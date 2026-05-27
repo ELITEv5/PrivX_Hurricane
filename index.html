@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PrivX Hurricane – Privacy That Pays</title>
+  <link rel="icon" href="privx-shield.png" type="image/png">
+  <meta property="og:image" content="https://github.com/ELITEv5/PrivX/Hurricane/privx-shield.png">
+  <meta property="og:type" content="website">
+  <meta name="robots" content="index,follow">
+  <meta name="description" content="The world's first fully on-chain, ownerless, immutable privacy protocol. Instant 2% Proof-of-Privacy rewards.">
+  <meta property="og:title" content="PrivX Hurricane – Privacy That Pays">
+  <meta property="og:description" content="Anonymous PRIVX transfers + instant 1-2% rewards. ELITE Team6 – November 7, 2025">
+  <meta name="theme-color" content="#8A2BE2">
+  <style>
+    :root {
+      --primary: #8A2BE2;
+      --accent: #00ffea;
+      --bg: #000;
+      --card: rgba(138,43,226,0.15);
+      --glow: rgba(138,43,226,0.6);
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;overflow-x:hidden}
+    canvas#matrix-bg{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+    .container{background:rgba(10,10,10,0.7);backdrop-filter:blur(20px);border-radius:24px;padding:40px 30px;max-width:620px;width:100%;border:1px solid var(--primary);box-shadow:0 0 80px var(--glow),inset 0 0 40px rgba(138,43,226,0.1);position:relative;z-index:10}
+    .subtitle{color:var(--accent);font-size:1.4em;margin-bottom:30px}
+    .wallet-button{position:fixed;top:20px;right:20px;background:rgba(10,10,10,0.8);backdrop-filter:blur(10px);padding:12px 28px;border:2px solid var(--primary);border-radius:12px;color:#fff;font-weight:600;cursor:pointer;transition:all .3s;z-index:9999}
+    .wallet-button:hover{border-color:var(--accent);box-shadow:0 0 30px var(--glow)}
+    .wallet-button.connected{color:var(--accent);border-color:var(--accent);box-shadow:0 0 30px var(--glow)}
+    .tabs{display:flex;gap:12px;margin-bottom:30px}
+    .tab{flex:1;padding:14px;border:2px solid rgba(255,255,255,0.1);border-radius:12px;background:rgba(20,20,20,0.6);cursor:pointer;transition:all .3s;text-align:center;font-weight:600}
+    .tab:hover{border-color:var(--primary)}
+    .tab.active{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 0 30px var(--glow)}
+    .denomination-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:30px 0}
+    .denomination-card{background:var(--card);border:2px solid transparent;border-radius:16px;padding:24px;cursor:pointer;transition:all .4s;text-align:center}
+    .denomination-card:hover{border-color:var(--primary);transform:translateY(-6px);box-shadow:0 12px 40px rgba(138,43,226,0.4)}
+    .denomination-card.selected{border:3px solid var(--primary);background:rgba(138,43,226,0.3);box-shadow:0 0 50px var(--glow);transform:scale(1.04)}
+    .denomination-amount{font-size:26px;font-weight:900;display:flex;align-items:center;justify-content:center;gap:12px;color:#fff}
+    .denomination-amount img{height:36px;width:36px;border-radius:50%;box-shadow:0 0 20px var(--glow)}
+    .denomination-label{margin-top:8px;color:#aaa;font-size:13px}
+    .button{width:100%;padding:18px;background:var(--primary);color:#fff;border:none;border-radius:14px;font-size:18px;font-weight:700;cursor:pointer;margin-top:20px;transition:all .3s;box-shadow:0 0 30px var(--glow)}
+    .button:hover{background:var(--accent);color:#000;transform:translateY(-3px)}
+    .button:disabled{background:#333;color:#666;cursor:not-allowed}
+    .note-display{background:#111;border:2px solid var(--primary);padding:20px;border-radius:14px;margin-top:25px;font-family:monospace;color:var(--accent);box-shadow:0 0 30px var(--glow)}
+    .vault-display{margin-top:30px;padding:20px;background:rgba(138,43,226,0.2);border-radius:14px;text-align:center;border:1px solid var(--primary)}
+    .vault-display span{color:var(--accent);font-size:1.4em;font-weight:900}
+    .hidden { display: none !important; }
+    .logo-header { text-align: center; margin-bottom: 30px; }
+    .privx-logo { max-width: 340px; width: 100%; height: auto; margin: 0 auto 12px auto; display: block; filter: drop-shadow(0 0 25px var(--glow)); transition: transform 0.3s ease, filter 0.3s ease; }
+    .privx-logo:hover { transform: scale(1.07); filter: drop-shadow(0 0 40px var(--accent)); }
+    @media (max-width: 768px) { .privx-logo { max-width: 260px; } }
+    @media (max-width: 480px) { .privx-logo { max-width: 200px; } }
+    @media (max-width: 768px) {
+      .subtitle { font-size:1.1em; text-align:center; }
+      .container { max-width:95%; padding:24px 18px; }
+      .wallet-button { top:10px; right:10px; padding:10px 16px; font-size:14px; }
+      .denomination-grid { grid-template-columns:1fr; }
+      .note-display { font-size:14px; word-break:break-all; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="matrix-bg"></canvas>
+  <div id="walletButton" class="wallet-button">
+    <span id="walletButtonText">Connect Wallet</span>
+  </div>
+  <div class="container">
+    <div class="logo-header">
+      <img src="privx_logo.png" alt="PrivX Hurricane" class="privx-logo">
+      <p class="subtitle">Hurricane Shield + Instant 1-2% Proof-of-Privacy Rewards</p>
+    </div>
+    <div class="tabs">
+      <div class="tab active" id="depositTabBtn">Deposit</div>
+      <div class="tab" id="withdrawTabBtn">Withdraw</div>
+    </div>
+    <div id="depositTab">
+      <div class="denomination-grid">
+        <div class="denomination-card" onclick="selectDenomination('100')">
+          <div class="denomination-amount">100 PRIVX <img src="privx-shield.png" alt="PrivX"></div>
+          <div class="denomination-label">Instant 2% reward</div>
+        </div>
+        <div class="denomination-card" onclick="selectDenomination('1000')">
+          <div class="denomination-amount">1,000 PRIVX <img src="privx-shield.png" alt="PrivX"></div>
+          <div class="denomination-label">Instant 2% reward</div>
+        </div>
+        <div class="denomination-card" onclick="selectDenomination('10000')">
+          <div class="denomination-amount">10,000 PRIVX <img src="privx-shield.png" alt="PrivX"></div>
+          <div class="denomination-label">Instant 2% reward</div>
+        </div>
+        <div class="denomination-card" onclick="selectDenomination('100000')">
+          <div class="denomination-amount">100,000 PRIVX <img src="privx-shield.png" alt="PrivX"></div>
+          <div class="denomination-label">Instant 2% reward</div>
+        </div>
+      </div>
+      <button class="button" id="depositBtn" disabled>Select Denomination</button>
+      <div id="depositNote" class="note-display hidden">
+        <strong>YOUR PRIVATE NOTE – SAVE THIS SECURELY!</strong><br><br>
+        <span id="noteText"></span><br><br>
+        <button class="button" onclick="copyNote()" style="padding:12px 24px;font-size:15px;width:auto">Copy Note</button>
+      </div>
+    </div>
+    <div id="withdrawTab" class="hidden">
+      <input type="text" id="withdrawNote" placeholder="Paste your private note here" style="width:100%;padding:16px;margin:15px 0;border-radius:12px;border:1px solid #444;background:#111;color:#fff;font-family:monospace">
+      <input type="text" id="recipientAddress" placeholder="Recipient address (optional – defaults to connected wallet)" style="width:100%;padding:16px;margin:15px 0;border-radius:12px;border:1px solid #444;background:#111;color:#fff">
+      <button class="button" id="withdrawBtn">Generate Proof + Withdraw</button>
+    </div>
+    <div class="vault-display">
+      <div>Proof-of-Privacy Mining Vault</div>
+      <span id="vaultBalance">Loading...</span> PRIVX Available
+    </div>
+    <div class="vault-display">
+      <div>🔥 Total PRIVX Burned</div>
+      <span id="burnedBalance">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/snarkjs@0.7.4/build/snarkjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/circomlibjs@0.1.7/build/browser/circomlibjs.min.js"></script>
+
+  <script>
+    // ─── Config ───────────────────────────────────────────────────────────────
+    // After redeployment, run `npm run deploy` and copy the new addresses
+    // from deployment.json into SHIELD_CONTRACTS below.
+    const PRIVX_TOKEN   = "0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986";
+    const PSUNDAI_TOKEN = "0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f";
+
+    // ⬇ Update these with addresses from deployment.json after deploying
+    const SHIELD_CONTRACTS = {
+      "100":    "0xb2435E52De257408A3954a2F775116C020b61683",
+      "1000":   "0x67a2ca4ce9FEd0A4c1e5bD7CdC90C341F0D9a061",
+      "10000":  "0xD8B80E8A90c6b2C681940F69B75A64547d1bF721",
+      "100000": "0xc9D4Ac9EDA1835E9563E33aF90586FD7b938A531"
+    };
+
+    // pSunDAI denomination in wei (18 decimals) — must match deployed contracts
+    const DENOM_WEI = {
+      "100":    100000000000000000000n,
+      "1000":   1000000000000000000000n,
+      "10000":  10000000000000000000000n,
+      "100000": 100000000000000000000000n
+    };
+
+    // PRIVX fee in wei per denomination — must match deployed contracts
+    const PRIVX_FEE_WEI = {
+      "100":    500000000000000000000n,     // 500 PRIVX
+      "1000":   2000000000000000000000n,    // 2,000 PRIVX
+      "10000":  7000000000000000000000n,    // 7,000 PRIVX
+      "100000": 20000000000000000000000n    // 20,000 PRIVX
+    };
+
+    const WASM_URL   = "./circuits/mixer_js/PrivXMixer14.wasm";
+    // ⬇ Update with new IPFS zkey URL after running scripts/build_circuit.sh
+    const ZKEY_URL   = "https://amaranth-rear-platypus-218.mypinata.cloud/ipfs/bafybeihp3fonoffw7syxzeryogmxx5vpq3wwjbx4tyatyoub5sgn6fgseq";
+    const TREE_LEVELS = 14;
+
+    // ─── State ────────────────────────────────────────────────────────────────
+    let web3, userAccount, selectedDenomination;
+    let poseidonFn = null; // set during init
+
+    // ─── Poseidon (standard circomlib – matches on-chain Hasher and circuit) ──
+    async function initPoseidon() {
+      const lib = await circomlibjs.buildPoseidon();
+      poseidonFn = (...inputs) => lib.F.toObject(lib(inputs.map(x => BigInt(x))));
+      console.log("Poseidon ready. Test Poseidon(0,0):", poseidonFn(0n, 0n).toString(16));
+    }
+
+    // ─── ABIs ─────────────────────────────────────────────────────────────────
+    const ERC20_ABI = [
+      { inputs: [{ name: "spender", type: "address" }, { name: "amount", type: "uint256" }],
+        name: "approve", outputs: [{ name: "", type: "bool" }], stateMutability: "nonpayable", type: "function" },
+      { inputs: [{ name: "owner", type: "address" }, { name: "spender", type: "address" }],
+        name: "allowance", outputs: [{ name: "", type: "uint256" }], stateMutability: "view", type: "function" },
+      { inputs: [{ name: "account", type: "address" }],
+        name: "balanceOf", outputs: [{ name: "", type: "uint256" }], stateMutability: "view", type: "function" }
+    ];
+    const SHIELD_ABI = [
+      { inputs: [{ internalType: "bytes32", name: "_commitment", type: "bytes32" }],
+        name: "deposit", outputs: [], stateMutability: "nonpayable", type: "function" },
+      { inputs: [
+          { internalType: "uint256[24]", name: "proof", type: "uint256[24]" },
+          { internalType: "uint256[3]",  name: "pubSignals", type: "uint256[3]" },
+          { internalType: "address payable", name: "recipient", type: "address" }
+        ], name: "withdraw", outputs: [], stateMutability: "nonpayable", type: "function" },
+      { inputs: [], name: "getLastRoot",
+        outputs: [{ internalType: "bytes32", name: "", type: "bytes32" }],
+        stateMutability: "view", type: "function" },
+      { anonymous: false,
+        inputs: [
+          { indexed: true,  internalType: "bytes32", name: "commitment", type: "bytes32" },
+          { indexed: false, internalType: "uint32",  name: "leafIndex",  type: "uint32" },
+          { indexed: false, internalType: "uint256", name: "timestamp",  type: "uint256" }
+        ], name: "Deposit", type: "event" }
+    ];
+
+    // ─── Merkle Tree ──────────────────────────────────────────────────────────
+    function buildFullTree(leaves) {
+      const size = 1 << TREE_LEVELS;
+      const padded = [...leaves];
+      while (padded.length < size) padded.push(0n);
+      const tree = [padded];
+      for (let lvl = 0; lvl < TREE_LEVELS; lvl++) {
+        const prev = tree[lvl];
+        const next = [];
+        for (let i = 0; i < prev.length; i += 2) {
+          next.push(poseidonFn(prev[i], prev[i + 1]));
+        }
+        tree.push(next);
+      }
+      return { tree, root: tree[TREE_LEVELS][0] };
+    }
+
+    async function getMerkleProof(shieldContract, targetCommitment) {
+      const events = await shieldContract.getPastEvents("Deposit", { fromBlock: 0, toBlock: "latest" });
+      if (!events.length) throw new Error("No deposits found in this shield");
+
+      events.sort((a, b) => Number(a.returnValues.leafIndex) - Number(b.returnValues.leafIndex));
+      const leaves    = events.map(e => BigInt(e.returnValues.commitment));
+      const leafIndex = leaves.findIndex(l => l === targetCommitment);
+      if (leafIndex === -1) throw new Error("Commitment not found – did you deposit with this note?");
+
+      const { tree, root } = buildFullTree(leaves);
+
+      const siblings    = [];
+      const pathIndices = [];
+      let idx = leafIndex;
+      for (let lvl = 0; lvl < TREE_LEVELS; lvl++) {
+        siblings.push(tree[lvl][idx ^ 1].toString());  // decimal string for circuit
+        pathIndices.push(idx & 1);
+        idx >>= 1;
+      }
+
+      const onChainRoot = await shieldContract.methods.getLastRoot().call();
+      const localRoot   = "0x" + root.toString(16).padStart(64, "0");
+      console.log("Local root :", localRoot);
+      console.log("On-chain   :", onChainRoot);
+
+      if (localRoot.toLowerCase() !== onChainRoot.toLowerCase()) {
+        throw new Error(
+          "Merkle root mismatch.\n" +
+          "Local: "    + localRoot + "\n" +
+          "On-chain: " + onChainRoot + "\n\n" +
+          "This usually means the contract was deployed with a different tree depth (LEVELS). " +
+          "Check that TREE_LEVELS=" + TREE_LEVELS + " matches the deployed contract."
+        );
+      }
+      return { pathIndices, siblings, proofRoot: root };
+    }
+
+    // ─── Deposit ──────────────────────────────────────────────────────────────
+    async function deposit() {
+      if (!userAccount || !selectedDenomination) return alert("Connect wallet & select denomination");
+      if (!poseidonFn) return alert("Poseidon not ready – wait a moment and try again");
+
+      const btn = document.getElementById("depositBtn");
+      btn.disabled = true;
+      btn.textContent = "Generating Note...";
+      try {
+        // 31 bytes keeps values safely inside the BN128 field (< 2^248 < prime)
+        const nullifierBytes = crypto.getRandomValues(new Uint8Array(31));
+        const secretBytes    = crypto.getRandomValues(new Uint8Array(31));
+        const nullifierHex   = [...nullifierBytes].map(b => b.toString(16).padStart(2, "0")).join("");
+        const secretHex      = [...secretBytes].map(b =>   b.toString(16).padStart(2, "0")).join("");
+
+        const nullifier    = BigInt("0x" + nullifierHex);
+        const secret       = BigInt("0x" + secretHex);
+        // commitment = Poseidon(nullifier, secret) — must match circuit
+        const commitmentBI = poseidonFn(nullifier, secret);
+        const commitment   = "0x" + commitmentBI.toString(16).padStart(64, "0");
+        const note         = `privx-hurricane-${selectedDenomination}-${nullifierHex}-${secretHex}`;
+
+        document.getElementById("noteText").textContent = note;
+        document.getElementById("depositNote").classList.remove("hidden");
+
+        const denomWei   = DENOM_WEI[selectedDenomination];
+        const feeWei     = PRIVX_FEE_WEI[selectedDenomination];
+        const shieldAddr = SHIELD_CONTRACTS[selectedDenomination];
+
+        if (!shieldAddr || shieldAddr === "DEPLOY_FIRST")
+          throw new Error("Contracts not yet deployed. Run scripts/deploy.js first.");
+
+        const privxContract  = new web3.eth.Contract(ERC20_ABI, PRIVX_TOKEN);
+        const assetContract  = new web3.eth.Contract(ERC20_ABI, PSUNDAI_TOKEN);
+        const shieldContract = new web3.eth.Contract(SHIELD_ABI, shieldAddr);
+
+        // Approve pSunDAI (the shielded asset)
+        const assetAllowance = await assetContract.methods.allowance(userAccount, shieldAddr).call();
+        if (BigInt(assetAllowance) < denomWei) {
+          btn.textContent = "Approving pSunDAI...";
+          await assetContract.methods.approve(shieldAddr, denomWei.toString()).send({ from: userAccount });
+        }
+
+        // Approve PRIVX (the protocol fee)
+        const privxAllowance = await privxContract.methods.allowance(userAccount, shieldAddr).call();
+        if (BigInt(privxAllowance) < feeWei) {
+          btn.textContent = "Approving PRIVX fee...";
+          await privxContract.methods.approve(shieldAddr, feeWei.toString()).send({ from: userAccount });
+        }
+
+        btn.textContent = "Depositing...";
+        const tx = await shieldContract.methods.deposit(commitment).send({ from: userAccount });
+        alert(`✅ Deposit successful!\nTX: ${tx.transactionHash}\n\n💾 SAVE YOUR NOTE – it is the only way to recover funds!`);
+      } catch (err) {
+        console.error("Deposit error:", err);
+        alert("Deposit failed: " + (err.message || "Check MetaMask / PRIVX balance"));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = `Shield ${selectedDenomination} pSunDAI`;
+      }
+    }
+
+    // ─── Withdraw ─────────────────────────────────────────────────────────────
+    async function withdraw() {
+      const noteInput = document.getElementById("withdrawNote").value.trim();
+      if (!noteInput)   return alert("Paste your private note first");
+      if (!userAccount) return alert("Connect wallet first");
+      if (!poseidonFn)  return alert("Poseidon not ready – wait a moment and try again");
+
+      // Note format: privx-hurricane-<amount>-<62-64 hex nullifier>-<62-64 hex secret>
+      const match = noteInput.match(/^privx-hurricane-(\d+)-([a-fA-F0-9]{62,64})-([a-fA-F0-9]{62,64})$/);
+      if (!match) return alert("Invalid note format.\nExpected: privx-hurricane-<amount>-<nullifier>-<secret>");
+
+      const [, denomStr, nullifierHex, secretHex] = match;
+      const denomWei  = DENOM_WEI[denomStr];
+      if (!denomWei) return alert("Unsupported denomination: " + denomStr);
+
+      const nullifier    = BigInt("0x" + nullifierHex);
+      const secret       = BigInt("0x" + secretHex);
+      // Must use the same Poseidon as the circuit uses
+      const commitment    = poseidonFn(nullifier, secret);
+      const nullifierHash = poseidonFn(nullifier, denomWei); // denomination in wei, matching contract
+
+      const shieldAddr = SHIELD_CONTRACTS[denomStr];
+      const shield     = new web3.eth.Contract(SHIELD_ABI, shieldAddr);
+
+      // Build Merkle proof (fix: store proofRoot outside try block)
+      let pathIndices, siblings, proofRoot;
+      try {
+        const mp = await getMerkleProof(shield, commitment);
+        pathIndices = mp.pathIndices;
+        siblings    = mp.siblings;
+        proofRoot   = mp.proofRoot;
+      } catch (e) {
+        return alert("Merkle proof failed:\n" + e.message);
+      }
+
+      // Circuit inputs — all values as decimal strings; snarkjs handles conversion
+      const circuitInput = {
+        nullifier:     nullifier.toString(),
+        secret:        secret.toString(),
+        pathIndices:   pathIndices.map(String),
+        siblings:      siblings,             // already decimal strings from getMerkleProof
+        root:          proofRoot.toString(), // decimal string
+        denomination:  denomWei.toString(),  // wei value – must match contract’s denomination
+        nullifierHash: nullifierHash.toString()
+      };
+
+      console.log("Circuit input:", circuitInput);
+
+      const btn = document.getElementById("withdrawBtn");
+      btn.textContent = "Generating ZK proof… (up to 30s)";
+      btn.disabled = true;
+
+      try {
+        const { proof: zkProof, publicSignals } = await snarkjs.plonk.fullProve(
+          circuitInput,
+          WASM_URL,
+          ZKEY_URL
+        );
+
+        console.log("Public signals:", publicSignals);
+        // Expected order: [root, nullifierHash, denomination]
+        console.log("Expected root:        ", proofRoot.toString());
+        console.log("Expected nullifierHash:", nullifierHash.toString());
+        console.log("Expected denomination: ", denomWei.toString());
+
+        const calldata  = await snarkjs.plonk.exportSolidityCallData(zkProof, publicSignals);
+        const argv      = calldata.replace(/["[\]\s]/g, "").split(",").filter(Boolean);
+        const proofArr  = argv.slice(0, 24).map(x => BigInt(x));
+        const pubSigArr = argv.slice(24, 27).map(x => BigInt(x));
+
+        const recipient = document.getElementById("recipientAddress").value.trim() || userAccount;
+        const tx = await shield.methods.withdraw(proofArr, pubSigArr, recipient).send({ from: userAccount });
+        alert(`🎉 Withdrawal successful!\nTX: ${tx.transactionHash}\nFunds + reward → ${recipient}`);
+
+      } catch (err) {
+        console.error("Withdraw failed:", err);
+        alert("Withdrawal failed: " + (err.message || "Check browser console for details"));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Generate Proof + Withdraw";
+      }
+    }
+
+    // ─── Wallet ───────────────────────────────────────────────────────────────
+    async function toggleWallet() {
+      if (!window.ethereum) return alert("Install MetaMask");
+      try {
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+        try {
+          await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0x171" }] });
+        } catch (e) {
+          if (e.code === 4902) {
+            await window.ethereum.request({
+              method: "wallet_addEthereumChain",
+              params: [{ chainId: "0x171", chainName: "PulseChain",
+                rpcUrls: ["https://rpc.pulsechain.com"],
+                nativeCurrency: { name: "PLS", symbol: "PLS", decimals: 18 },
+                blockExplorerUrls: ["https://scan.pulsechain.com"] }]
+            });
+          }
+        }
+        web3 = new Web3(window.ethereum);
+        const accounts = await web3.eth.getAccounts();
+        userAccount = accounts[0];
+        document.getElementById("walletButtonText").textContent =
+          `${userAccount.slice(0, 6)}...${userAccount.slice(-4)}`;
+        document.getElementById("walletButton").classList.add("connected");
+        updateDepositButton();
+        updateBurnedBalance();
+      } catch (err) {
+        alert("Connection failed");
+      }
+    }
+
+    if (window.ethereum) {
+      window.ethereum.request({ method: "eth_accounts" }).then(a => a.length > 0 && toggleWallet());
+    }
+
+    // ─── UI Helpers ───────────────────────────────────────────────────────────
+    function switchTab(tab) {
+      document.getElementById(‘depositTab’).classList.toggle(‘hidden’, tab !== ‘deposit’);
+      document.getElementById(‘withdrawTab’).classList.toggle(‘hidden’, tab !== ‘withdraw’);
+      document.getElementById(‘depositTabBtn’).classList.toggle(‘active’, tab === ‘deposit’);
+      document.getElementById(‘withdrawTabBtn’).classList.toggle(‘active’, tab === ‘withdraw’);
+    }
+
+    function selectDenomination(denom) {
+      selectedDenomination = denom;
+      document.querySelectorAll(‘.denomination-card’).forEach(c => c.classList.remove(‘selected’));
+      event.target.closest(‘.denomination-card’).classList.add(‘selected’);
+      updateDepositButton();
+    }
+
+    function updateDepositButton() {
+      const btn = document.getElementById(‘depositBtn’);
+      if (!userAccount)          { btn.textContent = "Connect Wallet First"; btn.disabled = true; }
+      else if (!selectedDenomination) { btn.textContent = "Select Denomination";  btn.disabled = true; }
+      else                       { btn.textContent = `Shield ${selectedDenomination} pSunDAI`; btn.disabled = false; }
+    }
+
+    function copyNote() {
+      navigator.clipboard.writeText(document.getElementById(‘noteText’).textContent);
+      alert("Note copied to clipboard!");
+    }
+
+    async function updateBurnedBalance() {
+      const el = document.getElementById("burnedBalance");
+      if (!el || !web3) return;
+      try {
+        const token = new web3.eth.Contract(ERC20_ABI, PRIVX_TOKEN);
+        const [dead, fire] = await Promise.all([
+          token.methods.balanceOf("0x000000000000000000000000000000000000dEaD").call(),
+          token.methods.balanceOf("0x0000000000000000000000000000000000000369").call()
+        ]);
+        const total  = BigInt(dead) + BigInt(fire);
+        const num    = Number(total / 10n ** 18n);
+        el.innerHTML = `<strong>${num.toLocaleString()}</strong> PRIVX burned`;
+      } catch (err) {
+        el.textContent = "Error";
+      }
+    }
+
+    async function loadVaultBalance() {
+      const el = document.getElementById("vaultBalance");
+      if (!el || !web3) return;
+      try {
+        const VAULT = "0x6fBd619538948e134b508e8954e120e99f7999a2";
+        const token = new web3.eth.Contract(ERC20_ABI, PRIVX_TOKEN);
+        const bal   = await token.methods.balanceOf(VAULT).call();
+        const num   = Number(BigInt(bal) / 10n ** 18n);
+        el.textContent = num.toLocaleString();
+      } catch (err) {
+        el.textContent = "Error";
+      }
+    }
+
+    // ─── Init ─────────────────────────────────────────────────────────────────
+    window.addEventListener(‘load’, async () => {
+      document.getElementById("walletButton").onclick = toggleWallet;
+      document.getElementById(‘depositBtn’).onclick   = deposit;
+      document.getElementById(‘withdrawBtn’).onclick  = withdraw;
+      document.getElementById(‘depositTabBtn’).addEventListener(‘click’, () => switchTab(‘deposit’));
+      document.getElementById(‘withdrawTabBtn’).addEventListener(‘click’, () => switchTab(‘withdraw’));
+      switchTab(‘deposit’);
+      updateDepositButton();
+
+      // Initialize Poseidon from circomlibjs (same constants as circuit + on-chain hasher)
+      try {
+        await initPoseidon();
+        console.log("✅ PrivX Hurricane ready – Poseidon initialized");
+      } catch (e) {
+        console.error("Failed to init Poseidon:", e);
+        alert("Warning: Poseidon failed to initialize. ZK proofs will not work until the page reloads.\n\n" + e.message);
+      }
+
+      setInterval(updateBurnedBalance, 30000);
+      setInterval(loadVaultBalance,    30000);
+    });
+  </script>
+
+  <!-- Matrix Rain -->
+  <script>
+    const canvas = document.getElementById('matrix-bg');
+    const ctx = canvas.getContext('2d');
+    canvas.width = innerWidth; canvas.height = innerHeight;
+    let fontSize = innerWidth < 600 ? 10 : 14;
+    const chars = '01PRIVXHURRICANE';
+    let columns = Math.floor(canvas.width / fontSize);
+    let drops = Array(columns).fill(1);
+    function draw() {
+      ctx.fillStyle = 'rgba(0,0,0,0.05)';
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.fillStyle = '#8A2BE2';
+      ctx.font = fontSize + 'px monospace';
+      drops.forEach((y,i) => {
+        const text = chars[Math.floor(Math.random()*chars.length)];
+        ctx.fillText(text, i*fontSize, y*fontSize);
+        if(y*fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      });
+    }
+    function loop(){ draw(); requestAnimationFrame(loop); }
+    loop();
+    addEventListener('resize', () => {
+      canvas.width = innerWidth; canvas.height = innerHeight;
+      fontSize = innerWidth < 600 ? 10 : 14;
+      columns = Math.floor(canvas.width / fontSize);
+      drops = Array(columns).fill(1);
+    });
+  </script>
+</body>
+</html>
