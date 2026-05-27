@@ -347,7 +347,15 @@
   <!-- Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/snarkjs@0.7.4/build/snarkjs.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/circomlibjs@0.1.7/build/browser/circomlibjs.min.js"></script>
+  <!-- circomlibjs has no UMD bundle — load via esm.sh and expose buildPoseidon as a global -->
+  <script type="module">
+    try {
+      const { buildPoseidon } = await import('https://esm.sh/circomlibjs@0.1.7');
+      window._buildPoseidon = buildPoseidon;
+    } catch(e) {
+      console.error('circomlibjs failed to load:', e);
+    }
+  </script>
 
   <script>
     // ─── Config ───────────────────────────────────────────────────────────────
@@ -386,7 +394,13 @@
 
     // ─── Poseidon ─────────────────────────────────────────────────────────────
     async function initPoseidon() {
-      const lib = await circomlibjs.buildPoseidon();
+      // Wait for the module script to expose window._buildPoseidon (up to 10s)
+      for (let i = 0; i < 100; i++) {
+        if (window._buildPoseidon) break;
+        await new Promise(r => setTimeout(r, 100));
+      }
+      if (!window._buildPoseidon) throw new Error("circomlibjs failed to load from esm.sh");
+      const lib = await window._buildPoseidon();
       poseidonFn = (...inputs) => lib.F.toObject(lib(inputs.map(x => BigInt(x))));
       console.log("Poseidon ready. Test Poseidon(0,0):", poseidonFn(0n, 0n).toString(16));
     }
