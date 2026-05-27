@@ -843,8 +843,8 @@
 
         const calldata  = await snarkjs.plonk.exportSolidityCallData(zkProof, publicSignals);
         const argv      = calldata.replace(/["[\]\s]/g, "").split(",").filter(Boolean);
-        const proofArr  = argv.slice(0, 24).map(x => BigInt(x));
-        const pubSigArr = argv.slice(24, 27).map(x => BigInt(x));
+        const proofArr  = argv.slice(0, 24).map(x => BigInt(x).toString());
+        const pubSigArr = argv.slice(24, 27).map(x => BigInt(x).toString());
 
         const recipient = document.getElementById("recipientAddress").value.trim() || userAccount;
         const tx = await shieldContract.methods.withdraw(proofArr, pubSigArr, recipient).send({ from: userAccount });
