@@ -469,24 +469,28 @@
       <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">PRIVX SHIELD</p>
       <table class="contract-table" id="privx-shield-contracts">
         <tr>
-          <td>POP Mining Vault</td>
-          <td id="ct-privx-vault" style="color:#555">Deploying soon</td>
+          <td>POP Mining Vault V2</td>
+          <td><a href="https://scan.pulsechain.com/address/0x096540908D8bb7d00546e750a227f53D9E7bdFAF" target="_blank">0x096540908D8bb7d00546e750a227f53D9E7bdFAF ↗</a></td>
+        </tr>
+        <tr>
+          <td>Fee Vault</td>
+          <td><a href="https://scan.pulsechain.com/address/0x35719658D396a551d98ce2C7BaE66541CEAE0Cbd" target="_blank">0x35719658D396a551d98ce2C7BaE66541CEAE0Cbd ↗</a></td>
         </tr>
         <tr>
           <td>Shield · 100 PRIVX</td>
-          <td id="ct-privx-100" style="color:#555">Deploying soon</td>
+          <td><a href="https://scan.pulsechain.com/address/0x3872605025f0cfF24C0e40B6Fb61bA064fe300F8" target="_blank">0x3872605025f0cfF24C0e40B6Fb61bA064fe300F8 ↗</a></td>
         </tr>
         <tr>
           <td>Shield · 1,000 PRIVX</td>
-          <td id="ct-privx-1000" style="color:#555">Deploying soon</td>
+          <td><a href="https://scan.pulsechain.com/address/0x4f8009c8756a7149cc553Fedd59dF8036Ca46847" target="_blank">0x4f8009c8756a7149cc553Fedd59dF8036Ca46847 ↗</a></td>
         </tr>
         <tr>
           <td>Shield · 10,000 PRIVX</td>
-          <td id="ct-privx-10000" style="color:#555">Deploying soon</td>
+          <td><a href="https://scan.pulsechain.com/address/0x67e6c3E1301e31B456f94348480a9BC54e7e5082" target="_blank">0x67e6c3E1301e31B456f94348480a9BC54e7e5082 ↗</a></td>
         </tr>
         <tr>
           <td>Shield · 100,000 PRIVX</td>
-          <td id="ct-privx-100000" style="color:#555">Deploying soon</td>
+          <td><a href="https://scan.pulsechain.com/address/0xD8a1339B91aCADe52f65211f63085B9b5C1EFcF0" target="_blank">0xD8a1339B91aCADe52f65211f63085B9b5C1EFcF0 ↗</a></td>
         </tr>
       </table>
 
@@ -520,38 +524,15 @@
     const PSUNDAI_TOKEN = "0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f";
 
     // To add a new shield token in future: add an entry here. That's it.
+    // feeBP: fee in basis points of denomination, paid in the shielded token.
+    //   50 = 0.5%, always proportional, no oracle, works for any token.
     const SHIELDS = {
       psundai: {
-        label:           "pSunDAI",
-        sublabel:        "Autonomous Stable Asset",
-        token:           PSUNDAI_TOKEN,
-        sameTokenAsFee:  false,   // asset != PRIVX, needs two separate approvals
-        vault:           "0x81E13A4c8C49e11C022eddC5C330F89c012A6360",
-        contracts: {
-          "100":    "0xb2435E52De257408A3954a2F775116C020b61683",
-          "1000":   "0x67a2ca4ce9FEd0A4c1e5bD7CdC90C341F0D9a061",
-          "10000":  "0xD8B80E8A90c6b2C681940F69B75A64547d1bF721",
-          "100000": "0xc9D4Ac9EDA1835E9563E33aF90586FD7b938A531"
-        },
-        denomWei: {
-          "100":    100000000000000000000n,
-          "1000":   1000000000000000000000n,
-          "10000":  10000000000000000000000n,
-          "100000": 100000000000000000000000n
-        },
-        feeWei: {
-          "100":    500000000000000000000n,
-          "1000":   2000000000000000000000n,
-          "10000":  7000000000000000000000n,
-          "100000": 20000000000000000000000n
-        }
-      },
-      privx: {
-        label:           "PRIVX",
-        sublabel:        "Privacy Mining Token",
-        token:           PRIVX_TOKEN,
-        sameTokenAsFee:  true,    // asset == PRIVX: approve denomination+fee in one call
-        vault:           "DEPLOY_FIRST",
+        label:    "pSunDAI",
+        sublabel: "Autonomous Stable Asset",
+        token:    PSUNDAI_TOKEN,
+        feeBP:    50,   // 0.5%
+        vault:    "DEPLOY_FIRST",
         contracts: {
           "100":    "DEPLOY_FIRST",
           "1000":   "DEPLOY_FIRST",
@@ -564,11 +545,32 @@
           "10000":  10000000000000000000000n,
           "100000": 100000000000000000000000n
         },
-        feeWei: {
-          "100":    500000000000000000000n,
-          "1000":   2000000000000000000000n,
-          "10000":  7000000000000000000000n,
-          "100000": 20000000000000000000000n
+        // Legacy contracts (old fee model). Deposits disabled — withdrawal still works.
+        legacyContracts: {
+          "100":    "0xb2435E52De257408A3954a2F775116C020b61683",
+          "1000":   "0x67a2ca4ce9FEd0A4c1e5bD7CdC90C341F0D9a061",
+          "10000":  "0xD8B80E8A90c6b2C681940F69B75A64547d1bF721",
+          "100000": "0xc9D4Ac9EDA1835E9563E33aF90586FD7b938A531"
+        },
+        legacyVault: "0x81E13A4c8C49e11C022eddC5C330F89c012A6360"
+      },
+      privx: {
+        label:    "PRIVX",
+        sublabel: "Privacy Mining Token",
+        token:    PRIVX_TOKEN,
+        feeBP:    50,   // 0.5%
+        vault:    "0x096540908D8bb7d00546e750a227f53D9E7bdFAF",
+        contracts: {
+          "100":    "0x3872605025f0cfF24C0e40B6Fb61bA064fe300F8",
+          "1000":   "0x4f8009c8756a7149cc553Fedd59dF8036Ca46847",
+          "10000":  "0x67e6c3E1301e31B456f94348480a9BC54e7e5082",
+          "100000": "0xD8a1339B91aCADe52f65211f63085B9b5C1EFcF0"
+        },
+        denomWei: {
+          "100":    100000000000000000000n,
+          "1000":   1000000000000000000000n,
+          "10000":  10000000000000000000000n,
+          "100000": 100000000000000000000000n
         }
       }
     };
@@ -707,7 +709,6 @@
       const shield     = SHIELDS[selectedToken];
       const shieldAddr = shield.contracts[selectedDenomination];
       const denomWei   = shield.denomWei[selectedDenomination];
-      const feeWei     = shield.feeWei[selectedDenomination];
 
       if (!shieldAddr || shieldAddr === "DEPLOY_FIRST")
         return alert(`The ${shield.label} shield is not yet deployed. Check back soon.`);
@@ -733,30 +734,18 @@
         document.getElementById("noteText").textContent = note;
         document.getElementById("depositNote").classList.remove("hidden");
 
-        const privxContract  = new web3.eth.Contract(ERC20_ABI, PRIVX_TOKEN);
+        // New unified model: fee is % of denomination, paid in the shielded token.
+        // Single approve for denomination + fee — same token, no PRIVX required.
+        const feeWei       = (denomWei * BigInt(shield.feeBP)) / 10000n;
+        const totalApprove = denomWei + feeWei;
+
+        const assetContract  = new web3.eth.Contract(ERC20_ABI, shield.token);
         const shieldContract = new web3.eth.Contract(SHIELD_ABI, shieldAddr);
 
-        if (shield.sameTokenAsFee) {
-          // PRIVX shield: asset == fee token — approve total in one call
-          const totalApprove = denomWei + feeWei;
-          const currentAllowance = await privxContract.methods.allowance(userAccount, shieldAddr).call();
-          if (BigInt(currentAllowance) < totalApprove) {
-            btn.textContent = "Approving PRIVX...";
-            await privxContract.methods.approve(shieldAddr, totalApprove.toString()).send({ from: userAccount });
-          }
-        } else {
-          // Standard shield: approve asset and PRIVX fee separately
-          const assetContract  = new web3.eth.Contract(ERC20_ABI, shield.token);
-          const assetAllowance = await assetContract.methods.allowance(userAccount, shieldAddr).call();
-          if (BigInt(assetAllowance) < denomWei) {
-            btn.textContent = `Approving ${shield.label}...`;
-            await assetContract.methods.approve(shieldAddr, denomWei.toString()).send({ from: userAccount });
-          }
-          const privxAllowance = await privxContract.methods.allowance(userAccount, shieldAddr).call();
-          if (BigInt(privxAllowance) < feeWei) {
-            btn.textContent = "Approving PRIVX fee...";
-            await privxContract.methods.approve(shieldAddr, feeWei.toString()).send({ from: userAccount });
-          }
+        const currentAllowance = await assetContract.methods.allowance(userAccount, shieldAddr).call();
+        if (BigInt(currentAllowance) < totalApprove) {
+          btn.textContent = `Approving ${shield.label}...`;
+          await assetContract.methods.approve(shieldAddr, totalApprove.toString()).send({ from: userAccount });
         }
 
         btn.textContent = "Depositing...";
@@ -793,14 +782,19 @@
         [, denomStr, nullifierHex, secretHex] = match;
       }
 
-      const shield     = SHIELDS[tokenKey];
-      const shieldAddr = shield?.contracts[denomStr];
-      const denomWei   = shield?.denomWei[denomStr];
+      const shield = SHIELDS[tokenKey];
+      if (!shield)   return alert("Unknown token in note: " + tokenKey);
 
-      if (!shield)    return alert("Unknown token in note: " + tokenKey);
-      if (!denomWei)  return alert("Unsupported denomination: " + denomStr);
+      const denomWei = shield.denomWei[denomStr];
+      if (!denomWei) return alert("Unsupported denomination: " + denomStr);
+
+      // Route: new contracts first, fall back to legacy for old-format pSunDAI notes
+      let shieldAddr = shield.contracts[denomStr];
+      if ((!shieldAddr || shieldAddr === "DEPLOY_FIRST") && shield.legacyContracts) {
+        shieldAddr = shield.legacyContracts[denomStr];
+      }
       if (!shieldAddr || shieldAddr === "DEPLOY_FIRST")
-        return alert(`The ${shield.label} shield for ${denomStr} is not yet deployed.`);
+        return alert(`No deployed shield found for ${shield.label} ${denomStr}.`);
 
       const nullifier    = BigInt("0x" + nullifierHex);
       const secret       = BigInt("0x" + secretHex);
@@ -915,10 +909,14 @@
       selectedDenomination = null;
       document.querySelectorAll('.denomination-card').forEach(c => c.classList.remove('selected'));
       document.getElementById('depositNote').classList.add('hidden');
-      // Update denomination card labels
-      const label = SHIELDS[token].label;
+      // Update denomination card labels and fee display
+      const shield = SHIELDS[token];
       ['100', '1000', '10000', '100000'].forEach(d => {
-        document.getElementById('denom-label-' + d).textContent = label;
+        document.getElementById('denom-label-' + d).textContent = shield.label;
+        const denomNum = Number(shield.denomWei[d] / 10n ** 18n);
+        const feeNum   = denomNum * shield.feeBP / 10000;
+        document.getElementById('denom-fee-' + d).textContent =
+          `Fee: ${feeNum.toLocaleString()} ${shield.label} (${shield.feeBP / 100}%)`;
       });
       updateDepositButton();
       loadVaultBalance();
@@ -985,7 +983,8 @@
     async function loadVaultBalance() {
       const el = document.getElementById("vaultBalance");
       if (!el || !web3) return;
-      const vaultAddr = SHIELDS[selectedToken].vault;
+      const s = SHIELDS[selectedToken];
+      const vaultAddr = (s.vault && s.vault !== "DEPLOY_FIRST") ? s.vault : s.legacyVault;
       if (!vaultAddr || vaultAddr === "DEPLOY_FIRST") { el.textContent = "–"; return; }
       try {
         const token = new web3.eth.Contract(ERC20_ABI, PRIVX_TOKEN);
