@@ -46,6 +46,9 @@
     .token-card .tc-name{font-weight:800;font-size:15px;color:#fff;margin-bottom:2px}
     .token-card .tc-sub{font-size:11px;color:#888}
     .token-card.active .tc-sub{color:var(--accent)}
+    .token-card.coming-soon{opacity:0.45;cursor:not-allowed;pointer-events:none}
+    .token-card.coming-soon .tc-sub{color:#666}
+    .tc-soon{font-size:10px;font-weight:700;color:#ffb400;letter-spacing:1px;margin-top:4px}
 
     .denomination-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:0 0 20px}
     .denomination-card{background:var(--card);border:2px solid transparent;border-radius:16px;padding:20px;cursor:pointer;transition:all .4s;text-align:center}
@@ -151,11 +154,12 @@
 
         <!-- Token selector -->
         <div class="token-select">
-          <div class="token-card active" id="token-psundai" onclick="selectToken('psundai')">
+          <div class="token-card coming-soon" id="token-psundai">
             <div class="tc-name">pSunDAI</div>
             <div class="tc-sub">Autonomous Stable Asset</div>
+            <div class="tc-soon">COMING SOON</div>
           </div>
-          <div class="token-card" id="token-privx" onclick="selectToken('privx')">
+          <div class="token-card active" id="token-privx" onclick="selectToken('privx')">
             <div class="tc-name">PRIVX</div>
             <div class="tc-sub">Privacy Mining Token</div>
           </div>
@@ -588,7 +592,7 @@
 
     // ─── State ────────────────────────────────────────────────────────────────
     let web3, userAccount, selectedDenomination;
-    let selectedToken  = 'psundai';
+    let selectedToken  = 'privx';
     let poseidonFn     = null;
     let _zkeyBlobUrl   = null;
 
