@@ -230,15 +230,15 @@
         <div class="step">
           <div class="step-num">1</div>
           <div class="step-body">
-            <strong>Choose your token and get what you need</strong>
-            <p>Pick the token you want to shield — currently pSunDAI (an Autonomous Stable Asset) or PRIVX. You also need <strong style="color:#fff">PRIVX</strong> to pay the protocol fee, and a small amount of PLS for gas. Connect MetaMask to PulseChain (chainId 369).</p>
+            <strong>Get PRIVX and connect your wallet</strong>
+            <p>PrivX Hurricane currently shields <strong style="color:#fff">PRIVX</strong> — the protocol's own privacy mining token. pSunDAI and other approved tokens are coming soon. You need PRIVX to deposit, and a small amount of PLS for gas. Connect MetaMask to PulseChain (chainId 369).</p>
           </div>
         </div>
         <div class="step">
           <div class="step-num">2</div>
           <div class="step-body">
             <strong>Choose a denomination and deposit</strong>
-            <p>Pick 100, 1,000, 10,000, or 100,000 of your chosen token. You approve the deposit amount and the PRIVX protocol fee (80% is burned forever, 20% seeds the mining vault). Your deposit is recorded on-chain as a cryptographic commitment — not your address.</p>
+            <p>Pick 100, 1,000, 10,000, or 100,000 PRIVX. A 0.5% fee is deducted from your deposit in PRIVX and sent to the Fee Vault, which converts it into Protocol-Owned Liquidity and mining rewards. Your deposit is recorded on-chain as a cryptographic commitment — not your address.</p>
           </div>
         </div>
         <div class="step">
@@ -275,12 +275,12 @@
         <h2 style="margin-bottom:16px">What You Need</h2>
         <div class="needs-grid">
           <div class="need-card">
-            <strong>Shield Token</strong>
-            <p>The token you want to shield. Currently pSunDAI (Autonomous Stable Asset) or PRIVX. Deposited into the contract and returned in full on withdrawal.</p>
+            <strong>PRIVX</strong>
+            <p>The token being shielded. Returned in full on withdrawal. A 0.5% fee is taken at deposit in PRIVX — no separate fee token needed.</p>
           </div>
           <div class="need-card">
-            <strong>PRIVX</strong>
-            <p>Protocol fee token. Paid once at deposit. 80% burned permanently, 20% funds the mining vault. For PRIVX shields, the fee comes from the same balance.</p>
+            <strong>More tokens coming soon</strong>
+            <p>pSunDAI and other approved tokens will be added. Every token uses the same ZK circuit, same fee model, and same mining rewards — only the asset changes.</p>
           </div>
           <div class="need-card">
             <strong>MetaMask</strong>
@@ -309,16 +309,16 @@
       <p style="color:#aaa;font-size:14px;line-height:1.7;margin-bottom:16px">PRIVX is the protocol token of PrivX Hurricane. It is not a governance token, not a utility token, and not a security. It is a <strong style="color:#fff">Proof-of-Privacy mining token</strong> — earned by using the protocol and deflationary by design.</p>
       <div class="privx-mechanic">
         <div class="mechanic-row">
-          <p><strong>80% of every deposit fee is burned forever.</strong> PRIVX supply decreases with every shield deposit. Fixed supply of 21 million — no minting ever.</p>
+          <p><strong>Every deposit fee strengthens PRIVX.</strong> A 0.5% fee is collected in the shielded token and sent to the Fee Vault. The vault converts it into PRIVX/WPLS Protocol-Owned Liquidity (80%), Mining Vault top-up (10%), and permanent burn (10%). Fixed supply of 21 million — no minting ever.</p>
         </div>
         <div class="mechanic-row">
-          <p><strong>Mine PRIVX by generating a Proof of Privacy (POP).</strong> Every successful withdrawal produces a POP — a zero-knowledge proof that you own a valid shielded note — and triggers a PRIVX reward from the mining vault. Early miners earn the most.</p>
+          <p><strong>Mine PRIVX by generating a Proof of Privacy (POP).</strong> Every successful withdrawal produces a POP — a zero-knowledge proof that you own a valid shielded note — and automatically triggers a PRIVX reward from the mining vault. No claim transaction needed. Early miners earn the most.</p>
         </div>
         <div class="mechanic-row">
-          <p><strong>Rewards decay as the vault drains.</strong> The reward rate drops quadratically as PRIVX is paid out. Anyone can refill the vault by calling topUp(), which resets the reward curve upward.</p>
+          <p><strong>Rewards decay as the vault drains.</strong> The reward rate drops quadratically as PRIVX is paid out. The Fee Vault automatically refills the mining vault from every deposit across every shield — POP rewards are self-sustaining.</p>
         </div>
         <div class="mechanic-row">
-          <p><strong>No dev fee stream.</strong> The development team holds PRIVX and benefits as the protocol grows through the burn mechanism — not from a cut of each transaction. There is no admin key, no upgradeable proxy, no multisig.</p>
+          <p><strong>No dev fee stream.</strong> The development team holds PRIVX and benefits as the protocol grows through the POL and burn mechanism — never from a direct cut of transactions. There is no admin key, no upgradeable proxy, no multisig.</p>
         </div>
       </div>
     </div>
@@ -378,16 +378,16 @@
           <p>Withdrawals still work normally — the vault reward is wrapped in a try/catch and never blocks a withdrawal. If the vault is empty, the reward is simply skipped. Anyone can refill the vault by calling topUp() with PRIVX, which resets the emission curve.</p>
         </details>
         <details class="faq-item">
-          <summary>Why do I need PRIVX to deposit?</summary>
-          <p>PRIVX is the protocol fee — it replaces the traditional model where a developer takes a cut of each transaction. Instead, 80% of your fee is burned (reducing supply permanently) and 20% funds the mining rewards. The developers hold PRIVX and benefit as the protocol grows — never from a direct fee stream.</p>
+          <summary>What is the deposit fee?</summary>
+          <p>A 0.5% fee is taken from your deposit in the shielded token — no separate token required. For PRIVX shields, 0.5% of your PRIVX deposit goes to the Fee Vault. The vault converts it into Protocol-Owned Liquidity (deepening PRIVX/WPLS liquidity permanently), mining vault top-up (self-funding POP rewards), and a burn. The more shields are used, the stronger PRIVX becomes.</p>
         </details>
         <details class="faq-item">
           <summary>Why does proof generation take so long?</summary>
           <p>PLONK zero-knowledge proofs require heavy computation — specifically, downloading the 29MB proving key and running polynomial operations on thousands of constraints. This happens entirely in your browser. Modern laptops take 15–30 seconds. This is a fundamental property of the cryptography and cannot be reduced without changing the security model.</p>
         </details>
         <details class="faq-item">
-          <summary>Can I shield PRIVX as well as pSunDAI?</summary>
-          <p>Yes. Use the token selector at the top of the deposit form to choose which token to shield. The same circuit, the same zero-knowledge proof, and the same immutable contracts power every shield — only the token and denomination change.</p>
+          <summary>Will other tokens be supported?</summary>
+          <p>Yes. pSunDAI and other approved tokens are coming soon. Every shield uses the same PLONK circuit, the same zero-knowledge proof, and the same fee model — only the token and denomination change. Any ERC-20 token can be shielded without modifying the circuit or verifier.</p>
         </details>
       </div>
     </div>
@@ -396,7 +396,7 @@
     <div class="info-card" id="buy-privx">
       <h2>Buy PRIVX</h2>
       <p style="color:#aaa;font-size:14px;line-height:1.7;margin-bottom:16px">
-        PRIVX is the Proof of Privacy <span class="pop-badge">POP</span> mining token. It is required to deposit into any shield and is earned back on every withdrawal. With a fixed supply of 21 million and 80% of every fee burned permanently, early participants accumulate PRIVX at the lowest prices.
+        PRIVX is the Proof of Privacy <span class="pop-badge">POP</span> mining token. Shield PRIVX, earn PRIVX back on every withdrawal. With a fixed supply of 21 million, every deposit fee deepens Protocol-Owned Liquidity and burns PRIVX permanently — the protocol gets stronger with every use.
       </p>
       <div class="buy-grid">
         <div class="buy-stat">
@@ -404,7 +404,7 @@
           <div class="stat-val" id="buyPrivxBalance">—</div>
         </div>
         <div class="buy-stat">
-          <div class="stat-label">Your pSunDAI Balance</div>
+          <div class="stat-label">Vault POP Rewards</div>
           <div class="stat-val" id="buyPsundaiBalance">—</div>
         </div>
       </div>
@@ -413,15 +413,12 @@
          target="_blank" rel="noopener">
         Swap for PRIVX on PulseX ↗
       </a>
-      <a class="buy-btn" style="margin-top:10px;background:linear-gradient(135deg,#1a6b3a,#0d4025)"
-         href="https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f"
-         target="_blank" rel="noopener">
-        Swap for pSunDAI on PulseX ↗
-      </a>
       <div style="margin-top:20px;padding:14px;background:rgba(138,43,226,0.08);border-radius:10px;font-size:13px;color:#888;line-height:1.7">
-        <strong style="color:#fff">Contract addresses for manual import:</strong><br>
-        PRIVX: <span style="color:var(--accent);font-family:monospace">0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986</span><br>
-        pSunDAI: <span style="color:var(--accent);font-family:monospace">0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f</span>
+        <strong style="color:#fff">Contract address for manual import:</strong><br>
+        PRIVX: <span style="color:var(--accent);font-family:monospace">0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986</span>
+      </div>
+      <div style="margin-top:12px;padding:14px;background:rgba(255,180,0,0.06);border:1px solid rgba(255,180,0,0.2);border-radius:10px;font-size:13px;color:#aaa;line-height:1.7">
+        <strong style="color:#ffb400">More shields coming soon</strong> — pSunDAI and other approved tokens will be added. Same circuit, same ZK proof, same mining rewards.
       </div>
     </div>
 
@@ -980,8 +977,12 @@
         const fmt = v => Number(BigInt(v) / 10n ** 18n).toLocaleString();
         const el1 = document.getElementById("buyPrivxBalance");
         const el2 = document.getElementById("buyPsundaiBalance");
-        if (el1) el1.textContent = fmt(pb)  + " PRIVX";
-        if (el2) el2.textContent = fmt(sb)  + " pSunDAI";
+        if (el1) el1.textContent = fmt(pb) + " PRIVX";
+        if (el2) {
+          const vaultBal = await new web3.eth.Contract(ERC20_ABI, PRIVX_TOKEN)
+            .methods.balanceOf("0x096540908D8bb7d00546e750a227f53D9E7bdFAF").call();
+          el2.textContent = fmt(vaultBal) + " PRIVX";
+        }
       } catch(e) { /* silently skip if not connected */ }
     }
 
