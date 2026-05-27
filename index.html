@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PrivX Hurricane – Privacy That Pays</title>
+  <title>PrivX Hurricane – Proof of Privacy (POP)</title>
   <link rel="icon" href="privx-shield.png" type="image/png">
   <meta property="og:image" content="privx-shield.png">
   <meta property="og:type" content="website">
   <meta name="robots" content="index,follow">
-  <meta name="description" content="Shield pSunDAI with zero-knowledge proofs. Earn PRIVX mining rewards on every withdrawal. Fully on-chain, ownerless, immutable.">
-  <meta property="og:title" content="PrivX Hurricane – Privacy That Pays">
-  <meta property="og:description" content="Zero-knowledge pSunDAI privacy shield on PulseChain. Earn PRIVX for proving your privacy.">
+  <meta name="description" content="Shield pSunDAI with zero-knowledge proofs. Every withdrawal generates a Proof of Privacy (POP) and earns PRIVX mining rewards. Fully on-chain, ownerless, immutable.">
+  <meta property="og:title" content="PrivX Hurricane – Proof of Privacy (POP)">
+  <meta property="og:description" content="The first Proof of Privacy protocol on PulseChain. Shield pSunDAI, generate a POP, earn PRIVX.">
   <meta name="theme-color" content="#8A2BE2">
   <style>
     :root {
@@ -27,6 +27,9 @@
     .container{background:rgba(10,10,10,0.7);backdrop-filter:blur(20px);border-radius:24px;padding:40px 30px;border:1px solid var(--primary);box-shadow:0 0 80px var(--glow),inset 0 0 40px rgba(138,43,226,0.1)}
     .info-card{background:rgba(10,10,10,0.7);backdrop-filter:blur(20px);border-radius:24px;padding:36px 30px;border:1px solid rgba(138,43,226,0.4);box-shadow:0 0 40px rgba(138,43,226,0.2)}
     .subtitle{color:var(--accent);font-size:1.2em;margin-bottom:30px;text-align:center}
+    .top-nav{position:fixed;top:20px;left:20px;display:flex;gap:10px;z-index:9999}
+    .nav-link{background:rgba(10,10,10,0.8);backdrop-filter:blur(10px);padding:10px 18px;border:1px solid rgba(138,43,226,0.5);border-radius:10px;color:#aaa;font-size:13px;font-weight:600;text-decoration:none;transition:all .3s}
+    .nav-link:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 20px var(--glow)}
     .wallet-button{position:fixed;top:20px;right:20px;background:rgba(10,10,10,0.8);backdrop-filter:blur(10px);padding:12px 28px;border:2px solid var(--primary);border-radius:12px;color:#fff;font-weight:600;cursor:pointer;transition:all .3s;z-index:9999}
     .wallet-button:hover{border-color:var(--accent);box-shadow:0 0 30px var(--glow)}
     .wallet-button.connected{color:var(--accent);border-color:var(--accent);box-shadow:0 0 30px var(--glow)}
@@ -80,6 +83,21 @@
     .faq-item p{padding:12px 16px;color:#aaa;font-size:14px;line-height:1.6;border-left:2px solid var(--primary);margin-top:6px}
     .warning-box{background:rgba(255,180,0,0.08);border:1px solid rgba(255,180,0,0.3);border-radius:12px;padding:16px;color:#ffb400;font-size:14px;line-height:1.6;margin-top:16px}
     .warning-box strong{display:block;margin-bottom:4px}
+    .buy-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+    .buy-stat{background:rgba(138,43,226,0.1);border:1px solid rgba(138,43,226,0.3);border-radius:12px;padding:16px;text-align:center}
+    .buy-stat .stat-label{font-size:12px;color:#888;margin-bottom:6px}
+    .buy-stat .stat-val{font-size:18px;font-weight:800;color:var(--accent)}
+    .buy-btn{display:block;width:100%;padding:16px;background:linear-gradient(135deg,var(--primary),#6a0dad);color:#fff;border:none;border-radius:12px;font-size:17px;font-weight:700;cursor:pointer;text-decoration:none;text-align:center;transition:all .3s;box-shadow:0 0 20px var(--glow);margin-top:8px}
+    .buy-btn:hover{background:linear-gradient(135deg,var(--accent),#00c9b0);color:#000;transform:translateY(-2px)}
+    .contract-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
+    .contract-table tr{border-bottom:1px solid rgba(138,43,226,0.2)}
+    .contract-table td{padding:10px 8px;vertical-align:middle}
+    .contract-table td:first-child{color:#aaa;width:140px;font-weight:600}
+    .contract-table td:last-child{font-family:monospace;font-size:11px}
+    .contract-table a{color:var(--accent);text-decoration:none}
+    .contract-table a:hover{text-decoration:underline}
+    .pop-badge{display:inline-block;background:linear-gradient(135deg,var(--primary),#6a0dad);color:#fff;font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;letter-spacing:1px;margin-left:6px;vertical-align:middle}
+    @media(max-width:768px){.buy-grid{grid-template-columns:1fr}.top-nav{gap:6px}.nav-link{padding:8px 12px;font-size:12px}}
 
     @media (max-width:768px){
       .page-wrap{margin-top:70px}
@@ -96,6 +114,12 @@
 </head>
 <body>
   <canvas id="matrix-bg"></canvas>
+
+  <div class="top-nav">
+    <a href="https://elitev5.github.io/Sun-Systems/" target="_blank" class="nav-link">☀️ Sun Systems Protocol</a>
+    <a href="#buy-privx" class="nav-link">Buy PRIVX</a>
+  </div>
+
   <div id="walletButton" class="wallet-button">
     <span id="walletButtonText">Connect Wallet</span>
   </div>
@@ -106,7 +130,7 @@
     <div class="container">
       <div class="logo-header">
         <img src="privx_logo.png" alt="PrivX Hurricane" class="privx-logo">
-        <p class="subtitle">Zero-Knowledge pSunDAI Privacy Shield · Earn PRIVX Mining Rewards</p>
+        <p class="subtitle">Zero-Knowledge pSunDAI Privacy Shield<br><span style="font-size:0.85em;opacity:0.85">Every withdrawal generates a <strong>Proof of Privacy <span class="pop-badge">POP</span></strong> and earns PRIVX</span></p>
       </div>
 
       <div class="tabs">
@@ -163,7 +187,7 @@
       <!-- Vault Stats -->
       <div class="vault-row" style="margin-top:28px">
         <div class="vault-display">
-          <div class="vault-label">Mining Vault Balance</div>
+          <div class="vault-label">⛏️ POP Mining Vault</div>
           <div class="vault-val"><span id="vaultBalance">—</span> PRIVX</div>
         </div>
         <div class="vault-display">
@@ -255,7 +279,7 @@
 
     <!-- ── PRIVX Token ── -->
     <div class="info-card">
-      <h2>🔥 The PRIVX Token</h2>
+      <h2>🔥 The PRIVX Token <span class="pop-badge">POP</span></h2>
       <p style="color:#aaa;font-size:14px;line-height:1.7;margin-bottom:16px">PRIVX is the protocol token of the PrivX Hurricane Shield. It is not a governance token, not a utility token, and not a security. It is a <strong style="color:#fff">Proof-of-Privacy mining token</strong> — earned by using the protocol and deflationary by design.</p>
       <div class="privx-mechanic">
         <div class="mechanic-row">
@@ -264,7 +288,7 @@
         </div>
         <div class="mechanic-row">
           <div class="mechanic-icon">⛏️</div>
-          <p><strong>Mine PRIVX by withdrawing.</strong> Every successful withdrawal triggers a PRIVX reward from the mining vault — proportional to the vault's fullness. Early miners earn the most.</p>
+          <p><strong>Mine PRIVX by generating a Proof of Privacy (POP).</strong> Every successful withdrawal produces a POP — a zero-knowledge proof of a valid shielded note — and triggers a PRIVX reward from the mining vault. Early miners earn the most.</p>
         </div>
         <div class="mechanic-row">
           <div class="mechanic-icon">📉</div>
@@ -339,6 +363,86 @@
           <summary>Why does proof generation take so long?</summary>
           <p>PLONK zero-knowledge proofs require heavy computation — specifically, downloading the 29MB proving key and running polynomial operations on thousands of constraints. This happens entirely in your browser. Modern laptops take 15–30 seconds. This is a technical property of the cryptography and cannot be reduced without changing the security model.</p>
         </details>
+      </div>
+    </div>
+
+    <!-- ── Buy PRIVX ── -->
+    <div class="info-card" id="buy-privx">
+      <h2>💜 Buy PRIVX</h2>
+      <p style="color:#aaa;font-size:14px;line-height:1.7;margin-bottom:16px">
+        PRIVX is the Proof of Privacy <span class="pop-badge">POP</span> mining token. It is required to deposit into any shield and is earned back on every withdrawal. With a fixed supply of 21 million and 80% of every fee burned permanently, early participants accumulate PRIVX at the lowest prices.
+      </p>
+      <div class="buy-grid">
+        <div class="buy-stat">
+          <div class="stat-label">Your PRIVX Balance</div>
+          <div class="stat-val" id="buyPrivxBalance">—</div>
+        </div>
+        <div class="buy-stat">
+          <div class="stat-label">Your pSunDAI Balance</div>
+          <div class="stat-val" id="buyPsundaiBalance">—</div>
+        </div>
+      </div>
+      <a class="buy-btn"
+         href="https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986"
+         target="_blank" rel="noopener">
+        Swap for PRIVX on PulseX ↗
+      </a>
+      <a class="buy-btn" style="margin-top:10px;background:linear-gradient(135deg,#1a6b3a,#0d4025)"
+         href="https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f"
+         target="_blank" rel="noopener">
+        Swap for pSunDAI on PulseX ↗
+      </a>
+      <div style="margin-top:20px;padding:14px;background:rgba(138,43,226,0.08);border-radius:10px;font-size:13px;color:#888;line-height:1.7">
+        <strong style="color:#fff">Contract addresses for manual import:</strong><br>
+        PRIVX: <span style="color:var(--accent);font-family:monospace">0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986</span><br>
+        pSunDAI: <span style="color:var(--accent);font-family:monospace">0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f</span>
+      </div>
+    </div>
+
+    <!-- ── Contracts ── -->
+    <div class="info-card">
+      <h2>📜 Verified Contracts</h2>
+      <p style="color:#aaa;font-size:14px;line-height:1.6;margin-bottom:16px">All contracts are immutable and unowned. No admin keys, no upgrade proxies, no pause functions. The code is the law.</p>
+      <table class="contract-table">
+        <tr>
+          <td>PRIVX Token</td>
+          <td><a href="https://scan.pulsechain.com/address/0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986" target="_blank">0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986 ↗</a></td>
+        </tr>
+        <tr>
+          <td>pSunDAI Token</td>
+          <td><a href="https://scan.pulsechain.com/address/0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f" target="_blank">0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f ↗</a></td>
+        </tr>
+        <tr>
+          <td>POP Mining Vault</td>
+          <td><a href="https://scan.pulsechain.com/address/0x81E13A4c8C49e11C022eddC5C330F89c012A6360" target="_blank">0x81E13A4c8C49e11C022eddC5C330F89c012A6360 ↗</a></td>
+        </tr>
+        <tr>
+          <td>PLONK Verifier</td>
+          <td><a href="https://scan.pulsechain.com/address/0x67E1Ab04F6999Acd9F7FC33228e0D435eEFfF527" target="_blank">0x67E1Ab04F6999Acd9F7FC33228e0D435eEFfF527 ↗</a></td>
+        </tr>
+        <tr>
+          <td>Shield · 100 pSunDAI</td>
+          <td><a href="https://scan.pulsechain.com/address/0xb2435E52De257408A3954a2F775116C020b61683" target="_blank">0xb2435E52De257408A3954a2F775116C020b61683 ↗</a></td>
+        </tr>
+        <tr>
+          <td>Shield · 1,000 pSunDAI</td>
+          <td><a href="https://scan.pulsechain.com/address/0x67a2ca4ce9FEd0A4c1e5bD7CdC90C341F0D9a061" target="_blank">0x67a2ca4ce9FEd0A4c1e5bD7CdC90C341F0D9a061 ↗</a></td>
+        </tr>
+        <tr>
+          <td>Shield · 10,000 pSunDAI</td>
+          <td><a href="https://scan.pulsechain.com/address/0xD8B80E8A90c6b2C681940F69B75A64547d1bF721" target="_blank">0xD8B80E8A90c6b2C681940F69B75A64547d1bF721 ↗</a></td>
+        </tr>
+        <tr>
+          <td>Shield · 100,000 pSunDAI</td>
+          <td><a href="https://scan.pulsechain.com/address/0xc9D4Ac9EDA1835E9563E33aF90586FD7b938A531" target="_blank">0xc9D4Ac9EDA1835E9563E33aF90586FD7b938A531 ↗</a></td>
+        </tr>
+      </table>
+      <div style="margin-top:20px;text-align:center;padding-top:20px;border-top:1px solid rgba(138,43,226,0.3)">
+        <p style="color:#888;font-size:13px;margin-bottom:12px">Part of the Sun Systems Protocol</p>
+        <a href="https://elitev5.github.io/Sun-Systems/" target="_blank" rel="noopener"
+           style="color:var(--accent);font-weight:700;text-decoration:none;font-size:15px">
+          ☀️ elitev5.github.io/Sun-Systems ↗
+        </a>
       </div>
     </div>
 
@@ -642,6 +746,7 @@
         updateDepositButton();
         updateBurnedBalance();
         loadVaultBalance();
+        loadUserBalances();
       } catch (err) {
         console.error("Wallet connection error:", err);
         alert("Connection failed: " + (err.message || "Check MetaMask"));
@@ -696,6 +801,23 @@
       }
     }
 
+    async function loadUserBalances() {
+      if (!web3 || !userAccount) return;
+      try {
+        const privx   = new web3.eth.Contract(ERC20_ABI, PRIVX_TOKEN);
+        const psundai = new web3.eth.Contract(ERC20_ABI, PSUNDAI_TOKEN);
+        const [pb, sb] = await Promise.all([
+          privx.methods.balanceOf(userAccount).call(),
+          psundai.methods.balanceOf(userAccount).call()
+        ]);
+        const fmt = (v, d) => Number(BigInt(v) / 10n ** BigInt(d)).toLocaleString();
+        const el1 = document.getElementById("buyPrivxBalance");
+        const el2 = document.getElementById("buyPsundaiBalance");
+        if (el1) el1.textContent = fmt(pb, 18) + " PRIVX";
+        if (el2) el2.textContent = fmt(sb, 18) + " pSunDAI";
+      } catch(e) { /* silently skip if not connected */ }
+    }
+
     async function loadVaultBalance() {
       const el = document.getElementById("vaultBalance");
       if (!el || !web3) return;
@@ -729,6 +851,7 @@
 
       setInterval(updateBurnedBalance, 30000);
       setInterval(loadVaultBalance,    30000);
+      setInterval(loadUserBalances,    30000);
     });
   </script>
 
