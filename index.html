@@ -842,9 +842,11 @@
         console.log("Public signals:", publicSignals);
 
         const calldata  = await snarkjs.plonk.exportSolidityCallData(zkProof, publicSignals);
+        console.log("Raw calldata:", calldata);
         const argv      = calldata.replace(/["[\]\s]/g, "").split(",").filter(Boolean);
-        const proofArr  = argv.slice(0, 24).map(x => BigInt(x).toString());
-        const pubSigArr = argv.slice(24, 27).map(x => BigInt(x).toString());
+        console.log("Parsed argv:", argv);
+        const proofArr  = argv.slice(0, 24);
+        const pubSigArr = argv.slice(24, 27);
 
         const recipient = document.getElementById("recipientAddress").value.trim() || userAccount;
         const tx = await shieldContract.methods.withdraw(proofArr, pubSigArr, recipient).send({ from: userAccount });
