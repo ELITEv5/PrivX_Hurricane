@@ -484,13 +484,38 @@
       "100000": 20000000000000000000000n
     };
 
-    const WASM_URL   = "./circuits/mixer_js/PrivXMixer14.wasm";
-    const ZKEY_URL   = "https://amaranth-rear-platypus-218.mypinata.cloud/ipfs/bafybeihp3fonoffw7syxzeryogmxx5vpq3wwjbx4tyatyoub5sgn6fgseq";
+    const WASM_URL    = "./circuits/mixer_js/PrivXMixer14.wasm";
+    const ZKEY_CID    = "bafybeihp3fonoffw7syxzeryogmxx5vpq3wwjbx4tyatyoub5sgn6fgseq";
+    const ZKEY_URLS   = [
+      `https://amaranth-rear-platypus-218.mypinata.cloud/ipfs/${ZKEY_CID}`,
+      `https://gateway.pinata.cloud/ipfs/${ZKEY_CID}`,
+      `https://ipfs.io/ipfs/${ZKEY_CID}`,
+      `https://${ZKEY_CID}.ipfs.dweb.link`
+    ];
     const TREE_LEVELS = 14;
 
     // ─── State ────────────────────────────────────────────────────────────────
     let web3, userAccount, selectedDenomination;
     let poseidonFn = null;
+    let _zkeyBlobUrl = null;  // cached after first download
+
+    // ─── zkey loader with fallback gateways ──────────────────────────────────
+    async function getZkeyUrl(setStatus) {
+      if (_zkeyBlobUrl) return _zkeyBlobUrl;
+      for (let i = 0; i < ZKEY_URLS.length; i++) {
+        try {
+          setStatus(`Downloading proving key… (source ${i + 1}/${ZKEY_URLS.length})`);
+          const resp = await fetch(ZKEY_URLS[i]);
+          if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+          const blob = await resp.blob();
+          _zkeyBlobUrl = URL.createObjectURL(blob);
+          return _zkeyBlobUrl;
+        } catch (e) {
+          console.warn(`zkey source ${i + 1} failed (${ZKEY_URLS[i]}):`, e.message);
+        }
+      }
+      throw new Error("Could not download proving key from any source. Check your internet connection and try again.");
+    }
 
     // ─── Poseidon ─────────────────────────────────────────────────────────────
     async function initPoseidon() {
@@ -687,12 +712,13 @@
       console.log("Circuit input:", circuitInput);
 
       const btn = document.getElementById("withdrawBtn");
-      btn.textContent = "Generating ZK proof… (up to 30s)";
       btn.disabled = true;
 
       try {
+        const zkeyUrl = await getZkeyUrl(msg => { btn.textContent = msg; });
+        btn.textContent = "Generating ZK proof… (up to 30s)";
         const { proof: zkProof, publicSignals } = await snarkjs.plonk.fullProve(
-          circuitInput, WASM_URL, ZKEY_URL
+          circuitInput, WASM_URL, zkeyUrl
         );
 
         console.log("Public signals:", publicSignals);
