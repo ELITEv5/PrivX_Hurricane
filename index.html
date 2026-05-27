@@ -235,7 +235,21 @@
           Paste the private note you saved during deposit. The token and denomination are read from the note automatically. For maximum privacy, withdraw to a <strong style="color:#fff">fresh wallet address</strong> that has never been linked to your deposit address.
         </div>
         <input type="text" id="withdrawNote" placeholder="privx-hurricane-privx-100-abc123..." style="width:100%;padding:16px;margin:8px 0 12px;border-radius:12px;border:1px solid #444;background:#111;color:#fff;font-family:monospace;font-size:13px">
-        <input type="text" id="recipientAddress" placeholder="Recipient address (leave blank to use connected wallet)" style="width:100%;padding:16px;margin:0 0 4px;border-radius:12px;border:1px solid #444;background:#111;color:#fff">
+        <input type="text" id="recipientAddress" placeholder="Recipient address (leave blank to use connected wallet)" style="width:100%;padding:16px;margin:0 0 10px;border-radius:12px;border:1px solid #444;background:#111;color:#fff">
+
+        <details id="mevGuard" style="margin-bottom:14px">
+          <summary style="cursor:pointer;color:#888;font-size:13px;padding:10px 14px;background:rgba(255,180,0,0.05);border:1px solid rgba(255,180,0,0.2);border-radius:10px;list-style:none;display:flex;justify-content:space-between;align-items:center">
+            <span>🛡 MEV Protection <span style="background:rgba(255,180,0,0.12);color:#ffb400;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;margin-left:8px;letter-spacing:.5px">OPTIONAL</span></span>
+            <span style="font-size:10px;color:#555">▼</span>
+          </summary>
+          <div style="padding:14px 16px;border:1px solid rgba(255,180,0,0.15);border-top:none;border-radius:0 0 10px 10px;background:rgba(255,180,0,0.03)">
+            <p style="color:#aaa;font-size:13px;line-height:1.6;margin-bottom:12px">Your ZK proof is visible in the public mempool before it mines. A bot could copy it and redirect your funds to their address. A private RPC submits your transaction directly to validators — bypassing the public mempool entirely.</p>
+            <label style="display:block;color:#888;font-size:11px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">Private RPC URL</label>
+            <input type="text" id="privateRpcUrl" placeholder="https://your-private-node.com" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,180,0,0.25);background:#0e0e0e;color:#fff;font-size:12px;font-family:monospace;outline:none;margin-bottom:8px">
+            <p style="color:#555;font-size:12px;line-height:1.5">Run your own PulseChain node for maximum protection. Leave blank to use your wallet's default RPC. A relayer (coming soon) will eliminate this risk entirely without needing a private node.</p>
+          </div>
+        </details>
+
         <button class="button" id="withdrawBtn">Generate ZK Proof + Withdraw</button>
         <div style="color:#888;font-size:13px;margin-top:12px;text-align:center">Proof generation takes ~15–30 seconds. Do not close the tab.</div>
       </div>
@@ -1160,6 +1174,57 @@ Constraints:
       }
     }
 
+    // ─── MEV-protected withdrawal wrapper ────────────────────────────────────
+    async function handleWithdraw() {
+      const privateRpc = document.getElementById('privateRpcUrl').value.trim();
+      if (!privateRpc) return withdraw();
+
+      let switched = false;
+      try {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [{
+            chainId: '0x171',
+            chainName: 'PulseChain (Protected)',
+            rpcUrls: [privateRpc],
+            nativeCurrency: { name: 'PLS', symbol: 'PLS', decimals: 18 },
+            blockExplorerUrls: ['https://scan.pulsechain.com']
+          }]
+        });
+        web3 = new Web3(window.ethereum);
+        switched = true;
+      } catch (e) {
+        const go = confirm(
+          "Could not switch to private RPC — MetaMask rejected the request.\n\n" +
+          "To protect manually: MetaMask → Settings → Networks → PulseChain → change RPC URL, then retry.\n\n" +
+          "Continue with your default (public) RPC? MEV risk applies."
+        );
+        if (!go) return;
+      }
+
+      try {
+        await withdraw();
+      } finally {
+        if (switched) {
+          try {
+            await window.ethereum.request({
+              method: 'wallet_addEthereumChain',
+              params: [{
+                chainId: '0x171',
+                chainName: 'PulseChain',
+                rpcUrls: ['https://rpc.pulsechain.com'],
+                nativeCurrency: { name: 'PLS', symbol: 'PLS', decimals: 18 },
+                blockExplorerUrls: ['https://scan.pulsechain.com']
+              }]
+            });
+            web3 = new Web3(window.ethereum);
+          } catch (e) {
+            console.warn('Could not switch back to standard PulseChain RPC — switch manually in MetaMask.');
+          }
+        }
+      }
+    }
+
     // ─── Wallet ───────────────────────────────────────────────────────────────
     async function toggleWallet() {
       if (!window.ethereum) return alert("Install MetaMask");
@@ -1309,7 +1374,7 @@ Constraints:
     window.addEventListener('load', async () => {
       document.getElementById("walletButton").onclick = toggleWallet;
       document.getElementById('depositBtn').onclick   = deposit;
-      document.getElementById('withdrawBtn').onclick  = withdraw;
+      document.getElementById('withdrawBtn').onclick  = handleWithdraw;
       document.getElementById('depositTabBtn').addEventListener('click', () => switchTab('deposit'));
       document.getElementById('withdrawTabBtn').addEventListener('click', () => switchTab('withdraw'));
       switchTab('deposit');
