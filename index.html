@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PrivX Hurricane – Privacy That Pays</title>
   <link rel="icon" href="privx-shield.png" type="image/png">
-  <meta property="og:image" content="https://github.com/ELITEv5/PrivX/Hurricane/privx-shield.png">
+  <meta property="og:image" content="privx-shield.png">
   <meta property="og:type" content="website">
   <meta name="robots" content="index,follow">
-  <meta name="description" content="The world's first fully on-chain, ownerless, immutable privacy protocol. Instant 2% Proof-of-Privacy rewards.">
+  <meta name="description" content="Shield pSunDAI with zero-knowledge proofs. Earn PRIVX mining rewards on every withdrawal. Fully on-chain, ownerless, immutable.">
   <meta property="og:title" content="PrivX Hurricane – Privacy That Pays">
-  <meta property="og:description" content="Anonymous PRIVX transfers + instant 1-2% rewards. ELITE Team6 – November 7, 2025">
+  <meta property="og:description" content="Zero-knowledge pSunDAI privacy shield on PulseChain. Earn PRIVX for proving your privacy.">
   <meta name="theme-color" content="#8A2BE2">
   <style>
     :root {
@@ -21,10 +21,12 @@
       --glow: rgba(138,43,226,0.6);
     }
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;overflow-x:hidden}
+    body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 20px 60px;overflow-x:hidden}
     canvas#matrix-bg{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
-    .container{background:rgba(10,10,10,0.7);backdrop-filter:blur(20px);border-radius:24px;padding:40px 30px;max-width:620px;width:100%;border:1px solid var(--primary);box-shadow:0 0 80px var(--glow),inset 0 0 40px rgba(138,43,226,0.1);position:relative;z-index:10}
-    .subtitle{color:var(--accent);font-size:1.4em;margin-bottom:30px}
+    .page-wrap{width:100%;max-width:680px;position:relative;z-index:10;display:flex;flex-direction:column;gap:24px;margin-top:60px}
+    .container{background:rgba(10,10,10,0.7);backdrop-filter:blur(20px);border-radius:24px;padding:40px 30px;border:1px solid var(--primary);box-shadow:0 0 80px var(--glow),inset 0 0 40px rgba(138,43,226,0.1)}
+    .info-card{background:rgba(10,10,10,0.7);backdrop-filter:blur(20px);border-radius:24px;padding:36px 30px;border:1px solid rgba(138,43,226,0.4);box-shadow:0 0 40px rgba(138,43,226,0.2)}
+    .subtitle{color:var(--accent);font-size:1.2em;margin-bottom:30px;text-align:center}
     .wallet-button{position:fixed;top:20px;right:20px;background:rgba(10,10,10,0.8);backdrop-filter:blur(10px);padding:12px 28px;border:2px solid var(--primary);border-radius:12px;color:#fff;font-weight:600;cursor:pointer;transition:all .3s;z-index:9999}
     .wallet-button:hover{border-color:var(--accent);box-shadow:0 0 30px var(--glow)}
     .wallet-button.connected{color:var(--accent);border-color:var(--accent);box-shadow:0 0 30px var(--glow)}
@@ -33,30 +35,62 @@
     .tab:hover{border-color:var(--primary)}
     .tab.active{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 0 30px var(--glow)}
     .denomination-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:30px 0}
-    .denomination-card{background:var(--card);border:2px solid transparent;border-radius:16px;padding:24px;cursor:pointer;transition:all .4s;text-align:center}
+    .denomination-card{background:var(--card);border:2px solid transparent;border-radius:16px;padding:20px;cursor:pointer;transition:all .4s;text-align:center}
     .denomination-card:hover{border-color:var(--primary);transform:translateY(-6px);box-shadow:0 12px 40px rgba(138,43,226,0.4)}
     .denomination-card.selected{border:3px solid var(--primary);background:rgba(138,43,226,0.3);box-shadow:0 0 50px var(--glow);transform:scale(1.04)}
-    .denomination-amount{font-size:26px;font-weight:900;display:flex;align-items:center;justify-content:center;gap:12px;color:#fff}
-    .denomination-amount img{height:36px;width:36px;border-radius:50%;box-shadow:0 0 20px var(--glow)}
-    .denomination-label{margin-top:8px;color:#aaa;font-size:13px}
+    .denom-amount{font-size:22px;font-weight:900;color:#fff;margin-bottom:4px}
+    .denom-token{font-size:13px;color:var(--accent);font-weight:600;margin-bottom:8px}
+    .denom-fee{font-size:12px;color:#888;border-top:1px solid rgba(255,255,255,0.1);padding-top:8px;margin-top:4px}
     .button{width:100%;padding:18px;background:var(--primary);color:#fff;border:none;border-radius:14px;font-size:18px;font-weight:700;cursor:pointer;margin-top:20px;transition:all .3s;box-shadow:0 0 30px var(--glow)}
     .button:hover{background:var(--accent);color:#000;transform:translateY(-3px)}
-    .button:disabled{background:#333;color:#666;cursor:not-allowed}
+    .button:disabled{background:#333;color:#666;cursor:not-allowed;box-shadow:none;transform:none}
     .note-display{background:#111;border:2px solid var(--primary);padding:20px;border-radius:14px;margin-top:25px;font-family:monospace;color:var(--accent);box-shadow:0 0 30px var(--glow)}
-    .vault-display{margin-top:30px;padding:20px;background:rgba(138,43,226,0.2);border-radius:14px;text-align:center;border:1px solid var(--primary)}
-    .vault-display span{color:var(--accent);font-size:1.4em;font-weight:900}
-    .hidden { display: none !important; }
-    .logo-header { text-align: center; margin-bottom: 30px; }
-    .privx-logo { max-width: 340px; width: 100%; height: auto; margin: 0 auto 12px auto; display: block; filter: drop-shadow(0 0 25px var(--glow)); transition: transform 0.3s ease, filter 0.3s ease; }
-    .privx-logo:hover { transform: scale(1.07); filter: drop-shadow(0 0 40px var(--accent)); }
-    @media (max-width: 768px) { .privx-logo { max-width: 260px; } }
-    @media (max-width: 480px) { .privx-logo { max-width: 200px; } }
-    @media (max-width: 768px) {
-      .subtitle { font-size:1.1em; text-align:center; }
-      .container { max-width:95%; padding:24px 18px; }
-      .wallet-button { top:10px; right:10px; padding:10px 16px; font-size:14px; }
-      .denomination-grid { grid-template-columns:1fr; }
-      .note-display { font-size:14px; word-break:break-all; }
+    .vault-row{display:flex;gap:16px;margin-top:0}
+    .vault-display{flex:1;padding:18px;background:rgba(138,43,226,0.15);border-radius:14px;text-align:center;border:1px solid var(--primary)}
+    .vault-display .vault-label{font-size:12px;color:#aaa;margin-bottom:6px}
+    .vault-display .vault-val{color:var(--accent);font-size:1.2em;font-weight:900}
+    .hidden{display:none!important}
+    .logo-header{text-align:center;margin-bottom:24px}
+    .privx-logo{max-width:320px;width:100%;height:auto;margin:0 auto 12px;display:block;filter:drop-shadow(0 0 25px var(--glow));transition:transform .3s,filter .3s}
+    .privx-logo:hover{transform:scale(1.07);filter:drop-shadow(0 0 40px var(--accent))}
+
+    /* Info sections */
+    .info-card h2{font-size:1.4em;font-weight:800;color:var(--accent);margin-bottom:20px;display:flex;align-items:center;gap:10px}
+    .steps{display:flex;flex-direction:column;gap:16px}
+    .step{display:flex;gap:16px;align-items:flex-start}
+    .step-num{background:var(--primary);color:#fff;font-weight:900;font-size:15px;min-width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 12px var(--glow)}
+    .step-body strong{color:#fff;display:block;margin-bottom:3px}
+    .step-body p{color:#aaa;font-size:14px;line-height:1.5}
+    .needs-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+    .need-card{background:rgba(138,43,226,0.1);border:1px solid rgba(138,43,226,0.3);border-radius:12px;padding:16px}
+    .need-card strong{color:var(--accent);display:block;margin-bottom:4px}
+    .need-card p{color:#aaa;font-size:13px;line-height:1.5}
+    .philosophy-block{margin-bottom:20px}
+    .philosophy-block h3{color:#fff;font-size:1em;font-weight:700;margin-bottom:8px}
+    .philosophy-block p{color:#aaa;font-size:14px;line-height:1.7}
+    .privx-mechanic{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+    .mechanic-row{display:flex;gap:12px;align-items:center;background:rgba(138,43,226,0.1);border-radius:10px;padding:12px 16px}
+    .mechanic-icon{font-size:20px;min-width:28px;text-align:center}
+    .mechanic-row p{color:#aaa;font-size:13px;line-height:1.5}
+    .mechanic-row strong{color:#fff}
+    .faq{display:flex;flex-direction:column;gap:14px;margin-top:4px}
+    .faq-item summary{cursor:pointer;font-weight:600;color:#fff;padding:12px 16px;background:rgba(138,43,226,0.1);border-radius:10px;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-item summary::after{content:"▼";font-size:11px;color:var(--accent)}
+    .faq-item[open] summary::after{content:"▲"}
+    .faq-item p{padding:12px 16px;color:#aaa;font-size:14px;line-height:1.6;border-left:2px solid var(--primary);margin-top:6px}
+    .warning-box{background:rgba(255,180,0,0.08);border:1px solid rgba(255,180,0,0.3);border-radius:12px;padding:16px;color:#ffb400;font-size:14px;line-height:1.6;margin-top:16px}
+    .warning-box strong{display:block;margin-bottom:4px}
+
+    @media (max-width:768px){
+      .page-wrap{margin-top:70px}
+      .subtitle{font-size:1em}
+      .container,.info-card{padding:24px 18px}
+      .wallet-button{top:10px;right:10px;padding:10px 16px;font-size:14px}
+      .denomination-grid{grid-template-columns:1fr 1fr}
+      .needs-grid{grid-template-columns:1fr}
+      .vault-row{flex-direction:column}
+      .note-display{font-size:13px;word-break:break-all}
+      .denom-amount{font-size:18px}
     }
   </style>
 </head>
@@ -65,55 +99,250 @@
   <div id="walletButton" class="wallet-button">
     <span id="walletButtonText">Connect Wallet</span>
   </div>
-  <div class="container">
-    <div class="logo-header">
-      <img src="privx_logo.png" alt="PrivX Hurricane" class="privx-logo">
-      <p class="subtitle">Hurricane Shield + Instant 1-2% Proof-of-Privacy Rewards</p>
-    </div>
-    <div class="tabs">
-      <div class="tab active" id="depositTabBtn">Deposit</div>
-      <div class="tab" id="withdrawTabBtn">Withdraw</div>
-    </div>
-    <div id="depositTab">
-      <div class="denomination-grid">
-        <div class="denomination-card" onclick="selectDenomination('100')">
-          <div class="denomination-amount">100 PRIVX <img src="privx-shield.png" alt="PrivX"></div>
-          <div class="denomination-label">Instant 2% reward</div>
+
+  <div class="page-wrap">
+
+    <!-- ── Main App Card ── -->
+    <div class="container">
+      <div class="logo-header">
+        <img src="privx_logo.png" alt="PrivX Hurricane" class="privx-logo">
+        <p class="subtitle">Zero-Knowledge pSunDAI Privacy Shield · Earn PRIVX Mining Rewards</p>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active" id="depositTabBtn">Deposit</div>
+        <div class="tab" id="withdrawTabBtn">Withdraw</div>
+      </div>
+
+      <!-- Deposit Tab -->
+      <div id="depositTab">
+        <div class="denomination-grid">
+          <div class="denomination-card" onclick="selectDenomination('100')">
+            <div class="denom-amount">100</div>
+            <div class="denom-token">pSunDAI</div>
+            <div class="denom-fee">Fee: 500 PRIVX</div>
+          </div>
+          <div class="denomination-card" onclick="selectDenomination('1000')">
+            <div class="denom-amount">1,000</div>
+            <div class="denom-token">pSunDAI</div>
+            <div class="denom-fee">Fee: 2,000 PRIVX</div>
+          </div>
+          <div class="denomination-card" onclick="selectDenomination('10000')">
+            <div class="denom-amount">10,000</div>
+            <div class="denom-token">pSunDAI</div>
+            <div class="denom-fee">Fee: 7,000 PRIVX</div>
+          </div>
+          <div class="denomination-card" onclick="selectDenomination('100000')">
+            <div class="denom-amount">100,000</div>
+            <div class="denom-token">pSunDAI</div>
+            <div class="denom-fee">Fee: 20,000 PRIVX</div>
+          </div>
         </div>
-        <div class="denomination-card" onclick="selectDenomination('1000')">
-          <div class="denomination-amount">1,000 PRIVX <img src="privx-shield.png" alt="PrivX"></div>
-          <div class="denomination-label">Instant 2% reward</div>
-        </div>
-        <div class="denomination-card" onclick="selectDenomination('10000')">
-          <div class="denomination-amount">10,000 PRIVX <img src="privx-shield.png" alt="PrivX"></div>
-          <div class="denomination-label">Instant 2% reward</div>
-        </div>
-        <div class="denomination-card" onclick="selectDenomination('100000')">
-          <div class="denomination-amount">100,000 PRIVX <img src="privx-shield.png" alt="PrivX"></div>
-          <div class="denomination-label">Instant 2% reward</div>
+
+        <button class="button" id="depositBtn" disabled>Select Denomination</button>
+
+        <div id="depositNote" class="note-display hidden">
+          <strong>YOUR PRIVATE NOTE — SAVE THIS SECURELY!</strong><br><br>
+          <span id="noteText"></span><br><br>
+          <small style="color:#888">Store this offline. Anyone with this note can withdraw your funds. Do NOT share it.</small><br><br>
+          <button class="button" onclick="copyNote()" style="padding:12px 24px;font-size:15px;width:auto;margin-top:0">Copy Note</button>
         </div>
       </div>
-      <button class="button" id="depositBtn" disabled>Select Denomination</button>
-      <div id="depositNote" class="note-display hidden">
-        <strong>YOUR PRIVATE NOTE – SAVE THIS SECURELY!</strong><br><br>
-        <span id="noteText"></span><br><br>
-        <button class="button" onclick="copyNote()" style="padding:12px 24px;font-size:15px;width:auto">Copy Note</button>
+
+      <!-- Withdraw Tab -->
+      <div id="withdrawTab" class="hidden">
+        <div style="color:#aaa;font-size:14px;margin-bottom:16px;line-height:1.6">
+          Paste the private note you saved during deposit. For maximum privacy, withdraw to a <strong style="color:#fff">fresh wallet address</strong> that has never been linked to your deposit address.
+        </div>
+        <input type="text" id="withdrawNote" placeholder="privx-hurricane-100-abc123..." style="width:100%;padding:16px;margin:8px 0 12px;border-radius:12px;border:1px solid #444;background:#111;color:#fff;font-family:monospace;font-size:13px">
+        <input type="text" id="recipientAddress" placeholder="Recipient address (leave blank to use connected wallet)" style="width:100%;padding:16px;margin:0 0 4px;border-radius:12px;border:1px solid #444;background:#111;color:#fff">
+        <button class="button" id="withdrawBtn">Generate ZK Proof + Withdraw</button>
+        <div style="color:#888;font-size:13px;margin-top:12px;text-align:center">Proof generation takes ~15–30 seconds. Do not close the tab.</div>
+      </div>
+
+      <!-- Vault Stats -->
+      <div class="vault-row" style="margin-top:28px">
+        <div class="vault-display">
+          <div class="vault-label">Mining Vault Balance</div>
+          <div class="vault-val"><span id="vaultBalance">—</span> PRIVX</div>
+        </div>
+        <div class="vault-display">
+          <div class="vault-label">🔥 Total PRIVX Burned</div>
+          <div class="vault-val"><span id="burnedBalance">—</span></div>
+        </div>
       </div>
     </div>
-    <div id="withdrawTab" class="hidden">
-      <input type="text" id="withdrawNote" placeholder="Paste your private note here" style="width:100%;padding:16px;margin:15px 0;border-radius:12px;border:1px solid #444;background:#111;color:#fff;font-family:monospace">
-      <input type="text" id="recipientAddress" placeholder="Recipient address (optional – defaults to connected wallet)" style="width:100%;padding:16px;margin:15px 0;border-radius:12px;border:1px solid #444;background:#111;color:#fff">
-      <button class="button" id="withdrawBtn">Generate Proof + Withdraw</button>
+
+    <!-- ── How It Works ── -->
+    <div class="info-card">
+      <h2>⚡ How It Works</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Get what you need</strong>
+            <p>You need <strong style="color:#fff">pSunDAI</strong> (the stablecoin being shielded) and <strong style="color:#fff">PRIVX</strong> (the protocol fee token). Both are on PulseChain. Connect MetaMask to PulseChain and make sure you have PLS for gas.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Choose a denomination and deposit</strong>
+            <p>Pick 100, 1,000, 10,000, or 100,000 pSunDAI. You approve two amounts: the pSunDAI you're shielding, and the PRIVX protocol fee (80% is burned forever, 20% seeds the mining vault). Your deposit is recorded on-chain as a cryptographic commitment — not your address.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Save your private note — this is critical</strong>
+            <p>A secret note is generated entirely in your browser. It never touches a server. This note is the <em>only</em> way to recover your funds. Write it down. Store it encrypted. The note contains your nullifier and secret — the two values the ZK proof is built from.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>Wait (optional but recommended)</strong>
+            <p>The longer you wait, the more other deposits join the anonymity set. When there are 100 deposits before you withdraw, an observer cannot determine which of those 100 was yours. Waiting hours or days dramatically strengthens your privacy.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <strong>Withdraw to a fresh address</strong>
+            <p>From a wallet that has never interacted with your deposit address, paste your note and choose a recipient. The app generates a PLONK zero-knowledge proof in your browser — proving you own a valid note without revealing which deposit it came from. The contract verifies the proof on-chain and releases your pSunDAI.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">6</div>
+          <div class="step-body">
+            <strong>Receive pSunDAI + PRIVX mining reward</strong>
+            <p>Your pSunDAI arrives at the recipient address. Simultaneously, the mining vault pays a PRIVX reward — a percentage of the original fee, depending on vault fullness. Early users earn more. The reward goes to the recipient address automatically.</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:28px">
+        <h2 style="margin-bottom:16px">🎒 What You Need</h2>
+        <div class="needs-grid">
+          <div class="need-card">
+            <strong>pSunDAI</strong>
+            <p>The stablecoin being shielded. This is what you deposit and receive back on withdrawal.</p>
+          </div>
+          <div class="need-card">
+            <strong>PRIVX</strong>
+            <p>Protocol fee token. Paid once at deposit. 80% burned permanently, 20% funds rewards.</p>
+          </div>
+          <div class="need-card">
+            <strong>MetaMask</strong>
+            <p>Or any EIP-1193 wallet. Must be on PulseChain (chainId 369). The app will prompt you to switch.</p>
+          </div>
+          <div class="need-card">
+            <strong>PLS for gas</strong>
+            <p>Small amount of PLS to pay transaction fees on PulseChain. Gas is very cheap.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="warning-box" style="margin-top:24px">
+        <strong>⚠️ Security Tips for Maximum Privacy</strong>
+        • Never deposit and withdraw from the same wallet address<br>
+        • Use a VPN or Tor when withdrawing<br>
+        • Wait for other deposits before withdrawing<br>
+        • Do not reuse withdrawal addresses<br>
+        • Your note is the only recovery — losing it means losing funds
+      </div>
     </div>
-    <div class="vault-display">
-      <div>Proof-of-Privacy Mining Vault</div>
-      <span id="vaultBalance">Loading...</span> PRIVX Available
+
+    <!-- ── PRIVX Token ── -->
+    <div class="info-card">
+      <h2>🔥 The PRIVX Token</h2>
+      <p style="color:#aaa;font-size:14px;line-height:1.7;margin-bottom:16px">PRIVX is the protocol token of the PrivX Hurricane Shield. It is not a governance token, not a utility token, and not a security. It is a <strong style="color:#fff">Proof-of-Privacy mining token</strong> — earned by using the protocol and deflationary by design.</p>
+      <div class="privx-mechanic">
+        <div class="mechanic-row">
+          <div class="mechanic-icon">🔥</div>
+          <p><strong>80% of every deposit fee is burned forever.</strong> PRIVX supply decreases with every shield deposit. 21 million total supply, no minting.</p>
+        </div>
+        <div class="mechanic-row">
+          <div class="mechanic-icon">⛏️</div>
+          <p><strong>Mine PRIVX by withdrawing.</strong> Every successful withdrawal triggers a PRIVX reward from the mining vault — proportional to the vault's fullness. Early miners earn the most.</p>
+        </div>
+        <div class="mechanic-row">
+          <div class="mechanic-icon">📉</div>
+          <p><strong>Emission decays as the vault drains.</strong> The reward rate drops quadratically as PRIVX is paid out. Refilling the vault resets the curve upward.</p>
+        </div>
+        <div class="mechanic-row">
+          <div class="mechanic-icon">🏛️</div>
+          <p><strong>No dev wallet.</strong> The development team holds PRIVX and benefits from the burn mechanism — not from a fee stream. There is no admin key, no upgradeable proxy, no multisig.</p>
+        </div>
+      </div>
     </div>
-    <div class="vault-display">
-      <div>🔥 Total PRIVX Burned</div>
-      <span id="burnedBalance">Loading...</span>
+
+    <!-- ── Why Privacy Matters ── -->
+    <div class="info-card">
+      <h2>🛡️ Why Financial Privacy Matters</h2>
+
+      <div class="philosophy-block">
+        <h3>Privacy is a fundamental human right</h3>
+        <p>Article 12 of the Universal Declaration of Human Rights protects individuals from arbitrary interference with their privacy. Financial privacy is inseparable from that right. When every transaction is visible to every employer, government, creditor, and advertiser — permanently, immutably, forever — the result is not transparency. It is total surveillance.</p>
+      </div>
+
+      <div class="philosophy-block">
+        <h3>Blockchain without privacy is a panopticon</h3>
+        <p>Public blockchains are revolutionary. They eliminate intermediaries, enable trustless contracts, and give individuals direct control over their assets. But complete transparency creates a new problem: a permanent, searchable ledger of everything you have ever bought, sold, earned, or donated. Employers screen wallets. Governments trace flows. Criminals target high balances. Transparency, without the option of privacy, is a surveillance system, not a financial system.</p>
+      </div>
+
+      <div class="philosophy-block">
+        <h3>Privacy is not crime</h3>
+        <p>Cash has been private for thousands of years. When you pay for groceries with a $20 bill, no one records your identity, the time, or your balance. That privacy is not suspicious — it is normal. Using a privacy shield to send stablecoins is the digital equivalent of using cash. The existence of a privacy tool does not imply wrongdoing any more than owning curtains implies criminality.</p>
+      </div>
+
+      <div class="philosophy-block">
+        <h3>The separation of money and state</h3>
+        <p>Financial surveillance is one of the most powerful tools of authoritarian control. Freezing accounts, debanking political opponents, and monitoring donations are not hypothetical risks — they are documented realities across dozens of countries. A privacy layer that is ownerless, immutable, and controlled by mathematics rather than institutions is a practical form of financial self-sovereignty. No entity can freeze it. No government can deplatform it. No company can be acquired and its policies reversed. It simply runs.</p>
+      </div>
+
+      <div class="philosophy-block">
+        <h3>Why PrivX Hurricane specifically?</h3>
+        <p>PrivX Hurricane is designed to be the most credibly neutral privacy protocol possible. There is no owner. No admin key. No upgradeability. The contracts are immutable from the moment of deployment. The development team cannot change the fee, pause withdrawals, or censor any transaction. The only rule is the circuit: if you know the note, you can withdraw — always, unconditionally, forever.</p>
+      </div>
     </div>
-  </div>
+
+    <!-- ── FAQ ── -->
+    <div class="info-card">
+      <h2>❓ FAQ</h2>
+      <div class="faq">
+        <details class="faq-item">
+          <summary>Is my note stored anywhere?</summary>
+          <p>No. Your note is generated entirely inside your browser using the Web Crypto API. It is never sent to a server, never stored on-chain, and never leaves your device unless you copy it. If you lose it, there is no recovery mechanism — the funds are locked in the contract forever.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What is a zero-knowledge proof?</summary>
+          <p>A ZK proof lets you prove you know a secret without revealing the secret itself. In this protocol, you prove "I know the nullifier and secret for a valid deposit in this Merkle tree" without revealing which deposit is yours. The on-chain verifier checks the mathematical proof — it cannot determine your identity, only that the proof is valid.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Why does denomination matter for privacy?</summary>
+          <p>All deposits in a shield are the same size (e.g. exactly 100 pSunDAI). When you withdraw, the observer sees someone withdrew 100 pSunDAI but cannot distinguish which of the N depositors owns the note. Larger denominations have smaller anonymity sets — fewer people deposit 100,000 pSunDAI than 100 pSunDAI — so the 100 and 1,000 tiers generally offer stronger privacy.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Can the contracts be paused or upgraded?</summary>
+          <p>No. There is no owner, no admin key, no proxy pattern, and no pause function. Once deployed, the contracts are mathematically immutable. Not the development team, not a multisig, not a DAO — no one can alter them.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What happens if the mining vault runs out of PRIVX?</summary>
+          <p>Withdrawals still work normally — the vault reward is wrapped in a try/catch and never blocks a withdrawal. If the vault is empty, the reward is simply skipped. Anyone can refill the vault by calling topUp() with PRIVX, which resets the emission curve.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Why do I need PRIVX to deposit?</summary>
+          <p>PRIVX is the protocol fee — it replaces the traditional model where a developer takes a cut of each transaction. Instead, 80% of your fee is burned (reducing supply permanently) and 20% funds the mining rewards. The developers hold PRIVX and benefit as the protocol grows — never from a direct fee stream.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Why does proof generation take so long?</summary>
+          <p>PLONK zero-knowledge proofs require heavy computation — specifically, downloading the 29MB proving key and running polynomial operations on thousands of constraints. This happens entirely in your browser. Modern laptops take 15–30 seconds. This is a technical property of the cryptography and cannot be reduced without changing the security model.</p>
+        </details>
+      </div>
+    </div>
+
+  </div><!-- /page-wrap -->
 
   <!-- Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
@@ -122,12 +351,10 @@
 
   <script>
     // ─── Config ───────────────────────────────────────────────────────────────
-    // After redeployment, run `npm run deploy` and copy the new addresses
-    // from deployment.json into SHIELD_CONTRACTS below.
     const PRIVX_TOKEN   = "0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986";
     const PSUNDAI_TOKEN = "0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f";
+    const VAULT_ADDRESS = "0x81E13A4c8C49e11C022eddC5C330F89c012A6360";
 
-    // ⬇ Update these with addresses from deployment.json after deploying
     const SHIELD_CONTRACTS = {
       "100":    "0xb2435E52De257408A3954a2F775116C020b61683",
       "1000":   "0x67a2ca4ce9FEd0A4c1e5bD7CdC90C341F0D9a061",
@@ -135,7 +362,6 @@
       "100000": "0xc9D4Ac9EDA1835E9563E33aF90586FD7b938A531"
     };
 
-    // pSunDAI denomination in wei (18 decimals) — must match deployed contracts
     const DENOM_WEI = {
       "100":    100000000000000000000n,
       "1000":   1000000000000000000000n,
@@ -143,24 +369,22 @@
       "100000": 100000000000000000000000n
     };
 
-    // PRIVX fee in wei per denomination — must match deployed contracts
     const PRIVX_FEE_WEI = {
-      "100":    500000000000000000000n,     // 500 PRIVX
-      "1000":   2000000000000000000000n,    // 2,000 PRIVX
-      "10000":  7000000000000000000000n,    // 7,000 PRIVX
-      "100000": 20000000000000000000000n    // 20,000 PRIVX
+      "100":    500000000000000000000n,
+      "1000":   2000000000000000000000n,
+      "10000":  7000000000000000000000n,
+      "100000": 20000000000000000000000n
     };
 
     const WASM_URL   = "./circuits/mixer_js/PrivXMixer14.wasm";
-    // ⬇ Update with new IPFS zkey URL after running scripts/build_circuit.sh
     const ZKEY_URL   = "https://amaranth-rear-platypus-218.mypinata.cloud/ipfs/bafybeihp3fonoffw7syxzeryogmxx5vpq3wwjbx4tyatyoub5sgn6fgseq";
     const TREE_LEVELS = 14;
 
     // ─── State ────────────────────────────────────────────────────────────────
     let web3, userAccount, selectedDenomination;
-    let poseidonFn = null; // set during init
+    let poseidonFn = null;
 
-    // ─── Poseidon (standard circomlib – matches on-chain Hasher and circuit) ──
+    // ─── Poseidon ─────────────────────────────────────────────────────────────
     async function initPoseidon() {
       const lib = await circomlibjs.buildPoseidon();
       poseidonFn = (...inputs) => lib.F.toObject(lib(inputs.map(x => BigInt(x))));
@@ -227,7 +451,7 @@
       const pathIndices = [];
       let idx = leafIndex;
       for (let lvl = 0; lvl < TREE_LEVELS; lvl++) {
-        siblings.push(tree[lvl][idx ^ 1].toString());  // decimal string for circuit
+        siblings.push(tree[lvl][idx ^ 1].toString());
         pathIndices.push(idx & 1);
         idx >>= 1;
       }
@@ -239,11 +463,8 @@
 
       if (localRoot.toLowerCase() !== onChainRoot.toLowerCase()) {
         throw new Error(
-          "Merkle root mismatch.\n" +
-          "Local: "    + localRoot + "\n" +
-          "On-chain: " + onChainRoot + "\n\n" +
-          "This usually means the contract was deployed with a different tree depth (LEVELS). " +
-          "Check that TREE_LEVELS=" + TREE_LEVELS + " matches the deployed contract."
+          "Merkle root mismatch.\nLocal: " + localRoot + "\nOn-chain: " + onChainRoot +
+          "\n\nThis usually means the contract was deployed with a different tree depth."
         );
       }
       return { pathIndices, siblings, proofRoot: root };
@@ -258,7 +479,6 @@
       btn.disabled = true;
       btn.textContent = "Generating Note...";
       try {
-        // 31 bytes keeps values safely inside the BN128 field (< 2^248 < prime)
         const nullifierBytes = crypto.getRandomValues(new Uint8Array(31));
         const secretBytes    = crypto.getRandomValues(new Uint8Array(31));
         const nullifierHex   = [...nullifierBytes].map(b => b.toString(16).padStart(2, "0")).join("");
@@ -266,7 +486,6 @@
 
         const nullifier    = BigInt("0x" + nullifierHex);
         const secret       = BigInt("0x" + secretHex);
-        // commitment = Poseidon(nullifier, secret) — must match circuit
         const commitmentBI = poseidonFn(nullifier, secret);
         const commitment   = "0x" + commitmentBI.toString(16).padStart(64, "0");
         const note         = `privx-hurricane-${selectedDenomination}-${nullifierHex}-${secretHex}`;
@@ -279,20 +498,18 @@
         const shieldAddr = SHIELD_CONTRACTS[selectedDenomination];
 
         if (!shieldAddr || shieldAddr === "DEPLOY_FIRST")
-          throw new Error("Contracts not yet deployed. Run scripts/deploy.js first.");
+          throw new Error("Contracts not yet deployed.");
 
         const privxContract  = new web3.eth.Contract(ERC20_ABI, PRIVX_TOKEN);
         const assetContract  = new web3.eth.Contract(ERC20_ABI, PSUNDAI_TOKEN);
         const shieldContract = new web3.eth.Contract(SHIELD_ABI, shieldAddr);
 
-        // Approve pSunDAI (the shielded asset)
         const assetAllowance = await assetContract.methods.allowance(userAccount, shieldAddr).call();
         if (BigInt(assetAllowance) < denomWei) {
           btn.textContent = "Approving pSunDAI...";
           await assetContract.methods.approve(shieldAddr, denomWei.toString()).send({ from: userAccount });
         }
 
-        // Approve PRIVX (the protocol fee)
         const privxAllowance = await privxContract.methods.allowance(userAccount, shieldAddr).call();
         if (BigInt(privxAllowance) < feeWei) {
           btn.textContent = "Approving PRIVX fee...";
@@ -318,7 +535,6 @@
       if (!userAccount) return alert("Connect wallet first");
       if (!poseidonFn)  return alert("Poseidon not ready – wait a moment and try again");
 
-      // Note format: privx-hurricane-<amount>-<62-64 hex nullifier>-<62-64 hex secret>
       const match = noteInput.match(/^privx-hurricane-(\d+)-([a-fA-F0-9]{62,64})-([a-fA-F0-9]{62,64})$/);
       if (!match) return alert("Invalid note format.\nExpected: privx-hurricane-<amount>-<nullifier>-<secret>");
 
@@ -328,14 +544,12 @@
 
       const nullifier    = BigInt("0x" + nullifierHex);
       const secret       = BigInt("0x" + secretHex);
-      // Must use the same Poseidon as the circuit uses
       const commitment    = poseidonFn(nullifier, secret);
-      const nullifierHash = poseidonFn(nullifier, denomWei); // denomination in wei, matching contract
+      const nullifierHash = poseidonFn(nullifier, denomWei);
 
       const shieldAddr = SHIELD_CONTRACTS[denomStr];
       const shield     = new web3.eth.Contract(SHIELD_ABI, shieldAddr);
 
-      // Build Merkle proof (fix: store proofRoot outside try block)
       let pathIndices, siblings, proofRoot;
       try {
         const mp = await getMerkleProof(shield, commitment);
@@ -346,14 +560,13 @@
         return alert("Merkle proof failed:\n" + e.message);
       }
 
-      // Circuit inputs — all values as decimal strings; snarkjs handles conversion
       const circuitInput = {
         nullifier:     nullifier.toString(),
         secret:        secret.toString(),
         pathIndices:   pathIndices.map(String),
-        siblings:      siblings,             // already decimal strings from getMerkleProof
-        root:          proofRoot.toString(), // decimal string
-        denomination:  denomWei.toString(),  // wei value – must match contract’s denomination
+        siblings:      siblings,
+        root:          proofRoot.toString(),
+        denomination:  denomWei.toString(),
         nullifierHash: nullifierHash.toString()
       };
 
@@ -365,16 +578,10 @@
 
       try {
         const { proof: zkProof, publicSignals } = await snarkjs.plonk.fullProve(
-          circuitInput,
-          WASM_URL,
-          ZKEY_URL
+          circuitInput, WASM_URL, ZKEY_URL
         );
 
         console.log("Public signals:", publicSignals);
-        // Expected order: [root, nullifierHash, denomination]
-        console.log("Expected root:        ", proofRoot.toString());
-        console.log("Expected nullifierHash:", nullifierHash.toString());
-        console.log("Expected denomination: ", denomWei.toString());
 
         const calldata  = await snarkjs.plonk.exportSolidityCallData(zkProof, publicSignals);
         const argv      = calldata.replace(/["[\]\s]/g, "").split(",").filter(Boolean);
@@ -390,7 +597,7 @@
         alert("Withdrawal failed: " + (err.message || "Check browser console for details"));
       } finally {
         btn.disabled = false;
-        btn.textContent = "Generate Proof + Withdraw";
+        btn.textContent = "Generate ZK Proof + Withdraw";
       }
     }
 
@@ -420,8 +627,10 @@
         document.getElementById("walletButton").classList.add("connected");
         updateDepositButton();
         updateBurnedBalance();
+        loadVaultBalance();
       } catch (err) {
-        alert("Connection failed");
+        console.error("Wallet connection error:", err);
+        alert("Connection failed: " + (err.message || "Check MetaMask"));
       }
     }
 
@@ -431,28 +640,28 @@
 
     // ─── UI Helpers ───────────────────────────────────────────────────────────
     function switchTab(tab) {
-      document.getElementById(‘depositTab’).classList.toggle(‘hidden’, tab !== ‘deposit’);
-      document.getElementById(‘withdrawTab’).classList.toggle(‘hidden’, tab !== ‘withdraw’);
-      document.getElementById(‘depositTabBtn’).classList.toggle(‘active’, tab === ‘deposit’);
-      document.getElementById(‘withdrawTabBtn’).classList.toggle(‘active’, tab === ‘withdraw’);
+      document.getElementById('depositTab').classList.toggle('hidden', tab !== 'deposit');
+      document.getElementById('withdrawTab').classList.toggle('hidden', tab !== 'withdraw');
+      document.getElementById('depositTabBtn').classList.toggle('active', tab === 'deposit');
+      document.getElementById('withdrawTabBtn').classList.toggle('active', tab === 'withdraw');
     }
 
     function selectDenomination(denom) {
       selectedDenomination = denom;
-      document.querySelectorAll(‘.denomination-card’).forEach(c => c.classList.remove(‘selected’));
-      event.target.closest(‘.denomination-card’).classList.add(‘selected’);
+      document.querySelectorAll('.denomination-card').forEach(c => c.classList.remove('selected'));
+      event.target.closest('.denomination-card').classList.add('selected');
       updateDepositButton();
     }
 
     function updateDepositButton() {
-      const btn = document.getElementById(‘depositBtn’);
-      if (!userAccount)          { btn.textContent = "Connect Wallet First"; btn.disabled = true; }
+      const btn = document.getElementById('depositBtn');
+      if (!userAccount)               { btn.textContent = "Connect Wallet First"; btn.disabled = true; }
       else if (!selectedDenomination) { btn.textContent = "Select Denomination";  btn.disabled = true; }
-      else                       { btn.textContent = `Shield ${selectedDenomination} pSunDAI`; btn.disabled = false; }
+      else                            { btn.textContent = `Shield ${selectedDenomination} pSunDAI`; btn.disabled = false; }
     }
 
     function copyNote() {
-      navigator.clipboard.writeText(document.getElementById(‘noteText’).textContent);
+      navigator.clipboard.writeText(document.getElementById('noteText').textContent);
       alert("Note copied to clipboard!");
     }
 
@@ -465,9 +674,9 @@
           token.methods.balanceOf("0x000000000000000000000000000000000000dEaD").call(),
           token.methods.balanceOf("0x0000000000000000000000000000000000000369").call()
         ]);
-        const total  = BigInt(dead) + BigInt(fire);
-        const num    = Number(total / 10n ** 18n);
-        el.innerHTML = `<strong>${num.toLocaleString()}</strong> PRIVX burned`;
+        const total = BigInt(dead) + BigInt(fire);
+        const num   = Number(total / 10n ** 18n);
+        el.innerHTML = `<strong>${num.toLocaleString()}</strong> PRIVX`;
       } catch (err) {
         el.textContent = "Error";
       }
@@ -477,9 +686,8 @@
       const el = document.getElementById("vaultBalance");
       if (!el || !web3) return;
       try {
-        const VAULT = "0x6fBd619538948e134b508e8954e120e99f7999a2";
         const token = new web3.eth.Contract(ERC20_ABI, PRIVX_TOKEN);
-        const bal   = await token.methods.balanceOf(VAULT).call();
+        const bal   = await token.methods.balanceOf(VAULT_ADDRESS).call();
         const num   = Number(BigInt(bal) / 10n ** 18n);
         el.textContent = num.toLocaleString();
       } catch (err) {
@@ -488,22 +696,21 @@
     }
 
     // ─── Init ─────────────────────────────────────────────────────────────────
-    window.addEventListener(‘load’, async () => {
+    window.addEventListener('load', async () => {
       document.getElementById("walletButton").onclick = toggleWallet;
-      document.getElementById(‘depositBtn’).onclick   = deposit;
-      document.getElementById(‘withdrawBtn’).onclick  = withdraw;
-      document.getElementById(‘depositTabBtn’).addEventListener(‘click’, () => switchTab(‘deposit’));
-      document.getElementById(‘withdrawTabBtn’).addEventListener(‘click’, () => switchTab(‘withdraw’));
-      switchTab(‘deposit’);
+      document.getElementById('depositBtn').onclick   = deposit;
+      document.getElementById('withdrawBtn').onclick  = withdraw;
+      document.getElementById('depositTabBtn').addEventListener('click', () => switchTab('deposit'));
+      document.getElementById('withdrawTabBtn').addEventListener('click', () => switchTab('withdraw'));
+      switchTab('deposit');
       updateDepositButton();
 
-      // Initialize Poseidon from circomlibjs (same constants as circuit + on-chain hasher)
       try {
         await initPoseidon();
-        console.log("✅ PrivX Hurricane ready – Poseidon initialized");
+        console.log("✅ PrivX Hurricane ready");
       } catch (e) {
         console.error("Failed to init Poseidon:", e);
-        alert("Warning: Poseidon failed to initialize. ZK proofs will not work until the page reloads.\n\n" + e.message);
+        alert("Warning: Poseidon failed to initialize. ZK proofs will not work.\n\n" + e.message);
       }
 
       setInterval(updateBurnedBalance, 30000);
