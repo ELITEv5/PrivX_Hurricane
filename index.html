@@ -848,6 +848,7 @@
 
         const recipient = document.getElementById("recipientAddress").value.trim() || userAccount;
         const tx = await shieldContract.methods.withdraw(proofArr, pubSigArr, recipient).send({ from: userAccount });
+        if (!tx.status) throw new Error("Transaction reverted on-chain.\nTX: " + tx.transactionHash + "\n\nCheck the transaction on scan.pulsechain.com for the revert reason.");
         alert(`Withdrawal successful!\nTX: ${tx.transactionHash}\nFunds + mining reward sent to: ${recipient}`);
 
       } catch (err) {
