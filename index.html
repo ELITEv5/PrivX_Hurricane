@@ -842,9 +842,7 @@
         console.log("Public signals:", publicSignals);
 
         const calldata  = await snarkjs.plonk.exportSolidityCallData(zkProof, publicSignals);
-        console.log("Raw calldata:", calldata);
-        const argv      = calldata.replace(/["[\]\s]/g, "").split(",").filter(Boolean);
-        console.log("Parsed argv:", argv);
+        const argv      = calldata.replace(/\]\s*\[/g, ",").replace(/["[\]\s]/g, "").split(",").filter(Boolean);
         const proofArr  = argv.slice(0, 24);
         const pubSigArr = argv.slice(24, 27);
 
