@@ -187,11 +187,11 @@
       <!-- Vault Stats -->
       <div class="vault-row" style="margin-top:28px">
         <div class="vault-display">
-          <div class="vault-label">⛏️ POP Mining Vault</div>
+          <div class="vault-label">POP Mining Vault</div>
           <div class="vault-val"><span id="vaultBalance">—</span> PRIVX</div>
         </div>
         <div class="vault-display">
-          <div class="vault-label">🔥 Total PRIVX Burned</div>
+          <div class="vault-label">Total PRIVX Burned</div>
           <div class="vault-val"><span id="burnedBalance">—</span></div>
         </div>
       </div>
@@ -199,13 +199,13 @@
 
     <!-- ── How It Works ── -->
     <div class="info-card">
-      <h2>⚡ How It Works</h2>
+      <h2>How It Works</h2>
       <div class="steps">
         <div class="step">
           <div class="step-num">1</div>
           <div class="step-body">
             <strong>Get what you need</strong>
-            <p>You need <strong style="color:#fff">pSunDAI</strong> (the stablecoin being shielded) and <strong style="color:#fff">PRIVX</strong> (the protocol fee token). Both are on PulseChain. Connect MetaMask to PulseChain and make sure you have PLS for gas.</p>
+            <p>You need <strong style="color:#fff">pSunDAI</strong> (an Autonomous Stable Asset, or ASA, native to PulseChain) and <strong style="color:#fff">PRIVX</strong> (the protocol fee token). Both are on PulseChain. Connect MetaMask to PulseChain and make sure you have a small amount of PLS for gas fees.</p>
           </div>
         </div>
         <div class="step">
@@ -246,11 +246,11 @@
       </div>
 
       <div style="margin-top:28px">
-        <h2 style="margin-bottom:16px">🎒 What You Need</h2>
+        <h2 style="margin-bottom:16px">What You Need</h2>
         <div class="needs-grid">
           <div class="need-card">
             <strong>pSunDAI</strong>
-            <p>The stablecoin being shielded. This is what you deposit and receive back on withdrawal.</p>
+            <p>pSunDAI is an Autonomous Stable Asset (ASA) on PulseChain. This is what you deposit into the shield and receive back when you withdraw.</p>
           </div>
           <div class="need-card">
             <strong>PRIVX</strong>
@@ -268,7 +268,7 @@
       </div>
 
       <div class="warning-box" style="margin-top:24px">
-        <strong>⚠️ Security Tips for Maximum Privacy</strong>
+        <strong>Security Tips for Maximum Privacy</strong>
         • Never deposit and withdraw from the same wallet address<br>
         • Use a VPN or Tor when withdrawing<br>
         • Wait for other deposits before withdrawing<br>
@@ -279,31 +279,27 @@
 
     <!-- ── PRIVX Token ── -->
     <div class="info-card">
-      <h2>🔥 The PRIVX Token <span class="pop-badge">POP</span></h2>
+      <h2>The PRIVX Token <span class="pop-badge">POP</span></h2>
       <p style="color:#aaa;font-size:14px;line-height:1.7;margin-bottom:16px">PRIVX is the protocol token of the PrivX Hurricane Shield. It is not a governance token, not a utility token, and not a security. It is a <strong style="color:#fff">Proof-of-Privacy mining token</strong> — earned by using the protocol and deflationary by design.</p>
       <div class="privx-mechanic">
         <div class="mechanic-row">
-          <div class="mechanic-icon">🔥</div>
-          <p><strong>80% of every deposit fee is burned forever.</strong> PRIVX supply decreases with every shield deposit. 21 million total supply, no minting.</p>
+          <p><strong>80% of every deposit fee is burned forever.</strong> PRIVX supply decreases with every shield deposit. Fixed supply of 21 million — no minting ever.</p>
         </div>
         <div class="mechanic-row">
-          <div class="mechanic-icon">⛏️</div>
-          <p><strong>Mine PRIVX by generating a Proof of Privacy (POP).</strong> Every successful withdrawal produces a POP — a zero-knowledge proof of a valid shielded note — and triggers a PRIVX reward from the mining vault. Early miners earn the most.</p>
+          <p><strong>Mine PRIVX by generating a Proof of Privacy (POP).</strong> Every successful withdrawal produces a POP — a zero-knowledge proof that you own a valid shielded note — and triggers a PRIVX reward from the mining vault. Early miners earn the most.</p>
         </div>
         <div class="mechanic-row">
-          <div class="mechanic-icon">📉</div>
-          <p><strong>Emission decays as the vault drains.</strong> The reward rate drops quadratically as PRIVX is paid out. Refilling the vault resets the curve upward.</p>
+          <p><strong>Rewards decay as the vault drains.</strong> The reward rate drops quadratically as PRIVX is paid out. Anyone can refill the vault by calling topUp(), which resets the reward curve upward.</p>
         </div>
         <div class="mechanic-row">
-          <div class="mechanic-icon">🏛️</div>
-          <p><strong>No dev wallet.</strong> The development team holds PRIVX and benefits from the burn mechanism — not from a fee stream. There is no admin key, no upgradeable proxy, no multisig.</p>
+          <p><strong>No dev fee stream.</strong> The development team holds PRIVX and benefits as the protocol grows through the burn mechanism — not from a cut of each transaction. There is no admin key, no upgradeable proxy, no multisig.</p>
         </div>
       </div>
     </div>
 
     <!-- ── Why Privacy Matters ── -->
     <div class="info-card">
-      <h2>🛡️ Why Financial Privacy Matters</h2>
+      <h2>Why Financial Privacy Matters</h2>
 
       <div class="philosophy-block">
         <h3>Privacy is a fundamental human right</h3>
@@ -317,7 +313,7 @@
 
       <div class="philosophy-block">
         <h3>Privacy is not crime</h3>
-        <p>Cash has been private for thousands of years. When you pay for groceries with a $20 bill, no one records your identity, the time, or your balance. That privacy is not suspicious — it is normal. Using a privacy shield to send stablecoins is the digital equivalent of using cash. The existence of a privacy tool does not imply wrongdoing any more than owning curtains implies criminality.</p>
+        <p>Cash has been private for thousands of years. When you pay for groceries with a $20 bill, no one records your identity, the time, or your balance. That privacy is not suspicious — it is normal. Using a privacy shield to send a Stable Asset is the digital equivalent of using cash. The existence of a privacy tool does not imply wrongdoing any more than owning curtains implies criminality.</p>
       </div>
 
       <div class="philosophy-block">
@@ -333,7 +329,7 @@
 
     <!-- ── FAQ ── -->
     <div class="info-card">
-      <h2>❓ FAQ</h2>
+      <h2>FAQ</h2>
       <div class="faq">
         <details class="faq-item">
           <summary>Is my note stored anywhere?</summary>
@@ -368,7 +364,7 @@
 
     <!-- ── Buy PRIVX ── -->
     <div class="info-card" id="buy-privx">
-      <h2>💜 Buy PRIVX</h2>
+      <h2>Buy PRIVX</h2>
       <p style="color:#aaa;font-size:14px;line-height:1.7;margin-bottom:16px">
         PRIVX is the Proof of Privacy <span class="pop-badge">POP</span> mining token. It is required to deposit into any shield and is earned back on every withdrawal. With a fixed supply of 21 million and 80% of every fee burned permanently, early participants accumulate PRIVX at the lowest prices.
       </p>
@@ -401,7 +397,7 @@
 
     <!-- ── Contracts ── -->
     <div class="info-card">
-      <h2>📜 Verified Contracts</h2>
+      <h2>Verified Contracts</h2>
       <p style="color:#aaa;font-size:14px;line-height:1.6;margin-bottom:16px">All contracts are immutable and unowned. No admin keys, no upgrade proxies, no pause functions. The code is the law.</p>
       <table class="contract-table">
         <tr>
@@ -636,7 +632,7 @@
 
         btn.textContent = "Depositing...";
         const tx = await shieldContract.methods.deposit(commitment).send({ from: userAccount });
-        alert(`✅ Deposit successful!\nTX: ${tx.transactionHash}\n\n💾 SAVE YOUR NOTE – it is the only way to recover funds!`);
+        alert(`Deposit successful!\nTX: ${tx.transactionHash}\n\nSAVE YOUR NOTE — it is the only way to recover your funds.`);
       } catch (err) {
         console.error("Deposit error:", err);
         alert("Deposit failed: " + (err.message || "Check MetaMask / PRIVX balance"));
@@ -708,7 +704,7 @@
 
         const recipient = document.getElementById("recipientAddress").value.trim() || userAccount;
         const tx = await shield.methods.withdraw(proofArr, pubSigArr, recipient).send({ from: userAccount });
-        alert(`🎉 Withdrawal successful!\nTX: ${tx.transactionHash}\nFunds + reward → ${recipient}`);
+        alert(`Withdrawal successful!\nTX: ${tx.transactionHash}\nFunds + mining reward sent to: ${recipient}`);
 
       } catch (err) {
         console.error("Withdraw failed:", err);
@@ -843,7 +839,7 @@
 
       try {
         await initPoseidon();
-        console.log("✅ PrivX Hurricane ready");
+        console.log("PrivX Hurricane ready");
       } catch (e) {
         console.error("Failed to init Poseidon:", e);
         alert("Warning: Poseidon failed to initialize. ZK proofs will not work.\n\n" + e.message);
