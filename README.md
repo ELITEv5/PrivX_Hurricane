@@ -2,7 +2,7 @@
 
 > Zero-knowledge token shielding on PulseChain. Shield tokens. Generate a Proof of Privacy. Mine PRIVX.
 
-**Live:** [elitev5.github.io/plonk-zk](https://elitev5.github.io/plonk-zk) &nbsp;·&nbsp; **Chain:** PulseChain (chainId 369)
+**Live:** [Hurricane Shield]([https://elitev5.github.io/plonk-zk](https://elitev5.github.io/PrivX_Hurricane/index.html)) &nbsp;·&nbsp; **Chain:** PulseChain (chainId 369)
 
 ---
 
