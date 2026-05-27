@@ -45,7 +45,7 @@ One contract per token per denomination. Fully immutable after deployment — no
 - **Root history:** Last 100 roots stored, allowing ~100 concurrent pending withdrawals
 - **Circuit:** `PrivXMixer(14)` — PLONK proof with public signals `[root, nullifierHash, denomination]`
 - **Fee model:** 0.5% of denomination in the shielded token, sent to FeeVault on deposit
-- **POP rewards:** `mineReward()` called on Mining Vault V2 on every successful withdrawal
+- **POP rewards:** `mineReward()` called on Mining Vault on every successful withdrawal
 
 ### Fee Vault (`PrivX_FeeVault.sol`)
 
@@ -66,9 +66,9 @@ Fee token accumulated → swap to WPLS (PulseX V2)
 - Mining Vault is auto-refilled from conversions — POP rewards are self-sustaining
 - Supports any ERC-20 fee token; PRIVX and WPLS have optimised paths
 
-### Mining Vault V2 (`PrivX_Mining_Vault_V2.sol`)
+### Mining Vault (`PrivX_Mining_Vault_V2.sol`)
 
-Pays PRIVX rewards to withdrawal recipients. Sealed after shield registration — no new shields can be added without deploying a new vault.
+Pays PRIVX rewards to withdrawal recipients. Sealed after shield registration.
 
 - **Emission curve:** Quadratic decay relative to peak balance — rewards are highest when vault is full
 - **Auto-refill:** Fee Vault calls `topUp()` on every conversion cycle
@@ -101,26 +101,16 @@ The circuit binds `nullifierHash` to the denomination, so a note from one shield
 | Poseidon Hasher | [`0x72740d65A93f2e9d9741234371d62FeE36AEf9dF`](https://scan.pulsechain.com/address/0x72740d65A93f2e9d9741234371d62FeE36AEf9dF) |
 | PRIVX Token | [`0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986`](https://scan.pulsechain.com/address/0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986) |
 
-### PRIVX Shield (live)
+### PRIVX Shield
 
 | Contract | Address |
 |---|---|
-| Mining Vault V2 | [`0x096540908D8bb7d00546e750a227f53D9E7bdFAF`](https://scan.pulsechain.com/address/0x096540908D8bb7d00546e750a227f53D9E7bdFAF) |
+| Mining Vault | [`0x096540908D8bb7d00546e750a227f53D9E7bdFAF`](https://scan.pulsechain.com/address/0x096540908D8bb7d00546e750a227f53D9E7bdFAF) |
 | Fee Vault | [`0x35719658D396a551d98ce2C7BaE66541CEAE0Cbd`](https://scan.pulsechain.com/address/0x35719658D396a551d98ce2C7BaE66541CEAE0Cbd) |
 | Shield · 100 PRIVX | [`0x3872605025f0cfF24C0e40B6Fb61bA064fe300F8`](https://scan.pulsechain.com/address/0x3872605025f0cfF24C0e40B6Fb61bA064fe300F8) |
 | Shield · 1,000 PRIVX | [`0x4f8009c8756a7149cc553Fedd59dF8036Ca46847`](https://scan.pulsechain.com/address/0x4f8009c8756a7149cc553Fedd59dF8036Ca46847) |
 | Shield · 10,000 PRIVX | [`0x67e6c3E1301e31B456f94348480a9BC54e7e5082`](https://scan.pulsechain.com/address/0x67e6c3E1301e31B456f94348480a9BC54e7e5082) |
 | Shield · 100,000 PRIVX | [`0xD8a1339B91aCADe52f65211f63085B9b5C1EFcF0`](https://scan.pulsechain.com/address/0xD8a1339B91aCADe52f65211f63085B9b5C1EFcF0) |
-
-### pSunDAI Shield (legacy — withdrawals only)
-
-| Contract | Address |
-|---|---|
-| Mining Vault (legacy) | [`0x81E13A4c8C49e11C022eddC5C330F89c012A6360`](https://scan.pulsechain.com/address/0x81E13A4c8C49e11C022eddC5C330F89c012A6360) |
-| Shield · 100 pSunDAI | [`0xb2435E52De257408A3954a2F775116C020b61683`](https://scan.pulsechain.com/address/0xb2435E52De257408A3954a2F775116C020b61683) |
-| Shield · 1,000 pSunDAI | [`0x67a2ca4ce9FEd0A4c1e5bD7CdC90C341F0D9a061`](https://scan.pulsechain.com/address/0x67a2ca4ce9FEd0A4c1e5bD7CdC90C341F0D9a061) |
-| Shield · 10,000 pSunDAI | [`0xD8B80E8A90c6b2C681940F69B75A64547d1bF721`](https://scan.pulsechain.com/address/0xD8B80E8A90c6b2C681940F69B75A64547d1bF721) |
-| Shield · 100,000 pSunDAI | [`0xc9D4Ac9EDA1835E9563E33aF90586FD7b938A531`](https://scan.pulsechain.com/address/0xc9D4Ac9EDA1835E9563E33aF90586FD7b938A531) |
 
 ---
 
@@ -142,7 +132,7 @@ Shield deposit (any token)
           (80% POL)   (10% POP)   (10% 🔥)
 ```
 
-Every token shielded — PRIVX, pSunDAI, or any future token — creates buying pressure on PRIVX, deepens its liquidity permanently, and funds mining rewards. The protocol gets stronger the more it is used.
+Every token shielded creates buying pressure on PRIVX, deepens its liquidity permanently, and funds mining rewards. The protocol gets stronger the more it is used.
 
 **POP Rewards:**
 - Paid automatically on every withdrawal — no claim needed
@@ -180,8 +170,7 @@ plonk-zk/
 ├── contracts/
 │   ├── PrivX_Shield.sol           # Universal shield (any ERC-20)
 │   ├── PrivX_FeeVault.sol         # Fee conversion → POL + rewards + burn
-│   ├── PrivX_Mining_Vault_V2.sol  # POP reward distributor
-│   └── PrivX_pSunDAI_Shield.sol   # Legacy pSunDAI shield (reference)
+│   └── PrivX_Mining_Vault_V2.sol  # POP reward distributor
 ├── index.html                     # Single-file dapp (no build step)
 └── privx-shield.png               # Logo
 ```
