@@ -97,7 +97,7 @@ The circuit binds `nullifierHash` to the denomination, so a note from one shield
 
 | Contract | Address |
 |---|---|
-| PLONK Verifier | [`0x67E1Ab04F6999Acd9F7FC33228e0D435eEFfF527`](https://scan.pulsechain.com/address/0x67E1Ab04F6999Acd9F7FC33228e0D435eEFfF527) |
+| PLONK Verifier | [`0xcEDa1071542d537221B5a01BFd1cF920cF8B9829`](https://scan.pulsechain.com/address/0xcEDa1071542d537221B5a01BFd1cF920cF8B9829) |
 | Poseidon Hasher | [`0x72740d65A93f2e9d9741234371d62FeE36AEf9dF`](https://scan.pulsechain.com/address/0x72740d65A93f2e9d9741234371d62FeE36AEf9dF) |
 | PRIVX Token | [`0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986`](https://scan.pulsechain.com/address/0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986) |
 
@@ -105,12 +105,12 @@ The circuit binds `nullifierHash` to the denomination, so a note from one shield
 
 | Contract | Address |
 |---|---|
-| Mining Vault | [`0x096540908D8bb7d00546e750a227f53D9E7bdFAF`](https://scan.pulsechain.com/address/0x096540908D8bb7d00546e750a227f53D9E7bdFAF) |
-| Fee Vault | [`0x35719658D396a551d98ce2C7BaE66541CEAE0Cbd`](https://scan.pulsechain.com/address/0x35719658D396a551d98ce2C7BaE66541CEAE0Cbd) |
-| Shield · 100 PRIVX | [`0x3872605025f0cfF24C0e40B6Fb61bA064fe300F8`](https://scan.pulsechain.com/address/0x3872605025f0cfF24C0e40B6Fb61bA064fe300F8) |
-| Shield · 1,000 PRIVX | [`0x4f8009c8756a7149cc553Fedd59dF8036Ca46847`](https://scan.pulsechain.com/address/0x4f8009c8756a7149cc553Fedd59dF8036Ca46847) |
-| Shield · 10,000 PRIVX | [`0x67e6c3E1301e31B456f94348480a9BC54e7e5082`](https://scan.pulsechain.com/address/0x67e6c3E1301e31B456f94348480a9BC54e7e5082) |
-| Shield · 100,000 PRIVX | [`0xD8a1339B91aCADe52f65211f63085B9b5C1EFcF0`](https://scan.pulsechain.com/address/0xD8a1339B91aCADe52f65211f63085B9b5C1EFcF0) |
+| Mining Vault | [`0x925D32ff834285E0faefFBAc83Fc641A71660057`](https://scan.pulsechain.com/address/0x925D32ff834285E0faefFBAc83Fc641A71660057) |
+| Fee Vault | [`0xBfa76b6961600331BA83F409789ddA36183F09Bf`](https://scan.pulsechain.com/address/0xBfa76b6961600331BA83F409789ddA36183F09Bf) |
+| Shield · 100 PRIVX | [`0x1e06B9A5D519241809701eD29142ef01dDfc9288`](https://scan.pulsechain.com/address/0x1e06B9A5D519241809701eD29142ef01dDfc9288) |
+| Shield · 1,000 PRIVX | [`0x6aCC2D19b6cCe5FbeF91AF97e18592B215280161`](https://scan.pulsechain.com/address/0x6aCC2D19b6cCe5FbeF91AF97e18592B215280161) |
+| Shield · 10,000 PRIVX | [`0xb2Ef8c01BcC3f5B39d2648d598b90ed98E3cb9Cb`](https://scan.pulsechain.com/address/0xb2Ef8c01BcC3f5B39d2648d598b90ed98E3cb9Cb) |
+| Shield · 100,000 PRIVX | [`0xaa2E70cE38C40e07d529b9656124c96eA26197Be`](https://scan.pulsechain.com/address/0xaa2E70cE38C40e07d529b9656124c96eA26197Be) |
 
 ---
 
