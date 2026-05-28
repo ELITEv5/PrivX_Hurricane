@@ -158,6 +158,7 @@
     <a href="https://elitev5.github.io/Sun-Systems/" target="_blank" class="nav-link">☀️ Sun Systems Protocol</a>
     <a href="#" onclick="openDocsModal();return false;" class="nav-link">📄 Protocol Docs</a>
     <a href="#" onclick="openFeeVaultModal();return false;" class="nav-link">⚡ Fee Vault</a>
+    <a href="#" onclick="openMiningVaultModal();return false;" class="nav-link">⛏ Mining Vault</a>
     <a href="#buy-privx" class="nav-link">Buy PRIVX</a>
   </div>
 
@@ -742,6 +743,53 @@ Constraints:
     </div>
   </div>
 
+  <!-- ── Mining Vault Modal ─────────────────────────────────────────────────── -->
+  <div id="miningVaultModal" class="modal-overlay hidden" onclick="if(event.target===this)closeMiningVaultModal()">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeMiningVaultModal()">✕</button>
+
+      <div class="docs-h1">⛏ Mining Vault</div>
+      <p class="docs-p" style="margin-bottom:6px">Pays PRIVX POP rewards on every withdrawal. Anyone can top up the vault — the more PRIVX inside, the higher the reward rate. Rewards decay quadratically as the vault drains and auto-refill from Fee Vault conversions.</p>
+      <div style="margin-bottom:20px">
+        <a href="https://scan.pulsechain.com/address/0x925D32ff834285E0faefFBAc83Fc641A71660057" target="_blank" style="color:#555;font-size:11px;font-family:monospace;text-decoration:none">0x925D32ff834285E0faefFBAc83Fc641A71660057 ↗</a>
+      </div>
+
+      <div class="fv-grid">
+        <div class="fv-stat">
+          <div class="fv-slabel">Vault Balance</div>
+          <div class="fv-sval" id="mvBalance">—</div>
+        </div>
+        <div class="fv-stat">
+          <div class="fv-slabel">Peak Balance</div>
+          <div class="fv-sval" id="mvPeak">—</div>
+        </div>
+        <div class="fv-stat">
+          <div class="fv-slabel">Current Reward Rate</div>
+          <div class="fv-sval" id="mvRate">—</div>
+        </div>
+        <div class="fv-stat">
+          <div class="fv-slabel">Total PRIVX Mined</div>
+          <div class="fv-sval" id="mvTotalMined">—</div>
+        </div>
+      </div>
+
+      <button class="button" style="margin-bottom:24px;background:rgba(138,43,226,0.15);border:1px solid var(--primary);font-size:14px;padding:13px;box-shadow:none" onclick="loadMiningVaultStats()">↻ Refresh Stats</button>
+
+      <div class="docs-h2" style="margin-top:0">Top Up Vault</div>
+      <p class="docs-p">Send PRIVX to the vault to increase POP rewards. Requires PRIVX approval. Anyone can top up — the community can contribute to reward sustainability.</p>
+
+      <label style="display:block;color:#888;font-size:12px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;margin-top:16px">Amount (PRIVX)</label>
+      <input class="fv-input" id="mvTopUpAmount" type="number" min="1" placeholder="e.g. 1000">
+
+      <button class="button" id="mvTopUpBtn" onclick="triggerTopUp()" style="margin-top:16px">Top Up Mining Vault</button>
+
+      <div class="warning-box" style="margin-top:16px;font-size:13px">
+        <strong>Reward formula</strong>
+        Rate = BASE_RATE × (balance / peakBalance)² — quadratic decay. A full vault pays the maximum rate (~1% of fee per withdrawal). As the vault drains, rewards decrease. Fee Vault conversions automatically refill it.
+      </div>
+    </div>
+  </div>
+
   <!-- Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/snarkjs@0.7.4/build/snarkjs.min.js"></script>
@@ -965,6 +1013,83 @@ Constraints:
       } finally {
         btn.disabled = false;
         btn.textContent = "Convert Fees → PRIVX POL + Vault + Burn";
+      }
+    }
+
+    // ─── Mining Vault ─────────────────────────────────────────────────────────
+    const MINING_VAULT_ADDRESS = "0x925D32ff834285E0faefFBAc83Fc641A71660057";
+    const MINING_VAULT_ABI = [
+      { inputs: [], name: "vaultBalance",
+        outputs: [{ name: "", type: "uint256" }], stateMutability: "view", type: "function" },
+      { inputs: [], name: "peakBalance",
+        outputs: [{ name: "", type: "uint256" }], stateMutability: "view", type: "function" },
+      { inputs: [], name: "currentRateBp",
+        outputs: [{ name: "", type: "uint256" }], stateMutability: "view", type: "function" },
+      { inputs: [], name: "totalMined",
+        outputs: [{ name: "", type: "uint256" }], stateMutability: "view", type: "function" },
+      { inputs: [{ name: "_amount", type: "uint256" }],
+        name: "topUp", outputs: [], stateMutability: "nonpayable", type: "function" }
+    ];
+
+    function openMiningVaultModal() {
+      document.getElementById('miningVaultModal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      loadMiningVaultStats();
+    }
+    function closeMiningVaultModal() {
+      document.getElementById('miningVaultModal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    async function loadMiningVaultStats() {
+      const w     = web3 || new Web3("https://rpc.pulsechain.com");
+      const vault = new w.eth.Contract(MINING_VAULT_ABI, MINING_VAULT_ADDRESS);
+      const fmtT  = v => (Math.round(Number(v) / 1e14) / 1e4).toLocaleString(undefined, { maximumFractionDigits: 4 });
+      const set   = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      try {
+        const [bal, peak, rateBp, mined] = await Promise.all([
+          vault.methods.vaultBalance().call(),
+          vault.methods.peakBalance().call(),
+          vault.methods.currentRateBp().call(),
+          vault.methods.totalMined().call()
+        ]);
+        set('mvBalance',    fmtT(bal)   + ' PRIVX');
+        set('mvPeak',       fmtT(peak)  + ' PRIVX');
+        set('mvRate',       (Number(rateBp) / 100).toFixed(2) + '%');
+        set('mvTotalMined', fmtT(mined) + ' PRIVX');
+      } catch (e) {
+        console.error("MiningVault stats error:", e);
+        ['mvBalance','mvPeak','mvRate','mvTotalMined'].forEach(id => set(id, 'Error'));
+      }
+    }
+
+    async function triggerTopUp() {
+      if (!userAccount) return alert("Connect wallet first");
+      const amountFloat = parseFloat(document.getElementById('mvTopUpAmount').value);
+      if (isNaN(amountFloat) || amountFloat <= 0) return alert("Enter a valid PRIVX amount");
+      const amountWei = BigInt(Math.floor(amountFloat * 1e18)).toString();
+
+      const btn = document.getElementById('mvTopUpBtn');
+      btn.disabled = true;
+      try {
+        const privxContract = new web3.eth.Contract(ERC20_ABI, PRIVX_TOKEN);
+        const allowance = await privxContract.methods.allowance(userAccount, MINING_VAULT_ADDRESS).call();
+        if (BigInt(allowance) < BigInt(amountWei)) {
+          btn.textContent = "Approving PRIVX…";
+          await privxContract.methods.approve(MINING_VAULT_ADDRESS, amountWei).send({ from: userAccount });
+        }
+        btn.textContent = "Sending topUp…";
+        const vault = new web3.eth.Contract(MINING_VAULT_ABI, MINING_VAULT_ADDRESS);
+        const tx = await vault.methods.topUp(amountWei).send({ from: userAccount });
+        if (!tx.status) throw new Error("Transaction reverted. TX: " + tx.transactionHash);
+        alert("Top up successful!\nTX: " + tx.transactionHash + "\n\nMining vault refilled. POP rewards are active.");
+        loadMiningVaultStats();
+      } catch (e) {
+        console.error("topUp failed:", e);
+        alert("Top up failed: " + (e.message || "Check browser console"));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Top Up Mining Vault";
       }
     }
 
@@ -1381,7 +1506,7 @@ Constraints:
       switchTab('deposit');
       selectToken('privx');
       updateDepositButton();
-      document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDocsModal(); closeFeeVaultModal(); } });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDocsModal(); closeFeeVaultModal(); closeMiningVaultModal(); } });
 
       try {
         await initPoseidon();
