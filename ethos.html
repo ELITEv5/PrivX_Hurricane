@@ -178,7 +178,6 @@
             <div class="denom-fee"    id="denom-fee-d0">Fee: 0.05 ETHOS (0.5%)</div>
 
             <div class="pool-depth">
-              <div class="pool-count count-none" id="pool-count-d0">—</div>
               <span class="pool-badge" id="pool-badge-d0" style="display:none"></span>
             </div>
           </div>
@@ -188,7 +187,6 @@
             <div class="denom-fee"    id="denom-fee-d1">Fee: 0.5 ETHOS (0.5%)</div>
 
             <div class="pool-depth">
-              <div class="pool-count count-none" id="pool-count-d1">—</div>
               <span class="pool-badge" id="pool-badge-d1" style="display:none"></span>
             </div>
           </div>
@@ -198,7 +196,6 @@
             <div class="denom-fee"    id="denom-fee-d2">Fee: 5 ETHOS (0.5%)</div>
 
             <div class="pool-depth">
-              <div class="pool-count count-none" id="pool-count-d2">—</div>
               <span class="pool-badge" id="pool-badge-d2" style="display:none"></span>
             </div>
           </div>
@@ -208,7 +205,6 @@
             <div class="denom-fee"    id="denom-fee-d3">Fee: 50 ETHOS (0.5%)</div>
 
             <div class="pool-depth">
-              <div class="pool-count count-none" id="pool-count-d3">—</div>
               <span class="pool-badge" id="pool-badge-d3" style="display:none"></span>
             </div>
           </div>
@@ -859,10 +855,8 @@
       const keys   = ['d0','d1','d2','d3'];
       const w      = web3 || new Web3("https://rpc.pulsechain.com");
 
-      // Show loading state
+      // Reset badges
       keys.forEach(k => {
-        const el = document.getElementById('pool-count-' + k);
-        if (el) { el.textContent = 'checking…'; el.className = 'pool-count count-none'; }
         const b = document.getElementById('pool-badge-' + k);
         if (b) b.style.display = 'none';
         const c = document.getElementById('denom-card-' + k);
@@ -885,39 +879,17 @@
 
       keys.forEach((k, i) => {
         const count   = counts[i];
-        const countEl = document.getElementById('pool-count-' + k);
         const badgeEl = document.getElementById('pool-badge-' + k);
         const cardEl  = document.getElementById('denom-card-' + k);
 
-        if (count === -1) {
-          // Not yet deployed
-          if (countEl) { countEl.textContent = 'Not yet deployed'; countEl.className = 'pool-count count-none'; }
-          return;
-        }
+        if (count === -1) return; // not deployed
 
-        // Colour-code the count
-        let cls = 'count-none', label = 'No deposits yet';
-        if (count >= 100)      { cls = 'count-high'; label = `${count} deposits`; }
-        else if (count >= 20)  { cls = 'count-high'; label = `${count} deposits`; }
-        else if (count >= 5)   { cls = 'count-mid';  label = `${count} deposits`; }
-        else if (count > 0)    { cls = 'count-low';  label = `${count} deposit${count===1?'':'s'}`; }
-        if (countEl) { countEl.textContent = label; countEl.className = 'pool-count ' + cls; }
-
-        // Badge logic
         if (badgeEl) {
           if (count === maxCount && maxCount > 0) {
             badgeEl.textContent = '★ Most Popular';
             badgeEl.className = 'pool-badge badge-popular';
             badgeEl.style.display = 'inline-block';
             if (cardEl) cardEl.classList.add('most-popular');
-          } else if (count >= 20) {
-            badgeEl.textContent = '✓ Good Privacy';
-            badgeEl.className = 'pool-badge badge-good';
-            badgeEl.style.display = 'inline-block';
-          } else if (count > 0 && count < 5) {
-            badgeEl.textContent = '⚠ Thin Pool';
-            badgeEl.className = 'pool-badge badge-thin';
-            badgeEl.style.display = 'inline-block';
           } else {
             badgeEl.style.display = 'none';
           }
