@@ -47,7 +47,6 @@
     .denom-amount{font-size:20px;font-weight:900;color:#fff;margin-bottom:4px}
     .denom-token{font-size:13px;color:var(--accent);font-weight:600;margin-bottom:8px}
     .denom-fee{font-size:12px;color:#888;border-top:1px solid rgba(255,255,255,0.1);padding-top:8px;margin-top:4px}
-    .denom-usd{font-size:11px;color:#555;margin-top:3px}
     /* Pool depth indicators */
     .pool-depth{margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.06)}
     .pool-count{font-size:11px;font-weight:600;margin-bottom:3px}
@@ -173,7 +172,7 @@
             <div class="denom-amount" id="denom-amount-d0">10</div>
             <div class="denom-token"  id="denom-label-d0">ETHOS</div>
             <div class="denom-fee"    id="denom-fee-d0">Fee: 0.05 ETHOS (0.5%)</div>
-            <div class="denom-usd"    id="denom-usd-d0">≈ $1.32</div>
+
             <div class="pool-depth">
               <div class="pool-count count-none" id="pool-count-d0">—</div>
               <span class="pool-badge" id="pool-badge-d0" style="display:none"></span>
@@ -183,7 +182,7 @@
             <div class="denom-amount" id="denom-amount-d1">100</div>
             <div class="denom-token"  id="denom-label-d1">ETHOS</div>
             <div class="denom-fee"    id="denom-fee-d1">Fee: 0.5 ETHOS (0.5%)</div>
-            <div class="denom-usd"    id="denom-usd-d1">≈ $13</div>
+
             <div class="pool-depth">
               <div class="pool-count count-none" id="pool-count-d1">—</div>
               <span class="pool-badge" id="pool-badge-d1" style="display:none"></span>
@@ -193,7 +192,7 @@
             <div class="denom-amount" id="denom-amount-d2">1,000</div>
             <div class="denom-token"  id="denom-label-d2">ETHOS</div>
             <div class="denom-fee"    id="denom-fee-d2">Fee: 5 ETHOS (0.5%)</div>
-            <div class="denom-usd"    id="denom-usd-d2">≈ $132</div>
+
             <div class="pool-depth">
               <div class="pool-count count-none" id="pool-count-d2">—</div>
               <span class="pool-badge" id="pool-badge-d2" style="display:none"></span>
@@ -203,7 +202,7 @@
             <div class="denom-amount" id="denom-amount-d3">10,000</div>
             <div class="denom-token"  id="denom-label-d3">ETHOS</div>
             <div class="denom-fee"    id="denom-fee-d3">Fee: 50 ETHOS (0.5%)</div>
-            <div class="denom-usd"    id="denom-usd-d3">≈ $1,320</div>
+
             <div class="pool-depth">
               <div class="pool-count count-none" id="pool-count-d3">—</div>
               <span class="pool-badge" id="pool-badge-d3" style="display:none"></span>
@@ -470,7 +469,6 @@
         contracts: { d0:"DEPLOY_FIRST", d1:"DEPLOY_FIRST", d2:"DEPLOY_FIRST", d3:"DEPLOY_FIRST" },
         denoms:   ["10","100","1000","10000"],
         denomWei: { d0:10000000000000000000n, d1:100000000000000000000n, d2:1000000000000000000000n, d3:10000000000000000000000n },
-        usd:      { d0:"$1.32", d1:"$13", d2:"$132", d3:"$1,320" }
       },
       pdai: {
         label: "pDAI", sublabel: "Stable Asset",
@@ -480,7 +478,6 @@
         contracts: { d0:"DEPLOY_FIRST", d1:"DEPLOY_FIRST", d2:"DEPLOY_FIRST", d3:"DEPLOY_FIRST" },
         denoms:   ["1000","10000","100000","1000000"],
         denomWei: { d0:1000000000000000000000n, d1:10000000000000000000000n, d2:100000000000000000000000n, d3:1000000000000000000000000n },
-        usd:      { d0:"$1.60", d1:"$16", d2:"$160", d3:"$1,600" }
       },
       wpls: {
         label: "WPLS", sublabel: "Wrapped PLS",
@@ -490,7 +487,6 @@
         contracts: { d0:"DEPLOY_FIRST", d1:"DEPLOY_FIRST", d2:"DEPLOY_FIRST", d3:"DEPLOY_FIRST" },
         denoms:   ["100000","1000000","10000000","100000000"],
         denomWei: { d0:100000000000000000000000n, d1:1000000000000000000000000n, d2:10000000000000000000000000n, d3:100000000000000000000000000n },
-        usd:      { d0:"$0.70", d1:"$7", d2:"$70", d3:"$700" }
       },
       plsx: {
         label: "PLSX", sublabel: "DEX Token",
@@ -500,7 +496,6 @@
         contracts: { d0:"DEPLOY_FIRST", d1:"DEPLOY_FIRST", d2:"DEPLOY_FIRST", d3:"DEPLOY_FIRST" },
         denoms:   ["100000","1000000","10000000","100000000"],
         denomWei: { d0:100000000000000000000000n, d1:1000000000000000000000000n, d2:10000000000000000000000000n, d3:100000000000000000000000000n },
-        usd:      { d0:"$0.52", d1:"$5.20", d2:"$52", d3:"$520" }
       },
       hex: {
         label: "HEX", sublabel: "Certificate of Deposit",
@@ -511,7 +506,6 @@
         denoms:   ["1000","10000","100000","1000000"],
         // HEX has 8 decimals — denomination wei = amount * 10^8
         denomWei: { d0:100000000000n, d1:1000000000000n, d2:10000000000000n, d3:100000000000000n },
-        usd:      { d0:"$1.10", d1:"$11", d2:"$110", d3:"$1,100" }
       },
       prvx: {
         label: "ProvX", sublabel: "PulseChain Token",
@@ -521,7 +515,6 @@
         contracts: { d0:"DEPLOY_FIRST", d1:"DEPLOY_FIRST", d2:"DEPLOY_FIRST", d3:"DEPLOY_FIRST" },
         denoms:   ["10000","100000","1000000","10000000"],
         denomWei: { d0:10000000000000000000000n, d1:100000000000000000000000n, d2:1000000000000000000000000n, d3:10000000000000000000000000n },
-        usd:      { d0:"$0.44", d1:"$4.40", d2:"$44", d3:"$440" }
       },
       omega: {
         label: "OMEGA", sublabel: "Yields HEX",
@@ -531,7 +524,6 @@
         contracts: { d0:"DEPLOY_FIRST", d1:"DEPLOY_FIRST", d2:"DEPLOY_FIRST", d3:"DEPLOY_FIRST" },
         denoms:   ["1000","10000","100000","1000000"],
         denomWei: { d0:1000000000000000000000n, d1:10000000000000000000000n, d2:100000000000000000000000n, d3:1000000000000000000000000n },
-        usd:      { d0:"$0.31", d1:"$3.10", d2:"$31", d3:"$310" }
       },
       zkp: {
         label: "ZKP", sublabel: "Yields PRVX",
@@ -541,7 +533,6 @@
         contracts: { d0:"DEPLOY_FIRST", d1:"DEPLOY_FIRST", d2:"DEPLOY_FIRST", d3:"DEPLOY_FIRST" },
         denoms:   ["1000","10000","100000","1000000"],
         denomWei: { d0:1000000000000000000000n, d1:10000000000000000000000n, d2:100000000000000000000000n, d3:1000000000000000000000000n },
-        usd:      { d0:"$0.30", d1:"$3", d2:"$30", d3:"$300" }
       },
       privx: {
         label: "PrivX", sublabel: "Privacy Mining",
@@ -551,7 +542,6 @@
         contracts: { d0:"DEPLOY_FIRST", d1:"DEPLOY_FIRST", d2:"DEPLOY_FIRST", d3:"DEPLOY_FIRST" },
         denoms:   ["1000","10000","100000","1000000"],
         denomWei: { d0:1000000000000000000000n, d1:10000000000000000000000n, d2:100000000000000000000000n, d3:1000000000000000000000000n },
-        usd:      { d0:"$0.56", d1:"$5.60", d2:"$56", d3:"$560" }
       }
     };
 
@@ -933,7 +923,6 @@
         document.getElementById('denom-amount-'+k).textContent=denomTokens.toLocaleString();
         document.getElementById('denom-label-'+k).textContent=shield.label;
         document.getElementById('denom-fee-'+k).textContent=`Fee: ${feeTokens.toLocaleString()} ${shield.label} (0.5%)`;
-        document.getElementById('denom-usd-'+k).textContent=`≈ ${shield.usd[k]}`;
       });
       // Update buy button
       const buyBtn=document.getElementById('buyTokenBtn');
