@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ETHOS Shield – Powered by PrivX</title>
+  <link rel="icon" href="ethoslogo.png" type="image/png">
+  <meta name="theme-color" content="#0d9488">
+  <meta name="description" content="Shield ETHOS, pDAI, WPLS, PLSX, HEX, PRVX, OMEGA, ZKP and PrivX with zero-knowledge proofs. Every withdrawal earns PRIVX. Powered by PrivX Hurricane.">
+  <style>
+    :root {
+      --primary: #0d9488;
+      --accent: #2dd4bf;
+      --bg: #000;
+      --card: rgba(13,148,136,0.15);
+      --glow: rgba(13,148,136,0.6);
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 20px 60px;overflow-x:hidden}
+    canvas#matrix-bg{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+    .page-wrap{width:100%;max-width:680px;position:relative;z-index:10;display:flex;flex-direction:column;gap:24px;margin-top:60px}
+    .container{background:rgba(10,10,10,0.7);backdrop-filter:blur(20px);border-radius:24px;padding:40px 30px;border:1px solid var(--primary);box-shadow:0 0 80px var(--glow),inset 0 0 40px rgba(13,148,136,0.1)}
+    .info-card{background:rgba(10,10,10,0.7);backdrop-filter:blur(20px);border-radius:24px;padding:36px 30px;border:1px solid rgba(13,148,136,0.4);box-shadow:0 0 40px rgba(13,148,136,0.2)}
+    .subtitle{color:var(--accent);font-size:1.2em;margin-bottom:30px;text-align:center}
+    .top-nav{position:fixed;top:20px;left:20px;display:flex;gap:10px;z-index:9999;flex-wrap:wrap}
+    .nav-link{background:rgba(10,10,10,0.8);backdrop-filter:blur(10px);padding:10px 18px;border:1px solid rgba(13,148,136,0.5);border-radius:10px;color:#aaa;font-size:13px;font-weight:600;text-decoration:none;transition:all .3s}
+    .nav-link:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 20px var(--glow)}
+    .wallet-button{position:fixed;top:20px;right:20px;background:rgba(10,10,10,0.8);backdrop-filter:blur(10px);padding:12px 28px;border:2px solid var(--primary);border-radius:12px;color:#fff;font-weight:600;cursor:pointer;transition:all .3s;z-index:9999}
+    .wallet-button:hover{border-color:var(--accent);box-shadow:0 0 30px var(--glow)}
+    .wallet-button.connected{color:var(--accent);border-color:var(--accent);box-shadow:0 0 30px var(--glow)}
+    .tabs{display:flex;gap:12px;margin-bottom:20px}
+    .tab{flex:1;padding:14px;border:2px solid rgba(255,255,255,0.1);border-radius:12px;background:rgba(20,20,20,0.6);cursor:pointer;transition:all .3s;text-align:center;font-weight:600}
+    .tab:hover{border-color:var(--primary)}
+    .tab.active{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 0 30px var(--glow)}
+    /* 3×3 token grid */
+    .token-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px}
+    .token-card{padding:10px 8px;border:2px solid rgba(255,255,255,0.1);border-radius:12px;background:rgba(20,20,20,0.6);cursor:pointer;transition:all .3s;text-align:center}
+    .token-card:hover{border-color:var(--primary)}
+    .token-card.active{background:rgba(13,148,136,0.25);border-color:var(--primary);box-shadow:0 0 20px var(--glow)}
+    .token-card .tc-name{font-weight:800;font-size:14px;color:#fff;margin-bottom:2px}
+    .token-card .tc-sub{font-size:10px;color:#888;line-height:1.3}
+    .token-card.active .tc-sub{color:var(--accent)}
+    .denomination-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:0 0 20px}
+    .denomination-card{background:var(--card);border:2px solid transparent;border-radius:16px;padding:20px;cursor:pointer;transition:all .4s;text-align:center}
+    .denomination-card:hover{border-color:var(--primary);transform:translateY(-6px);box-shadow:0 12px 40px rgba(13,148,136,0.4)}
+    .denomination-card.selected{border:3px solid var(--primary);background:rgba(13,148,136,0.3);box-shadow:0 0 50px var(--glow);transform:scale(1.04)}
+    .denom-amount{font-size:20px;font-weight:900;color:#fff;margin-bottom:4px}
+    .denom-token{font-size:13px;color:var(--accent);font-weight:600;margin-bottom:8px}
+    .denom-fee{font-size:12px;color:#888;border-top:1px solid rgba(255,255,255,0.1);padding-top:8px;margin-top:4px}
+    .denom-usd{font-size:11px;color:#555;margin-top:3px}
+    /* Pool depth indicators */
+    .pool-depth{margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.06)}
+    .pool-count{font-size:11px;font-weight:600;margin-bottom:3px}
+    .count-none{color:#555}
+    .count-low{color:#ef4444}
+    .count-mid{color:#ffb400}
+    .count-high{color:#22c55e}
+    .pool-badge{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.8px;padding:2px 7px;border-radius:4px;text-transform:uppercase;margin-top:2px}
+    .badge-popular{background:linear-gradient(90deg,#0d9488,#065f46);color:#fff;box-shadow:0 0 10px rgba(13,148,136,0.5)}
+    .badge-good{background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.3)}
+    .badge-thin{background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2)}
+    .denomination-card.most-popular{border-color:var(--primary)!important;box-shadow:0 0 30px rgba(13,148,136,0.35)}
+    .button{width:100%;padding:18px;background:var(--primary);color:#fff;border:none;border-radius:14px;font-size:18px;font-weight:700;cursor:pointer;margin-top:0;transition:all .3s;box-shadow:0 0 30px var(--glow)}
+    .button:hover{background:var(--accent);color:#000;transform:translateY(-3px)}
+    .button:disabled{background:#333;color:#666;cursor:not-allowed;box-shadow:none;transform:none}
+    .note-display{background:#111;border:2px solid var(--primary);padding:20px;border-radius:14px;margin-top:25px;font-family:monospace;color:var(--accent);box-shadow:0 0 30px var(--glow)}
+    .vault-row{display:flex;gap:16px;margin-top:0}
+    .vault-display{flex:1;padding:18px;background:rgba(13,148,136,0.15);border-radius:14px;text-align:center;border:1px solid var(--primary)}
+    .vault-display .vault-label{font-size:12px;color:#aaa;margin-bottom:6px}
+    .vault-display .vault-val{color:var(--accent);font-size:1.2em;font-weight:900}
+    .hidden{display:none!important}
+    .logo-header{text-align:center;margin-bottom:24px}
+    .ethos-logo{max-width:100px;width:100%;height:auto;margin:0 auto 16px;display:block;filter:drop-shadow(0 0 25px var(--glow));transition:transform .3s,filter .3s;border-radius:16px}
+    .ethos-logo:hover{transform:scale(1.07);filter:drop-shadow(0 0 40px var(--accent))}
+    .info-card h2{font-size:1.4em;font-weight:800;color:var(--accent);margin-bottom:20px}
+    .faq{display:flex;flex-direction:column;gap:14px;margin-top:4px}
+    .faq-item summary{cursor:pointer;font-weight:600;color:#fff;padding:12px 16px;background:rgba(13,148,136,0.1);border-radius:10px;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-item summary::after{content:"▼";font-size:11px;color:var(--accent)}
+    .faq-item[open] summary::after{content:"▲"}
+    .faq-item p{padding:12px 16px;color:#aaa;font-size:14px;line-height:1.6;border-left:2px solid var(--primary);margin-top:6px}
+    .warning-box{background:rgba(255,180,0,0.08);border:1px solid rgba(255,180,0,0.3);border-radius:12px;padding:16px;color:#ffb400;font-size:14px;line-height:1.6;margin-top:16px}
+    .warning-box strong{display:block;margin-bottom:4px}
+    .contract-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
+    .contract-table tr{border-bottom:1px solid rgba(13,148,136,0.2)}
+    .contract-table td{padding:10px 8px;vertical-align:middle}
+    .contract-table td:first-child{color:#aaa;width:170px;font-weight:600;font-size:12px}
+    .contract-table td:last-child{font-family:monospace;font-size:11px}
+    .contract-table a{color:var(--accent);text-decoration:none}
+    .contract-table a:hover{text-decoration:underline}
+    .pop-badge{display:inline-block;background:linear-gradient(135deg,var(--primary),#065f46);color:#fff;font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;letter-spacing:1px;margin-left:6px;vertical-align:middle}
+    .privx-badge{display:inline-block;background:linear-gradient(135deg,#6d28d9,#4c1d95);color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:6px;letter-spacing:1px;margin-left:6px;vertical-align:middle}
+    .buy-btn{display:block;width:100%;padding:16px;background:linear-gradient(135deg,var(--primary),#065f46);color:#fff;border:none;border-radius:12px;font-size:17px;font-weight:700;cursor:pointer;text-decoration:none;text-align:center;transition:all .3s;box-shadow:0 0 20px var(--glow);margin-top:8px}
+    .buy-btn:hover{background:linear-gradient(135deg,var(--accent),#0d9488);color:#000;transform:translateY(-2px)}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.9);backdrop-filter:blur(10px);z-index:10000;display:flex;align-items:flex-start;justify-content:center;padding:30px 20px;overflow-y:auto}
+    .modal-box{background:rgba(6,6,6,0.98);border:1px solid var(--primary);border-radius:24px;padding:40px 36px;max-width:760px;width:100%;box-shadow:0 0 100px var(--glow);position:relative;margin:auto}
+    .modal-close{position:absolute;top:18px;right:20px;background:none;border:none;color:#555;font-size:22px;cursor:pointer;transition:color .2s;line-height:1;padding:4px 8px}
+    .modal-close:hover{color:var(--accent)}
+    .docs-h1{color:var(--accent);font-size:1.7em;font-weight:900;margin-bottom:8px}
+    .docs-h2{color:#fff;font-size:1.1em;font-weight:800;margin:32px 0 10px;border-bottom:1px solid rgba(13,148,136,0.3);padding-bottom:6px}
+    .docs-p{color:#aaa;font-size:14px;line-height:1.75;margin-bottom:10px}
+    .docs-table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0}
+    .docs-table th{color:var(--accent);text-align:left;padding:8px 10px;border-bottom:1px solid rgba(13,148,136,0.35);font-size:11px;letter-spacing:.5px;text-transform:uppercase}
+    .docs-table td{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,0.04)}
+    .docs-table td:first-child{color:#fff;font-weight:600;white-space:nowrap}
+    .fv-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+    .fv-stat{background:rgba(13,148,136,0.1);border:1px solid rgba(13,148,136,0.25);border-radius:12px;padding:14px;text-align:center}
+    .fv-slabel{font-size:11px;color:#888;margin-bottom:6px;letter-spacing:.5px;text-transform:uppercase}
+    .fv-sval{font-size:15px;font-weight:800;color:var(--accent)}
+    .fv-input{width:100%;padding:14px 16px;margin:6px 0;border-radius:12px;border:1px solid rgba(13,148,136,0.4);background:#111;color:#fff;font-size:13px;outline:none;font-family:monospace}
+    .fv-input:focus{border-color:var(--accent)}
+    @media(max-width:768px){
+      .page-wrap{margin-top:70px}
+      .container,.info-card{padding:24px 18px}
+      .wallet-button{top:10px;right:10px;padding:10px 16px;font-size:14px}
+      .top-nav{top:10px;left:10px}
+      .nav-link{padding:7px 10px;font-size:11px}
+      .token-grid{grid-template-columns:1fr 1fr 1fr;gap:6px}
+      .token-card .tc-name{font-size:12px}
+      .vault-row{flex-direction:column}
+      .note-display{font-size:13px;word-break:break-all}
+    }
+    @media(max-width:600px){.modal-box{padding:24px 16px;border-radius:16px}.fv-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <canvas id="matrix-bg"></canvas>
+
+  <div class="top-nav">
+    <a href="#" onclick="openDocsModal();return false;" class="nav-link">📄 Docs</a>
+    <a href="#" onclick="openFeeVaultModal();return false;" class="nav-link">⚡ Fee Vault</a>
+    <a href="#" onclick="openMiningVaultModal();return false;" class="nav-link">⛏ Mining Vault</a>
+    <a href="https://elitev5.github.io/PrivX_Hurricane/index.html" target="_blank" class="nav-link">🔒 PrivX Hurricane</a>
+  </div>
+
+  <div id="walletButton" class="wallet-button">
+    <span id="walletButtonText">Connect Wallet</span>
+  </div>
+
+  <div class="page-wrap">
+
+    <div class="container">
+      <div class="logo-header">
+        <img src="ethoslogo.png" alt="ETHOS Shield" class="ethos-logo">
+        <h1 style="font-size:2em;font-weight:900;margin-bottom:8px;background:linear-gradient(90deg,#2dd4bf,#0d9488);-webkit-background-clip:text;-webkit-text-fill-color:transparent">ETHOS Shield</h1>
+        <p class="subtitle">Zero-Knowledge Privacy on PulseChain<br>
+          <span style="font-size:0.85em;opacity:0.85">Every withdrawal earns PRIVX <span class="pop-badge">POP</span> <span class="privx-badge">Powered by PrivX</span></span>
+        </p>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active" id="depositTabBtn">Deposit</div>
+        <div class="tab" id="withdrawTabBtn">Withdraw</div>
+      </div>
+
+      <!-- Deposit Tab -->
+      <div id="depositTab">
+
+        <!-- 3×3 token selector -->
+        <div class="token-grid">
+          <div class="token-card active" id="token-ethos"  onclick="selectToken('ethos')"><div class="tc-name">ETHOS</div><div class="tc-sub">Yield Token</div></div>
+          <div class="token-card"        id="token-pdai"   onclick="selectToken('pdai')"><div class="tc-name">pDAI</div><div class="tc-sub">Stable Asset</div></div>
+          <div class="token-card"        id="token-wpls"   onclick="selectToken('wpls')"><div class="tc-name">WPLS</div><div class="tc-sub">Wrapped PLS</div></div>
+          <div class="token-card"        id="token-plsx"   onclick="selectToken('plsx')"><div class="tc-name">PLSX</div><div class="tc-sub">DEX Token</div></div>
+          <div class="token-card"        id="token-hex"    onclick="selectToken('hex')"><div class="tc-name">HEX</div><div class="tc-sub">Certificate of Deposit</div></div>
+          <div class="token-card"        id="token-prvx"   onclick="selectToken('prvx')"><div class="tc-name">ProvX</div><div class="tc-sub">PulseChain Token</div></div>
+          <div class="token-card"        id="token-omega"  onclick="selectToken('omega')"><div class="tc-name">OMEGA</div><div class="tc-sub">Yields HEX</div></div>
+          <div class="token-card"        id="token-zkp"    onclick="selectToken('zkp')"><div class="tc-name">ZKP</div><div class="tc-sub">Yields PRVX</div></div>
+          <div class="token-card"        id="token-privx"  onclick="selectToken('privx')"><div class="tc-name">PrivX</div><div class="tc-sub">Privacy Mining</div></div>
+        </div>
+
+        <div class="denomination-grid">
+          <div class="denomination-card" id="denom-card-d0" onclick="selectDenomination('d0')">
+            <div class="denom-amount" id="denom-amount-d0">10</div>
+            <div class="denom-token"  id="denom-label-d0">ETHOS</div>
+            <div class="denom-fee"    id="denom-fee-d0">Fee: 0.05 ETHOS (0.5%)</div>
+            <div class="denom-usd"    id="denom-usd-d0">≈ $1.32</div>
+            <div class="pool-depth">
+              <div class="pool-count count-none" id="pool-count-d0">—</div>
+              <span class="pool-badge" id="pool-badge-d0" style="display:none"></span>
+            </div>
+          </div>
+          <div class="denomination-card" id="denom-card-d1" onclick="selectDenomination('d1')">
+            <div class="denom-amount" id="denom-amount-d1">100</div>
+            <div class="denom-token"  id="denom-label-d1">ETHOS</div>
+            <div class="denom-fee"    id="denom-fee-d1">Fee: 0.5 ETHOS (0.5%)</div>
+            <div class="denom-usd"    id="denom-usd-d1">≈ $13</div>
+            <div class="pool-depth">
+              <div class="pool-count count-none" id="pool-count-d1">—</div>
+              <span class="pool-badge" id="pool-badge-d1" style="display:none"></span>
+            </div>
+          </div>
+          <div class="denomination-card" id="denom-card-d2" onclick="selectDenomination('d2')">
+            <div class="denom-amount" id="denom-amount-d2">1,000</div>
+            <div class="denom-token"  id="denom-label-d2">ETHOS</div>
+            <div class="denom-fee"    id="denom-fee-d2">Fee: 5 ETHOS (0.5%)</div>
+            <div class="denom-usd"    id="denom-usd-d2">≈ $132</div>
+            <div class="pool-depth">
+              <div class="pool-count count-none" id="pool-count-d2">—</div>
+              <span class="pool-badge" id="pool-badge-d2" style="display:none"></span>
+            </div>
+          </div>
+          <div class="denomination-card" id="denom-card-d3" onclick="selectDenomination('d3')">
+            <div class="denom-amount" id="denom-amount-d3">10,000</div>
+            <div class="denom-token"  id="denom-label-d3">ETHOS</div>
+            <div class="denom-fee"    id="denom-fee-d3">Fee: 50 ETHOS (0.5%)</div>
+            <div class="denom-usd"    id="denom-usd-d3">≈ $1,320</div>
+            <div class="pool-depth">
+              <div class="pool-count count-none" id="pool-count-d3">—</div>
+              <span class="pool-badge" id="pool-badge-d3" style="display:none"></span>
+            </div>
+          </div>
+        </div>
+
+        <button class="button" id="depositBtn" disabled>Select a Denomination</button>
+
+        <div id="depositNote" class="note-display hidden">
+          <strong>YOUR PRIVATE NOTE — SAVE THIS SECURELY!</strong><br><br>
+          <span id="noteText"></span><br><br>
+          <small style="color:#888">Store offline. Anyone with this note can withdraw your funds.</small><br><br>
+          <button class="button" onclick="copyNote()" style="padding:12px 24px;font-size:15px;width:auto;margin-top:0">Copy Note</button>
+        </div>
+      </div>
+
+      <!-- Withdraw Tab -->
+      <div id="withdrawTab" class="hidden">
+        <div style="color:#aaa;font-size:14px;margin-bottom:16px;line-height:1.6">
+          Paste your private note. Token and denomination are read automatically. Withdraw to a <strong style="color:#fff">fresh wallet</strong> never linked to your deposit address.
+        </div>
+        <input type="text" id="withdrawNote" placeholder="ethos-shield-ethos-100-abc123..." style="width:100%;padding:16px;margin:8px 0 12px;border-radius:12px;border:1px solid #444;background:#111;color:#fff;font-family:monospace;font-size:13px">
+        <input type="text" id="recipientAddress" placeholder="Recipient address (blank = connected wallet)" style="width:100%;padding:16px;margin:0 0 10px;border-radius:12px;border:1px solid #444;background:#111;color:#fff">
+
+        <details id="mevGuard" style="margin-bottom:14px">
+          <summary style="cursor:pointer;color:#888;font-size:13px;padding:10px 14px;background:rgba(255,180,0,0.05);border:1px solid rgba(255,180,0,0.2);border-radius:10px;list-style:none;display:flex;justify-content:space-between;align-items:center">
+            <span>🛡 MEV Protection <span style="background:rgba(255,180,0,0.12);color:#ffb400;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;margin-left:8px">OPTIONAL</span></span>
+            <span style="font-size:10px;color:#555">▼</span>
+          </summary>
+          <div style="padding:14px 16px;border:1px solid rgba(255,180,0,0.15);border-top:none;border-radius:0 0 10px 10px;background:rgba(255,180,0,0.03)">
+            <p style="color:#aaa;font-size:13px;line-height:1.6;margin-bottom:12px">Your ZK proof is visible in the public mempool. A private RPC bypasses it entirely.</p>
+            <label style="display:block;color:#888;font-size:11px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">Private RPC URL</label>
+            <input type="text" id="privateRpcUrl" placeholder="https://your-private-node.com" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,180,0,0.25);background:#0e0e0e;color:#fff;font-size:12px;font-family:monospace;outline:none">
+          </div>
+        </details>
+
+        <button class="button" id="withdrawBtn">Generate ZK Proof + Withdraw</button>
+        <div style="color:#888;font-size:13px;margin-top:12px;text-align:center">Proof generation takes ~15–30 seconds. Do not close the tab.</div>
+      </div>
+
+      <div class="vault-row" style="margin-top:28px">
+        <div class="vault-display">
+          <div class="vault-label">POP Mining Vault</div>
+          <div class="vault-val"><span id="vaultBalance">—</span> PRIVX</div>
+        </div>
+        <div class="vault-display">
+          <div class="vault-label">Total PRIVX Burned</div>
+          <div class="vault-val"><span id="burnedBalance">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Buy section -->
+    <div class="info-card" id="buy-section">
+      <h2>Get Tokens</h2>
+      <p style="color:#aaa;font-size:14px;line-height:1.7;margin-bottom:16px">
+        Select a token above then swap on PulseX. Every shield deposit fee converts to PRIVX — Protocol-Owned Liquidity, mining vault top-up, and permanent burn.
+      </p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0">
+        <div style="background:rgba(13,148,136,0.1);border:1px solid rgba(13,148,136,0.3);border-radius:12px;padding:16px;text-align:center">
+          <div style="font-size:12px;color:#888;margin-bottom:6px">Your Balance</div>
+          <div style="font-size:18px;font-weight:800;color:var(--accent)" id="buyTokenBalance">—</div>
+        </div>
+        <div style="background:rgba(13,148,136,0.1);border:1px solid rgba(13,148,136,0.3);border-radius:12px;padding:16px;text-align:center">
+          <div style="font-size:12px;color:#888;margin-bottom:6px">Mining Vault</div>
+          <div style="font-size:18px;font-weight:800;color:var(--accent)" id="vaultBalanceBuy">—</div>
+        </div>
+      </div>
+      <a class="buy-btn" id="buyTokenBtn" href="#" target="_blank" rel="noopener">Swap on PulseX ↗</a>
+    </div>
+
+    <!-- Contracts -->
+    <div class="info-card">
+      <h2>Verified Contracts</h2>
+      <p style="color:#aaa;font-size:14px;margin-bottom:16px">All contracts immutable and unowned. No admin keys, no upgrade proxies, no pause functions.</p>
+
+      <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;letter-spacing:1px">SHARED INFRASTRUCTURE</p>
+      <table class="contract-table">
+        <tr><td>PRIVX Token</td><td><a href="https://scan.pulsechain.com/address/0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986" target="_blank">0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986 ↗</a></td></tr>
+        <tr><td>PLONK Verifier</td><td><a href="https://scan.pulsechain.com/address/0xcEDa1071542d537221B5a01BFd1cF920cF8B9829" target="_blank">0xcEDa1071542d537221B5a01BFd1cF920cF8B9829 ↗</a></td></tr>
+        <tr><td>Poseidon Hasher</td><td><a href="https://scan.pulsechain.com/address/0x72740d65A93f2e9d9741234371d62FeE36AEf9dF" target="_blank">0x72740d65A93f2e9d9741234371d62FeE36AEf9dF ↗</a></td></tr>
+        <tr><td>Mining Vault</td><td id="ct-vault" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>Fee Vault</td><td id="ct-feevault" style="color:#555">Deploying soon…</td></tr>
+      </table>
+
+      <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">ETHOS SHIELDS</p>
+      <table class="contract-table">
+        <tr><td>10 ETHOS</td><td id="ct-ethos-d0" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>100 ETHOS</td><td id="ct-ethos-d1" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>1,000 ETHOS</td><td id="ct-ethos-d2" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>10,000 ETHOS</td><td id="ct-ethos-d3" style="color:#555">Deploying soon…</td></tr>
+      </table>
+
+      <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">pDAI SHIELDS</p>
+      <table class="contract-table">
+        <tr><td>1,000 pDAI</td><td id="ct-pdai-d0" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>10,000 pDAI</td><td id="ct-pdai-d1" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>100,000 pDAI</td><td id="ct-pdai-d2" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>1,000,000 pDAI</td><td id="ct-pdai-d3" style="color:#555">Deploying soon…</td></tr>
+      </table>
+
+      <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">WPLS SHIELDS</p>
+      <table class="contract-table">
+        <tr><td>100,000 WPLS</td><td id="ct-wpls-d0" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>1,000,000 WPLS</td><td id="ct-wpls-d1" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>10,000,000 WPLS</td><td id="ct-wpls-d2" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>100,000,000 WPLS</td><td id="ct-wpls-d3" style="color:#555">Deploying soon…</td></tr>
+      </table>
+
+      <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">PLSX SHIELDS</p>
+      <table class="contract-table">
+        <tr><td>100,000 PLSX</td><td id="ct-plsx-d0" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>1,000,000 PLSX</td><td id="ct-plsx-d1" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>10,000,000 PLSX</td><td id="ct-plsx-d2" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>100,000,000 PLSX</td><td id="ct-plsx-d3" style="color:#555">Deploying soon…</td></tr>
+      </table>
+
+      <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">HEX SHIELDS <span style="color:#ffb400;font-size:10px;font-weight:700">⚠ 8 DECIMALS</span></p>
+      <table class="contract-table">
+        <tr><td>1,000 HEX</td><td id="ct-hex-d0" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>10,000 HEX</td><td id="ct-hex-d1" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>100,000 HEX</td><td id="ct-hex-d2" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>1,000,000 HEX</td><td id="ct-hex-d3" style="color:#555">Deploying soon…</td></tr>
+      </table>
+
+      <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">ProvX SHIELDS</p>
+      <table class="contract-table">
+        <tr><td>10,000 ProvX</td><td id="ct-prvx-d0" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>100,000 ProvX</td><td id="ct-prvx-d1" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>1,000,000 ProvX</td><td id="ct-prvx-d2" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>10,000,000 ProvX</td><td id="ct-prvx-d3" style="color:#555">Deploying soon…</td></tr>
+      </table>
+
+      <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">OMEGA SHIELDS</p>
+      <table class="contract-table">
+        <tr><td>1,000 OMEGA</td><td id="ct-omega-d0" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>10,000 OMEGA</td><td id="ct-omega-d1" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>100,000 OMEGA</td><td id="ct-omega-d2" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>1,000,000 OMEGA</td><td id="ct-omega-d3" style="color:#555">Deploying soon…</td></tr>
+      </table>
+
+      <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">ZKP SHIELDS</p>
+      <table class="contract-table">
+        <tr><td>1,000 ZKP</td><td id="ct-zkp-d0" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>10,000 ZKP</td><td id="ct-zkp-d1" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>100,000 ZKP</td><td id="ct-zkp-d2" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>1,000,000 ZKP</td><td id="ct-zkp-d3" style="color:#555">Deploying soon…</td></tr>
+      </table>
+
+      <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">PrivX SHIELDS</p>
+      <table class="contract-table">
+        <tr><td>1,000 PrivX</td><td id="ct-privx-d0" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>10,000 PrivX</td><td id="ct-privx-d1" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>100,000 PrivX</td><td id="ct-privx-d2" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>1,000,000 PrivX</td><td id="ct-privx-d3" style="color:#555">Deploying soon…</td></tr>
+      </table>
+    </div>
+
+  </div><!-- /page-wrap -->
+
+  <!-- Docs Modal -->
+  <div id="docsModal" class="modal-overlay hidden" onclick="if(event.target===this)closeDocsModal()">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeDocsModal()">✕</button>
+      <div class="docs-h1">ETHOS Shield — Protocol Docs</div>
+      <p class="docs-p" style="border-left:3px solid var(--primary);padding-left:14px;font-style:italic;margin-bottom:24px">
+        Zero-knowledge privacy for 9 PulseChain tokens. Powered by PrivX Hurricane. Shield tokens, generate a Proof of Privacy, earn PRIVX.
+      </p>
+      <div class="docs-h2">Supported Tokens</div>
+      <table class="docs-table">
+        <tr><th>Token</th><th>Denominations</th><th>USD Range</th></tr>
+        <tr><td>ETHOS</td><td>100 / 1K / 10K / 100K</td><td>$13 – $13,200</td></tr>
+        <tr><td>pDAI</td><td>10K / 100K / 1M / 10M</td><td>$16 – $16,000</td></tr>
+        <tr><td>WPLS</td><td>1M / 10M / 100M / 1B</td><td>$7 – $7,000</td></tr>
+        <tr><td>PLSX</td><td>1M / 10M / 100M / 1B</td><td>$5 – $5,200</td></tr>
+        <tr><td>HEX</td><td>10K / 100K / 1M / 10M</td><td>$11 – $11,000</td></tr>
+        <tr><td>ProvX</td><td>100K / 1M / 10M / 100M</td><td>$4 – $4,400</td></tr>
+        <tr><td>OMEGA</td><td>10K / 100K / 1M / 10M</td><td>$3 – $3,100</td></tr>
+        <tr><td>ZKP</td><td>10K / 100K / 1M / 10M</td><td>$3 – $3,000</td></tr>
+        <tr><td>PrivX</td><td>10K / 100K / 1M / 10M</td><td>$6 – $5,600</td></tr>
+      </table>
+      <div class="docs-h2">Fee Flow</div>
+      <p class="docs-p">0.5% fee on every deposit in the shielded token → Fee Vault → swapped to PRIVX → 80% Protocol-Owned Liquidity / 10% Mining Vault (POP rewards) / 10% permanent burn. No PRIVX required to use any shield.</p>
+      <div class="docs-h2">ZK Circuit</div>
+      <p class="docs-p">Shared PrivXMixer(14) PLONK circuit — 14-level Poseidon Merkle tree, 16,384 leaves per pool. Same verifier and hasher as PrivX Hurricane. Proof generation in browser ~15–30s.</p>
+    </div>
+  </div>
+
+  <!-- Fee Vault Modal -->
+  <div id="feeVaultModal" class="modal-overlay hidden" onclick="if(event.target===this)closeFeeVaultModal()">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeFeeVaultModal()">✕</button>
+      <div class="docs-h1">⚡ ETHOS Fee Vault</div>
+      <p class="docs-p" style="margin-bottom:6px">Collects 0.5% fees from all ETHOS Shield deposits and converts them into PRIVX POL, mining rewards, and permanent burn.</p>
+      <div style="color:#555;font-size:12px;font-family:monospace;margin-bottom:20px" id="feeVaultAddr">Deploying soon…</div>
+      <div class="fv-grid">
+        <div class="fv-stat"><div class="fv-slabel">PRIVX Burned</div><div class="fv-sval" id="fvTotalBurned">—</div></div>
+        <div class="fv-stat"><div class="fv-slabel">PRIVX → Vault</div><div class="fv-sval" id="fvTotalVault">—</div></div>
+        <div class="fv-stat"><div class="fv-slabel">LP Locked</div><div class="fv-sval" id="fvLpLocked">—</div></div>
+        <div class="fv-stat"><div class="fv-slabel">Current Token Fee</div><div class="fv-sval" id="fvAccumulated">—</div></div>
+      </div>
+      <button class="button" style="margin-bottom:24px;background:rgba(13,148,136,0.15);border:1px solid var(--primary);font-size:14px;padding:13px;box-shadow:none" onclick="loadFeeVaultStats()">↻ Refresh</button>
+      <div class="docs-h2" style="margin-top:0">Trigger Conversion</div>
+      <label style="display:block;color:#888;font-size:12px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;margin-top:16px">Fee token address</label>
+      <input class="fv-input" id="fvTokenAddr" value="0x7CDaff7Bccf2AA44BA1fC235a2b44D6e8238C81C" placeholder="Token address">
+      <label style="display:block;color:#888;font-size:12px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;margin-top:12px">Slippage (basis points)</label>
+      <input class="fv-input" id="fvSlippage" type="number" value="600" min="1" max="2000" placeholder="600">
+      <div style="font-size:11px;color:#ffb400;margin:-2px 0 16px 2px">⚠️ ETHOS has 5% swap tax — use 600bp minimum for ETHOS. 200bp for standard tokens.</div>
+      <button class="button" id="fvConvertBtn" onclick="triggerFeeVaultConversion()">Convert Fees → PRIVX POL + Vault + Burn</button>
+      <div class="warning-box" style="margin-top:16px;font-size:13px">
+        <strong>80/10/10 split</strong>
+        Fees swap to PRIVX → 80% PRIVX/WPLS LP (locked forever) · 10% Mining Vault · 10% burned. ETHOS uses FOT-safe router due to 5% swap tax.
+      </div>
+    </div>
+  </div>
+
+  <!-- Mining Vault Modal -->
+  <div id="miningVaultModal" class="modal-overlay hidden" onclick="if(event.target===this)closeMiningVaultModal()">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeMiningVaultModal()">✕</button>
+      <div class="docs-h1">⛏ POP Mining Vault</div>
+      <p class="docs-p" style="margin-bottom:6px">Pays PRIVX rewards on every ETHOS Shield withdrawal. Quadratic decay — fuller vault = higher rate. Auto-refills from Fee Vault conversions.</p>
+      <div style="color:#555;font-size:12px;font-family:monospace;margin-bottom:20px" id="miningVaultAddr">Deploying soon…</div>
+      <div class="fv-grid">
+        <div class="fv-stat"><div class="fv-slabel">Vault Balance</div><div class="fv-sval" id="mvBalance">—</div></div>
+        <div class="fv-stat"><div class="fv-slabel">Peak Balance</div><div class="fv-sval" id="mvPeak">—</div></div>
+        <div class="fv-stat"><div class="fv-slabel">Reward Rate</div><div class="fv-sval" id="mvRate">—</div></div>
+        <div class="fv-stat"><div class="fv-slabel">Total Mined</div><div class="fv-sval" id="mvTotalMined">—</div></div>
+      </div>
+      <button class="button" style="margin-bottom:24px;background:rgba(13,148,136,0.15);border:1px solid var(--primary);font-size:14px;padding:13px;box-shadow:none" onclick="loadMiningVaultStats()">↻ Refresh</button>
+      <div class="docs-h2" style="margin-top:0">Top Up Vault</div>
+      <input class="fv-input" id="mvTopUpAmount" type="number" min="1" placeholder="PRIVX amount (e.g. 10000)" style="margin-top:12px">
+      <button class="button" id="mvTopUpBtn" onclick="triggerTopUp()" style="margin-top:16px">Top Up Mining Vault</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/snarkjs@0.7.4/build/snarkjs.min.js"></script>
+  <script type="module">
+    try {
+      const { buildPoseidon } = await import('https://esm.sh/circomlibjs@0.1.7');
+      window._buildPoseidon = buildPoseidon;
+    } catch(e) { console.error('circomlibjs load failed:', e); }
+  </script>
+
+  <script>
+    // ─── Contract Addresses ───────────────────────────────────────────────────
+    const PRIVX_TOKEN = "0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986";
+    const FEE_VAULT   = "DEPLOY_FIRST";
+    const MINING_VAULT = "DEPLOY_FIRST";
+
+    // ─── Shield Config ────────────────────────────────────────────────────────
+    // denomWei: denomination in the token's native wei units
+    // decimals: token decimal places (HEX = 8, all others = 18)
+    // Lowest tier sized for $0.30–$1.60 at current prices to allow 10–50x
+    // price appreciation before smallest denomination becomes impractical.
+    const SHIELDS = {
+      ethos: {
+        label: "ETHOS", sublabel: "Yield Token",
+        token: "0x7CDaff7Bccf2AA44BA1fC235a2b44D6e8238C81C",
+        decimals: 18, feeBP: 50,
+        swapUrl: "https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=0x7CDaff7Bccf2AA44BA1fC235a2b44D6e8238C81C",
+        contracts: { d0:"DEPLOY_FIRST", d1:"DEPLOY_FIRST", d2:"DEPLOY_FIRST", d3:"DEPLOY_FIRST" },
+        denoms:   ["10","100","1000","10000"],
+        denomWei: { d0:10000000000000000000n, d1:100000000000000000000n, d2:1000000000000000000000n, d3:10000000000000000000000n },
+        usd:      { d0:"$1.32", d1:"$13", d2:"$132", d3:"$1,320" }
+      },
+      pdai: {
+        label: "pDAI", sublabel: "Stable Asset",
+        token: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+        decimals: 18, feeBP: 50,
+        swapUrl: "https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=0x6B175474E89094C44Da98b954EedeAC495271d0F",
+        contracts: { d0:"DEPLOY_FIRST", d1:"DEPLOY_FIRST", d2:"DEPLOY_FIRST", d3:"DEPLOY_FIRST" },
+        denoms:   ["1000","10000","100000","1000000"],
+        denomWei: { d0:1000000000000000000000n, d1:10000000000000000000000n, d2:100000000000000000000000n, d3:1000000000000000000000000n },
+        usd:      { d0:"$1.60", d1:"$16", d2:"$160", d3:"$1,600" }
+      },
+      wpls: {
+        label: "WPLS", sublabel: "Wrapped PLS",
+        token: "0xA1077a294dDE1B09bB078844df40758a5D0f9a27",
+        decimals: 18, feeBP: 50,
+        swapUrl: "https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=0xA1077a294dDE1B09bB078844df40758a5D0f9a27",
+        contracts: { d0:"DEPLOY_FIRST", d1:"DEPLOY_FIRST", d2:"DEPLOY_FIRST", d3:"DEPLOY_FIRST" },
+        denoms:   ["100000","1000000","10000000","100000000"],
+        denomWei: { d0:100000000000000000000000n, d1:1000000000000000000000000n, d2:10000000000000000000000000n, d3:100000000000000000000000000n },
+        usd:      { d0:"$0.70", d1:"$7", d2:"$70", d3:"$700" }
+      },
+      plsx: {
+        label: "PLSX", sublabel: "DEX Token",
+        token: "0x95B303987A60C71504D99Aa1b13B4DA07b0790ab",
+        decimals: 18, feeBP: 50,
+        swapUrl: "https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=0x95B303987A60C71504D99Aa1b13B4DA07b0790ab",
+        contracts: { d0:"DEPLOY_FIRST", d1:"DEPLOY_FIRST", d2:"DEPLOY_FIRST", d3:"DEPLOY_FIRST" },
+        denoms:   ["100000","1000000","10000000","100000000"],
+        denomWei: { d0:100000000000000000000000n, d1:1000000000000000000000000n, d2:10000000000000000000000000n, d3:100000000000000000000000000n },
+        usd:      { d0:"$0.52", d1:"$5.20", d2:"$52", d3:"$520" }
+      },
+      hex: {
+        label: "HEX", sublabel: "Certificate of Deposit",
+        token: "0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39",
+        decimals: 8, feeBP: 50,
+        swapUrl: "https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39",
+        contracts: { d0:"DEPLOY_FIRST", d1:"DEPLOY_FIRST", d2:"DEPLOY_FIRST", d3:"DEPLOY_FIRST" },
+        denoms:   ["1000","10000","100000","1000000"],
+        // HEX has 8 decimals — denomination wei = amount * 10^8
+        denomWei: { d0:100000000000n, d1:1000000000000n, d2:10000000000000n, d3:100000000000000n },
+        usd:      { d0:"$1.10", d1:"$11", d2:"$110", d3:"$1,100" }
+      },
+      prvx: {
+        label: "ProvX", sublabel: "PulseChain Token",
+        token: "0xF6f8Db0aBa00007681F8fAF16A0FDa1c9B030b11",
+        decimals: 18, feeBP: 50,
+        swapUrl: "https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=0xF6f8Db0aBa00007681F8fAF16A0FDa1c9B030b11",
+        contracts: { d0:"DEPLOY_FIRST", d1:"DEPLOY_FIRST", d2:"DEPLOY_FIRST", d3:"DEPLOY_FIRST" },
+        denoms:   ["10000","100000","1000000","10000000"],
+        denomWei: { d0:10000000000000000000000n, d1:100000000000000000000000n, d2:1000000000000000000000000n, d3:10000000000000000000000000n },
+        usd:      { d0:"$0.44", d1:"$4.40", d2:"$44", d3:"$440" }
+      },
+      omega: {
+        label: "OMEGA", sublabel: "Yields HEX",
+        token: "0xcB1C38d47732031150D31566Ec7F4298A7Dc50cD",
+        decimals: 18, feeBP: 50,
+        swapUrl: "https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=0xcB1C38d47732031150D31566Ec7F4298A7Dc50cD",
+        contracts: { d0:"DEPLOY_FIRST", d1:"DEPLOY_FIRST", d2:"DEPLOY_FIRST", d3:"DEPLOY_FIRST" },
+        denoms:   ["1000","10000","100000","1000000"],
+        denomWei: { d0:1000000000000000000000n, d1:10000000000000000000000n, d2:100000000000000000000000n, d3:1000000000000000000000000n },
+        usd:      { d0:"$0.31", d1:"$3.10", d2:"$31", d3:"$310" }
+      },
+      zkp: {
+        label: "ZKP", sublabel: "Yields PRVX",
+        token: "0x90F055196778e541018482213Ca50648cEA1a050",
+        decimals: 18, feeBP: 50,
+        swapUrl: "https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=0x90F055196778e541018482213Ca50648cEA1a050",
+        contracts: { d0:"DEPLOY_FIRST", d1:"DEPLOY_FIRST", d2:"DEPLOY_FIRST", d3:"DEPLOY_FIRST" },
+        denoms:   ["1000","10000","100000","1000000"],
+        denomWei: { d0:1000000000000000000000n, d1:10000000000000000000000n, d2:100000000000000000000000n, d3:1000000000000000000000000n },
+        usd:      { d0:"$0.30", d1:"$3", d2:"$30", d3:"$300" }
+      },
+      privx: {
+        label: "PrivX", sublabel: "Privacy Mining",
+        token: "0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986",
+        decimals: 18, feeBP: 50,
+        swapUrl: "https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986",
+        contracts: { d0:"DEPLOY_FIRST", d1:"DEPLOY_FIRST", d2:"DEPLOY_FIRST", d3:"DEPLOY_FIRST" },
+        denoms:   ["1000","10000","100000","1000000"],
+        denomWei: { d0:1000000000000000000000n, d1:10000000000000000000000n, d2:100000000000000000000000n, d3:1000000000000000000000000n },
+        usd:      { d0:"$0.56", d1:"$5.60", d2:"$56", d3:"$560" }
+      }
+    };
+
+    // ─── ZKey (shared PrivX Hurricane circuit) ────────────────────────────────
+    const WASM_URL  = "../plonk-zk/circuits/mixer_js/PrivXMixer14.wasm";
+    const ZKEY_CID  = "bafybeiahcycu5sbkgdxfxt4py3qagjrce2nxrbxenwv7oxkg67xoy4qwmu";
+    const ZKEY_URLS = [
+      `https://amaranth-rear-platypus-218.mypinata.cloud/ipfs/${ZKEY_CID}`,
+      `https://gateway.pinata.cloud/ipfs/${ZKEY_CID}`,
+      `https://ipfs.io/ipfs/${ZKEY_CID}`,
+      `https://${ZKEY_CID}.ipfs.dweb.link`
+    ];
+    const TREE_LEVELS = 14;
+
+    // ─── State ────────────────────────────────────────────────────────────────
+    let web3, userAccount, selectedDenom;
+    let selectedToken = 'ethos';
+    let poseidonFn = null, _zkeyBlobUrl = null;
+
+    // ─── ABIs ─────────────────────────────────────────────────────────────────
+    const ERC20_ABI = [
+      { inputs:[{name:"spender",type:"address"},{name:"amount",type:"uint256"}], name:"approve", outputs:[{name:"",type:"bool"}], stateMutability:"nonpayable", type:"function" },
+      { inputs:[{name:"owner",type:"address"},{name:"spender",type:"address"}], name:"allowance", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" },
+      { inputs:[{name:"account",type:"address"}], name:"balanceOf", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" }
+    ];
+    const SHIELD_ABI = [
+      { inputs:[{internalType:"bytes32",name:"_commitment",type:"bytes32"}], name:"deposit", outputs:[], stateMutability:"nonpayable", type:"function" },
+      { inputs:[{internalType:"uint256[24]",name:"proof",type:"uint256[24]"},{internalType:"uint256[4]",name:"pubSignals",type:"uint256[4]"},{internalType:"address",name:"recipient",type:"address"}], name:"withdraw", outputs:[], stateMutability:"nonpayable", type:"function" },
+      { inputs:[], name:"getLastRoot", outputs:[{internalType:"bytes32",name:"",type:"bytes32"}], stateMutability:"view", type:"function" },
+      { inputs:[], name:"nextLeafIndex", outputs:[{internalType:"uint32",name:"",type:"uint32"}], stateMutability:"view", type:"function" },
+      { anonymous:false, inputs:[{indexed:true,internalType:"bytes32",name:"commitment",type:"bytes32"},{indexed:false,internalType:"uint32",name:"leafIndex",type:"uint32"},{indexed:false,internalType:"uint256",name:"timestamp",type:"uint256"}], name:"Deposit", type:"event" }
+    ];
+    const FEE_VAULT_ABI = [
+      { inputs:[{name:"token",type:"address"},{name:"slippageBP",type:"uint256"}], name:"convertAuto", outputs:[], stateMutability:"nonpayable", type:"function" },
+      { inputs:[{name:"token",type:"address"}], name:"accumulated", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" },
+      { inputs:[], name:"totalPrivxBurned", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" },
+      { inputs:[], name:"totalPrivxToVault", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" },
+      { inputs:[], name:"polLpBalance", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" }
+    ];
+    const MINING_VAULT_ABI = [
+      { inputs:[], name:"vaultBalance", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" },
+      { inputs:[], name:"peakBalance", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" },
+      { inputs:[], name:"currentRateBp", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" },
+      { inputs:[], name:"totalMined", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" },
+      { inputs:[{name:"_amount",type:"uint256"}], name:"topUp", outputs:[], stateMutability:"nonpayable", type:"function" }
+    ];
+
+    // ─── Helpers ──────────────────────────────────────────────────────────────
+    const fmt18 = v => Number(BigInt(v) / 10n**18n).toLocaleString();
+    const fmtDec = (v, dec) => Number(BigInt(v) / 10n**BigInt(dec)).toLocaleString();
+
+    async function getZkeyUrl(setStatus) {
+      if (_zkeyBlobUrl) return _zkeyBlobUrl;
+      for (let i = 0; i < ZKEY_URLS.length; i++) {
+        try {
+          setStatus(`Downloading proving key… (${i+1}/${ZKEY_URLS.length})`);
+          const resp = await fetch(ZKEY_URLS[i]);
+          if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+          _zkeyBlobUrl = URL.createObjectURL(await resp.blob());
+          return _zkeyBlobUrl;
+        } catch(e) { console.warn(`zkey source ${i+1} failed:`, e.message); }
+      }
+      throw new Error("Could not download proving key from any source.");
+    }
+
+    async function initPoseidon() {
+      for (let i = 0; i < 100; i++) { if (window._buildPoseidon) break; await new Promise(r=>setTimeout(r,100)); }
+      if (!window._buildPoseidon) throw new Error("circomlibjs failed to load");
+      const lib = await window._buildPoseidon();
+      poseidonFn = (...inputs) => lib.F.toObject(lib(inputs.map(x=>BigInt(x))));
+    }
+
+    // ─── Modal helpers ────────────────────────────────────────────────────────
+    function openDocsModal()         { document.getElementById('docsModal').classList.remove('hidden');       document.body.style.overflow='hidden'; }
+    function closeDocsModal()        { document.getElementById('docsModal').classList.add('hidden');          document.body.style.overflow=''; }
+    function openFeeVaultModal()     { document.getElementById('feeVaultModal').classList.remove('hidden');   document.body.style.overflow='hidden'; loadFeeVaultStats(); }
+    function closeFeeVaultModal()    { document.getElementById('feeVaultModal').classList.add('hidden');      document.body.style.overflow=''; }
+    function openMiningVaultModal()  { document.getElementById('miningVaultModal').classList.remove('hidden');document.body.style.overflow='hidden'; loadMiningVaultStats(); }
+    function closeMiningVaultModal() { document.getElementById('miningVaultModal').classList.add('hidden');   document.body.style.overflow=''; }
+
+    async function loadFeeVaultStats() {
+      const set = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+      if (!FEE_VAULT || FEE_VAULT==="DEPLOY_FIRST") { ['fvTotalBurned','fvTotalVault','fvLpLocked','fvAccumulated'].forEach(id=>set(id,'Coming soon')); return; }
+      const w = web3 || new Web3("https://rpc.pulsechain.com");
+      const vault = new w.eth.Contract(FEE_VAULT_ABI, FEE_VAULT);
+      const shield = SHIELDS[selectedToken];
+      try {
+        const [burned,toVault,lp,acc] = await Promise.all([vault.methods.totalPrivxBurned().call(), vault.methods.totalPrivxToVault().call(), vault.methods.polLpBalance().call(), vault.methods.accumulated(shield.token).call()]);
+        set('fvTotalBurned', fmt18(burned)+' PRIVX');
+        set('fvTotalVault',  fmt18(toVault)+' PRIVX');
+        set('fvLpLocked',    fmt18(lp)+' LP');
+        set('fvAccumulated', fmtDec(acc, shield.decimals)+' '+shield.label);
+      } catch(e) { ['fvTotalBurned','fvTotalVault','fvLpLocked','fvAccumulated'].forEach(id=>set(id,'Error')); }
+    }
+
+    async function triggerFeeVaultConversion() {
+      if (!userAccount) return alert("Connect wallet first");
+      if (!FEE_VAULT || FEE_VAULT==="DEPLOY_FIRST") return alert("Fee Vault not yet deployed.");
+      const tokenAddr = document.getElementById('fvTokenAddr').value.trim();
+      const slippage  = parseInt(document.getElementById('fvSlippage').value, 10);
+      if (!tokenAddr) return alert("Enter a token address");
+      if (isNaN(slippage)||slippage<1||slippage>=10000) return alert("Slippage must be 1–9999");
+      const btn = document.getElementById('fvConvertBtn');
+      btn.disabled=true; btn.textContent="Sending…";
+      try {
+        const vault = new web3.eth.Contract(FEE_VAULT_ABI, FEE_VAULT);
+        const tx = await vault.methods.convertAuto(tokenAddr, slippage).send({from:userAccount});
+        if (!tx.status) throw new Error("Reverted: "+tx.transactionHash);
+        alert("Conversion successful!\nTX: "+tx.transactionHash);
+        loadFeeVaultStats();
+      } catch(e) { alert("Failed: "+(e.message||"check console")); }
+      finally { btn.disabled=false; btn.textContent="Convert Fees → PRIVX POL + Vault + Burn"; }
+    }
+
+    async function loadMiningVaultStats() {
+      const set = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+      if (!MINING_VAULT||MINING_VAULT==="DEPLOY_FIRST") { ['mvBalance','mvPeak','mvRate','mvTotalMined'].forEach(id=>set(id,'Coming soon')); return; }
+      const w = web3||new Web3("https://rpc.pulsechain.com");
+      const vault = new w.eth.Contract(MINING_VAULT_ABI, MINING_VAULT);
+      try {
+        const [bal,peak,rate,mined] = await Promise.all([vault.methods.vaultBalance().call(),vault.methods.peakBalance().call(),vault.methods.currentRateBp().call(),vault.methods.totalMined().call()]);
+        set('mvBalance',    fmt18(bal)+' PRIVX');
+        set('mvPeak',       fmt18(peak)+' PRIVX');
+        set('mvRate',       (Number(rate)/100).toFixed(2)+'%');
+        set('mvTotalMined', fmt18(mined)+' PRIVX');
+      } catch(e) { ['mvBalance','mvPeak','mvRate','mvTotalMined'].forEach(id=>set(id,'Error')); }
+    }
+
+    async function triggerTopUp() {
+      if (!userAccount) return alert("Connect wallet first");
+      if (!MINING_VAULT||MINING_VAULT==="DEPLOY_FIRST") return alert("Mining Vault not yet deployed.");
+      const amt = parseFloat(document.getElementById('mvTopUpAmount').value);
+      if (isNaN(amt)||amt<=0) return alert("Enter a valid PRIVX amount");
+      const amtWei = BigInt(Math.floor(amt*1e18)).toString();
+      const btn = document.getElementById('mvTopUpBtn');
+      btn.disabled=true;
+      try {
+        const privxC = new web3.eth.Contract(ERC20_ABI, PRIVX_TOKEN);
+        const allow = await privxC.methods.allowance(userAccount, MINING_VAULT).call();
+        if (BigInt(allow)<BigInt(amtWei)) { btn.textContent="Approving PRIVX…"; await privxC.methods.approve(MINING_VAULT, amtWei).send({from:userAccount}); }
+        btn.textContent="Sending topUp…";
+        const vault = new web3.eth.Contract(MINING_VAULT_ABI, MINING_VAULT);
+        const tx = await vault.methods.topUp(amtWei).send({from:userAccount});
+        if (!tx.status) throw new Error("Reverted");
+        alert("Top up successful!\nTX: "+tx.transactionHash);
+        loadMiningVaultStats();
+      } catch(e) { alert("Failed: "+(e.message||"check console")); }
+      finally { btn.disabled=false; btn.textContent="Top Up Mining Vault"; }
+    }
+
+    // ─── Pool depth (anonymity set size) ─────────────────────────────────────
+    async function loadDepositCounts(token) {
+      const shield = SHIELDS[token];
+      const keys   = ['d0','d1','d2','d3'];
+      const w      = web3 || new Web3("https://rpc.pulsechain.com");
+
+      // Show loading state
+      keys.forEach(k => {
+        const el = document.getElementById('pool-count-' + k);
+        if (el) { el.textContent = 'checking…'; el.className = 'pool-count count-none'; }
+        const b = document.getElementById('pool-badge-' + k);
+        if (b) b.style.display = 'none';
+        const c = document.getElementById('denom-card-' + k);
+        if (c) c.classList.remove('most-popular');
+      });
+
+      // Fetch deposit counts in parallel
+      const counts = await Promise.all(keys.map(async k => {
+        const addr = shield.contracts[k];
+        if (!addr || addr === 'DEPLOY_FIRST') return -1;
+        try {
+          const c = new w.eth.Contract(SHIELD_ABI, addr);
+          return Number(await c.methods.nextLeafIndex().call());
+        } catch(e) { return 0; }
+      }));
+
+      // Find the highest count among deployed pools
+      const deployed = counts.filter(c => c >= 0);
+      const maxCount = deployed.length ? Math.max(...deployed) : 0;
+
+      keys.forEach((k, i) => {
+        const count   = counts[i];
+        const countEl = document.getElementById('pool-count-' + k);
+        const badgeEl = document.getElementById('pool-badge-' + k);
+        const cardEl  = document.getElementById('denom-card-' + k);
+
+        if (count === -1) {
+          // Not yet deployed
+          if (countEl) { countEl.textContent = 'Not yet deployed'; countEl.className = 'pool-count count-none'; }
+          return;
+        }
+
+        // Colour-code the count
+        let cls = 'count-none', label = 'No deposits yet';
+        if (count >= 100)      { cls = 'count-high'; label = `${count} deposits`; }
+        else if (count >= 20)  { cls = 'count-high'; label = `${count} deposits`; }
+        else if (count >= 5)   { cls = 'count-mid';  label = `${count} deposits`; }
+        else if (count > 0)    { cls = 'count-low';  label = `${count} deposit${count===1?'':'s'}`; }
+        if (countEl) { countEl.textContent = label; countEl.className = 'pool-count ' + cls; }
+
+        // Badge logic
+        if (badgeEl) {
+          if (count === maxCount && maxCount > 0) {
+            badgeEl.textContent = '★ Most Popular';
+            badgeEl.className = 'pool-badge badge-popular';
+            badgeEl.style.display = 'inline-block';
+            if (cardEl) cardEl.classList.add('most-popular');
+          } else if (count >= 20) {
+            badgeEl.textContent = '✓ Good Privacy';
+            badgeEl.className = 'pool-badge badge-good';
+            badgeEl.style.display = 'inline-block';
+          } else if (count > 0 && count < 5) {
+            badgeEl.textContent = '⚠ Thin Pool';
+            badgeEl.className = 'pool-badge badge-thin';
+            badgeEl.style.display = 'inline-block';
+          } else {
+            badgeEl.style.display = 'none';
+          }
+        }
+      });
+    }
+
+    // ─── Merkle tree ──────────────────────────────────────────────────────────
+    function buildFullTree(leaves) {
+      const size=1<<TREE_LEVELS, padded=[...leaves];
+      while(padded.length<size) padded.push(0n);
+      const tree=[padded];
+      for(let lvl=0;lvl<TREE_LEVELS;lvl++){
+        const prev=tree[lvl],next=[];
+        for(let i=0;i<prev.length;i+=2) next.push(poseidonFn(prev[i],prev[i+1]));
+        tree.push(next);
+      }
+      return {tree,root:tree[TREE_LEVELS][0]};
+    }
+
+    async function getMerkleProof(shieldContract, targetCommitment) {
+      const events = await shieldContract.getPastEvents("Deposit",{fromBlock:0,toBlock:"latest"});
+      if(!events.length) throw new Error("No deposits in this shield");
+      events.sort((a,b)=>Number(a.returnValues.leafIndex)-Number(b.returnValues.leafIndex));
+      const leaves=events.map(e=>BigInt(e.returnValues.commitment));
+      const leafIndex=leaves.findIndex(l=>l===targetCommitment);
+      if(leafIndex===-1) throw new Error("Commitment not found — correct note?");
+      const {tree,root}=buildFullTree(leaves);
+      const siblings=[],pathIndices=[];
+      let idx=leafIndex;
+      for(let lvl=0;lvl<TREE_LEVELS;lvl++){siblings.push(tree[lvl][idx^1].toString());pathIndices.push(idx&1);idx>>=1;}
+      const onChainRoot=await shieldContract.methods.getLastRoot().call();
+      const localRoot="0x"+root.toString(16).padStart(64,"0");
+      if(localRoot.toLowerCase()!==onChainRoot.toLowerCase()) throw new Error("Merkle root mismatch.\nLocal:"+localRoot+"\nOn-chain:"+onChainRoot);
+      return {pathIndices,siblings,proofRoot:root};
+    }
+
+    // ─── Deposit ──────────────────────────────────────────────────────────────
+    async function deposit() {
+      if(!userAccount||!selectedDenom) return alert("Connect wallet and select a denomination");
+      if(!poseidonFn) return alert("Poseidon not ready — wait a moment");
+      const shield=SHIELDS[selectedToken];
+      const shieldAddr=shield.contracts[selectedDenom];
+      const denomWei=shield.denomWei[selectedDenom];
+      if(!shieldAddr||shieldAddr==="DEPLOY_FIRST") return alert(`${shield.label} shield not yet deployed.`);
+      const btn=document.getElementById("depositBtn");
+      btn.disabled=true; btn.textContent="Generating Note...";
+      try {
+        const nBytes=crypto.getRandomValues(new Uint8Array(31));
+        const sBytes=crypto.getRandomValues(new Uint8Array(31));
+        const nHex=[...nBytes].map(b=>b.toString(16).padStart(2,"0")).join("");
+        const sHex=[...sBytes].map(b=>b.toString(16).padStart(2,"0")).join("");
+        const nullifier=BigInt("0x"+nHex), secret=BigInt("0x"+sHex);
+        const commitmentBI=poseidonFn(nullifier,secret);
+        const commitment="0x"+commitmentBI.toString(16).padStart(64,"0");
+        const denomStr=shield.denoms[['d0','d1','d2','d3'].indexOf(selectedDenom)];
+        const note=`ethos-shield-${selectedToken}-${denomStr}-${nHex}-${sHex}`;
+        document.getElementById("noteText").textContent=note;
+        document.getElementById("depositNote").classList.remove("hidden");
+        const feeWei=(denomWei*BigInt(shield.feeBP))/10000n;
+        const totalApprove=denomWei+feeWei;
+        const assetC=new web3.eth.Contract(ERC20_ABI,shield.token);
+        const shieldC=new web3.eth.Contract(SHIELD_ABI,shieldAddr);
+        const allow=await assetC.methods.allowance(userAccount,shieldAddr).call();
+        if(BigInt(allow)<totalApprove){btn.textContent=`Approving ${shield.label}...`;await assetC.methods.approve(shieldAddr,totalApprove.toString()).send({from:userAccount});}
+        btn.textContent="Depositing...";
+        const tx=await shieldC.methods.deposit(commitment).send({from:userAccount});
+        alert(`Deposit successful!\nTX: ${tx.transactionHash}\n\nSAVE YOUR NOTE — only way to recover funds.`);
+        loadDepositCounts(selectedToken);
+      } catch(err){console.error(err);alert("Deposit failed: "+(err.message||"check MetaMask"));}
+      finally{
+        btn.disabled=false;
+        const s=SHIELDS[selectedToken],d=s.denoms[['d0','d1','d2','d3'].indexOf(selectedDenom)];
+        btn.textContent=`Shield ${Number(d).toLocaleString()} ${s.label}`;
+      }
+    }
+
+    // ─── Withdraw ─────────────────────────────────────────────────────────────
+    async function withdraw() {
+      const noteInput=document.getElementById("withdrawNote").value.trim();
+      if(!noteInput) return alert("Paste your private note first");
+      if(!userAccount) return alert("Connect wallet first");
+      if(!poseidonFn) return alert("Poseidon not ready — wait a moment");
+      const match=noteInput.match(/^ethos-shield-(ethos|pdai|wpls|plsx|hex|prvx|omega|zkp|privx)-(\d+)-([a-fA-F0-9]{62,64})-([a-fA-F0-9]{62,64})$/i);
+      if(!match) return alert("Invalid note format.\nExpected: ethos-shield-<token>-<amount>-<nullifier>-<secret>");
+      let[,tokenKey,denomStr,nHex,sHex]=match; tokenKey=tokenKey.toLowerCase();
+      const shield=SHIELDS[tokenKey];
+      if(!shield) return alert("Unknown token: "+tokenKey);
+      const denomIdx=shield.denoms.indexOf(denomStr);
+      if(denomIdx===-1) return alert("Unsupported denomination: "+denomStr);
+      const denomKey=['d0','d1','d2','d3'][denomIdx];
+      const denomWei=shield.denomWei[denomKey];
+      const shieldAddr=shield.contracts[denomKey];
+      if(!shieldAddr||shieldAddr==="DEPLOY_FIRST") return alert(`No deployed shield for ${shield.label} ${denomStr}.`);
+      const nullifier=BigInt("0x"+nHex), secret=BigInt("0x"+sHex);
+      const commitment=poseidonFn(nullifier,secret);
+      const nullifierHash=poseidonFn(nullifier,denomWei);
+      const shieldC=new web3.eth.Contract(SHIELD_ABI,shieldAddr);
+      let pathIndices,siblings,proofRoot;
+      try{const mp=await getMerkleProof(shieldC,commitment);pathIndices=mp.pathIndices;siblings=mp.siblings;proofRoot=mp.proofRoot;}
+      catch(e){return alert("Merkle proof failed:\n"+e.message);}
+      const recipient=document.getElementById("recipientAddress").value.trim()||userAccount;
+      const circuitInput={nullifier:nullifier.toString(),secret:secret.toString(),pathIndices:pathIndices.map(String),siblings,root:proofRoot.toString(),denomination:denomWei.toString(),nullifierHash:nullifierHash.toString(),recipient:BigInt(recipient).toString()};
+      const btn=document.getElementById("withdrawBtn"); btn.disabled=true;
+      try{
+        const zkeyUrl=await getZkeyUrl(msg=>{btn.textContent=msg;});
+        btn.textContent="Generating ZK proof… (up to 30s)";
+        const{proof:zkProof,publicSignals}=await snarkjs.plonk.fullProve(circuitInput,WASM_URL,zkeyUrl);
+        const calldata=await snarkjs.plonk.exportSolidityCallData(zkProof,publicSignals);
+        const argv=calldata.replace(/\]\s*\[/g,",").replace(/["[\]\s]/g,"").split(",").filter(Boolean);
+        const tx=await shieldC.methods.withdraw(argv.slice(0,24),argv.slice(24,28),recipient).send({from:userAccount});
+        if(!tx.status) throw new Error("Reverted. TX: "+tx.transactionHash);
+        alert(`Withdrawal successful!\nTX: ${tx.transactionHash}\nFunds + PRIVX reward → ${recipient}`);
+      }catch(err){console.error(err);alert("Withdrawal failed: "+(err.message||"check console"));}
+      finally{btn.disabled=false;btn.textContent="Generate ZK Proof + Withdraw";}
+    }
+
+    // ─── MEV wrapper ──────────────────────────────────────────────────────────
+    async function handleWithdraw() {
+      const rpc=document.getElementById('privateRpcUrl').value.trim();
+      if(!rpc) return withdraw();
+      let switched=false;
+      try{await window.ethereum.request({method:'wallet_addEthereumChain',params:[{chainId:'0x171',chainName:'PulseChain (Protected)',rpcUrls:[rpc],nativeCurrency:{name:'PLS',symbol:'PLS',decimals:18},blockExplorerUrls:['https://scan.pulsechain.com']}]});web3=new Web3(window.ethereum);switched=true;}
+      catch(e){if(!confirm("Could not switch to private RPC. Continue with public RPC?")) return;}
+      try{await withdraw();}
+      finally{if(switched){try{await window.ethereum.request({method:'wallet_addEthereumChain',params:[{chainId:'0x171',chainName:'PulseChain',rpcUrls:['https://rpc.pulsechain.com'],nativeCurrency:{name:'PLS',symbol:'PLS',decimals:18},blockExplorerUrls:['https://scan.pulsechain.com']}]});web3=new Web3(window.ethereum);}catch(e){}}}
+    }
+
+    // ─── Wallet ───────────────────────────────────────────────────────────────
+    async function toggleWallet() {
+      if(!window.ethereum) return alert("Install MetaMask");
+      try{
+        await window.ethereum.request({method:"eth_requestAccounts"});
+        try{await window.ethereum.request({method:"wallet_switchEthereumChain",params:[{chainId:"0x171"}]});}
+        catch(e){if(e.code===4902)await window.ethereum.request({method:"wallet_addEthereumChain",params:[{chainId:"0x171",chainName:"PulseChain",rpcUrls:["https://rpc.pulsechain.com"],nativeCurrency:{name:"PLS",symbol:"PLS",decimals:18},blockExplorerUrls:["https://scan.pulsechain.com"]}]});}
+        web3=new Web3(window.ethereum);
+        const accounts=await web3.eth.getAccounts(); userAccount=accounts[0];
+        document.getElementById("walletButtonText").textContent=`${userAccount.slice(0,6)}...${userAccount.slice(-4)}`;
+        document.getElementById("walletButton").classList.add("connected");
+        updateDepositButton(); updateBurnedBalance(); loadVaultBalance(); loadUserBalances();
+      }catch(err){alert("Connection failed: "+(err.message||"check MetaMask"));}
+    }
+    if(window.ethereum) window.ethereum.request({method:"eth_accounts"}).then(a=>a.length>0&&toggleWallet());
+
+    // ─── UI helpers ───────────────────────────────────────────────────────────
+    function switchTab(tab){
+      document.getElementById('depositTab').classList.toggle('hidden',tab!=='deposit');
+      document.getElementById('withdrawTab').classList.toggle('hidden',tab!=='withdraw');
+      document.getElementById('depositTabBtn').classList.toggle('active',tab==='deposit');
+      document.getElementById('withdrawTabBtn').classList.toggle('active',tab==='withdraw');
+    }
+
+    function selectToken(token) {
+      selectedToken=token; selectedDenom=null;
+      document.querySelectorAll('.token-card').forEach(c=>c.classList.remove('active'));
+      document.getElementById('token-'+token).classList.add('active');
+      document.querySelectorAll('.denomination-card').forEach(c=>c.classList.remove('selected'));
+      document.getElementById('depositNote').classList.add('hidden');
+      const shield=SHIELDS[token];
+      const keys=['d0','d1','d2','d3'];
+      keys.forEach((k,i)=>{
+        const denomTokens=Number(shield.denomWei[k]/10n**BigInt(shield.decimals));
+        const feeTokens=denomTokens*shield.feeBP/10000;
+        document.getElementById('denom-amount-'+k).textContent=denomTokens.toLocaleString();
+        document.getElementById('denom-label-'+k).textContent=shield.label;
+        document.getElementById('denom-fee-'+k).textContent=`Fee: ${feeTokens.toLocaleString()} ${shield.label} (0.5%)`;
+        document.getElementById('denom-usd-'+k).textContent=`≈ ${shield.usd[k]}`;
+      });
+      // Update buy button
+      const buyBtn=document.getElementById('buyTokenBtn');
+      if(buyBtn){buyBtn.textContent=`Swap for ${shield.label} on PulseX ↗`;buyBtn.href=shield.swapUrl;}
+      updateDepositButton(); loadVaultBalance(); loadUserBalances();
+      loadDepositCounts(token);
+    }
+
+    function selectDenomination(denom){
+      selectedDenom=denom;
+      document.querySelectorAll('.denomination-card').forEach(c=>c.classList.remove('selected'));
+      event.target.closest('.denomination-card').classList.add('selected');
+      updateDepositButton();
+    }
+
+    function updateDepositButton(){
+      const btn=document.getElementById('depositBtn');
+      const shield=SHIELDS[selectedToken];
+      if(!userAccount){btn.textContent="Connect Wallet First";btn.disabled=true;return;}
+      if(!selectedDenom){btn.textContent="Select a Denomination";btn.disabled=true;return;}
+      const addr=shield.contracts[selectedDenom];
+      if(!addr||addr==="DEPLOY_FIRST"){btn.textContent=`${shield.label} Shield Deploying Soon`;btn.disabled=true;return;}
+      const d=shield.denoms[['d0','d1','d2','d3'].indexOf(selectedDenom)];
+      btn.textContent=`Shield ${Number(d).toLocaleString()} ${shield.label}`;
+      btn.disabled=false;
+    }
+
+    function copyNote(){navigator.clipboard.writeText(document.getElementById('noteText').textContent);alert("Note copied!");}
+
+    async function updateBurnedBalance(){
+      const el=document.getElementById("burnedBalance");
+      if(!el||!web3) return;
+      try{
+        const t=new web3.eth.Contract(ERC20_ABI,PRIVX_TOKEN);
+        const[dead,fire]=await Promise.all([t.methods.balanceOf("0x000000000000000000000000000000000000dEaD").call(),t.methods.balanceOf("0x0000000000000000000000000000000000000369").call()]);
+        el.innerHTML=`<strong>${Number((BigInt(dead)+BigInt(fire))/10n**18n).toLocaleString()}</strong> PRIVX`;
+      }catch(e){el.textContent="Error";}
+    }
+
+    async function loadUserBalances(){
+      if(!web3||!userAccount) return;
+      try{
+        const shield=SHIELDS[selectedToken];
+        const t=new web3.eth.Contract(ERC20_ABI,shield.token);
+        const bal=await t.methods.balanceOf(userAccount).call();
+        const el=document.getElementById("buyTokenBalance");
+        if(el) el.textContent=fmtDec(bal,shield.decimals)+" "+shield.label;
+      }catch(e){}
+    }
+
+    async function loadVaultBalance(){
+      const el=document.getElementById("vaultBalance");
+      const el2=document.getElementById("vaultBalanceBuy");
+      if(!web3) return;
+      if(!MINING_VAULT||MINING_VAULT==="DEPLOY_FIRST"){if(el)el.textContent="–";if(el2)el2.textContent="–";return;}
+      try{
+        const t=new web3.eth.Contract(ERC20_ABI,PRIVX_TOKEN);
+        const bal=await t.methods.balanceOf(MINING_VAULT).call();
+        const v=Number(BigInt(bal)/10n**18n).toLocaleString()+" PRIVX";
+        if(el)el.textContent=v;if(el2)el2.textContent=v;
+      }catch(e){if(el)el.textContent="Error";}
+    }
+
+    // ─── Init ─────────────────────────────────────────────────────────────────
+    window.addEventListener('load',async()=>{
+      document.getElementById("walletButton").onclick=toggleWallet;
+      document.getElementById('depositBtn').onclick=deposit;
+      document.getElementById('withdrawBtn').onclick=handleWithdraw;
+      document.getElementById('depositTabBtn').addEventListener('click',()=>switchTab('deposit'));
+      document.getElementById('withdrawTabBtn').addEventListener('click',()=>switchTab('withdraw'));
+      switchTab('deposit'); selectToken('ethos'); updateDepositButton();
+      document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDocsModal();closeFeeVaultModal();closeMiningVaultModal();}});
+      try{await initPoseidon();console.log("ETHOS Shield ready (Powered by PrivX)");}
+      catch(e){console.error(e);alert("Poseidon failed: "+e.message);}
+      setInterval(updateBurnedBalance,30000);
+      setInterval(loadVaultBalance,30000);
+      setInterval(loadUserBalances,30000);
+    });
+  </script>
+
+  <!-- Matrix rain -->
+  <script>
+    const canvas=document.getElementById('matrix-bg'),ctx=canvas.getContext('2d');
+    canvas.width=innerWidth;canvas.height=innerHeight;
+    let fontSize=innerWidth<600?10:14;
+    const chars='01ETHOSSHIELDPRIVXPLSZKHEX';
+    let columns=Math.floor(canvas.width/fontSize);
+    let drops=Array(columns).fill(1);
+    function draw(){ctx.fillStyle='rgba(0,0,0,0.05)';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#0d9488';ctx.font=fontSize+'px monospace';drops.forEach((y,i)=>{ctx.fillText(chars[Math.floor(Math.random()*chars.length)],i*fontSize,y*fontSize);if(y*fontSize>canvas.height&&Math.random()>0.975)drops[i]=0;drops[i]++;});}
+    function loop(){draw();requestAnimationFrame(loop);}loop();
+    addEventListener('resize',()=>{canvas.width=innerWidth;canvas.height=innerHeight;fontSize=innerWidth<600?10:14;columns=Math.floor(canvas.width/fontSize);drops=Array(columns).fill(1);});
+  </script>
+</body>
+</html>
