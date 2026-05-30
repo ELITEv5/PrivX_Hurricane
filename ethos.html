@@ -408,10 +408,10 @@
       <button class="button" style="margin-bottom:24px;background:rgba(13,148,136,0.15);border:1px solid var(--primary);font-size:14px;padding:13px;box-shadow:none" onclick="loadFeeVaultStats()">↻ Refresh</button>
       <div class="docs-h2" style="margin-top:0">Trigger Conversion</div>
       <label style="display:block;color:#888;font-size:12px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;margin-top:16px">Fee token address</label>
-      <input class="fv-input" id="fvTokenAddr" value="0x7CDaff7Bccf2AA44BA1fC235a2b44D6e8238C81C" placeholder="Token address">
+      <input class="fv-input" id="fvTokenAddr" placeholder="Token address">
       <label style="display:block;color:#888;font-size:12px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;margin-top:12px">Slippage (basis points)</label>
-      <input class="fv-input" id="fvSlippage" type="number" value="600" min="1" max="2000" placeholder="600">
-      <div style="font-size:11px;color:#ffb400;margin:-2px 0 16px 2px">⚠️ ETHOS has 5% swap tax — use 600bp minimum for ETHOS. 200bp for standard tokens.</div>
+      <input class="fv-input" id="fvSlippage" type="number" value="200" min="1" max="2000" placeholder="200">
+      <div style="font-size:11px;color:#ffb400;margin:-2px 0 16px 2px">⚠️ ETHOS, ZKP &amp; OMEGA have 5% swap tax — use 600bp minimum. 200bp for all other tokens.</div>
       <button class="button" id="fvConvertBtn" onclick="triggerFeeVaultConversion()">Convert Fees → PRIVX POL + Vault + Burn</button>
       <div class="warning-box" style="margin-top:16px;font-size:13px">
         <strong>80/10/10 split</strong>
@@ -617,7 +617,15 @@
     // ─── Modal helpers ────────────────────────────────────────────────────────
     function openDocsModal()         { document.getElementById('docsModal').classList.remove('hidden');       document.body.style.overflow='hidden'; }
     function closeDocsModal()        { document.getElementById('docsModal').classList.add('hidden');          document.body.style.overflow=''; }
-    function openFeeVaultModal()     { document.getElementById('feeVaultModal').classList.remove('hidden');   document.body.style.overflow='hidden'; loadFeeVaultStats(); }
+    function openFeeVaultModal() {
+      document.getElementById('feeVaultModal').classList.remove('hidden');
+      document.body.style.overflow='hidden';
+      const shield = SHIELDS[selectedToken];
+      const taxTokens = ['ethos','zkp','omega'];
+      document.getElementById('fvTokenAddr').value = shield.token;
+      document.getElementById('fvSlippage').value  = taxTokens.includes(selectedToken) ? '600' : '200';
+      loadFeeVaultStats();
+    }
     function closeFeeVaultModal()    { document.getElementById('feeVaultModal').classList.add('hidden');      document.body.style.overflow=''; }
     function openMiningVaultModal()  { document.getElementById('miningVaultModal').classList.remove('hidden');document.body.style.overflow='hidden'; loadMiningVaultStats(); }
     function closeMiningVaultModal() { document.getElementById('miningVaultModal').classList.add('hidden');   document.body.style.overflow=''; }
