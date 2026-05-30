@@ -1016,7 +1016,7 @@
     const canvas=document.getElementById('matrix-bg'),ctx=canvas.getContext('2d');
     canvas.width=innerWidth;canvas.height=innerHeight;
     let fontSize=innerWidth<600?10:14;
-    const chars='01ETHOSSHIELDPRIVXPLSZKHEX';
+    const chars='01ETHOSPDAIWPLSXHEXPROVXOMAZGKPRIVX';
     let columns=Math.floor(canvas.width/fontSize);
     let drops=Array(columns).fill(1);
     function draw(){ctx.fillStyle='rgba(0,0,0,0.05)';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#0d9488';ctx.font=fontSize+'px monospace';drops.forEach((y,i)=>{ctx.fillText(chars[Math.floor(Math.random()*chars.length)],i*fontSize,y*fontSize);if(y*fontSize>canvas.height&&Math.random()>0.975)drops[i]=0;drops[i]++;});}
