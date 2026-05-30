@@ -3,10 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ETHOS Shield – Powered by PrivX</title>
+  <title>ETHOS Shield — PulseChain's First PLONK Privacy Protocol</title>
   <link rel="icon" href="ethoslogo.png" type="image/png">
   <meta name="theme-color" content="#0d9488">
-  <meta name="description" content="Shield ETHOS, pDAI, WPLS, PLSX, HEX, PRVX, OMEGA, ZKP and PrivX with zero-knowledge proofs. Every withdrawal earns PRIVX. Powered by PrivX Hurricane.">
+  <meta name="description" content="PulseChain's first multi-token PLONK zero-knowledge privacy shield. Shield ETHOS, pDAI, WPLS, PLSX, HEX, ProvX, OMEGA, ZKP and PrivX. Every withdrawal generates a Proof of Privacy and earns PRIVX. Powered by PrivX Hurricane.">
+  <meta property="og:title" content="ETHOS Shield — PulseChain's First PLONK Privacy Protocol">
+  <meta property="og:description" content="9 tokens. Zero knowledge. Every withdrawal earns PRIVX. The first PLONK-based privacy shield on PulseChain.">
   <style>
     :root {
       --primary: #0d9488;
@@ -16,7 +18,8 @@
       --glow: rgba(13,148,136,0.6);
     }
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 20px 60px;overflow-x:hidden}
+    html{overscroll-behavior:none;-webkit-text-size-adjust:100%}
+    body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 20px 60px;overflow-x:hidden;overscroll-behavior:none;-webkit-overflow-scrolling:touch;position:relative}
     canvas#matrix-bg{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
     .page-wrap{width:100%;max-width:680px;position:relative;z-index:10;display:flex;flex-direction:column;gap:24px;margin-top:60px}
     .container{background:rgba(10,10,10,0.7);backdrop-filter:blur(20px);border-radius:24px;padding:40px 30px;border:1px solid var(--primary);box-shadow:0 0 80px var(--glow),inset 0 0 40px rgba(13,148,136,0.1)}
@@ -69,8 +72,8 @@
     .vault-display .vault-val{color:var(--accent);font-size:1.2em;font-weight:900}
     .hidden{display:none!important}
     .logo-header{text-align:center;margin-bottom:24px}
-    .ethos-logo{max-width:100px;width:100%;height:auto;margin:0 auto 16px;display:block;filter:drop-shadow(0 0 25px var(--glow));transition:transform .3s,filter .3s;border-radius:16px}
-    .ethos-logo:hover{transform:scale(1.07);filter:drop-shadow(0 0 40px var(--accent))}
+    .ethos-logo{width:clamp(100px,20vw,160px);height:auto;margin:0 auto 20px;display:block;filter:drop-shadow(0 0 30px var(--glow));transition:transform .3s,filter .3s;border-radius:20px}
+    .ethos-logo:hover{transform:scale(1.07);filter:drop-shadow(0 0 50px var(--accent))}
     .info-card h2{font-size:1.4em;font-weight:800;color:var(--accent);margin-bottom:20px}
     .faq{display:flex;flex-direction:column;gap:14px;margin-top:4px}
     .faq-item summary{cursor:pointer;font-weight:600;color:#fff;padding:12px 16px;background:rgba(13,148,136,0.1);border-radius:10px;list-style:none;display:flex;justify-content:space-between;align-items:center}
@@ -140,9 +143,10 @@
     <div class="container">
       <div class="logo-header">
         <img src="ethoslogo.png" alt="ETHOS Shield" class="ethos-logo">
-        <h1 style="font-size:2em;font-weight:900;margin-bottom:8px;background:linear-gradient(90deg,#2dd4bf,#0d9488);-webkit-background-clip:text;-webkit-text-fill-color:transparent">ETHOS Shield</h1>
-        <p class="subtitle">Zero-Knowledge Privacy on PulseChain<br>
-          <span style="font-size:0.85em;opacity:0.85">Every withdrawal earns PRIVX <span class="pop-badge">POP</span> <span class="privx-badge">Powered by PrivX</span></span>
+        <h1 style="font-size:clamp(1.8em,5vw,2.4em);font-weight:900;margin-bottom:6px;background:linear-gradient(90deg,#2dd4bf,#0d9488);-webkit-background-clip:text;-webkit-text-fill-color:transparent">ETHOS Shield</h1>
+        <div style="color:#fff;font-size:clamp(0.6em,2.2vw,0.82em);font-weight:700;letter-spacing:1px;margin-bottom:10px;opacity:0.7">PULSECHAIN'S FIRST PLONK-BASED MULTI-TOKEN PRIVACY PROTOCOL</div>
+        <p class="subtitle">9 tokens. Zero knowledge. Every withdrawal earns PRIVX.<br>
+          <span style="font-size:0.85em;opacity:0.85"><span class="pop-badge">POP</span> <span class="privx-badge">Powered by PrivX Hurricane</span></span>
         </p>
       </div>
 
@@ -256,11 +260,143 @@
       </div>
     </div>
 
+    <!-- How It Works -->
+    <div class="info-card">
+      <h2>How It Works</h2>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;gap:16px;align-items:flex-start">
+          <div style="background:var(--primary);color:#fff;font-weight:900;font-size:15px;min-width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 12px var(--glow)">1</div>
+          <div><strong style="color:#fff;display:block;margin-bottom:3px">Choose a token and denomination</strong><p style="color:#aaa;font-size:14px;line-height:1.5">ETHOS Shield supports 9 PulseChain tokens. Select one, pick a denomination, and deposit. Your deposit is recorded on-chain as a cryptographic commitment — your address is never stored.</p></div>
+        </div>
+        <div style="display:flex;gap:16px;align-items:flex-start">
+          <div style="background:var(--primary);color:#fff;font-weight:900;font-size:15px;min-width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 12px var(--glow)">2</div>
+          <div><strong style="color:#fff;display:block;margin-bottom:3px">Save your private note — this is critical</strong><p style="color:#aaa;font-size:14px;line-height:1.5">A secret note is generated entirely in your browser and never touches a server. It is the <em>only</em> way to recover your funds. Write it down. Store it offline. Losing it means losing your deposit permanently — there is no recovery.</p></div>
+        </div>
+        <div style="display:flex;gap:16px;align-items:flex-start">
+          <div style="background:var(--primary);color:#fff;font-weight:900;font-size:15px;min-width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 12px var(--glow)">3</div>
+          <div><strong style="color:#fff;display:block;margin-bottom:3px">Wait — let the anonymity set grow</strong><p style="color:#aaa;font-size:14px;line-height:1.5">Privacy comes from how many people share your pool. The more deposits before you withdraw, the harder it is for anyone to link your withdrawal to your deposit. Waiting hours or days dramatically strengthens your privacy. Always pick the <strong style="color:#fff">★ Most Popular</strong> pool — it has the most deposits.</p></div>
+        </div>
+        <div style="display:flex;gap:16px;align-items:flex-start">
+          <div style="background:var(--primary);color:#fff;font-weight:900;font-size:15px;min-width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 12px var(--glow)">4</div>
+          <div><strong style="color:#fff;display:block;margin-bottom:3px">Withdraw to a fresh wallet</strong><p style="color:#aaa;font-size:14px;line-height:1.5">From a wallet that has never interacted with your deposit address, paste your note and choose a recipient. The app generates a PLONK zero-knowledge proof entirely in your browser — proving you own a valid note without revealing which deposit it came from. The contract verifies the proof on-chain and releases your tokens.</p></div>
+        </div>
+        <div style="display:flex;gap:16px;align-items:flex-start">
+          <div style="background:var(--primary);color:#fff;font-weight:900;font-size:15px;min-width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 12px var(--glow)">5</div>
+          <div><strong style="color:#fff;display:block;margin-bottom:3px">Receive tokens + automatic PRIVX reward</strong><p style="color:#aaa;font-size:14px;line-height:1.5">Your shielded tokens arrive at the recipient address. Simultaneously, the POP Mining Vault pays a PRIVX reward automatically — no claim transaction needed. Every withdrawal is also a <strong style="color:#fff">Proof of Privacy (POP)</strong>.</p></div>
+        </div>
+      </div>
+
+      <div style="margin-top:24px">
+        <h2 style="margin-bottom:16px">What You Need</h2>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px">
+          <div style="background:rgba(13,148,136,0.1);border:1px solid rgba(13,148,136,0.3);border-radius:12px;padding:16px">
+            <strong style="color:var(--accent);display:block;margin-bottom:4px">Any of the 9 tokens</strong>
+            <p style="color:#aaa;font-size:13px;line-height:1.5">ETHOS, pDAI, WPLS, PLSX, HEX, ProvX, OMEGA, ZKP, or PrivX. The 0.5% fee is paid in the same token you're shielding — no PRIVX required to deposit.</p>
+          </div>
+          <div style="background:rgba(13,148,136,0.1);border:1px solid rgba(13,148,136,0.3);border-radius:12px;padding:16px">
+            <strong style="color:var(--accent);display:block;margin-bottom:4px">PRIVX rewards — automatic</strong>
+            <p style="color:#aaa;font-size:13px;line-height:1.5">Every withdrawal earns PRIVX from the POP Mining Vault. No separate transaction, no claiming — it arrives with your tokens automatically.</p>
+          </div>
+          <div style="background:rgba(13,148,136,0.1);border:1px solid rgba(13,148,136,0.3);border-radius:12px;padding:16px">
+            <strong style="color:var(--accent);display:block;margin-bottom:4px">MetaMask or any EIP-1193 wallet</strong>
+            <p style="color:#aaa;font-size:13px;line-height:1.5">Must be on PulseChain (chainId 369). The app will prompt you to switch if needed.</p>
+          </div>
+          <div style="background:rgba(13,148,136,0.1);border:1px solid rgba(13,148,136,0.3);border-radius:12px;padding:16px">
+            <strong style="color:var(--accent);display:block;margin-bottom:4px">PLS for gas</strong>
+            <p style="color:#aaa;font-size:13px;line-height:1.5">A small amount of PLS to pay transaction fees. Gas is extremely cheap on PulseChain.</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:rgba(255,180,0,0.08);border:1px solid rgba(255,180,0,0.3);border-radius:12px;padding:16px;color:#ffb400;font-size:14px;line-height:1.6;margin-top:24px">
+        <strong style="display:block;margin-bottom:4px">Security — Maximum Privacy Checklist</strong>
+        • Never deposit and withdraw from the same wallet<br>
+        • Use a VPN or Tor when withdrawing<br>
+        • Wait for other deposits before withdrawing — check the pool depth badge<br>
+        • Always withdraw to a brand-new wallet with no prior history<br>
+        • Your note is the only recovery — losing it means losing funds permanently<br>
+        • Proof generation takes ~15–30 seconds — do not close the tab
+      </div>
+    </div>
+
+    <!-- PRIVX Mining -->
+    <div class="info-card">
+      <h2>Proof of Privacy Mining <span class="pop-badge">POP</span></h2>
+      <p style="color:#aaa;font-size:14px;line-height:1.7;margin-bottom:16px">ETHOS Shield is built on the PrivX Hurricane protocol — the same ZK circuit, the same verifier, the same mining vault. Every deposit fee strengthens PRIVX. Every withdrawal mines it.</p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+        <div style="background:rgba(13,148,136,0.1);border-radius:10px;padding:12px 16px">
+          <p style="color:#aaa;font-size:13px;line-height:1.5"><strong style="color:#fff">Every deposit fee builds PRIVX.</strong> A 0.5% fee is collected in the shielded token and sent to the Fee Vault. The vault converts it to PRIVX and splits it three ways: <strong style="color:#fff">80%</strong> added as PRIVX/WPLS Protocol-Owned Liquidity (locked permanently), <strong style="color:#fff">10%</strong> sent to the POP Mining Vault to fund rewards, <strong style="color:#fff">10%</strong> burned forever. Every token shielded creates PRIVX buying pressure.</p>
+        </div>
+        <div style="background:rgba(13,148,136,0.1);border-radius:10px;padding:12px 16px">
+          <p style="color:#aaa;font-size:13px;line-height:1.5"><strong style="color:#fff">Mine PRIVX by withdrawing privately.</strong> Every successful withdrawal generates a Proof of Privacy (POP) — a zero-knowledge proof that you own a valid shielded note — and automatically triggers a PRIVX reward from the Mining Vault. No claim transaction. No staking. Just use the protocol and earn.</p>
+        </div>
+        <div style="background:rgba(13,148,136,0.1);border-radius:10px;padding:12px 16px">
+          <p style="color:#aaa;font-size:13px;line-height:1.5"><strong style="color:#fff">Rewards decay as the vault drains.</strong> The reward rate drops quadratically as PRIVX is paid out. The Fee Vault automatically refills the Mining Vault from every deposit across all 9 token shields — POP rewards are self-sustaining as long as the protocol is used.</p>
+        </div>
+        <div style="background:rgba(13,148,136,0.1);border-radius:10px;padding:12px 16px">
+          <p style="color:#aaa;font-size:13px;line-height:1.5"><strong style="color:#fff">Ownerless and immutable.</strong> No admin key, no upgrade proxy, no pause function. The shield contracts cannot be changed after deployment. No entity can freeze withdrawals or censor transactions. If you know the note, you can withdraw — always, unconditionally, forever.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Why Privacy -->
+    <div class="info-card">
+      <h2>Why Financial Privacy Matters</h2>
+      <div style="margin-bottom:20px">
+        <h3 style="color:#fff;font-size:1em;font-weight:700;margin-bottom:8px">Every blockchain transaction is permanently public</h3>
+        <p style="color:#aaa;font-size:14px;line-height:1.7">Every balance, every address, every connection — visible to every employer, government, creditor, and advertiser, forever. Transparency was designed for systems, not for people. When you can be profiled, tracked, and targeted based on your financial history, you don't have a financial system — you have a surveillance system.</p>
+      </div>
+      <div style="margin-bottom:20px">
+        <h3 style="color:#fff;font-size:1em;font-weight:700;margin-bottom:8px">Privacy is not crime</h3>
+        <p style="color:#aaa;font-size:14px;line-height:1.7">Cash has been private for thousands of years. When you pay with a $20 bill, no one records your identity, the time, or your balance. That privacy is not suspicious — it is normal. Shielding tokens privately is the digital equivalent of using cash. The existence of a privacy tool no more implies wrongdoing than owning curtains implies criminality.</p>
+      </div>
+      <div style="margin-bottom:20px">
+        <h3 style="color:#fff;font-size:1em;font-weight:700;margin-bottom:8px">Statistical invisibility through participation</h3>
+        <p style="color:#aaa;font-size:14px;line-height:1.7">When hundreds of users shield funds together, something powerful happens: every deposit adds noise, every withdrawal blends deeper into the crowd. There is no centralized mixer — only mathematics and participation. The more people use it, the stronger the privacy for everyone.</p>
+      </div>
+      <blockquote style="border-left:3px solid var(--primary);padding-left:1rem;margin:1rem 0;color:#ccc;font-style:italic">"Cash doesn't make you a criminal. It makes you free. Privacy on-chain should be no different."</blockquote>
+    </div>
+
+    <!-- FAQ -->
+    <div class="info-card">
+      <h2>FAQ</h2>
+      <div style="display:flex;flex-direction:column;gap:14px;margin-top:4px">
+        <details style="border-radius:10px;overflow:hidden">
+          <summary style="cursor:pointer;font-weight:600;color:#fff;padding:12px 16px;background:rgba(13,148,136,0.1);list-style:none;display:flex;justify-content:space-between;align-items:center">What makes ETHOS Shield unique? <span style="font-size:11px;color:var(--accent)">▼</span></summary>
+          <p style="padding:12px 16px;color:#aaa;font-size:14px;line-height:1.6;border-left:2px solid var(--primary);margin-top:6px">ETHOS Shield is PulseChain's first PLONK-based privacy protocol — and the first of its kind to support multiple tokens simultaneously. It uses the same battle-tested circuit architecture as Tornado Cash (Poseidon Merkle tree, PLONK proofs) extended to 9 tokens, with the addition of PRIVX Proof-of-Privacy mining rewards paid automatically on every withdrawal.</p>
+        </details>
+        <details style="border-radius:10px;overflow:hidden">
+          <summary style="cursor:pointer;font-weight:600;color:#fff;padding:12px 16px;background:rgba(13,148,136,0.1);list-style:none;display:flex;justify-content:space-between;align-items:center">Is my note stored anywhere? <span style="font-size:11px;color:var(--accent)">▼</span></summary>
+          <p style="padding:12px 16px;color:#aaa;font-size:14px;line-height:1.6;border-left:2px solid var(--primary);margin-top:6px">No. Your note is generated entirely inside your browser using the Web Crypto API. It is never sent to a server, never stored on-chain, and never leaves your device unless you copy it. If you lose it, there is no recovery mechanism — the funds are locked in the contract permanently.</p>
+        </details>
+        <details style="border-radius:10px;overflow:hidden">
+          <summary style="cursor:pointer;font-weight:600;color:#fff;padding:12px 16px;background:rgba(13,148,136,0.1);list-style:none;display:flex;justify-content:space-between;align-items:center">What is a zero-knowledge proof? <span style="font-size:11px;color:var(--accent)">▼</span></summary>
+          <p style="padding:12px 16px;color:#aaa;font-size:14px;line-height:1.6;border-left:2px solid var(--primary);margin-top:6px">A ZK proof lets you prove you know a secret without revealing the secret itself. In this protocol, you prove "I know the nullifier and secret for a valid deposit in this Merkle tree" without revealing which deposit is yours. The on-chain verifier checks the mathematical proof — it cannot determine your identity, only that the proof is valid.</p>
+        </details>
+        <details style="border-radius:10px;overflow:hidden">
+          <summary style="cursor:pointer;font-weight:600;color:#fff;padding:12px 16px;background:rgba(13,148,136,0.1);list-style:none;display:flex;justify-content:space-between;align-items:center">Why do I have to pick a fixed denomination? <span style="font-size:11px;color:var(--accent)">▼</span></summary>
+          <p style="padding:12px 16px;color:#aaa;font-size:14px;line-height:1.6;border-left:2px solid var(--primary);margin-top:6px">All deposits in a pool are exactly the same size. When you withdraw, an observer sees "someone withdrew X tokens" but cannot distinguish which of the N depositors you are. Fixed denominations are what makes the privacy mathematically sound — variable amounts would let observers narrow the field immediately. Always pick the pool with the most deposits (★ Most Popular) for the strongest anonymity set.</p>
+        </details>
+        <details style="border-radius:10px;overflow:hidden">
+          <summary style="cursor:pointer;font-weight:600;color:#fff;padding:12px 16px;background:rgba(13,148,136,0.1);list-style:none;display:flex;justify-content:space-between;align-items:center">Can the contracts be paused or upgraded? <span style="font-size:11px;color:var(--accent)">▼</span></summary>
+          <p style="padding:12px 16px;color:#aaa;font-size:14px;line-height:1.6;border-left:2px solid var(--primary);margin-top:6px">No. There is no owner, no admin key, no proxy pattern, and no pause function on the shield contracts. Once deployed they are mathematically immutable. Not the development team, not a multisig, not anyone — can alter them. If you know the note, you can withdraw. Always. Unconditionally. Forever.</p>
+        </details>
+        <details style="border-radius:10px;overflow:hidden">
+          <summary style="cursor:pointer;font-weight:600;color:#fff;padding:12px 16px;background:rgba(13,148,136,0.1);list-style:none;display:flex;justify-content:space-between;align-items:center">Do I need PRIVX to use the shield? <span style="font-size:11px;color:var(--accent)">▼</span></summary>
+          <p style="padding:12px 16px;color:#aaa;font-size:14px;line-height:1.6;border-left:2px solid var(--primary);margin-top:6px">No. You only need the token you want to shield plus a small amount of PLS for gas. The 0.5% protocol fee is paid in the same token you're depositing — no PRIVX required. PRIVX is what you <em>earn</em> on every withdrawal, not what you spend.</p>
+        </details>
+        <details style="border-radius:10px;overflow:hidden">
+          <summary style="cursor:pointer;font-weight:600;color:#fff;padding:12px 16px;background:rgba(13,148,136,0.1);list-style:none;display:flex;justify-content:space-between;align-items:center">Why does proof generation take so long? <span style="font-size:11px;color:var(--accent)">▼</span></summary>
+          <p style="padding:12px 16px;color:#aaa;font-size:14px;line-height:1.6;border-left:2px solid var(--primary);margin-top:6px">PLONK zero-knowledge proofs require heavy computation — downloading the proving key and running polynomial operations on thousands of constraints, all inside your browser. Modern laptops take 15–30 seconds. This computation is what makes the privacy cryptographically sound and cannot be reduced without weakening the security model. Do not close the tab during proof generation.</p>
+        </details>
+      </div>
+    </div>
+
     <!-- Buy section -->
     <div class="info-card" id="buy-section">
       <h2>Get Tokens</h2>
       <p style="color:#aaa;font-size:14px;line-height:1.7;margin-bottom:16px">
-        Select a token above then swap on PulseX. Every shield deposit fee converts to PRIVX — Protocol-Owned Liquidity, mining vault top-up, and permanent burn.
+        Select a token in the shield above then swap on PulseX. Every deposit fee is converted to PRIVX — deepening Protocol-Owned Liquidity, funding mining rewards, and burning supply permanently.
       </p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0">
         <div style="background:rgba(13,148,136,0.1);border:1px solid rgba(13,148,136,0.3);border-radius:12px;padding:16px;text-align:center">
@@ -278,14 +414,14 @@
     <!-- Contracts -->
     <div class="info-card">
       <h2>Verified Contracts</h2>
-      <p style="color:#aaa;font-size:14px;margin-bottom:16px">All contracts immutable and unowned. No admin keys, no upgrade proxies, no pause functions.</p>
+      <p style="color:#aaa;font-size:14px;margin-bottom:16px">All shield contracts are immutable and unowned from the moment of deployment. No admin keys, no upgrade proxies, no pause functions. The code is the law.</p>
 
       <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;letter-spacing:1px">SHARED INFRASTRUCTURE</p>
       <table class="contract-table">
         <tr><td>PRIVX Token</td><td><a href="https://scan.pulsechain.com/address/0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986" target="_blank">0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986 ↗</a></td></tr>
         <tr><td>PLONK Verifier</td><td><a href="https://scan.pulsechain.com/address/0xcEDa1071542d537221B5a01BFd1cF920cF8B9829" target="_blank">0xcEDa1071542d537221B5a01BFd1cF920cF8B9829 ↗</a></td></tr>
         <tr><td>Poseidon Hasher</td><td><a href="https://scan.pulsechain.com/address/0x72740d65A93f2e9d9741234371d62FeE36AEf9dF" target="_blank">0x72740d65A93f2e9d9741234371d62FeE36AEf9dF ↗</a></td></tr>
-        <tr><td>Mining Vault</td><td><a href="https://scan.pulsechain.com/address/0x49eF06F0fD4b691E860F4c5fa31a3202C2166d7b" target="_blank">0x49eF06F0fD4b691E860F4c5fa31a3202C2166d7b ↗</a></td></tr>
+        <tr><td>Mining Vault</td><td><a href="https://scan.pulsechain.com/address/0x75bAEca9DEb3848Dd823c78c2C850e0aC3C043e6" target="_blank">0x75bAEca9DEb3848Dd823c78c2C850e0aC3C043e6 ↗</a></td></tr>
         <tr><td>Fee Vault</td><td><a href="https://scan.pulsechain.com/address/0x51B9926D8386a733830c11806Ba209Ce13EB6C73" target="_blank">0x51B9926D8386a733830c11806Ba209Ce13EB6C73 ↗</a></td></tr>
       </table>
 
@@ -370,25 +506,42 @@
       <button class="modal-close" onclick="closeDocsModal()">✕</button>
       <div class="docs-h1">ETHOS Shield — Protocol Docs</div>
       <p class="docs-p" style="border-left:3px solid var(--primary);padding-left:14px;font-style:italic;margin-bottom:24px">
-        Zero-knowledge privacy for 9 PulseChain tokens. Powered by PrivX Hurricane. Shield tokens, generate a Proof of Privacy, earn PRIVX.
+        PulseChain's first PLONK-based multi-token privacy protocol. Shield 9 tokens. Generate a Proof of Privacy. Mine PRIVX on every withdrawal.<br><br>
+        <strong style="color:#fff">Chain:</strong> PulseChain (chainId 369) &nbsp;·&nbsp; <strong style="color:#fff">Circuit:</strong> PrivXMixer(14) PLONK &nbsp;·&nbsp; <strong style="color:#fff">Powered by:</strong> PrivX Hurricane
       </p>
+      <div class="docs-h2">What Is ETHOS Shield?</div>
+      <p class="docs-p">ETHOS Shield is PulseChain's first PLONK-based privacy protocol, and the first of its kind to shield multiple tokens simultaneously. Deposit any of 9 supported tokens into a shielded pool and withdraw them to a completely unlinked address. Every withdrawal generates a <strong style="color:#fff">Proof of Privacy (POP)</strong> and automatically pays PRIVX mining rewards. No PRIVX required to deposit — it is what you earn, not what you spend.</p>
       <div class="docs-h2">Supported Tokens</div>
       <table class="docs-table">
-        <tr><th>Token</th><th>Denominations</th><th>USD Range</th></tr>
-        <tr><td>ETHOS</td><td>100 / 1K / 10K / 100K</td><td>$13 – $13,200</td></tr>
-        <tr><td>pDAI</td><td>10K / 100K / 1M / 10M</td><td>$16 – $16,000</td></tr>
-        <tr><td>WPLS</td><td>1M / 10M / 100M / 1B</td><td>$7 – $7,000</td></tr>
-        <tr><td>PLSX</td><td>1M / 10M / 100M / 1B</td><td>$5 – $5,200</td></tr>
-        <tr><td>HEX</td><td>10K / 100K / 1M / 10M</td><td>$11 – $11,000</td></tr>
-        <tr><td>ProvX</td><td>100K / 1M / 10M / 100M</td><td>$4 – $4,400</td></tr>
-        <tr><td>OMEGA</td><td>10K / 100K / 1M / 10M</td><td>$3 – $3,100</td></tr>
-        <tr><td>ZKP</td><td>10K / 100K / 1M / 10M</td><td>$3 – $3,000</td></tr>
-        <tr><td>PrivX</td><td>10K / 100K / 1M / 10M</td><td>$6 – $5,600</td></tr>
+        <tr><th>Token</th><th>Denominations</th><th>Notes</th></tr>
+        <tr><td>ETHOS</td><td>10 / 100 / 1K / 10K</td><td>5% swap tax</td></tr>
+        <tr><td>pDAI</td><td>1K / 10K / 100K / 1M</td><td>Standard</td></tr>
+        <tr><td>WPLS</td><td>100K / 1M / 10M / 100M</td><td>Standard</td></tr>
+        <tr><td>PLSX</td><td>100K / 1M / 10M / 100M</td><td>Standard</td></tr>
+        <tr><td>HEX</td><td>1K / 10K / 100K / 1M</td><td>8 decimals</td></tr>
+        <tr><td>ProvX</td><td>10K / 100K / 1M / 10M</td><td>Standard</td></tr>
+        <tr><td>OMEGA</td><td>1K / 10K / 100K / 1M</td><td>5% swap tax</td></tr>
+        <tr><td>ZKP</td><td>1K / 10K / 100K / 1M</td><td>5% swap tax</td></tr>
+        <tr><td>PrivX</td><td>1K / 10K / 100K / 1M</td><td>Standard</td></tr>
       </table>
       <div class="docs-h2">Fee Flow</div>
-      <p class="docs-p">0.5% fee on every deposit in the shielded token → Fee Vault → swapped to PRIVX → 80% Protocol-Owned Liquidity / 10% Mining Vault (POP rewards) / 10% permanent burn. No PRIVX required to use any shield.</p>
+      <p class="docs-p">0.5% fee in the shielded token → Fee Vault → swapped to PRIVX → 80% PRIVX/WPLS Protocol-Owned Liquidity (locked permanently) / 10% POP Mining Vault (self-funding rewards) / 10% burned to dead address. Every token shielded creates permanent PRIVX buying pressure.</p>
       <div class="docs-h2">ZK Circuit</div>
-      <p class="docs-p">Shared PrivXMixer(14) PLONK circuit — 14-level Poseidon Merkle tree, 16,384 leaves per pool. Same verifier and hasher as PrivX Hurricane. Proof generation in browser ~15–30s.</p>
+      <p class="docs-p">PrivXMixer(14) — 14-level incremental Poseidon Merkle tree, 16,384 leaves per pool. PLONK proof with public signals: root, nullifierHash, denomination, recipient. The recipient is cryptographically bound — MEV bots cannot redirect your withdrawal. Proof generation ~15–30s in-browser. Same verifier and proving key as PrivX Hurricane.</p>
+      <div class="docs-h2">Security Properties</div>
+      <table class="docs-table">
+        <tr><th>Property</th><th>Status</th></tr>
+        <tr><td>No owner / admin key on shields</td><td><span style="color:#00ff88">✅</span></td></tr>
+        <tr><td>No upgrade proxy</td><td><span style="color:#00ff88">✅</span></td></tr>
+        <tr><td>No pause function</td><td><span style="color:#00ff88">✅</span></td></tr>
+        <tr><td>Recipient bound to ZK proof</td><td><span style="color:#00ff88">✅</span> MEV-safe</td></tr>
+        <tr><td>Double-spend prevention</td><td><span style="color:#00ff88">✅</span> Nullifier mapping</td></tr>
+        <tr><td>Reentrancy protection</td><td><span style="color:#00ff88">✅</span> OpenZeppelin</td></tr>
+        <tr><td>Safe token transfers</td><td><span style="color:#00ff88">✅</span> OpenZeppelin SafeERC20</td></tr>
+      </table>
+      <div style="margin-top:32px;padding-top:20px;border-top:1px solid rgba(13,148,136,0.25);text-align:center">
+        <p class="docs-p" style="margin:0">ETHOS Shield — Powered by PrivX Hurricane &nbsp;·&nbsp; PulseChain Mainnet &nbsp;·&nbsp; 2025</p>
+      </div>
     </div>
   </div>
 
@@ -426,7 +579,7 @@
       <button class="modal-close" onclick="closeMiningVaultModal()">✕</button>
       <div class="docs-h1">⛏ POP Mining Vault</div>
       <p class="docs-p" style="margin-bottom:6px">Pays PRIVX rewards on every ETHOS Shield withdrawal. Quadratic decay — fuller vault = higher rate. Auto-refills from Fee Vault conversions.</p>
-      <div style="margin-bottom:20px"><a href="https://scan.pulsechain.com/address/0x49eF06F0fD4b691E860F4c5fa31a3202C2166d7b" target="_blank" style="color:#555;font-size:12px;font-family:monospace;text-decoration:none">0x49eF06F0fD4b691E860F4c5fa31a3202C2166d7b ↗</a></div>
+      <div style="margin-bottom:20px"><a href="https://scan.pulsechain.com/address/0x75bAEca9DEb3848Dd823c78c2C850e0aC3C043e6" target="_blank" style="color:#555;font-size:12px;font-family:monospace;text-decoration:none">0x75bAEca9DEb3848Dd823c78c2C850e0aC3C043e6 ↗</a></div>
       <div class="fv-grid">
         <div class="fv-stat"><div class="fv-slabel">Vault Balance</div><div class="fv-sval" id="mvBalance">—</div></div>
         <div class="fv-stat"><div class="fv-slabel">Peak Balance</div><div class="fv-sval" id="mvPeak">—</div></div>
@@ -453,7 +606,7 @@
     // ─── Contract Addresses ───────────────────────────────────────────────────
     const PRIVX_TOKEN = "0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986";
     const FEE_VAULT   = "0x51B9926D8386a733830c11806Ba209Ce13EB6C73";
-    const MINING_VAULT = "0x49eF06F0fD4b691E860F4c5fa31a3202C2166d7b";
+    const MINING_VAULT = "0x75bAEca9DEb3848Dd823c78c2C850e0aC3C043e6";
 
     // ─── Shield Config ────────────────────────────────────────────────────────
     // denomWei: denomination in the token's native wei units
