@@ -724,7 +724,7 @@
       { inputs:[{internalType:"bytes32",name:"_commitment",type:"bytes32"}], name:"deposit", outputs:[], stateMutability:"nonpayable", type:"function" },
       { inputs:[{internalType:"uint256[24]",name:"proof",type:"uint256[24]"},{internalType:"uint256[4]",name:"pubSignals",type:"uint256[4]"},{internalType:"address",name:"recipient",type:"address"}], name:"withdraw", outputs:[], stateMutability:"nonpayable", type:"function" },
       { inputs:[], name:"getLastRoot", outputs:[{internalType:"bytes32",name:"",type:"bytes32"}], stateMutability:"view", type:"function" },
-      { inputs:[], name:"nextLeafIndex", outputs:[{internalType:"uint32",name:"",type:"uint32"}], stateMutability:"view", type:"function" },
+      { inputs:[], name:"depositCount", outputs:[{internalType:"uint32",name:"",type:"uint32"}], stateMutability:"view", type:"function" },
       { anonymous:false, inputs:[{indexed:true,internalType:"bytes32",name:"commitment",type:"bytes32"},{indexed:false,internalType:"uint32",name:"leafIndex",type:"uint32"},{indexed:false,internalType:"uint256",name:"timestamp",type:"uint256"}], name:"Deposit", type:"event" }
     ];
     const FEE_VAULT_ABI = [
@@ -875,7 +875,7 @@
         if (!addr || addr === 'DEPLOY_FIRST') return -1;
         try {
           const c = new w.eth.Contract(SHIELD_ABI, addr);
-          return Number(await c.methods.nextLeafIndex().call());
+          return Number(await c.methods.depositCount().call());
         } catch(e) { return 0; }
       }));
 
