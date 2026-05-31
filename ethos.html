@@ -769,10 +769,11 @@
     function openFeeVaultModal() {
       document.getElementById('feeVaultModal').classList.remove('hidden');
       document.body.style.overflow='hidden';
-      const shield = SHIELDS[selectedToken];
+      const tokenKey = selectedToken || 'wpls';
+      const shield = SHIELDS[tokenKey];
       const taxTokens = ['ethos','zkp','omega'];
-      document.getElementById('fvTokenAddr').value = shield.token;
-      document.getElementById('fvSlippage').value  = taxTokens.includes(selectedToken) ? '600' : '200';
+      document.getElementById('fvTokenAddr').value = shield ? shield.token : '';
+      document.getElementById('fvSlippage').value  = taxTokens.includes(tokenKey) ? '600' : '200';
       loadFeeVaultStats();
     }
     function closeFeeVaultModal()    { document.getElementById('feeVaultModal').classList.add('hidden');      document.body.style.overflow=''; }
