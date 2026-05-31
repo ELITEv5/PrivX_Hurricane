@@ -40,9 +40,15 @@
     .token-card{padding:10px 8px;border:2px solid rgba(255,255,255,0.1);border-radius:12px;background:rgba(20,20,20,0.6);cursor:pointer;transition:all .3s;text-align:center}
     .token-card:hover{border-color:var(--primary)}
     .token-card.active{background:rgba(13,148,136,0.25);border-color:var(--primary);box-shadow:0 0 20px var(--glow)}
+    .token-card.live{border-color:rgba(232,184,75,0.5);background:rgba(232,184,75,0.07);box-shadow:0 0 16px rgba(232,184,75,0.25)}
+    .token-card.live:hover{border-color:#E8B84B;box-shadow:0 0 24px rgba(232,184,75,0.45)}
+    .token-card.live.active{border-color:#E8B84B;background:rgba(232,184,75,0.18);box-shadow:0 0 28px rgba(232,184,75,0.55)}
     .token-card .tc-name{font-weight:800;font-size:14px;color:#fff;margin-bottom:2px}
     .token-card .tc-sub{font-size:10px;color:#888;line-height:1.3}
     .token-card.active .tc-sub{color:var(--accent)}
+    .token-card.live .tc-sub{color:#E8B84B}
+    .tc-live{display:inline-block;font-size:8px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#E8B84B;background:rgba(232,184,75,0.15);border:1px solid rgba(232,184,75,0.4);border-radius:4px;padding:1px 5px;margin-top:3px}
+    .tc-soon{font-size:9px;color:#b8860b;letter-spacing:.5px;margin-top:2px;opacity:0.8}
     .denomination-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:0 0 20px}
     .denomination-card{background:var(--card);border:2px solid transparent;border-radius:16px;padding:20px;cursor:pointer;transition:all .4s;text-align:center}
     .denomination-card:hover{border-color:var(--primary);transform:translateY(-6px);box-shadow:0 12px 40px rgba(13,148,136,0.4)}
@@ -160,15 +166,15 @@
 
         <!-- 3×3 token selector -->
         <div class="token-grid">
-          <div class="token-card active" id="token-ethos"  onclick="selectToken('ethos')"><div class="tc-name">ETHOS</div><div class="tc-sub">Yield Token</div></div>
-          <div class="token-card"        id="token-pdai"   onclick="selectToken('pdai')"><div class="tc-name">pDAI</div><div class="tc-sub">Stable Asset</div></div>
-          <div class="token-card"        id="token-wpls"   onclick="selectToken('wpls')"><div class="tc-name">PLS</div><div class="tc-sub">PulseChain</div></div>
-          <div class="token-card"        id="token-plsx"   onclick="selectToken('plsx')"><div class="tc-name">PLSX</div><div class="tc-sub">DEX Token</div></div>
-          <div class="token-card"        id="token-hex"    onclick="selectToken('hex')"><div class="tc-name">HEX</div><div class="tc-sub">Certificate of Deposit</div></div>
-          <div class="token-card"        id="token-prvx"   onclick="selectToken('prvx')"><div class="tc-name">ProvX</div><div class="tc-sub">PulseChain Token</div></div>
-          <div class="token-card"        id="token-omega"  onclick="selectToken('omega')"><div class="tc-name">OMEGA</div><div class="tc-sub">Yields HEX</div></div>
-          <div class="token-card"        id="token-zkp"    onclick="selectToken('zkp')"><div class="tc-name">ZKP</div><div class="tc-sub">Yields PRVX</div></div>
-          <div class="token-card"        id="token-privx"  onclick="selectToken('privx')"><div class="tc-name">PrivX</div><div class="tc-sub">Privacy Mining</div></div>
+          <div class="token-card live active" id="token-pdai" onclick="selectToken('pdai')"><div class="tc-name">pDAI</div><div class="tc-sub">Stable Asset</div><div class="tc-live">Live Now</div></div>
+          <div class="token-card live"   id="token-wpls"   onclick="selectToken('wpls')"><div class="tc-name">PLS</div><div class="tc-sub">PulseChain</div><div class="tc-live">Live Now</div></div>
+          <div class="token-card live"   id="token-privx"  onclick="selectToken('privx')"><div class="tc-name">PrivX</div><div class="tc-sub">Privacy Mining</div><div class="tc-live">Live Now</div></div>
+          <div class="token-card"        id="token-ethos"  onclick="selectToken('ethos')"><div class="tc-name">ETHOS</div><div class="tc-sub">Yield Token</div><div class="tc-soon">Coming Soon</div></div>
+          <div class="token-card"        id="token-plsx"   onclick="selectToken('plsx')"><div class="tc-name">PLSX</div><div class="tc-sub">DEX Token</div><div class="tc-soon">Coming Soon</div></div>
+          <div class="token-card"        id="token-hex"    onclick="selectToken('hex')"><div class="tc-name">HEX</div><div class="tc-sub">Certificate of Deposit</div><div class="tc-soon">Coming Soon</div></div>
+          <div class="token-card"        id="token-prvx"   onclick="selectToken('prvx')"><div class="tc-name">ProvX</div><div class="tc-sub">PulseChain Token</div><div class="tc-soon">Coming Soon</div></div>
+          <div class="token-card"        id="token-omega"  onclick="selectToken('omega')"><div class="tc-name">OMEGA</div><div class="tc-sub">Yields HEX</div><div class="tc-soon">Coming Soon</div></div>
+          <div class="token-card"        id="token-zkp"    onclick="selectToken('zkp')"><div class="tc-name">ZKP</div><div class="tc-sub">Yields PRVX</div><div class="tc-soon">Coming Soon</div></div>
         </div>
 
         <div class="denomination-grid">
@@ -707,7 +713,7 @@
 
     // ─── State ────────────────────────────────────────────────────────────────
     let web3, userAccount, selectedDenom;
-    let selectedToken = 'ethos';
+    let selectedToken = 'pdai';
     let poseidonFn = null, _zkeyBlobUrl = null;
 
     // ─── ABIs ─────────────────────────────────────────────────────────────────
