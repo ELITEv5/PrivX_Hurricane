@@ -631,7 +631,7 @@
       wpls: {
         label: "PLS", sublabel: "PulseChain",
         token: "0xA1077a294dDE1B09bB078844df40758a5D0f9a27",
-        decimals: 18, feeBP: 50,
+        decimals: 18, feeBP: 50, isNative: true,
         swapUrl: "https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=0xA1077a294dDE1B09bB078844df40758a5D0f9a27",
         contracts: { d0:"0x50692426BbaAE38f56eA0F9319271ecE5f7487Ec", d1:"0xA2d8470f4337411320Cfc40eE552Ab9A6b703ECc", d2:"0x820E27C203a840Dec0b6f1c1387feAE4C9Ae530D", d3:"0x87B8B44Bf24fB905E0d010919134D4123410aedF" },
         denoms:   ["100000","1000000","10000000","100000000"],
@@ -950,13 +950,19 @@
         document.getElementById("noteText").textContent=note;
         document.getElementById("depositNote").classList.remove("hidden");
         const feeWei=(denomWei*BigInt(shield.feeBP))/10000n;
-        const totalApprove=denomWei+feeWei;
-        const assetC=new web3.eth.Contract(ERC20_ABI,shield.token);
+        const totalValue=denomWei+feeWei;
         const shieldC=new web3.eth.Contract(SHIELD_ABI,shieldAddr);
-        const allow=await assetC.methods.allowance(userAccount,shieldAddr).call();
-        if(BigInt(allow)<totalApprove){btn.textContent=`Approving ${shield.label}...`;await assetC.methods.approve(shieldAddr,totalApprove.toString()).send({from:userAccount});}
-        btn.textContent="Depositing...";
-        const tx=await shieldC.methods.deposit(commitment).send({from:userAccount});
+        let tx;
+        if(shield.isNative){
+          btn.textContent="Depositing...";
+          tx=await shieldC.methods.deposit(commitment).send({from:userAccount,value:totalValue.toString()});
+        } else {
+          const assetC=new web3.eth.Contract(ERC20_ABI,shield.token);
+          const allow=await assetC.methods.allowance(userAccount,shieldAddr).call();
+          if(BigInt(allow)<totalValue){btn.textContent=`Approving ${shield.label}...`;await assetC.methods.approve(shieldAddr,totalValue.toString()).send({from:userAccount});}
+          btn.textContent="Depositing...";
+          tx=await shieldC.methods.deposit(commitment).send({from:userAccount});
+        }
         alert(`Deposit successful!\nTX: ${tx.transactionHash}\n\nSAVE YOUR NOTE — only way to recover funds.`);
         loadDepositCounts(selectedToken);
       } catch(err){console.error(err);alert("Deposit failed: "+(err.message||"check MetaMask"));}
