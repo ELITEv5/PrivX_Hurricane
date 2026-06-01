@@ -171,7 +171,7 @@
           <div class="token-card live active" id="token-pdai" onclick="selectToken('pdai')"><div class="tc-name">pDAI</div><div class="tc-sub">Stable Asset</div><div class="tc-live">Live Now</div></div>
           <div class="token-card live"   id="token-wpls"   onclick="selectToken('wpls')"><div class="tc-name">PLS</div><div class="tc-sub">PulseChain</div><div class="tc-live">Live Now</div></div>
           <div class="token-card live"   id="token-privx"  onclick="selectToken('privx')"><div class="tc-name">PrivX</div><div class="tc-sub">Privacy Mining</div><div class="tc-live">Live Now</div></div>
-          <div class="token-card"        id="token-ethos"  onclick="selectToken('ethos')"><div class="tc-name">ETHOS</div><div class="tc-sub">Yield Token</div><div class="tc-soon">Coming Soon</div></div>
+          <div class="token-card live"   id="token-ethos"  onclick="selectToken('ethos')"><div class="tc-name">ETHOS</div><div class="tc-sub">Yield Token</div><div class="tc-live">Live Now</div></div>
           <div class="token-card"        id="token-plsx"   onclick="selectToken('plsx')"><div class="tc-name">PLSX</div><div class="tc-sub">DEX Token</div><div class="tc-soon">Coming Soon</div></div>
           <div class="token-card"        id="token-hex"    onclick="selectToken('hex')"><div class="tc-name">HEX</div><div class="tc-sub">Certificate of Deposit</div><div class="tc-soon">Coming Soon</div></div>
           <div class="token-card"        id="token-prvx"   onclick="selectToken('prvx')"><div class="tc-name">ProvX</div><div class="tc-sub">PulseChain Token</div><div class="tc-soon">Coming Soon</div></div>
@@ -435,10 +435,10 @@
 
       <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">ETHOS SHIELDS</p>
       <table class="contract-table">
-        <tr><td>10 ETHOS</td><td id="ct-ethos-d0" style="color:#555">Deploying soon…</td></tr>
-        <tr><td>100 ETHOS</td><td id="ct-ethos-d1" style="color:#555">Deploying soon…</td></tr>
-        <tr><td>1,000 ETHOS</td><td id="ct-ethos-d2" style="color:#555">Deploying soon…</td></tr>
-        <tr><td>10,000 ETHOS</td><td id="ct-ethos-d3" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>10 ETHOS</td><td><a href="https://scan.pulsechain.com/address/0xD9870Ce1FE01e1EBf80191a1F541A9d43b43f0e9" target="_blank">0xD9870Ce1FE01e1EBf80191a1F541A9d43b43f0e9 ↗</a></td></tr>
+        <tr><td>100 ETHOS</td><td><a href="https://scan.pulsechain.com/address/0x1F25dd6Dea3284e5575a03c3d68cAD13FdaF2Dda" target="_blank">0x1F25dd6Dea3284e5575a03c3d68cAD13FdaF2Dda ↗</a></td></tr>
+        <tr><td>1,000 ETHOS</td><td><a href="https://scan.pulsechain.com/address/0x0134BbB49ab02e30c7192b42880eA9aE995E31BD" target="_blank">0x0134BbB49ab02e30c7192b42880eA9aE995E31BD ↗</a></td></tr>
+        <tr><td>10,000 ETHOS</td><td><a href="https://scan.pulsechain.com/address/0xC79d2eBa222BC9bC05eB54F40A79463A9B39556C" target="_blank">0xC79d2eBa222BC9bC05eB54F40A79463A9B39556C ↗</a></td></tr>
       </table>
 
       <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">pDAI SHIELDS</p>
@@ -612,7 +612,8 @@
   <script>
     // ─── Contract Addresses ───────────────────────────────────────────────────
     const PRIVX_TOKEN = "0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986";
-    const FEE_VAULT   = "0x54818356b47b5F7b52DceAbf2B6eF52Cf8b072Fd";
+    const FEE_VAULT      = "0x54818356b47b5F7b52DceAbf2B6eF52Cf8b072Fd";
+    const BURN_FEE_VAULT = "0x7c6ca8c69b1524b3b9712Caf86323E2197b15576";
     const MINING_VAULT = "0x7f6D1165a15a7DC4Bbbf27C6C18de7bfAA9E718C";
 
     // ─── Shield Config ────────────────────────────────────────────────────────
@@ -626,7 +627,7 @@
         token: "0x7CDaff7Bccf2AA44BA1fC235a2b44D6e8238C81C",
         decimals: 18, feeBP: 50,
         swapUrl: "https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=0x7CDaff7Bccf2AA44BA1fC235a2b44D6e8238C81C",
-        contracts: { d0:"DEPLOY_FIRST", d1:"DEPLOY_FIRST", d2:"DEPLOY_FIRST", d3:"DEPLOY_FIRST" },
+        contracts: { d0:"0xD9870Ce1FE01e1EBf80191a1F541A9d43b43f0e9", d1:"0x1F25dd6Dea3284e5575a03c3d68cAD13FdaF2Dda", d2:"0x0134BbB49ab02e30c7192b42880eA9aE995E31BD", d3:"0xC79d2eBa222BC9bC05eB54F40A79463A9B39556C" },
         denoms:   ["10","100","1000","10000"],
         denomWei: { d0:10000000000000000000n, d1:100000000000000000000n, d2:1000000000000000000000n, d3:10000000000000000000000n },
       },
@@ -741,6 +742,13 @@
       { inputs:[], name:"totalPrivxToVault", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" },
       { inputs:[], name:"polLpBalance", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" }
     ];
+    const BURN_FEE_VAULT_ABI = [
+      { inputs:[{name:"slippageBP",type:"uint256"}], name:"convertAuto", outputs:[], stateMutability:"nonpayable", type:"function" },
+      { inputs:[], name:"accumulated", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" },
+      { inputs:[], name:"totalPrivxBurned", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" },
+      { inputs:[], name:"totalPrivxToVault", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" },
+      { inputs:[], name:"polLpBalance", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" }
+    ];
     const MINING_VAULT_ABI = [
       { inputs:[], name:"vaultBalance", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" },
       { inputs:[], name:"peakBalance", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" },
@@ -793,13 +801,17 @@
 
     async function loadFeeVaultStats() {
       const set = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
-      if (!FEE_VAULT || FEE_VAULT==="DEPLOY_FIRST") { ['fvTotalBurned','fvTotalVault','fvLpLocked','fvAccumulated'].forEach(id=>set(id,'Coming soon')); return; }
+      const isEthos = selectedToken === 'ethos';
+      const vaultAddr = isEthos ? BURN_FEE_VAULT : FEE_VAULT;
+      const vaultAbi  = isEthos ? BURN_FEE_VAULT_ABI : FEE_VAULT_ABI;
+      if (!vaultAddr || vaultAddr==="DEPLOY_FIRST") { ['fvTotalBurned','fvTotalVault','fvLpLocked','fvAccumulated'].forEach(id=>set(id,'Coming soon')); return; }
       const w = web3 || new Web3("https://rpc.pulsechain.com");
-      const vault = new w.eth.Contract(FEE_VAULT_ABI, FEE_VAULT);
+      const vault = new w.eth.Contract(vaultAbi, vaultAddr);
       const privxC = new w.eth.Contract(ERC20_ABI, PRIVX_TOKEN);
       const shield = SHIELDS[selectedToken];
       try {
-        const [dead,fire,toVault,lp,acc] = await Promise.all([privxC.methods.balanceOf("0x000000000000000000000000000000000000dEaD").call(), privxC.methods.balanceOf("0x0000000000000000000000000000000000000369").call(), vault.methods.totalPrivxToVault().call(), vault.methods.polLpBalance().call(), vault.methods.accumulated(shield.token).call()]);
+        const accCall = isEthos ? vault.methods.accumulated().call() : vault.methods.accumulated(shield.token).call();
+        const [dead,fire,toVault,lp,acc] = await Promise.all([privxC.methods.balanceOf("0x000000000000000000000000000000000000dEaD").call(), privxC.methods.balanceOf("0x0000000000000000000000000000000000000369").call(), vault.methods.totalPrivxToVault().call(), vault.methods.polLpBalance().call(), accCall]);
         set('fvTotalBurned', fmt18(BigInt(dead)+BigInt(fire))+' PRIVX');
         set('fvTotalVault',  fmt18(toVault)+' PRIVX');
         set('fvLpLocked',    fmt18(lp)+' LP Tokens');
@@ -809,16 +821,21 @@
 
     async function triggerFeeVaultConversion() {
       if (!userAccount) return alert("Connect wallet first");
-      if (!FEE_VAULT || FEE_VAULT==="DEPLOY_FIRST") return alert("Fee Vault not yet deployed.");
+      const isEthos  = selectedToken === 'ethos';
+      const vaultAddr = isEthos ? BURN_FEE_VAULT : FEE_VAULT;
+      const vaultAbi  = isEthos ? BURN_FEE_VAULT_ABI : FEE_VAULT_ABI;
+      if (!vaultAddr || vaultAddr==="DEPLOY_FIRST") return alert("Fee Vault not yet deployed.");
       const tokenAddr = document.getElementById('fvTokenAddr').value.trim();
       const slippage  = parseInt(document.getElementById('fvSlippage').value, 10);
-      if (!tokenAddr) return alert("Enter a token address");
+      if (!isEthos && !tokenAddr) return alert("Enter a token address");
       if (isNaN(slippage)||slippage<1||slippage>=10000) return alert("Slippage must be 1–9999");
       const btn = document.getElementById('fvConvertBtn');
       btn.disabled=true; btn.textContent="Sending…";
       try {
-        const vault = new web3.eth.Contract(FEE_VAULT_ABI, FEE_VAULT);
-        const tx = await vault.methods.convertAuto(tokenAddr, slippage).send({from:userAccount});
+        const vault = new web3.eth.Contract(vaultAbi, vaultAddr);
+        const tx = isEthos
+          ? await vault.methods.convertAuto(slippage).send({from:userAccount})
+          : await vault.methods.convertAuto(tokenAddr, slippage).send({from:userAccount});
         if (!tx.status) throw new Error("Reverted: "+tx.transactionHash);
         alert("Conversion successful!\nTX: "+tx.transactionHash);
         loadFeeVaultStats();
