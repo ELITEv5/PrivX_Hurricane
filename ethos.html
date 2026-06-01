@@ -5,7 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ETHOS Shield — PulseChain's First PLONK Privacy Protocol</title>
   <link rel="icon" href="ethoslogo.png" type="image/png">
+  <link rel="apple-touch-icon" href="ethoslogo.png">
+  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0d9488">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ETHOS Shield">
   <meta name="description" content="PulseChain's first multi-token PLONK zero-knowledge privacy shield. Shield ETHOS, pDAI, PLS, PLSX, HEX, ProvX, OMEGA, ZKP and PrivX. Every withdrawal generates a Proof of Privacy and earns PRIVX. Powered by PrivX Hurricane.">
   <meta property="og:title" content="ETHOS Shield — PulseChain's First PLONK Privacy Protocol">
   <meta property="og:description" content="9 tokens. Zero knowledge. Every withdrawal earns PRIVX. The first PLONK-based privacy shield on PulseChain.">
@@ -88,8 +94,6 @@
     .faq-item p{padding:12px 16px;color:#aaa;font-size:14px;line-height:1.6;border-left:2px solid var(--primary);margin-top:6px}
     .warning-box{background:rgba(255,180,0,0.08);border:1px solid rgba(255,180,0,0.3);border-radius:12px;padding:16px;color:#ffb400;font-size:14px;line-height:1.6;margin-top:16px}
     .warning-box strong{display:block;margin-bottom:4px}
-    .mobile-warn{display:none}
-    @media(max-width:768px){.mobile-warn{display:block}}
     .contract-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
     .contract-table tr{border-bottom:1px solid rgba(13,148,136,0.2)}
     .contract-table td{padding:10px 8px;vertical-align:middle}
@@ -230,10 +234,6 @@
 
       <!-- Withdraw Tab -->
       <div id="withdrawTab" class="hidden">
-        <div class="warning-box mobile-warn" style="margin-top:0;margin-bottom:16px">
-          <strong>⚠️ Desktop recommended for withdrawals</strong>
-          Generating a ZK proof requires significant CPU and memory. This may take several minutes or crash your mobile browser. Use a desktop browser for reliable withdrawals.
-        </div>
         <div style="color:#aaa;font-size:14px;margin-bottom:16px;line-height:1.6">
           Paste your private note. Token and denomination are read automatically. Withdraw to a <strong style="color:#fff">fresh wallet</strong> never linked to your deposit address.
         </div>
@@ -558,24 +558,25 @@
     <div class="modal-box">
       <button class="modal-close" onclick="closeFeeVaultModal()">✕</button>
       <div class="docs-h1">⚡ ETHOS Fee Vault</div>
-      <p class="docs-p" style="margin-bottom:6px">Every deposit pays a 0.5% fee in the shielded token. Fees accumulate here until converted — swapped to PRIVX, then split: <strong style="color:#fff">80%</strong> locked as permanent PRIVX/WPLS liquidity, <strong style="color:#fff">10%</strong> sent to fund withdrawal rewards, <strong style="color:#fff">10%</strong> burned forever.</p>
+      <p class="docs-p" style="margin-bottom:6px">Collects 0.5% fees from all ETHOS Shield deposits and converts them into PRIVX POL, mining rewards, and permanent burn.</p>
       <div style="margin-bottom:20px"><a href="https://scan.pulsechain.com/address/0x54818356b47b5F7b52DceAbf2B6eF52Cf8b072Fd" target="_blank" style="color:#555;font-size:12px;font-family:monospace;text-decoration:none">0x54818356b47b5F7b52DceAbf2B6eF52Cf8b072Fd ↗</a></div>
       <div class="fv-grid">
-        <div class="fv-stat"><div class="fv-slabel">Total PRIVX Burned On-Chain 🔥</div><div class="fv-sval" id="fvTotalBurned">—</div></div>
-        <div class="fv-stat"><div class="fv-slabel">PRIVX Sent to POP Mining</div><div class="fv-sval" id="fvTotalVault">—</div></div>
-        <div class="fv-stat"><div class="fv-slabel">Liquidity Locked Forever 🔒</div><div class="fv-sval" id="fvLpLocked">—</div></div>
-        <div class="fv-stat"><div class="fv-slabel" id="fvAccumulatedLabel">Fees Ready to Convert</div><div class="fv-sval" id="fvAccumulated">—</div></div>
+        <div class="fv-stat"><div class="fv-slabel">PRIVX Burned</div><div class="fv-sval" id="fvTotalBurned">—</div></div>
+        <div class="fv-stat"><div class="fv-slabel">PRIVX → Vault</div><div class="fv-sval" id="fvTotalVault">—</div></div>
+        <div class="fv-stat"><div class="fv-slabel">LP Locked</div><div class="fv-sval" id="fvLpLocked">—</div></div>
+        <div class="fv-stat"><div class="fv-slabel">Current Token Fee</div><div class="fv-sval" id="fvAccumulated">—</div></div>
       </div>
       <button class="button" style="margin-bottom:24px;background:rgba(13,148,136,0.15);border:1px solid var(--primary);font-size:14px;padding:13px;box-shadow:none" onclick="loadFeeVaultStats()">↻ Refresh</button>
-      <div class="docs-h2" style="margin-top:0">Convert Accumulated Fees</div>
+      <div class="docs-h2" style="margin-top:0">Trigger Conversion</div>
       <label style="display:block;color:#888;font-size:12px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;margin-top:16px">Fee token address</label>
       <input class="fv-input" id="fvTokenAddr" placeholder="Token address">
-      <label style="display:block;color:#888;font-size:12px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;margin-top:12px">Max slippage (100bp = 1%)</label>
+      <label style="display:block;color:#888;font-size:12px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;margin-top:12px">Slippage (basis points)</label>
       <input class="fv-input" id="fvSlippage" type="number" value="200" min="1" max="2000" placeholder="200">
       <div style="font-size:11px;color:#ffb400;margin:-2px 0 16px 2px">⚠️ ETHOS, ZKP &amp; OMEGA have 5% swap tax — use 600bp minimum. 200bp for all other tokens.</div>
       <button class="button" id="fvConvertBtn" onclick="triggerFeeVaultConversion()">Convert Fees → PRIVX POL + Vault + Burn</button>
       <div class="warning-box" style="margin-top:16px;font-size:13px">
-        <strong>What happens when you convert:</strong> The vault swaps the accumulated fee token into PRIVX, then automatically splits it — 80% is paired with WPLS and locked as liquidity forever, 10% tops up the mining rewards vault, and 10% is sent to the burn address. Anyone can trigger a conversion at any time.
+        <strong>80/10/10 split</strong>
+        Fees swap to PRIVX → 80% PRIVX/WPLS LP (locked forever) · 10% Mining Vault · 10% burned. ETHOS uses FOT-safe router due to 5% swap tax.
       </div>
     </div>
   </div>
@@ -600,13 +601,29 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/snarkjs@0.7.4/build/snarkjs.min.js"></script>
+  <script src="./web3.min.js"></script>
+  <script src="./snarkjs.min.js"></script>
   <script type="module">
-    try {
-      const { buildPoseidon } = await import('https://esm.sh/circomlibjs@0.1.7');
-      window._buildPoseidon = buildPoseidon;
-    } catch(e) { console.error('circomlibjs load failed:', e); }
+    const CIRCOM_SOURCES = [
+      'https://esm.sh/circomlibjs@0.1.7',
+      'https://cdn.skypack.dev/circomlibjs@0.1.7',
+      'https://unpkg.com/circomlibjs@0.1.7/main.js'
+    ];
+    for (const src of CIRCOM_SOURCES) {
+      try {
+        const { buildPoseidon } = await import(src);
+        window._buildPoseidon = buildPoseidon;
+        break;
+      } catch(e) { console.warn('circomlibjs source failed:', src, e.message); }
+    }
+    if (!window._buildPoseidon) console.error('All circomlibjs sources failed');
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(e => console.warn('SW registration failed:', e));
+      });
+    }
   </script>
 
   <script>
@@ -796,13 +813,12 @@
       if (!FEE_VAULT || FEE_VAULT==="DEPLOY_FIRST") { ['fvTotalBurned','fvTotalVault','fvLpLocked','fvAccumulated'].forEach(id=>set(id,'Coming soon')); return; }
       const w = web3 || new Web3("https://rpc.pulsechain.com");
       const vault = new w.eth.Contract(FEE_VAULT_ABI, FEE_VAULT);
-      const privxC = new w.eth.Contract(ERC20_ABI, PRIVX_TOKEN);
       const shield = SHIELDS[selectedToken];
       try {
-        const [dead,fire,toVault,lp,acc] = await Promise.all([privxC.methods.balanceOf("0x000000000000000000000000000000000000dEaD").call(), privxC.methods.balanceOf("0x0000000000000000000000000000000000000369").call(), vault.methods.totalPrivxToVault().call(), vault.methods.polLpBalance().call(), vault.methods.accumulated(shield.token).call()]);
-        set('fvTotalBurned', fmt18(BigInt(dead)+BigInt(fire))+' PRIVX');
+        const [burned,toVault,lp,acc] = await Promise.all([vault.methods.totalPrivxBurned().call(), vault.methods.totalPrivxToVault().call(), vault.methods.polLpBalance().call(), vault.methods.accumulated(shield.token).call()]);
+        set('fvTotalBurned', fmt18(burned)+' PRIVX');
         set('fvTotalVault',  fmt18(toVault)+' PRIVX');
-        set('fvLpLocked',    fmt18(lp)+' LP Tokens');
+        set('fvLpLocked',    fmt18(lp)+' LP');
         set('fvAccumulated', fmtDec(acc, shield.decimals)+' '+shield.label);
       } catch(e) { ['fvTotalBurned','fvTotalVault','fvLpLocked','fvAccumulated'].forEach(id=>set(id,'Error')); }
     }
