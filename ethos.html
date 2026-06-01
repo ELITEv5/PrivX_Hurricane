@@ -88,6 +88,8 @@
     .faq-item p{padding:12px 16px;color:#aaa;font-size:14px;line-height:1.6;border-left:2px solid var(--primary);margin-top:6px}
     .warning-box{background:rgba(255,180,0,0.08);border:1px solid rgba(255,180,0,0.3);border-radius:12px;padding:16px;color:#ffb400;font-size:14px;line-height:1.6;margin-top:16px}
     .warning-box strong{display:block;margin-bottom:4px}
+    .mobile-warn{display:none}
+    @media(max-width:768px){.mobile-warn{display:block}}
     .contract-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
     .contract-table tr{border-bottom:1px solid rgba(13,148,136,0.2)}
     .contract-table td{padding:10px 8px;vertical-align:middle}
@@ -228,6 +230,10 @@
 
       <!-- Withdraw Tab -->
       <div id="withdrawTab" class="hidden">
+        <div class="warning-box mobile-warn" style="margin-top:0;margin-bottom:16px">
+          <strong>⚠️ Desktop recommended for withdrawals</strong>
+          Generating a ZK proof requires significant CPU and memory. This may take several minutes or crash your mobile browser. Use a desktop browser for reliable withdrawals.
+        </div>
         <div style="color:#aaa;font-size:14px;margin-bottom:16px;line-height:1.6">
           Paste your private note. Token and denomination are read automatically. Withdraw to a <strong style="color:#fff">fresh wallet</strong> never linked to your deposit address.
         </div>
