@@ -1046,7 +1046,7 @@ Constraints:
     async function loadMiningVaultStats() {
       const w     = web3 || new Web3("https://rpc.pulsechain.com");
       const vault = new w.eth.Contract(MINING_VAULT_ABI, MINING_VAULT_ADDRESS);
-      const fmtT  = v => (Math.round(Number(v) / 1e14) / 1e4).toLocaleString(undefined, { maximumFractionDigits: 4 });
+      const fmtT  = v => Math.round(Number(v) / 1e18).toLocaleString();
       const set   = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
       try {
         const [bal, peak, rateBp, mined] = await Promise.all([
