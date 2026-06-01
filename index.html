@@ -697,40 +697,40 @@ Constraints:
       <button class="modal-close" onclick="closeFeeVaultModal()">✕</button>
 
       <div class="docs-h1">⚡ Fee Vault</div>
-      <p class="docs-p" style="margin-bottom:6px">Protocol fees accumulate here from every shield deposit. Anyone can trigger the conversion cycle — no special permissions required. The vault converts fees into Protocol-Owned Liquidity, Mining Vault top-up, and permanent PRIVX burn.</p>
+      <p class="docs-p" style="margin-bottom:6px">Every deposit pays a 0.5% fee in the shielded token. Fees accumulate here until converted — swapped to PRIVX, then split: <strong style="color:#fff">80%</strong> locked as permanent PRIVX/WPLS liquidity, <strong style="color:#fff">10%</strong> sent to fund POP mining rewards, <strong style="color:#fff">10%</strong> burned forever.</p>
       <div style="margin-bottom:20px">
         <a href="https://scan.pulsechain.com/address/0x54818356b47b5F7b52DceAbf2B6eF52Cf8b072Fd" target="_blank" style="color:#555;font-size:11px;font-family:monospace;text-decoration:none">0x54818356b47b5F7b52DceAbf2B6eF52Cf8b072Fd ↗</a>
       </div>
 
       <div class="fv-grid">
         <div class="fv-stat">
-          <div class="fv-slabel">PRIVX Accumulated</div>
+          <div class="fv-slabel">Fees Ready to Convert</div>
           <div class="fv-sval" id="fvPrivxAcc">—</div>
         </div>
         <div class="fv-stat">
-          <div class="fv-slabel">POL LP Locked</div>
+          <div class="fv-slabel">Liquidity Locked Forever 🔒</div>
           <div class="fv-sval" id="fvLpLocked">—</div>
         </div>
         <div class="fv-stat">
-          <div class="fv-slabel">Total PRIVX Burned</div>
+          <div class="fv-slabel">Total PRIVX Burned On-Chain 🔥</div>
           <div class="fv-sval" id="fvTotalBurned">—</div>
         </div>
         <div class="fv-stat">
-          <div class="fv-slabel">Total PRIVX → Vault</div>
+          <div class="fv-slabel">PRIVX Sent to POP Mining</div>
           <div class="fv-sval" id="fvTotalVault">—</div>
         </div>
       </div>
 
       <button class="button" style="margin-bottom:24px;background:rgba(138,43,226,0.15);border:1px solid var(--primary);font-size:14px;padding:13px;box-shadow:none" onclick="loadFeeVaultStats()">↻ Refresh Stats</button>
 
-      <div class="docs-h2" style="margin-top:0">Trigger Conversion</div>
+      <div class="docs-h2" style="margin-top:0">Convert Accumulated Fees</div>
       <p class="docs-p">Call <code style="background:rgba(138,43,226,0.2);color:var(--accent);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:12px">convertAuto(token, slippageBP)</code> to run the full 80/10/10 conversion cycle for any accumulated fee token. Wallet required.</p>
 
       <label style="display:block;color:#888;font-size:12px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;margin-top:16px">Fee token address</label>
       <input class="fv-input" id="fvTokenAddr" value="0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986" placeholder="Token address">
       <div style="font-size:11px;color:#555;margin:-2px 0 14px 2px">Default: PRIVX token</div>
 
-      <label style="display:block;color:#888;font-size:12px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px">Slippage tolerance (basis points)</label>
+      <label style="display:block;color:#888;font-size:12px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px">Max slippage (100bp = 1%)</label>
       <input class="fv-input" id="fvSlippage" type="number" value="200" min="1" max="1000" placeholder="200">
       <div style="font-size:11px;color:#555;margin:-2px 0 16px 2px">200 = 2% · higher = more likely to succeed, more MEV-vulnerable</div>
 
@@ -974,17 +974,19 @@ Constraints:
       const vault = new w.eth.Contract(FEE_VAULT_ABI, FEE_VAULT_ADDRESS);
       const fmtT  = v => (Math.round(Number(v) / 1e14) / 1e4).toLocaleString(undefined, { maximumFractionDigits: 4 });
       const set   = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      const privxC = new w.eth.Contract(ERC20_ABI, PRIVX_TOKEN);
       try {
-        const [acc, burned, toVault, lpBal] = await Promise.all([
+        const [acc, dead, fire, toVault, lpBal] = await Promise.all([
           vault.methods.accumulated(PRIVX_TOKEN).call(),
-          vault.methods.totalPrivxBurned().call(),
+          privxC.methods.balanceOf("0x000000000000000000000000000000000000dEaD").call(),
+          privxC.methods.balanceOf("0x0000000000000000000000000000000000000369").call(),
           vault.methods.totalPrivxToVault().call(),
           vault.methods.polLpBalance().call()
         ]);
-        set('fvPrivxAcc',    fmtT(acc)     + ' PRIVX');
-        set('fvTotalBurned', fmtT(burned)  + ' PRIVX');
-        set('fvTotalVault',  fmtT(toVault) + ' PRIVX');
-        set('fvLpLocked',    fmtT(lpBal)   + ' LP');
+        set('fvPrivxAcc',    fmtT(acc)                              + ' PRIVX');
+        set('fvTotalBurned', fmtT(BigInt(dead) + BigInt(fire))     + ' PRIVX');
+        set('fvTotalVault',  fmtT(toVault)                         + ' PRIVX');
+        set('fvLpLocked',    fmtT(lpBal)                           + ' LP Tokens');
       } catch (e) {
         console.error("FeeVault stats error:", e);
         ['fvPrivxAcc','fvTotalBurned','fvTotalVault','fvLpLocked'].forEach(id => set(id, 'Error'));
