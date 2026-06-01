@@ -552,25 +552,24 @@
     <div class="modal-box">
       <button class="modal-close" onclick="closeFeeVaultModal()">✕</button>
       <div class="docs-h1">⚡ ETHOS Fee Vault</div>
-      <p class="docs-p" style="margin-bottom:6px">Collects 0.5% fees from all ETHOS Shield deposits and converts them into PRIVX POL, mining rewards, and permanent burn.</p>
+      <p class="docs-p" style="margin-bottom:6px">Every deposit pays a 0.5% fee in the shielded token. Fees accumulate here until converted — swapped to PRIVX, then split: <strong style="color:#fff">80%</strong> locked as permanent PRIVX/WPLS liquidity, <strong style="color:#fff">10%</strong> sent to fund withdrawal rewards, <strong style="color:#fff">10%</strong> burned forever.</p>
       <div style="margin-bottom:20px"><a href="https://scan.pulsechain.com/address/0x54818356b47b5F7b52DceAbf2B6eF52Cf8b072Fd" target="_blank" style="color:#555;font-size:12px;font-family:monospace;text-decoration:none">0x54818356b47b5F7b52DceAbf2B6eF52Cf8b072Fd ↗</a></div>
       <div class="fv-grid">
-        <div class="fv-stat"><div class="fv-slabel">PRIVX Burned</div><div class="fv-sval" id="fvTotalBurned">—</div></div>
-        <div class="fv-stat"><div class="fv-slabel">PRIVX → Vault</div><div class="fv-sval" id="fvTotalVault">—</div></div>
-        <div class="fv-stat"><div class="fv-slabel">LP Locked</div><div class="fv-sval" id="fvLpLocked">—</div></div>
-        <div class="fv-stat"><div class="fv-slabel">Current Token Fee</div><div class="fv-sval" id="fvAccumulated">—</div></div>
+        <div class="fv-stat"><div class="fv-slabel">Total PRIVX Burned On-Chain 🔥</div><div class="fv-sval" id="fvTotalBurned">—</div></div>
+        <div class="fv-stat"><div class="fv-slabel">PRIVX Sent to POP Mining</div><div class="fv-sval" id="fvTotalVault">—</div></div>
+        <div class="fv-stat"><div class="fv-slabel">Liquidity Locked Forever 🔒</div><div class="fv-sval" id="fvLpLocked">—</div></div>
+        <div class="fv-stat"><div class="fv-slabel" id="fvAccumulatedLabel">Fees Ready to Convert</div><div class="fv-sval" id="fvAccumulated">—</div></div>
       </div>
       <button class="button" style="margin-bottom:24px;background:rgba(13,148,136,0.15);border:1px solid var(--primary);font-size:14px;padding:13px;box-shadow:none" onclick="loadFeeVaultStats()">↻ Refresh</button>
-      <div class="docs-h2" style="margin-top:0">Trigger Conversion</div>
+      <div class="docs-h2" style="margin-top:0">Convert Accumulated Fees</div>
       <label style="display:block;color:#888;font-size:12px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;margin-top:16px">Fee token address</label>
       <input class="fv-input" id="fvTokenAddr" placeholder="Token address">
-      <label style="display:block;color:#888;font-size:12px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;margin-top:12px">Slippage (basis points)</label>
+      <label style="display:block;color:#888;font-size:12px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;margin-top:12px">Max slippage (100bp = 1%)</label>
       <input class="fv-input" id="fvSlippage" type="number" value="200" min="1" max="2000" placeholder="200">
       <div style="font-size:11px;color:#ffb400;margin:-2px 0 16px 2px">⚠️ ETHOS, ZKP &amp; OMEGA have 5% swap tax — use 600bp minimum. 200bp for all other tokens.</div>
       <button class="button" id="fvConvertBtn" onclick="triggerFeeVaultConversion()">Convert Fees → PRIVX POL + Vault + Burn</button>
       <div class="warning-box" style="margin-top:16px;font-size:13px">
-        <strong>80/10/10 split</strong>
-        Fees swap to PRIVX → 80% PRIVX/WPLS LP (locked forever) · 10% Mining Vault · 10% burned. ETHOS uses FOT-safe router due to 5% swap tax.
+        <strong>What happens when you convert:</strong> The vault swaps the accumulated fee token into PRIVX, then automatically splits it — 80% is paired with WPLS and locked as liquidity forever, 10% tops up the mining rewards vault, and 10% is sent to the burn address. Anyone can trigger a conversion at any time.
       </div>
     </div>
   </div>
@@ -791,12 +790,13 @@
       if (!FEE_VAULT || FEE_VAULT==="DEPLOY_FIRST") { ['fvTotalBurned','fvTotalVault','fvLpLocked','fvAccumulated'].forEach(id=>set(id,'Coming soon')); return; }
       const w = web3 || new Web3("https://rpc.pulsechain.com");
       const vault = new w.eth.Contract(FEE_VAULT_ABI, FEE_VAULT);
+      const privxC = new w.eth.Contract(ERC20_ABI, PRIVX_TOKEN);
       const shield = SHIELDS[selectedToken];
       try {
-        const [burned,toVault,lp,acc] = await Promise.all([vault.methods.totalPrivxBurned().call(), vault.methods.totalPrivxToVault().call(), vault.methods.polLpBalance().call(), vault.methods.accumulated(shield.token).call()]);
-        set('fvTotalBurned', fmt18(burned)+' PRIVX');
+        const [dead,fire,toVault,lp,acc] = await Promise.all([privxC.methods.balanceOf("0x000000000000000000000000000000000000dEaD").call(), privxC.methods.balanceOf("0x0000000000000000000000000000000000000369").call(), vault.methods.totalPrivxToVault().call(), vault.methods.polLpBalance().call(), vault.methods.accumulated(shield.token).call()]);
+        set('fvTotalBurned', fmt18(BigInt(dead)+BigInt(fire))+' PRIVX');
         set('fvTotalVault',  fmt18(toVault)+' PRIVX');
-        set('fvLpLocked',    fmt18(lp)+' LP');
+        set('fvLpLocked',    fmt18(lp)+' LP Tokens');
         set('fvAccumulated', fmtDec(acc, shield.decimals)+' '+shield.label);
       } catch(e) { ['fvTotalBurned','fvTotalVault','fvLpLocked','fvAccumulated'].forEach(id=>set(id,'Error')); }
     }
