@@ -118,31 +118,40 @@ The recipient address is cryptographically embedded into the ZK proof at generat
 | Poseidon Hasher | [`0x72740d65A93f2e9d9741234371d62FeE36AEf9dF`](https://scan.pulsechain.com/address/0x72740d65A93f2e9d9741234371d62FeE36AEf9dF) |
 | PRIVX Token | [`0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986`](https://scan.pulsechain.com/address/0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986) |
 
+### Shared Infrastructure — PrivX Hurricane + ETHOS Shield
+
+Mining vault and fee vault are unified across both protocols. All shields — PrivX Hurricane and ETHOS Shield — feed the same POL, the same mining rewards, and the same burn.
+
+| Contract | Address |
+|---|---|
+| POP Mining Vault V2 | [`0x7f6D1165a15a7DC4Bbbf27C6C18de7bfAA9E718C`](https://scan.pulsechain.com/address/0x7f6D1165a15a7DC4Bbbf27C6C18de7bfAA9E718C) |
+| Fee Vault (PulseX V2) | [`0x54818356b47b5F7b52DceAbf2B6eF52Cf8b072Fd`](https://scan.pulsechain.com/address/0x54818356b47b5F7b52DceAbf2B6eF52Cf8b072Fd) |
+
 ### PRIVX Hurricane Shield
 
 | Contract | Address |
 |---|---|
-| Mining Vault | [`0x925D32ff834285E0faefFBAc83Fc641A71660057`](https://scan.pulsechain.com/address/0x925D32ff834285E0faefFBAc83Fc641A71660057) |
-| Fee Vault | [`0xBfa76b6961600331BA83F409789ddA36183F09Bf`](https://scan.pulsechain.com/address/0xBfa76b6961600331BA83F409789ddA36183F09Bf) |
-| Shield · 100 PRIVX | [`0x1e06B9A5D519241809701eD29142ef01dDfc9288`](https://scan.pulsechain.com/address/0x1e06B9A5D519241809701eD29142ef01dDfc9288) |
-| Shield · 1,000 PRIVX | [`0x6aCC2D19b6cCe5FbeF91AF97e18592B215280161`](https://scan.pulsechain.com/address/0x6aCC2D19b6cCe5FbeF91AF97e18592B215280161) |
-| Shield · 10,000 PRIVX | [`0xb2Ef8c01BcC3f5B39d2648d598b90ed98E3cb9Cb`](https://scan.pulsechain.com/address/0xb2Ef8c01BcC3f5B39d2648d598b90ed98E3cb9Cb) |
-| Shield · 100,000 PRIVX | [`0xaa2E70cE38C40e07d529b9656124c96eA26197Be`](https://scan.pulsechain.com/address/0xaa2E70cE38C40e07d529b9656124c96eA26197Be) |
+| Shield · 100 PRIVX | [`0x74471E88588c2dF518379c4f9feC981158f741F4`](https://scan.pulsechain.com/address/0x74471E88588c2dF518379c4f9feC981158f741F4) |
+| Shield · 1,000 PRIVX | [`0xAbbF7729949eb15Ba2A9e739b591db7585d252ae`](https://scan.pulsechain.com/address/0xAbbF7729949eb15Ba2A9e739b591db7585d252ae) |
+| Shield · 10,000 PRIVX | [`0x7DBc9558DA5aA494302d2099f5F36F307988a84a`](https://scan.pulsechain.com/address/0x7DBc9558DA5aA494302d2099f5F36F307988a84a) |
+| Shield · 100,000 PRIVX | [`0x72DDf291c8cE3e2DCb7C555b48E09Cd353CE9177`](https://scan.pulsechain.com/address/0x72DDf291c8cE3e2DCb7C555b48E09Cd353CE9177) |
 
-### ETHOS Shield — Multi-Token (pDAI + PLS Live)
+### ETHOS Shield — Multi-Token (pDAI + PLS + PrivX Live)
 
 | Contract | Address |
 |---|---|
-| Mining Vault | [`0x7f6D1165a15a7DC4Bbbf27C6C18de7bfAA9E718C`](https://scan.pulsechain.com/address/0x7f6D1165a15a7DC4Bbbf27C6C18de7bfAA9E718C) |
-| Fee Vault | [`0x83799D768243265a40395bEd77A7C3A410E6FCbB`](https://scan.pulsechain.com/address/0x83799D768243265a40395bEd77A7C3A410E6FCbB) |
-| pDAI · 1,000 | [`0x6CF348cAd3A6A7A70103A78Af5B80071133395d8`](https://scan.pulsechain.com/address/0x6CF348cAd3A6A7A70103A78Af5B80071133395d8) |
-| pDAI · 10,000 | [`0x59a50171E178313a1B3beDaF6558D2AffD1729bD`](https://scan.pulsechain.com/address/0x59a50171E178313a1B3beDaF6558D2AffD1729bD) |
-| pDAI · 100,000 | [`0xeb19d6A2Fc2b5c9395daB2B90b7A959b7683fE87`](https://scan.pulsechain.com/address/0xeb19d6A2Fc2b5c9395daB2B90b7A959b7683fE87) |
-| pDAI · 1,000,000 | [`0x2447C0fb757565b7984655D141506D478f15F5c1`](https://scan.pulsechain.com/address/0x2447C0fb757565b7984655D141506D478f15F5c1) |
-| PLS · 100,000 | [`0x3524E0ec3Fd42852ab9423EE80fA0954D50f046a`](https://scan.pulsechain.com/address/0x3524E0ec3Fd42852ab9423EE80fA0954D50f046a) |
-| PLS · 1,000,000 | [`0x5ce2B1953459cFE00cE8876b3B2D93f1C7e24C49`](https://scan.pulsechain.com/address/0x5ce2B1953459cFE00cE8876b3B2D93f1C7e24C49) |
-| PLS · 10,000,000 | [`0x9FCd7De9dbFA15D26e4eb4D22658Db49820cC60A`](https://scan.pulsechain.com/address/0x9FCd7De9dbFA15D26e4eb4D22658Db49820cC60A) |
-| PLS · 100,000,000 | [`0x4B0481A990F39EC21d684349F35a524Bf93c2a38`](https://scan.pulsechain.com/address/0x4B0481A990F39EC21d684349F35a524Bf93c2a38) |
+| pDAI · 1,000 | [`0x94D0Df289cE310462Fee8137aF945381844B94D1`](https://scan.pulsechain.com/address/0x94D0Df289cE310462Fee8137aF945381844B94D1) |
+| pDAI · 10,000 | [`0xc00D854d2fCBEdBe8A717c01a15C1351722858E7`](https://scan.pulsechain.com/address/0xc00D854d2fCBEdBe8A717c01a15C1351722858E7) |
+| pDAI · 100,000 | [`0x5136467D3E81bF2a722f364900DF2982adeE02EE`](https://scan.pulsechain.com/address/0x5136467D3E81bF2a722f364900DF2982adeE02EE) |
+| pDAI · 1,000,000 | [`0xBbaFF183588FAB20cC24F67De7cd4263670a09E5`](https://scan.pulsechain.com/address/0xBbaFF183588FAB20cC24F67De7cd4263670a09E5) |
+| PLS · 100,000 | [`0xFdbd8a02f112e722543C12bce3596f42b9Bb3b72`](https://scan.pulsechain.com/address/0xFdbd8a02f112e722543C12bce3596f42b9Bb3b72) |
+| PLS · 1,000,000 | [`0xfD03a99A337931de9a217E5836046CBF13578B18`](https://scan.pulsechain.com/address/0xfD03a99A337931de9a217E5836046CBF13578B18) |
+| PLS · 10,000,000 | [`0xE97135be5b9D6A3020C733AD122c4A6092ABF1F7`](https://scan.pulsechain.com/address/0xE97135be5b9D6A3020C733AD122c4A6092ABF1F7) |
+| PLS · 100,000,000 | [`0xEB4297A2c769eD02778Fa9D3197a58665beD8834`](https://scan.pulsechain.com/address/0xEB4297A2c769eD02778Fa9D3197a58665beD8834) |
+| PrivX · 100 | [`0x74471E88588c2dF518379c4f9feC981158f741F4`](https://scan.pulsechain.com/address/0x74471E88588c2dF518379c4f9feC981158f741F4) |
+| PrivX · 1,000 | [`0xAbbF7729949eb15Ba2A9e739b591db7585d252ae`](https://scan.pulsechain.com/address/0xAbbF7729949eb15Ba2A9e739b591db7585d252ae) |
+| PrivX · 10,000 | [`0x7DBc9558DA5aA494302d2099f5F36F307988a84a`](https://scan.pulsechain.com/address/0x7DBc9558DA5aA494302d2099f5F36F307988a84a) |
+| PrivX · 100,000 | [`0x72DDf291c8cE3e2DCb7C555b48E09Cd353CE9177`](https://scan.pulsechain.com/address/0x72DDf291c8cE3e2DCb7C555b48E09Cd353CE9177) |
 
 ---
 
