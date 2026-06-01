@@ -95,6 +95,8 @@
     .faq-item p{padding:12px 16px;color:#aaa;font-size:14px;line-height:1.6;border-left:2px solid var(--primary);margin-top:6px}
     .warning-box{background:rgba(255,180,0,0.08);border:1px solid rgba(255,180,0,0.3);border-radius:12px;padding:16px;color:#ffb400;font-size:14px;line-height:1.6;margin-top:16px}
     .warning-box strong{display:block;margin-bottom:4px}
+    .mobile-warn{display:none}
+    @media(max-width:768px){.mobile-warn{display:block}}
     .buy-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
     .buy-stat{background:rgba(138,43,226,0.1);border:1px solid rgba(138,43,226,0.3);border-radius:12px;padding:16px;text-align:center}
     .buy-stat .stat-label{font-size:12px;color:#888;margin-bottom:6px}
@@ -232,6 +234,10 @@
 
       <!-- Withdraw Tab -->
       <div id="withdrawTab" class="hidden">
+        <div class="warning-box mobile-warn" style="margin-top:0;margin-bottom:16px">
+          <strong>⚠️ Desktop recommended for withdrawals</strong>
+          Generating a ZK proof requires significant CPU and memory. This may take several minutes or crash your mobile browser. Use a desktop browser for reliable withdrawals.
+        </div>
         <div style="color:#aaa;font-size:14px;margin-bottom:16px;line-height:1.6">
           Paste the private note you saved during deposit. The token and denomination are read from the note automatically. For maximum privacy, withdraw to a <strong style="color:#fff">fresh wallet address</strong> that has never been linked to your deposit address.
         </div>
