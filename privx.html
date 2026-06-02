@@ -9,7 +9,7 @@
   <link rel="icon" type="image/png" sizes="16x16" href="privx-shield.png">
   <link rel="apple-touch-icon" href="privx-shield.png">
   <meta name="theme-color" content="#8A2BE2">
-  <meta name="description" content="Multi-token PLONK zero-knowledge privacy shield on PulseChain. Shield PLS, HEX, PLSX, DAI, USDC, pSunDAI, pDAI, ETHOS and PrivX. Every withdrawal generates a Proof of Privacy and earns PRIVX. PrivX Hurricane Protocol.">
+  <meta name="description" content="Multi-token PLONK zero-knowledge privacy shield on PulseChain. Shield PLS, HEX, PLSX, DAI, USDC, pSunDAI, pDAI, pCOCK and PrivX. Every withdrawal generates a Proof of Privacy and earns PRIVX. PrivX Hurricane Protocol.">
   <meta property="og:title" content="PrivX Hurricane — Proof of Privacy Protocol">
   <meta property="og:description" content="9 tokens. Zero knowledge. Every withdrawal earns PRIVX. The first PLONK-based privacy shield on PulseChain.">
   <style>
@@ -182,7 +182,7 @@
           <div class="token-card"        id="token-psundai" onclick="selectToken('psundai')"><div class="tc-name">pSunDAI</div><div class="tc-sub">Autonomous Stable</div><div class="tc-soon">Coming Soon</div></div>
           <!-- Row 3 -->
           <div class="token-card live"        id="token-pdai" onclick="selectToken('pdai')"><div class="tc-name">pDAI</div><div class="tc-sub">Stable Asset</div><div class="tc-live">Live Now</div></div>
-          <div class="token-card"        id="token-ethos"   onclick="selectToken('ethos')"><div class="tc-name">ETHOS</div><div class="tc-sub">Yield Token</div><div class="tc-soon">Coming Soon</div></div>
+          <div class="token-card"        id="token-pcock"   onclick="selectToken('pcock')"><div class="tc-name">pCOCK</div><div class="tc-sub">Community Token</div><div class="tc-soon">Coming Soon</div></div>
           <div class="token-card live"   id="token-privx"   onclick="selectToken('privx')"><div class="tc-name">PrivX</div><div class="tc-sub">Privacy Mining</div><div class="tc-live">Live Now</div></div>
         </div>
 
@@ -306,7 +306,7 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px">
           <div style="background:rgba(138,43,226,0.1);border:1px solid rgba(138,43,226,0.3);border-radius:12px;padding:16px">
             <strong style="color:var(--accent);display:block;margin-bottom:4px">Any of the 9 tokens</strong>
-            <p style="color:#aaa;font-size:13px;line-height:1.5">PLS, HEX, PLSX, DAI, USDC, pSunDAI, pDAI, ETHOS, or PrivX. The 0.5% fee is paid in the same token you're shielding — no PRIVX required to deposit.</p>
+            <p style="color:#aaa;font-size:13px;line-height:1.5">PLS, HEX, PLSX, DAI, USDC, pSunDAI, pDAI, pCOCK, or PrivX. The 0.5% fee is paid in the same token you're shielding — no PRIVX required to deposit.</p>
           </div>
           <div style="background:rgba(138,43,226,0.1);border:1px solid rgba(138,43,226,0.3);border-radius:12px;padding:16px">
             <strong style="color:var(--accent);display:block;margin-bottom:4px">PRIVX rewards — automatic</strong>
@@ -496,12 +496,12 @@
         <tr><td>1,000,000 pDAI</td><td><a href="https://scan.pulsechain.com/address/0xBbaFF183588FAB20cC24F67De7cd4263670a09E5" target="_blank">0xBbaFF183588FAB20cC24F67De7cd4263670a09E5 ↗</a></td></tr>
       </table>
 
-      <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">ETHOS SHIELDS</p>
+      <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">pCOCK SHIELDS</p>
       <table class="contract-table">
-        <tr><td>10 ETHOS</td><td id="ct-ethos-d0" style="color:#555">Deploying soon…</td></tr>
-        <tr><td>100 ETHOS</td><td id="ct-ethos-d1" style="color:#555">Deploying soon…</td></tr>
-        <tr><td>1,000 ETHOS</td><td id="ct-ethos-d2" style="color:#555">Deploying soon…</td></tr>
-        <tr><td>10,000 ETHOS</td><td id="ct-ethos-d3" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>100 pCOCK</td><td id="ct-pcock-d0" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>1,000 pCOCK</td><td id="ct-pcock-d1" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>10,000 pCOCK</td><td id="ct-pcock-d2" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>100,000 pCOCK</td><td id="ct-pcock-d3" style="color:#555">Deploying soon…</td></tr>
       </table>
 
       <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">PrivX SHIELDS</p>
@@ -536,7 +536,7 @@
         <tr><td>USDC</td><td>10 / 100 / 1K / 10K</td><td>6 decimals</td></tr>
         <tr><td>pSunDAI</td><td>10 / 100 / 1K / 10K</td><td>Standard</td></tr>
         <tr><td>pDAI</td><td>1K / 10K / 100K / 1M</td><td>Live ✓</td></tr>
-        <tr><td>ETHOS</td><td>10 / 100 / 1K / 10K</td><td>5% swap tax</td></tr>
+        <tr><td>pCOCK</td><td>100 / 1K / 10K / 100K</td><td>Standard</td></tr>
         <tr><td>PrivX</td><td>100 / 1K / 10K / 100K</td><td>Live ✓</td></tr>
       </table>
       <div class="docs-h2">Fee Flow</div>
@@ -587,7 +587,7 @@
       <input class="fv-input" id="fvTokenAddr" placeholder="Token address">
       <label style="display:block;color:#888;font-size:12px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;margin-top:12px">Max slippage (100bp = 1%)</label>
       <input class="fv-input" id="fvSlippage" type="number" value="200" min="1" max="2000" placeholder="200">
-      <div style="font-size:11px;color:#ffb400;margin:-2px 0 16px 2px">⚠️ ETHOS has a 5% swap tax — use 600bp minimum. 200bp for all other tokens.</div>
+      <div style="font-size:11px;color:#888;margin:-2px 0 16px 2px">200bp (2%) slippage works for all live tokens.</div>
       <button class="button" id="fvConvertBtn" onclick="triggerFeeVaultConversion()">Convert Fees → PRIVX POL + Vault + Burn</button>
       <div class="warning-box" style="margin-top:16px;font-size:13px">
         <strong>What happens when you convert:</strong> The vault swaps the accumulated fee token into PRIVX, then automatically splits it — 80% is paired with WPLS and locked as liquidity forever, 10% tops up the mining rewards vault, and 10% is sent to the burn address. Anyone can trigger a conversion at any time.
@@ -636,14 +636,14 @@
     // Lowest tier sized for $0.30–$1.60 at current prices to allow 10–50x
     // price appreciation before smallest denomination becomes impractical.
     const SHIELDS = {
-      ethos: {
-        label: "ETHOS", sublabel: "Yield Token",
-        token: "0x7CDaff7Bccf2AA44BA1fC235a2b44D6e8238C81C",
+      pcock: {
+        label: "pCOCK", sublabel: "Community Token",
+        token: "0xc10A4Ed9b4042222d69ff0B374eddd47ed90fC1F",
         decimals: 18, feeBP: 50,
-        swapUrl: "https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=0x7CDaff7Bccf2AA44BA1fC235a2b44D6e8238C81C",
+        swapUrl: "https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=0xc10A4Ed9b4042222d69ff0B374eddd47ed90fC1F",
         contracts: { d0:"DEPLOY_FIRST", d1:"DEPLOY_FIRST", d2:"DEPLOY_FIRST", d3:"DEPLOY_FIRST" },
-        denoms:   ["10","100","1000","10000"],
-        denomWei: { d0:10000000000000000000n, d1:100000000000000000000n, d2:1000000000000000000000n, d3:10000000000000000000000n },
+        denoms:   ["100","1000","10000","100000"],
+        denomWei: { d0:100000000000000000000n, d1:1000000000000000000000n, d2:10000000000000000000000n, d3:100000000000000000000000n },
       },
       pdai: {
         label: "pDAI", sublabel: "Stable Asset",
@@ -799,7 +799,7 @@
       document.body.style.overflow='hidden';
       const tokenKey = selectedToken || 'wpls';
       const shield = SHIELDS[tokenKey];
-      const taxTokens = ['ethos','zkp','omega'];
+      const taxTokens = ['zkp','omega'];
       document.getElementById('fvTokenAddr').value = shield ? shield.token : '';
       document.getElementById('fvSlippage').value  = taxTokens.includes(tokenKey) ? '600' : '200';
       loadFeeVaultStats();
@@ -1014,7 +1014,7 @@
       if(!noteInput) return alert("Paste your private note first");
       if(!userAccount) return alert("Connect wallet first");
       if(!poseidonFn) return alert("Poseidon not ready — wait a moment");
-      const match=noteInput.match(/^privx-hurricane-(ethos|pdai|wpls|plsx|hex|dai|usdc|psundai|privx)-(\d+)-([a-fA-F0-9]{62,64})-([a-fA-F0-9]{62,64})$/i);
+      const match=noteInput.match(/^privx-hurricane-(pcock|pdai|wpls|plsx|hex|dai|usdc|psundai|privx)-(\d+)-([a-fA-F0-9]{62,64})-([a-fA-F0-9]{62,64})$/i);
       if(!match) return alert("Invalid note format.\nExpected: privx-hurricane-<token>-<amount>-<nullifier>-<secret>");
       let[,tokenKey,denomStr,nHex,sHex]=match; tokenKey=tokenKey.toLowerCase();
       const shield=SHIELDS[tokenKey];
@@ -1187,7 +1187,7 @@
     const canvas=document.getElementById('matrix-bg'),ctx=canvas.getContext('2d');
     canvas.width=innerWidth;canvas.height=innerHeight;
     let fontSize=innerWidth<600?10:14;
-    const chars='01ETHOSPDAIWPLSXHEXPROVXOMAZGKPRIVX';
+    const chars='01PCOCKPDAIWPLSXHEXPROVXOMAZGKPRIVX';
     let columns=Math.floor(canvas.width/fontSize);
     let drops=Array(columns).fill(1);
     function draw(){ctx.fillStyle='rgba(0,0,0,0.05)';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#8A2BE2';ctx.font=fontSize+'px monospace';drops.forEach((y,i)=>{ctx.fillText(chars[Math.floor(Math.random()*chars.length)],i*fontSize,y*fontSize);if(y*fontSize>canvas.height&&Math.random()>0.975)drops[i]=0;drops[i]++;});}
