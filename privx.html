@@ -542,15 +542,23 @@
       <div class="docs-h2">Fee Flow</div>
       <p class="docs-p">0.5% fee in the shielded token → Fee Vault → swapped to PRIVX → 80% PRIVX/WPLS Protocol-Owned Liquidity (locked permanently) / 10% POP Mining Vault (self-funding rewards) / 10% burned to dead address. Every token shielded creates permanent PRIVX buying pressure.</p>
       <div class="docs-h2">ZK Circuit</div>
-      <p class="docs-p">PrivXMixer(14) — 14-level incremental Poseidon Merkle tree, 16,384 leaves per pool. PLONK proof with public signals: root, nullifierHash, denomination, recipient. The recipient is cryptographically bound — MEV bots cannot redirect your withdrawal. Proof generation ~15–30s in-browser. Same verifier and proving key as PrivX Hurricane.</p>
+      <p class="docs-p">PrivXMixer(14) — 14-level incremental Poseidon Merkle tree with 16,384 leaves per pool. PLONK proofs are generated entirely in the browser. The recipient address is cryptographically embedded into every proof at generation time — no relay, no intermediary can redirect your withdrawal. Proof generation ~15–30s depending on device.</p>
+      <div class="docs-h2">Trusted Setup</div>
+      <p class="docs-p">The proving key underpinning every PrivX Hurricane proof was derived from the <strong style="color:#fff">Hermez Network Powers of Tau ceremony</strong> — a multi-party computation with <strong style="color:#fff">54 independent contributors</strong> from across the world. The security guarantee is absolute: every single one of those 54 participants would need to have colluded and preserved their secret randomness for the system to be compromised. In practice, this is computationally and logistically impossible.</p>
+      <p class="docs-p" style="margin-top:10px">Unlike older ZK systems that require circuit-specific trusted setups — creating additional attack surface — PrivX Hurricane uses <strong style="color:#fff">PLONK</strong>, a universal proving system. There is no secondary ceremony, no circuit-specific toxic waste, and no privileged key holder. The ceremony file is independently verifiable by anyone in the world via its publicly known cryptographic fingerprint.</p>
+      <p class="docs-p" style="margin-top:10px;font-size:13px;color:#888">The same proving key powers every shield across every token. No new ceremony is ever required to add a token — only the on-chain verifier and shield contracts are needed.</p>
       <div class="docs-h2">Security Properties</div>
       <table class="docs-table">
         <tr><th>Property</th><th>Status</th></tr>
-        <tr><td>No owner / admin key on shields</td><td><span style="color:#00ff88">✅</span></td></tr>
+        <tr><td>Trusted setup</td><td><span style="color:#00ff88">✅</span> Hermez MPC — 54 contributors</td></tr>
+        <tr><td>No phase-2 / circuit toxic waste</td><td><span style="color:#00ff88">✅</span> PLONK universal SRS</td></tr>
+        <tr><td>Proving key publicly verifiable</td><td><span style="color:#00ff88">✅</span> SHA256 fingerprint published</td></tr>
+        <tr><td>Proof generated client-side</td><td><span style="color:#00ff88">✅</span> Never leaves your browser</td></tr>
+        <tr><td>Recipient bound to ZK proof</td><td><span style="color:#00ff88">✅</span> MEV-proof withdrawals</td></tr>
+        <tr><td>Double-spend prevention</td><td><span style="color:#00ff88">✅</span> On-chain nullifier mapping</td></tr>
+        <tr><td>No owner / admin key on shields</td><td><span style="color:#00ff88">✅</span> Fully immutable</td></tr>
         <tr><td>No upgrade proxy</td><td><span style="color:#00ff88">✅</span></td></tr>
         <tr><td>No pause function</td><td><span style="color:#00ff88">✅</span></td></tr>
-        <tr><td>Recipient bound to ZK proof</td><td><span style="color:#00ff88">✅</span> MEV-safe</td></tr>
-        <tr><td>Double-spend prevention</td><td><span style="color:#00ff88">✅</span> Nullifier mapping</td></tr>
         <tr><td>Reentrancy protection</td><td><span style="color:#00ff88">✅</span> OpenZeppelin</td></tr>
         <tr><td>Safe token transfers</td><td><span style="color:#00ff88">✅</span> OpenZeppelin SafeERC20</td></tr>
       </table>
