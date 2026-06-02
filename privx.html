@@ -993,7 +993,11 @@
         }
         alert(`Deposit successful!\nTX: ${tx.transactionHash}\n\nSAVE YOUR NOTE — only way to recover funds.`);
         loadDepositCounts(selectedToken);
-      } catch(err){console.error(err);alert("Deposit failed: "+(err.message||"check MetaMask"));}
+      } catch(err){
+        console.error(err);
+        const isTimeout=err.message&&(err.message.includes('50 blocks')||err.message.includes('not mined')||err.message.includes('polling timeout'));
+        if(!isTimeout) alert("Deposit failed: "+(err.message||"check MetaMask"));
+      }
       finally{
         btn.disabled=false;
         const s=SHIELDS[selectedToken],d=s.denoms[['d0','d1','d2','d3'].indexOf(selectedDenom)];
@@ -1039,11 +1043,8 @@
         alert(`Withdrawal successful!\nTX: ${tx.transactionHash}\nFunds + PRIVX reward → ${recipient}`);
       }catch(err){
         console.error(err);
-        if(err.message&&(err.message.includes('50 blocks')||err.message.includes('not mined')||err.message.includes('polling timeout'))){
-          alert('Transaction submitted and pending — it is taking longer than usual to confirm but has NOT failed.\n\nCheck scan.pulsechain.com for your transaction status. Do NOT resubmit — your funds are safe and the transaction is still live.');
-        } else {
-          alert("Withdrawal failed: "+(err.message||"check console"));
-        }
+        const isTimeout=err.message&&(err.message.includes('50 blocks')||err.message.includes('not mined')||err.message.includes('polling timeout'));
+        if(!isTimeout) alert("Withdrawal failed: "+(err.message||"check console"));
       }
       finally{btn.disabled=false;btn.textContent="Generate ZK Proof + Withdraw";}
     }
