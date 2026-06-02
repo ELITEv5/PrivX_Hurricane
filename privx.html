@@ -767,6 +767,8 @@
     // ─── Helpers ──────────────────────────────────────────────────────────────
     const fmt18 = v => Number(BigInt(v) / 10n**18n).toLocaleString();
     const fmtDec = (v, dec) => Number(BigInt(v) / 10n**BigInt(dec)).toLocaleString();
+    const fmtDec2 = (v, dec) => (Number(v) / 10**dec).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+    const STABLE2 = ['dai','usdc','psundai'];
 
     async function getZkeyUrl(setStatus) {
       if (_zkeyBlobUrl) return _zkeyBlobUrl;
@@ -818,7 +820,8 @@
         set('fvTotalBurned', fmt18(BigInt(dead)+BigInt(fire))+' PRIVX');
         set('fvTotalVault',  fmt18(toVault)+' PRIVX');
         set('fvLpLocked',    fmt18(lp)+' LP Tokens');
-        set('fvAccumulated', fmtDec(acc, shield.decimals)+' '+shield.label);
+        const accFmt = STABLE2.includes(selectedToken) ? fmtDec2(acc, shield.decimals) : fmtDec(acc, shield.decimals);
+        set('fvAccumulated', accFmt+' '+shield.label);
       } catch(e) { ['fvTotalBurned','fvTotalVault','fvLpLocked','fvAccumulated'].forEach(id=>set(id,'Error')); }
     }
 
