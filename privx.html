@@ -177,7 +177,7 @@
           <div class="token-card"        id="token-hex"     onclick="selectToken('hex')"><div class="tc-name">HEX</div><div class="tc-sub">Certificate of Deposit</div><div class="tc-soon">Coming Soon</div></div>
           <div class="token-card"        id="token-plsx"    onclick="selectToken('plsx')"><div class="tc-name">PLSX</div><div class="tc-sub">DEX Token</div><div class="tc-soon">Coming Soon</div></div>
           <!-- Row 2 -->
-          <div class="token-card"        id="token-dai"     onclick="selectToken('dai')"><div class="tc-name">DAI</div><div class="tc-sub">Stablecoin</div><div class="tc-soon">Coming Soon</div></div>
+          <div class="token-card live"   id="token-dai"     onclick="selectToken('dai')"><div class="tc-name">DAI</div><div class="tc-sub">Stablecoin</div><div class="tc-live">Live Now</div></div>
           <div class="token-card"        id="token-usdc"    onclick="selectToken('usdc')"><div class="tc-name">USDC</div><div class="tc-sub">Stablecoin</div><div class="tc-soon">Coming Soon</div></div>
           <div class="token-card"        id="token-psundai" onclick="selectToken('psundai')"><div class="tc-name">pSunDAI</div><div class="tc-sub">Autonomous Stable</div><div class="tc-soon">Coming Soon</div></div>
           <!-- Row 3 -->
@@ -466,10 +466,10 @@
 
       <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">DAI SHIELDS</p>
       <table class="contract-table">
-        <tr><td>10 DAI</td><td id="ct-dai-d0" style="color:#555">Deploying soon…</td></tr>
-        <tr><td>100 DAI</td><td id="ct-dai-d1" style="color:#555">Deploying soon…</td></tr>
-        <tr><td>1,000 DAI</td><td id="ct-dai-d2" style="color:#555">Deploying soon…</td></tr>
-        <tr><td>10,000 DAI</td><td id="ct-dai-d3" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>10 DAI</td><td><a href="https://scan.pulsechain.com/address/0xf0A963bD32d4BDF5da56dbB7B4C66f7d5976c5e6" target="_blank">0xf0A963bD32d4BDF5da56dbB7B4C66f7d5976c5e6 ↗</a></td></tr>
+        <tr><td>100 DAI</td><td><a href="https://scan.pulsechain.com/address/0xcD837b3b1881e43A33f8dBa1a093cE54bEf2AB41" target="_blank">0xcD837b3b1881e43A33f8dBa1a093cE54bEf2AB41 ↗</a></td></tr>
+        <tr><td>1,000 DAI</td><td><a href="https://scan.pulsechain.com/address/0x90A7Ef100eDea88A79318f19B913998528BcA5a2" target="_blank">0x90A7Ef100eDea88A79318f19B913998528BcA5a2 ↗</a></td></tr>
+        <tr><td>10,000 DAI</td><td><a href="https://scan.pulsechain.com/address/0x1E4205337b5a59bDCB0D9541664C827238DDb250" target="_blank">0x1E4205337b5a59bDCB0D9541664C827238DDb250 ↗</a></td></tr>
       </table>
 
       <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">USDC SHIELDS</p>
@@ -532,7 +532,7 @@
         <tr><td>PLS</td><td>100K / 1M / 10M / 100M</td><td>Live ✓</td></tr>
         <tr><td>HEX</td><td>1K / 10K / 100K / 1M</td><td>8 decimals</td></tr>
         <tr><td>PLSX</td><td>100K / 1M / 10M / 100M</td><td>Standard</td></tr>
-        <tr><td>DAI</td><td>10 / 100 / 1K / 10K</td><td>Standard</td></tr>
+        <tr><td>DAI</td><td>10 / 100 / 1K / 10K</td><td>Live ✓</td></tr>
         <tr><td>USDC</td><td>10 / 100 / 1K / 10K</td><td>6 decimals</td></tr>
         <tr><td>pSunDAI</td><td>10 / 100 / 1K / 10K</td><td>Standard</td></tr>
         <tr><td>pDAI</td><td>1K / 10K / 100K / 1M</td><td>Live ✓</td></tr>
@@ -684,16 +684,16 @@
       },
       dai: {
         label: "DAI", sublabel: "Stablecoin",
-        token: "FILL_CA", // UPDATE: bridged DAI contract address on PulseChain
+        token: "0xefD766cCb38EaF1dfd701853BFCe31359239F305",
         decimals: 18, feeBP: 50,
-        swapUrl: "https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=FILL_CA",
-        contracts: { d0:"DEPLOY_FIRST", d1:"DEPLOY_FIRST", d2:"DEPLOY_FIRST", d3:"DEPLOY_FIRST" },
+        swapUrl: "https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=0xefD766cCb38EaF1dfd701853BFCe31359239F305",
+        contracts: { d0:"0xf0A963bD32d4BDF5da56dbB7B4C66f7d5976c5e6", d1:"0xcD837b3b1881e43A33f8dBa1a093cE54bEf2AB41", d2:"0x90A7Ef100eDea88A79318f19B913998528BcA5a2", d3:"0x1E4205337b5a59bDCB0D9541664C827238DDb250" },
         denoms:   ["10","100","1000","10000"],
         denomWei: { d0:10000000000000000000n, d1:100000000000000000000n, d2:1000000000000000000000n, d3:10000000000000000000000n },
       },
       usdc: {
         label: "USDC", sublabel: "Stablecoin",
-        token: "FILL_CA", // UPDATE: bridged USDC contract address on PulseChain
+        token: "FILL_CA",
         decimals: 6, feeBP: 50,
         swapUrl: "https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=FILL_CA",
         contracts: { d0:"DEPLOY_FIRST", d1:"DEPLOY_FIRST", d2:"DEPLOY_FIRST", d3:"DEPLOY_FIRST" },
