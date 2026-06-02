@@ -173,7 +173,7 @@
         <!-- 3×3 token selector -->
         <div class="token-grid">
           <!-- Row 1 -->
-          <div class="token-card live"   id="token-wpls"    onclick="selectToken('wpls')"><div class="tc-name">PLS</div><div class="tc-sub">PulseChain</div><div class="tc-live">Live Now</div></div>
+          <div class="token-card live active" id="token-wpls" onclick="selectToken('wpls')"><div class="tc-name">PLS</div><div class="tc-sub">PulseChain</div><div class="tc-live">Live Now</div></div>
           <div class="token-card"        id="token-hex"     onclick="selectToken('hex')"><div class="tc-name">HEX</div><div class="tc-sub">Certificate of Deposit</div><div class="tc-soon">Coming Soon</div></div>
           <div class="token-card"        id="token-plsx"    onclick="selectToken('plsx')"><div class="tc-name">PLSX</div><div class="tc-sub">DEX Token</div><div class="tc-soon">Coming Soon</div></div>
           <!-- Row 2 -->
@@ -181,7 +181,7 @@
           <div class="token-card"        id="token-usdc"    onclick="selectToken('usdc')"><div class="tc-name">USDC</div><div class="tc-sub">Stablecoin</div><div class="tc-soon">Coming Soon</div></div>
           <div class="token-card"        id="token-psundai" onclick="selectToken('psundai')"><div class="tc-name">pSunDAI</div><div class="tc-sub">Autonomous Stable</div><div class="tc-soon">Coming Soon</div></div>
           <!-- Row 3 -->
-          <div class="token-card live active" id="token-pdai" onclick="selectToken('pdai')"><div class="tc-name">pDAI</div><div class="tc-sub">Stable Asset</div><div class="tc-live">Live Now</div></div>
+          <div class="token-card live"        id="token-pdai" onclick="selectToken('pdai')"><div class="tc-name">pDAI</div><div class="tc-sub">Stable Asset</div><div class="tc-live">Live Now</div></div>
           <div class="token-card"        id="token-ethos"   onclick="selectToken('ethos')"><div class="tc-name">ETHOS</div><div class="tc-sub">Yield Token</div><div class="tc-soon">Coming Soon</div></div>
           <div class="token-card live"   id="token-privx"   onclick="selectToken('privx')"><div class="tc-name">PrivX</div><div class="tc-sub">Privacy Mining</div><div class="tc-live">Live Now</div></div>
         </div>
@@ -725,7 +725,7 @@
 
     // ─── State ────────────────────────────────────────────────────────────────
     let web3, userAccount, selectedDenom;
-    let selectedToken = 'pdai';
+    let selectedToken = 'wpls';
     let poseidonFn = null, _zkeyBlobUrl = null;
 
     // ─── ABIs ─────────────────────────────────────────────────────────────────
@@ -999,7 +999,7 @@
       if(!noteInput) return alert("Paste your private note first");
       if(!userAccount) return alert("Connect wallet first");
       if(!poseidonFn) return alert("Poseidon not ready — wait a moment");
-      const match=noteInput.match(/^privx-hurricane-(ethos|pdai|wpls|plsx|hex|prvx|omega|zkp|privx)-(\d+)-([a-fA-F0-9]{62,64})-([a-fA-F0-9]{62,64})$/i);
+      const match=noteInput.match(/^privx-hurricane-(ethos|pdai|wpls|plsx|hex|dai|usdc|psundai|privx)-(\d+)-([a-fA-F0-9]{62,64})-([a-fA-F0-9]{62,64})$/i);
       if(!match) return alert("Invalid note format.\nExpected: privx-hurricane-<token>-<amount>-<nullifier>-<secret>");
       let[,tokenKey,denomStr,nHex,sHex]=match; tokenKey=tokenKey.toLowerCase();
       const shield=SHIELDS[tokenKey];
@@ -1160,7 +1160,7 @@
       document.getElementById('withdrawBtn').onclick=handleWithdraw;
       document.getElementById('depositTabBtn').addEventListener('click',()=>switchTab('deposit'));
       document.getElementById('withdrawTabBtn').addEventListener('click',()=>switchTab('withdraw'));
-      switchTab('deposit'); selectToken('ethos'); updateDepositButton();
+      switchTab('deposit'); selectToken('wpls'); updateDepositButton();
       document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDocsModal();closeFeeVaultModal();closeMiningVaultModal();}});
       try{await initPoseidon();console.log("PrivX Hurricane ready (Powered by PrivX)");}
       catch(e){console.error(e);alert("Poseidon failed: "+e.message);}
