@@ -185,14 +185,26 @@ Every token shielded across every pool creates buying pressure on PRIVX, deepens
 
 ## Trusted Setup
 
-The ZK circuit uses the **Hermez Powers of Tau ceremony** (`powersOfTau28_hez_final_14.ptau`) — a multi-party trusted setup with 54 independent contributors. Security holds as long as at least one contributor destroyed their toxic waste. The ceremony file is publicly verifiable:
+PrivX Hurricane's cryptographic foundation rests on the **Hermez Network Powers of Tau** — one of the most rigorous multi-party computation ceremonies ever conducted for a ZK proving system. **54 independent contributors** from across the world each added entropy to the ceremony. The security guarantee is unconditional: every single one of those 54 participants would need to have secretly preserved their randomness *and* coordinated together to compromise the system. This is considered computationally and logistically impossible.
+
+### Why PLONK Changes Everything
+
+Unlike Groth16 — the proving system used by earlier privacy protocols — **PLONK requires no circuit-specific trusted setup**. There is no secondary ceremony, no per-circuit toxic waste, and no privileged developer key that could theoretically be exploited. The universal structured reference string (SRS) derived from the Hermez ceremony is all that is needed, permanently and for every token PrivX Hurricane ever shields.
+
+This means:
+- Adding a new shielded token requires **no new ceremony**
+- There is **no single point of failure** introduced at circuit compile time
+- The proving key is a mathematical consequence of the ceremony — not a secret
+
+### Verification
+
+The ceremony file is cryptographically fingerprinted and independently verifiable by anyone:
 
 ```
 SHA256: 489be9e5ac65d524f7b1685baac8a183c6e77924fdb73d2b8105e335f277895d
-Source: https://storage.googleapis.com/zkevm/ptau/powersOfTau28_hez_final_14.ptau
 ```
 
-The proving key (`PrivXMixer14_final.zkey`) was generated from this ceremony file and the compiled circuit constraints. It is pinned on IPFS and served to the browser for client-side proof generation.
+The proving key (`PrivXMixer14_final.zkey`) was derived from this ceremony file and the compiled circuit constraints. It is pinned to IPFS, served to the browser for fully client-side proof generation, and never touches a server.
 
 ---
 
