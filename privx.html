@@ -37,6 +37,31 @@
     .verify-ipfs{font-family:monospace;font-size:10px;color:#444;letter-spacing:0.3px}
     .verify-ipfs a{color:#555;text-decoration:none;transition:color .2s}
     .verify-ipfs a:hover{color:#888}
+    .verify-badge.verified{cursor:pointer}
+    .verify-badge.verified:hover{background:rgba(0,255,100,0.13);border-color:rgba(0,255,100,0.4)}
+    /* Verify modal */
+    #verifyModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:10000;backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:1rem}
+    #verifyModal.open{display:flex}
+    .vm-box{background:#0e0e0e;border:1px solid rgba(0,255,100,0.2);border-radius:14px;max-width:640px;width:100%;max-height:90vh;overflow-y:auto;padding:0}
+    .vm-head{padding:1.2rem 1.5rem;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between}
+    .vm-title{font-size:0.95rem;font-weight:700;color:#00e664;letter-spacing:0.5px}
+    .vm-close{background:none;border:none;color:#555;font-size:1.3rem;cursor:pointer;padding:0 4px;transition:color .2s}
+    .vm-close:hover{color:#aaa}
+    .vm-body{padding:1.2rem 1.5rem;display:flex;flex-direction:column;gap:1rem}
+    .vm-intro{font-size:0.8rem;color:#666;line-height:1.6;font-family:monospace}
+    .vm-shield{background:#111;border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:0.9rem 1rem}
+    .vm-shield-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem}
+    .vm-shield-name{font-size:0.78rem;font-weight:700;color:#fff;letter-spacing:1px}
+    .vm-shield-status{font-size:0.72rem;font-weight:700}
+    .vm-shield-status.ok{color:#00e664}
+    .vm-shield-status.fail{color:#ff5555}
+    .vm-row{display:grid;grid-template-columns:80px 1fr 20px;gap:4px 8px;align-items:center;margin-bottom:3px}
+    .vm-key{font-family:monospace;font-size:0.65rem;color:#555;text-transform:uppercase;letter-spacing:0.5px}
+    .vm-val{font-family:monospace;font-size:0.65rem;color:#888}
+    .vm-val a{color:#666;text-decoration:none}
+    .vm-val a:hover{color:#aaa}
+    .vm-check{font-size:0.75rem;text-align:right}
+    .vm-footer{padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,0.06);font-size:0.72rem;color:#444;line-height:1.6;font-family:monospace}
     .top-nav{position:fixed;top:20px;left:20px;display:flex;gap:10px;z-index:9999;flex-wrap:wrap}
     .nav-link{background:rgba(10,10,10,0.8);backdrop-filter:blur(10px);padding:10px 18px;border:1px solid rgba(138,43,226,0.5);border-radius:10px;color:#aaa;font-size:13px;font-weight:600;text-decoration:none;transition:all .3s}
     .nav-link:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 20px var(--glow)}
@@ -1196,6 +1221,45 @@
       { label:"PrivX", addr:"0x74471E88588c2dF518379c4f9feC981158f741F4", assetFn:"asset", expectedAsset:"0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986" },
     ];
 
+    let _verifyResults = null;
+
+    function openVerifyModal() {
+      if (!_verifyResults) return;
+      const container = document.getElementById('vm-shields');
+      container.innerHTML = _verifyResults.map(r => `
+        <div class="vm-shield">
+          <div class="vm-shield-head">
+            <span class="vm-shield-name">${r.label} SHIELD</span>
+            <span class="vm-shield-status ${r.ok?'ok':'fail'}">${r.ok?'✓ VERIFIED':'✗ MISMATCH'}</span>
+          </div>
+          <div class="vm-row">
+            <span class="vm-key">Contract</span>
+            <span class="vm-val"><a href="https://scan.pulsechain.com/address/${r.addr}" target="_blank">${r.addr.slice(0,10)}…${r.addr.slice(-8)} ↗</a></span>
+            <span></span>
+          </div>
+          <div class="vm-row">
+            <span class="vm-key">verifier()</span>
+            <span class="vm-val"><a href="https://scan.pulsechain.com/address/${r.verifier}" target="_blank">${r.verifier.slice(0,10)}…${r.verifier.slice(-8)} ↗</a></span>
+            <span class="vm-check">${r.verifierOk?'<span style="color:#00e664">✓</span>':'<span style="color:#ff5555">✗</span>'}</span>
+          </div>
+          <div class="vm-row">
+            <span class="vm-key">hasher()</span>
+            <span class="vm-val"><a href="https://scan.pulsechain.com/address/${r.hasher}" target="_blank">${r.hasher.slice(0,10)}…${r.hasher.slice(-8)} ↗</a></span>
+            <span class="vm-check">${r.hasherOk?'<span style="color:#00e664">✓</span>':'<span style="color:#ff5555">✗</span>'}</span>
+          </div>
+          <div class="vm-row">
+            <span class="vm-key">${r.assetFn}()</span>
+            <span class="vm-val"><a href="https://scan.pulsechain.com/address/${r.asset}" target="_blank">${r.asset.slice(0,10)}…${r.asset.slice(-8)} ↗</a></span>
+            <span class="vm-check">${r.assetOk?'<span style="color:#00e664">✓</span>':'<span style="color:#ff5555">✗</span>'}</span>
+          </div>
+        </div>`).join('');
+      document.getElementById('verifyModal').classList.add('open');
+    }
+
+    function closeVerifyModal() {
+      document.getElementById('verifyModal').classList.remove('open');
+    }
+
     async function verifyContracts() {
       const badge = document.getElementById('verify-badge');
       if (!badge) return;
@@ -1208,20 +1272,22 @@
             c.methods.hasher().call(),
             c.methods[s.assetFn]().call()
           ]);
-          return {
-            label:   s.label,
-            ok:      ver.toLowerCase()       === EXPECTED_VERIFIER.toLowerCase() &&
-                     hash.toLowerCase()      === EXPECTED_HASHER.toLowerCase()   &&
-                     assetAddr.toLowerCase() === s.expectedAsset.toLowerCase()
-          };
+          const verifierOk = ver.toLowerCase()       === EXPECTED_VERIFIER.toLowerCase();
+          const hasherOk   = hash.toLowerCase()      === EXPECTED_HASHER.toLowerCase();
+          const assetOk    = assetAddr.toLowerCase() === s.expectedAsset.toLowerCase();
+          return { label:s.label, addr:s.addr, assetFn:s.assetFn, verifier:ver, hasher:hash, asset:assetAddr, verifierOk, hasherOk, assetOk, ok:verifierOk&&hasherOk&&assetOk };
         }));
+        _verifyResults = results;
         const failed = results.filter(r => !r.ok);
         if (failed.length === 0) {
           badge.className = 'verify-badge verified';
-          badge.innerHTML = `✓ Contracts verified on-chain &nbsp;·&nbsp; <span style="opacity:0.6">PLONK Verifier · Poseidon Hasher · ${results.length} shields</span>`;
+          badge.title = 'Click to see full verification details';
+          badge.innerHTML = `✓ Contracts verified on-chain &nbsp;·&nbsp; <span style="opacity:0.6">PLONK Verifier · Poseidon Hasher · ${results.length} shields — click to inspect</span>`;
+          badge.onclick = openVerifyModal;
         } else {
           badge.className = 'verify-badge failed';
           badge.innerHTML = `⚠ Verification failed: ${failed.map(f=>f.label).join(', ')} — do not use this site`;
+          badge.onclick = openVerifyModal;
         }
       } catch(e) {
         console.error('verifyContracts failed:', e);
@@ -1238,7 +1304,7 @@
       document.getElementById('depositTabBtn').addEventListener('click',()=>switchTab('deposit'));
       document.getElementById('withdrawTabBtn').addEventListener('click',()=>switchTab('withdraw'));
       switchTab('deposit'); selectToken('wpls'); updateDepositButton();
-      document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDocsModal();closeFeeVaultModal();closeMiningVaultModal();}});
+      document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDocsModal();closeFeeVaultModal();closeMiningVaultModal();closeVerifyModal();}});
       verifyContracts();
       try{await initPoseidon();console.log("PrivX Hurricane ready (Powered by PrivX)");}
       catch(e){console.error(e);alert("Poseidon failed: "+e.message);}
@@ -1247,6 +1313,24 @@
       setInterval(loadUserBalances,30000);
     });
   </script>
+
+  <!-- Verify Modal -->
+  <div id="verifyModal" onclick="if(event.target===this)closeVerifyModal()">
+    <div class="vm-box">
+      <div class="vm-head">
+        <span class="vm-title">✓ On-Chain Contract Verification</span>
+        <button class="vm-close" onclick="closeVerifyModal()">✕</button>
+      </div>
+      <div class="vm-body">
+        <div class="vm-intro">Your browser called <strong style="color:#aaa">verifier()</strong>, <strong style="color:#aaa">hasher()</strong>, and <strong style="color:#aaa">asset()</strong> directly on each shield contract and compared the returned addresses against the known PrivX Hurricane contracts. A fake site cannot spoof these — the values come from immutable on-chain code.</div>
+        <div id="vm-shields"></div>
+      </div>
+      <div class="vm-footer">
+        Expected PLONK Verifier: <a href="https://scan.pulsechain.com/address/0xcEDa1071542d537221B5a01BFd1cF920cF8B9829" target="_blank" style="color:#555">0xcEDa1071542d537221B5a01BFd1cF920cF8B9829 ↗</a><br>
+        Expected Poseidon Hasher: <a href="https://scan.pulsechain.com/address/0x72740d65A93f2e9d9741234371d62FeE36AEf9dF" target="_blank" style="color:#555">0x72740d65A93f2e9d9741234371d62FeE36AEf9dF ↗</a>
+      </div>
+    </div>
+  </div>
 
   <!-- Matrix rain -->
   <script>
