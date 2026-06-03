@@ -1181,10 +1181,10 @@
 
     // ─── Contract Verification ────────────────────────────────────────────────
     const VERIFY_ABI = [
-      { inputs:[], name:"verifier",    outputs:[{type:"address"}], stateMutability:"view", type:"function" },
-      { inputs:[], name:"hasher",      outputs:[{type:"address"}], stateMutability:"view", type:"function" },
-      { inputs:[], name:"asset",       outputs:[{type:"address"}], stateMutability:"view", type:"function" },
-      { inputs:[], name:"wpls",        outputs:[{type:"address"}], stateMutability:"view", type:"function" },
+      { inputs:[], name:"verifier", outputs:[{name:"",type:"address"}], stateMutability:"view", type:"function" },
+      { inputs:[], name:"hasher",   outputs:[{name:"",type:"address"}], stateMutability:"view", type:"function" },
+      { inputs:[], name:"asset",    outputs:[{name:"",type:"address"}], stateMutability:"view", type:"function" },
+      { inputs:[], name:"wpls",     outputs:[{name:"",type:"address"}], stateMutability:"view", type:"function" },
     ];
     const EXPECTED_VERIFIER = "0xcEDa1071542d537221B5a01BFd1cF920cF8B9829";
     const EXPECTED_HASHER   = "0x72740d65A93f2e9d9741234371d62FeE36AEf9dF";
@@ -1224,8 +1224,9 @@
           badge.innerHTML = `⚠ Verification failed: ${failed.map(f=>f.label).join(', ')} — do not use this site`;
         }
       } catch(e) {
-        const badge = document.getElementById('verify-badge');
-        if (badge) { badge.className='verify-badge warn'; badge.innerHTML='⚡ Could not verify — RPC unavailable'; }
+        console.error('verifyContracts failed:', e);
+        const b = document.getElementById('verify-badge');
+        if (b) { b.className='verify-badge warn'; b.innerHTML='⚡ Could not verify — RPC unavailable'; }
       }
     }
 
