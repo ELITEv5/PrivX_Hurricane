@@ -27,7 +27,16 @@
     .page-wrap{width:100%;max-width:680px;position:relative;z-index:10;display:flex;flex-direction:column;gap:24px;margin-top:60px}
     .container{background:rgba(10,10,10,0.7);backdrop-filter:blur(20px);border-radius:24px;padding:40px 30px;border:1px solid var(--primary);box-shadow:0 0 80px var(--glow),inset 0 0 40px rgba(138,43,226,0.1)}
     .info-card{background:rgba(10,10,10,0.7);backdrop-filter:blur(20px);border-radius:24px;padding:36px 30px;border:1px solid rgba(138,43,226,0.4);box-shadow:0 0 40px rgba(138,43,226,0.2)}
-    .subtitle{color:var(--accent);font-size:1.2em;margin-bottom:30px;text-align:center}
+    .subtitle{color:var(--accent);font-size:1.2em;margin-bottom:12px;text-align:center}
+    .verify-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:20px}
+    .verify-badge{display:inline-flex;align-items:center;gap:6px;font-family:monospace;font-size:11px;letter-spacing:0.4px;padding:5px 14px;border-radius:20px;cursor:default;transition:all .3s}
+    .verify-badge.checking{background:rgba(255,255,255,0.04);color:#666;border:1px solid rgba(255,255,255,0.08)}
+    .verify-badge.verified{background:rgba(0,255,100,0.07);color:#00e664;border:1px solid rgba(0,255,100,0.22)}
+    .verify-badge.failed{background:rgba(255,50,50,0.09);color:#ff5555;border:1px solid rgba(255,50,50,0.28)}
+    .verify-badge.warn{background:rgba(255,180,0,0.07);color:#ffb400;border:1px solid rgba(255,180,0,0.22)}
+    .verify-ipfs{font-family:monospace;font-size:10px;color:#444;letter-spacing:0.3px}
+    .verify-ipfs a{color:#555;text-decoration:none;transition:color .2s}
+    .verify-ipfs a:hover{color:#888}
     .top-nav{position:fixed;top:20px;left:20px;display:flex;gap:10px;z-index:9999;flex-wrap:wrap}
     .nav-link{background:rgba(10,10,10,0.8);backdrop-filter:blur(10px);padding:10px 18px;border:1px solid rgba(138,43,226,0.5);border-radius:10px;color:#aaa;font-size:13px;font-weight:600;text-decoration:none;transition:all .3s}
     .nav-link:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 20px var(--glow)}
@@ -160,6 +169,11 @@
         <p class="subtitle">9 tokens. Zero knowledge. Every withdrawal earns PRIVX.<br>
           <span style="font-size:0.85em;opacity:0.85"><span class="pop-badge">POP</span> <span class="privx-badge"><img src="privx-shield.png" style="height:12px;width:auto;vertical-align:middle;margin-right:4px;border-radius:3px" alt="">PrivX Hurricane Protocol</span></span>
         </p>
+      </div>
+
+      <div class="verify-wrap">
+        <div id="verify-badge" class="verify-badge checking">⏳ Verifying contracts on-chain…</div>
+        <div class="verify-ipfs">IPFS: <a href="https://ipfs.io/ipfs/bafybeighmp7axycyyy34o2tkmw5huze6nbs2b6t7siqwqmtjjdi5cifsoe" target="_blank" title="Censorship-resistant build — CID is the content hash">bafybei…cifsoe ↗</a></div>
       </div>
 
       <div class="tabs">
@@ -1165,6 +1179,56 @@
       }catch(e){if(el)el.textContent="Error";}
     }
 
+    // ─── Contract Verification ────────────────────────────────────────────────
+    const VERIFY_ABI = [
+      { inputs:[], name:"verifier",    outputs:[{type:"address"}], stateMutability:"view", type:"function" },
+      { inputs:[], name:"hasher",      outputs:[{type:"address"}], stateMutability:"view", type:"function" },
+      { inputs:[], name:"asset",       outputs:[{type:"address"}], stateMutability:"view", type:"function" },
+      { inputs:[], name:"wpls",        outputs:[{type:"address"}], stateMutability:"view", type:"function" },
+    ];
+    const EXPECTED_VERIFIER = "0xcEDa1071542d537221B5a01BFd1cF920cF8B9829";
+    const EXPECTED_HASHER   = "0x72740d65A93f2e9d9741234371d62FeE36AEf9dF";
+    const VERIFY_SHIELDS = [
+      { label:"PLS",   addr:"0xFdbd8a02f112e722543C12bce3596f42b9Bb3b72", assetFn:"wpls",  expectedAsset:"0xA1077a294dDE1B09bB078844df40758a5D0f9a27" },
+      { label:"DAI",   addr:"0xf0A963bD32d4BDF5da56dbB7B4C66f7d5976c5e6", assetFn:"asset", expectedAsset:"0xefD766cCb38EaF1dfd701853BFCe31359239F305" },
+      { label:"pDAI",  addr:"0x94D0Df289cE310462Fee8137aF945381844B94D1", assetFn:"asset", expectedAsset:"0x6B175474E89094C44Da98b954EedeAC495271d0F" },
+      { label:"pCOCK", addr:"0x8F63010C4e5FE11f09654B9ff3471e81C36b4883", assetFn:"asset", expectedAsset:"0xc10A4Ed9b4042222d69ff0B374eddd47ed90fC1F" },
+      { label:"PrivX", addr:"0x74471E88588c2dF518379c4f9feC981158f741F4", assetFn:"asset", expectedAsset:"0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986" },
+    ];
+
+    async function verifyContracts() {
+      const badge = document.getElementById('verify-badge');
+      if (!badge) return;
+      try {
+        const w = new Web3("https://rpc.pulsechain.com");
+        const results = await Promise.all(VERIFY_SHIELDS.map(async s => {
+          const c = new w.eth.Contract(VERIFY_ABI, s.addr);
+          const [ver, hash, assetAddr] = await Promise.all([
+            c.methods.verifier().call(),
+            c.methods.hasher().call(),
+            c.methods[s.assetFn]().call()
+          ]);
+          return {
+            label:   s.label,
+            ok:      ver.toLowerCase()       === EXPECTED_VERIFIER.toLowerCase() &&
+                     hash.toLowerCase()      === EXPECTED_HASHER.toLowerCase()   &&
+                     assetAddr.toLowerCase() === s.expectedAsset.toLowerCase()
+          };
+        }));
+        const failed = results.filter(r => !r.ok);
+        if (failed.length === 0) {
+          badge.className = 'verify-badge verified';
+          badge.innerHTML = `✓ Contracts verified on-chain &nbsp;·&nbsp; <span style="opacity:0.6">PLONK Verifier · Poseidon Hasher · ${results.length} shields</span>`;
+        } else {
+          badge.className = 'verify-badge failed';
+          badge.innerHTML = `⚠ Verification failed: ${failed.map(f=>f.label).join(', ')} — do not use this site`;
+        }
+      } catch(e) {
+        const badge = document.getElementById('verify-badge');
+        if (badge) { badge.className='verify-badge warn'; badge.innerHTML='⚡ Could not verify — RPC unavailable'; }
+      }
+    }
+
     // ─── Init ─────────────────────────────────────────────────────────────────
     window.addEventListener('load',async()=>{
       document.getElementById("walletButton").onclick=toggleWallet;
@@ -1174,6 +1238,7 @@
       document.getElementById('withdrawTabBtn').addEventListener('click',()=>switchTab('withdraw'));
       switchTab('deposit'); selectToken('wpls'); updateDepositButton();
       document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDocsModal();closeFeeVaultModal();closeMiningVaultModal();}});
+      verifyContracts();
       try{await initPoseidon();console.log("PrivX Hurricane ready (Powered by PrivX)");}
       catch(e){console.error(e);alert("Poseidon failed: "+e.message);}
       setInterval(updateBurnedBalance,30000);
