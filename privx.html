@@ -1118,7 +1118,7 @@
       finally{
         btn.disabled=false;
         const s=SHIELDS[selectedToken],d=s.denoms[['d0','d1','d2','d3'].indexOf(selectedDenom)];
-        btn.textContent=`Shield ${Number(d).toLocaleString()} ${s.label}`;
+        btn.textContent=`Shield ${d} ${s.label}`;
       }
     }
 
@@ -1303,11 +1303,13 @@
       const shield=SHIELDS[token];
       const keys=['d0','d1','d2','d3'];
       keys.forEach((k,i)=>{
-        const denomTokens=Number(shield.denomWei[k]/10n**BigInt(shield.decimals));
-        const feeTokens=denomTokens*shield.feeBP/10000;
-        document.getElementById('denom-amount-'+k).textContent=denomTokens.toLocaleString();
+        const denomStr=shield.denoms[i];
+        const denomNum=Number(denomStr);
+        const feeNum=denomNum*shield.feeBP/10000;
+        const feeDisplay=feeNum>=1?feeNum.toLocaleString():parseFloat(feeNum.toPrecision(2)).toString();
+        document.getElementById('denom-amount-'+k).textContent=denomStr;
         document.getElementById('denom-label-'+k).textContent=shield.label;
-        document.getElementById('denom-fee-'+k).textContent=`Fee: ${feeTokens.toLocaleString()} ${shield.label} (0.5%)`;
+        document.getElementById('denom-fee-'+k).textContent=`Fee: ${feeDisplay} ${shield.label} (0.5%)`;
       });
       // Update buy button
       const buyBtn=document.getElementById('buyTokenBtn');
