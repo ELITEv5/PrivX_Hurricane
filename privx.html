@@ -37,6 +37,19 @@
     .verify-ipfs{font-family:monospace;font-size:10px;color:#444;letter-spacing:0.3px}
     .verify-ipfs a{color:#555;text-decoration:none;transition:color .2s}
     .verify-ipfs a:hover{color:#888}
+    /* Relayer mode */
+    .relayer-toggle{width:100%;padding:11px 16px;border-radius:10px;border:1px solid rgba(0,255,234,0.2);background:rgba(0,255,234,0.04);color:#888;font-size:13px;font-weight:600;cursor:pointer;text-align:left;display:flex;justify-content:space-between;align-items:center;transition:all .2s;margin-bottom:0}
+    .relayer-toggle:hover{border-color:rgba(0,255,234,0.35);color:#aaa}
+    .relayer-toggle.active{border-color:rgba(0,255,234,0.5);background:rgba(0,255,234,0.08);color:#00ffea}
+    .relayer-pill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;background:rgba(0,255,234,0.1);color:#00ffea;letter-spacing:1px}
+    .relayer-pill.off{background:rgba(255,255,255,0.05);color:#555}
+    .proof-export{background:#0a0a0a;border:1px solid rgba(0,255,234,0.25);border-radius:12px;padding:16px;margin-top:16px}
+    .proof-export-title{color:#00ffea;font-size:13px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+    .proof-json{width:100%;height:120px;background:#050505;border:1px solid #222;border-radius:8px;color:#555;font-family:monospace;font-size:10px;padding:10px;resize:none;outline:none;line-height:1.5}
+    .proof-actions{display:flex;gap:8px;margin-top:10px}
+    .proof-btn{flex:1;padding:10px;border-radius:8px;border:1px solid rgba(0,255,234,0.3);background:rgba(0,255,234,0.07);color:#00ffea;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;font-family:monospace}
+    .proof-btn:hover{background:rgba(0,255,234,0.14)}
+    .proof-warn{font-size:11px;color:#555;margin-top:10px;line-height:1.6;font-family:monospace}
     .verify-badge.verified{cursor:pointer}
     .verify-badge.verified:hover{background:rgba(0,255,100,0.13);border-color:rgba(0,255,100,0.4)}
     /* Verify modal */
@@ -291,7 +304,7 @@
         <input type="text" id="withdrawNote" placeholder="privx-hurricane-pdai-1000-abc123..." style="width:100%;padding:16px;margin:8px 0 12px;border-radius:12px;border:1px solid #444;background:#111;color:#fff;font-family:monospace;font-size:13px">
         <input type="text" id="recipientAddress" placeholder="Recipient address (blank = connected wallet)" style="width:100%;padding:16px;margin:0 0 10px;border-radius:12px;border:1px solid #444;background:#111;color:#fff">
 
-        <details id="mevGuard" style="margin-bottom:14px">
+        <details id="mevGuard" style="margin-bottom:14px"><!-- mevGuard -->
           <summary style="cursor:pointer;color:#888;font-size:13px;padding:10px 14px;background:rgba(255,180,0,0.05);border:1px solid rgba(255,180,0,0.2);border-radius:10px;list-style:none;display:flex;justify-content:space-between;align-items:center">
             <span>🛡 MEV Protection <span style="background:rgba(255,180,0,0.12);color:#ffb400;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;margin-left:8px">OPTIONAL</span></span>
             <span style="font-size:10px;color:#555">▼</span>
@@ -303,8 +316,36 @@
           </div>
         </details>
 
+        <div style="margin-bottom:14px">
+          <button class="relayer-toggle" id="relayerToggleBtn" onclick="toggleRelayerMode()">
+            <span>📦 Relayer Mode — generate proof without submitting</span>
+            <span class="relayer-pill off" id="relayerPill">OFF</span>
+          </button>
+          <div id="relayerInfo" style="display:none;padding:12px 14px;border:1px solid rgba(0,255,234,0.15);border-top:none;border-radius:0 0 10px 10px;background:rgba(0,255,234,0.03);font-size:12px;color:#888;line-height:1.6">
+            No wallet needed. Generate the ZK proof in your browser, copy the JSON, and send it to any relayer — they submit it on-chain. Your fresh wallet receives the funds without ever touching gas. <strong style="color:#00ffea">Recipient address is required.</strong>
+          </div>
+        </div>
+
         <button class="button" id="withdrawBtn">Generate ZK Proof + Withdraw</button>
         <div style="color:#888;font-size:13px;margin-top:12px;text-align:center">Proof generation takes ~15–30 seconds. Do not close the tab.</div>
+
+        <div id="proofExportPanel" style="display:none">
+          <div class="proof-export">
+            <div class="proof-export-title">✓ Proof ready — send this JSON to a relayer</div>
+            <textarea id="proofJson" class="proof-json" readonly></textarea>
+            <div class="proof-actions">
+              <button class="proof-btn" onclick="copyProofJson()">📋 Copy JSON</button>
+              <button class="proof-btn" onclick="downloadProofJson()">⬇ Download .json</button>
+            </div>
+            <div class="proof-actions" style="margin-top:0">
+              <a href="relayer.html" target="_blank" class="proof-btn" style="text-decoration:none;text-align:center">🔗 Open Relayer Page</a>
+            </div>
+            <div class="proof-warn">
+              ⚠ This proof is single-use. Once any relayer submits it the nullifier is permanently spent — do not share it twice.<br>
+              The recipient address is cryptographically locked into the proof. No relayer can redirect your funds.
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="vault-row" style="margin-top:28px">
@@ -1052,6 +1093,97 @@
       }
     }
 
+    // ─── Relayer mode ─────────────────────────────────────────────────────────
+    let relayerMode = false;
+    let _lastProofData = null;
+
+    function toggleRelayerMode() {
+      relayerMode = !relayerMode;
+      const pill = document.getElementById('relayerPill');
+      const btn  = document.getElementById('relayerToggleBtn');
+      const info = document.getElementById('relayerInfo');
+      const wb   = document.getElementById('withdrawBtn');
+      const mev  = document.getElementById('mevGuard');
+      pill.textContent = relayerMode ? 'ON' : 'OFF';
+      pill.className   = relayerMode ? 'relayer-pill' : 'relayer-pill off';
+      btn.className    = relayerMode ? 'relayer-toggle active' : 'relayer-toggle';
+      info.style.display = relayerMode ? 'block' : 'none';
+      mev.style.display  = relayerMode ? 'none'  : 'block';
+      wb.textContent  = relayerMode ? 'Generate Proof for Relayer' : 'Generate ZK Proof + Withdraw';
+      document.getElementById('proofExportPanel').style.display = 'none';
+    }
+
+    function copyProofJson() {
+      if (!_lastProofData) return;
+      navigator.clipboard.writeText(JSON.stringify(_lastProofData, null, 2))
+        .then(() => alert('Proof JSON copied to clipboard.'));
+    }
+
+    function downloadProofJson() {
+      if (!_lastProofData) return;
+      const blob = new Blob([JSON.stringify(_lastProofData, null, 2)], {type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `privx-proof-${_lastProofData.token}-${_lastProofData.denomination}-${Date.now()}.json`;
+      a.click();
+    }
+
+    async function generateForRelayer() {
+      const noteInput = document.getElementById("withdrawNote").value.trim();
+      if (!noteInput) return alert("Paste your private note first");
+      if (!poseidonFn) return alert("Poseidon not ready — wait a moment");
+      const match = noteInput.match(/^privx-hurricane-(pcock|pdai|wpls|plsx|hex|dai|usdc|psundai|privx)-(\d+)-([a-fA-F0-9]{62,64})-([a-fA-F0-9]{62,64})$/i);
+      if (!match) return alert("Invalid note format.");
+      let [,tokenKey,denomStr,nHex,sHex] = match; tokenKey = tokenKey.toLowerCase();
+      const shield    = SHIELDS[tokenKey];
+      const denomIdx  = shield.denoms.indexOf(denomStr);
+      if (denomIdx === -1) return alert("Unsupported denomination: " + denomStr);
+      const denomKey  = ['d0','d1','d2','d3'][denomIdx];
+      const denomWei  = shield.denomWei[denomKey];
+      const shieldAddr = shield.contracts[denomKey];
+      if (!shieldAddr || shieldAddr === "DEPLOY_FIRST") return alert(`No deployed shield for ${shield.label} ${denomStr}.`);
+      const recipient = document.getElementById("recipientAddress").value.trim();
+      if (!recipient) return alert("Recipient address is required in relayer mode — the fresh wallet that receives the funds.");
+      const nullifier    = BigInt("0x"+nHex), secret = BigInt("0x"+sHex);
+      const commitment   = poseidonFn(nullifier, secret);
+      const nullifierHash = poseidonFn(nullifier, denomWei);
+      const w = new Web3("https://rpc.pulsechain.com");
+      const shieldC = new w.eth.Contract(SHIELD_ABI, shieldAddr);
+      let pathIndices, siblings, proofRoot;
+      try { const mp = await getMerkleProof(shieldC, commitment); pathIndices=mp.pathIndices; siblings=mp.siblings; proofRoot=mp.proofRoot; }
+      catch(e) { return alert("Merkle proof failed:\n"+e.message); }
+      const circuitInput = {nullifier:nullifier.toString(),secret:secret.toString(),pathIndices:pathIndices.map(String),siblings,root:proofRoot.toString(),denomination:denomWei.toString(),nullifierHash:nullifierHash.toString(),recipient:BigInt(recipient).toString()};
+      const btn = document.getElementById("withdrawBtn");
+      btn.disabled = true;
+      try {
+        const zkeyUrl = await getZkeyUrl(msg => { btn.textContent = msg; });
+        btn.textContent = "Generating ZK proof… (up to 30s)";
+        const {proof:zkProof, publicSignals} = await snarkjs.plonk.fullProve(circuitInput, WASM_URL, zkeyUrl);
+        const calldata = await snarkjs.plonk.exportSolidityCallData(zkProof, publicSignals);
+        const argv = calldata.replace(/\]\s*\[/g,",").replace(/["[\]\s]/g,"").split(",").filter(Boolean);
+        _lastProofData = {
+          protocol:    "PrivX Hurricane",
+          version:     "1",
+          shield:      shieldAddr,
+          token:       shield.label,
+          denomination: `${denomStr} ${shield.label}`,
+          recipient:   recipient,
+          proof:       argv.slice(0,24),
+          pubSignals:  argv.slice(24,28),
+          generated:   new Date().toISOString()
+        };
+        document.getElementById('proofJson').value = JSON.stringify(_lastProofData, null, 2);
+        document.getElementById('proofExportPanel').style.display = 'block';
+        document.getElementById('proofExportPanel').scrollIntoView({behavior:'smooth', block:'nearest'});
+      } catch(err) {
+        console.error(err);
+        alert("Proof generation failed: "+(err.message||"check console"));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Generate Proof for Relayer";
+      }
+    }
+
     // ─── Withdraw ─────────────────────────────────────────────────────────────
     async function withdraw() {
       const noteInput=document.getElementById("withdrawNote").value.trim();
@@ -1098,6 +1230,7 @@
 
     // ─── MEV wrapper ──────────────────────────────────────────────────────────
     async function handleWithdraw() {
+      if (relayerMode) return generateForRelayer();
       const rpc=document.getElementById('privateRpcUrl').value.trim();
       if(!rpc) return withdraw();
       let switched=false;
