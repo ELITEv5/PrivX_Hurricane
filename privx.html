@@ -9,7 +9,7 @@
   <link rel="icon" type="image/png" sizes="16x16" href="privx-shield.png">
   <link rel="apple-touch-icon" href="privx-shield.png">
   <meta name="theme-color" content="#8A2BE2">
-  <meta name="description" content="Multi-token PLONK zero-knowledge privacy shield on PulseChain. Shield PLS, HEX, PLSX, DAI, USDC, pSunDAI, pDAI, pCOCK and PrivX. Every withdrawal generates a Proof of Privacy and earns PRIVX. PrivX Hurricane Protocol.">
+  <meta name="description" content="Multi-token PLONK zero-knowledge privacy shield on PulseChain. Shield PLS, HEX, PLSX, DAI, WETH, pSunDAI, pDAI, pCOCK and PrivX. Every withdrawal generates a Proof of Privacy and earns PRIVX. PrivX Hurricane Protocol.">
   <meta property="og:title" content="PrivX Hurricane — Proof of Privacy Protocol">
   <meta property="og:description" content="9 tokens. Zero knowledge. Every withdrawal earns PRIVX. The first PLONK-based privacy shield on PulseChain.">
   <style>
@@ -231,7 +231,7 @@
           <div class="token-card"        id="token-plsx"    onclick="selectToken('plsx')"><div class="tc-name">PLSX</div><div class="tc-sub">DEX Token</div><div class="tc-soon">Coming Soon</div></div>
           <!-- Row 2 -->
           <div class="token-card live"   id="token-dai"     onclick="selectToken('dai')"><div class="tc-name">DAI</div><div class="tc-sub">Stablecoin</div><div class="tc-live">Live Now</div></div>
-          <div class="token-card"        id="token-usdc"    onclick="selectToken('usdc')"><div class="tc-name">USDC</div><div class="tc-sub">Stablecoin</div><div class="tc-soon">Coming Soon</div></div>
+          <div class="token-card"        id="token-weth"    onclick="selectToken('weth')"><div class="tc-name">WETH</div><div class="tc-sub">Wrapped Ether</div><div class="tc-soon">Coming Soon</div></div>
           <div class="token-card"        id="token-psundai" onclick="selectToken('psundai')"><div class="tc-name">pSunDAI</div><div class="tc-sub">Autonomous Stable</div><div class="tc-soon">Coming Soon</div></div>
           <!-- Row 3 -->
           <div class="token-card live"        id="token-pdai" onclick="selectToken('pdai')"><div class="tc-name">pDAI</div><div class="tc-sub">Stable Asset</div><div class="tc-live">Live Now</div></div>
@@ -394,7 +394,7 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px">
           <div style="background:rgba(138,43,226,0.1);border:1px solid rgba(138,43,226,0.3);border-radius:12px;padding:16px">
             <strong style="color:var(--accent);display:block;margin-bottom:4px">Any of the 9 tokens</strong>
-            <p style="color:#aaa;font-size:13px;line-height:1.5">PLS, HEX, PLSX, DAI, USDC, pSunDAI, pDAI, pCOCK, or PrivX. The 0.5% fee is paid in the same token you're shielding — no PRIVX required to deposit.</p>
+            <p style="color:#aaa;font-size:13px;line-height:1.5">PLS, HEX, PLSX, DAI, WETH, pSunDAI, pDAI, pCOCK, or PrivX. The 0.5% fee is paid in the same token you're shielding — no PRIVX required to deposit.</p>
           </div>
           <div style="background:rgba(138,43,226,0.1);border:1px solid rgba(138,43,226,0.3);border-radius:12px;padding:16px">
             <strong style="color:var(--accent);display:block;margin-bottom:4px">PRIVX rewards — automatic</strong>
@@ -560,12 +560,12 @@
         <tr><td>10,000 DAI</td><td><a href="https://scan.pulsechain.com/address/0x1E4205337b5a59bDCB0D9541664C827238DDb250" target="_blank">0x1E4205337b5a59bDCB0D9541664C827238DDb250 ↗</a></td></tr>
       </table>
 
-      <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">USDC SHIELDS</p>
+      <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">WETH SHIELDS</p>
       <table class="contract-table">
-        <tr><td>10 USDC</td><td id="ct-usdc-d0" style="color:#555">Deploying soon…</td></tr>
-        <tr><td>100 USDC</td><td id="ct-usdc-d1" style="color:#555">Deploying soon…</td></tr>
-        <tr><td>1,000 USDC</td><td id="ct-usdc-d2" style="color:#555">Deploying soon…</td></tr>
-        <tr><td>10,000 USDC</td><td id="ct-usdc-d3" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>0.01 WETH</td><td id="ct-weth-d0" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>0.1 WETH</td><td id="ct-weth-d1" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>1 WETH</td><td id="ct-weth-d2" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>10 WETH</td><td id="ct-weth-d3" style="color:#555">Deploying soon…</td></tr>
       </table>
 
       <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">pSunDAI SHIELDS</p>
@@ -621,7 +621,7 @@
         <tr><td>HEX</td><td>1K / 10K / 100K / 1M</td><td>8 decimals</td></tr>
         <tr><td>PLSX</td><td>100K / 1M / 10M / 100M</td><td>Standard</td></tr>
         <tr><td>DAI</td><td>10 / 100 / 1K / 10K</td><td>Live ✓</td></tr>
-        <tr><td>USDC</td><td>10 / 100 / 1K / 10K</td><td>6 decimals</td></tr>
+        <tr><td>WETH</td><td>0.01 / 0.1 / 1 / 10</td><td>Standard</td></tr>
         <tr><td>pSunDAI</td><td>10 / 100 / 1K / 10K</td><td>Standard</td></tr>
         <tr><td>pDAI</td><td>1K / 10K / 100K / 1M</td><td>Live ✓</td></tr>
         <tr><td>pCOCK</td><td>100 / 1K / 10K / 100K</td><td>Live ✓</td></tr>
@@ -805,14 +805,14 @@
         denoms:   ["10","100","1000","10000"],
         denomWei: { d0:10000000000000000000n, d1:100000000000000000000n, d2:1000000000000000000000n, d3:10000000000000000000000n },
       },
-      usdc: {
-        label: "USDC", sublabel: "Stablecoin",
-        token: "FILL_CA",
-        decimals: 6, feeBP: 50,
-        swapUrl: "https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=FILL_CA",
+      weth: {
+        label: "WETH", sublabel: "Wrapped Ether",
+        token: "0x02DcdD04e3F455D838cd1249292C58f3B79e3C3C",
+        decimals: 18, feeBP: 50,
+        swapUrl: "https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=0x02DcdD04e3F455D838cd1249292C58f3B79e3C3C",
         contracts: { d0:"DEPLOY_FIRST", d1:"DEPLOY_FIRST", d2:"DEPLOY_FIRST", d3:"DEPLOY_FIRST" },
-        denoms:   ["10","100","1000","10000"],
-        denomWei: { d0:10000000n, d1:100000000n, d2:1000000000n, d3:10000000000n },
+        denoms:   ["0.01","0.1","1","10"],
+        denomWei: { d0:10000000000000000n, d1:100000000000000000n, d2:1000000000000000000n, d3:10000000000000000000n },
       },
       psundai: {
         label: "pSunDAI", sublabel: "Autonomous Stable",
@@ -882,7 +882,7 @@
     const fmt18 = v => Number(BigInt(v) / 10n**18n).toLocaleString();
     const fmtDec = (v, dec) => Number(BigInt(v) / 10n**BigInt(dec)).toLocaleString();
     const fmtDec2 = (v, dec) => (Number(v) / 10**dec).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
-    const STABLE2 = ['dai','usdc','psundai'];
+    const STABLE2 = ['dai','psundai'];
 
     async function getZkeyUrl(setStatus) {
       if (_zkeyBlobUrl) return _zkeyBlobUrl;
@@ -1161,7 +1161,7 @@
       const noteInput = document.getElementById("withdrawNote").value.trim();
       if (!noteInput) return alert("Paste your private note first");
       if (!poseidonFn) return alert("Poseidon not ready — wait a moment");
-      const match = noteInput.match(/^privx-hurricane-(pcock|pdai|wpls|plsx|hex|dai|usdc|psundai|privx)-(\d+)-([a-fA-F0-9]{62,64})-([a-fA-F0-9]{62,64})$/i);
+      const match = noteInput.match(/^privx-hurricane-(pcock|pdai|wpls|plsx|hex|dai|weth|psundai|privx)-(\d+[.0-9]*)-([a-fA-F0-9]{62,64})-([a-fA-F0-9]{62,64})$/i);
       if (!match) return alert("Invalid note format.");
       let [,tokenKey,denomStr,nHex,sHex] = match; tokenKey = tokenKey.toLowerCase();
       const shield    = SHIELDS[tokenKey];
@@ -1219,7 +1219,7 @@
       if(!noteInput) return alert("Paste your private note first");
       if(!userAccount) return alert("Connect wallet first");
       if(!poseidonFn) return alert("Poseidon not ready — wait a moment");
-      const match=noteInput.match(/^privx-hurricane-(pcock|pdai|wpls|plsx|hex|dai|usdc|psundai|privx)-(\d+)-([a-fA-F0-9]{62,64})-([a-fA-F0-9]{62,64})$/i);
+      const match=noteInput.match(/^privx-hurricane-(pcock|pdai|wpls|plsx|hex|dai|weth|psundai|privx)-(\d+[.0-9]*)-([a-fA-F0-9]{62,64})-([a-fA-F0-9]{62,64})$/i);
       if(!match) return alert("Invalid note format.\nExpected: privx-hurricane-<token>-<amount>-<nullifier>-<secret>");
       let[,tokenKey,denomStr,nHex,sHex]=match; tokenKey=tokenKey.toLowerCase();
       const shield=SHIELDS[tokenKey];
@@ -1504,7 +1504,7 @@
     const canvas=document.getElementById('matrix-bg'),ctx=canvas.getContext('2d');
     canvas.width=innerWidth;canvas.height=innerHeight;
     let fontSize=innerWidth<600?10:14;
-    const chars='01PCOCKPDAIWPLSXHEXPROVXOMAZGKPRIVX';
+    const chars='01PCOCKPDAIWPLSXHEXWETHPROVXOMAZGKPRIVX';
     let columns=Math.floor(canvas.width/fontSize);
     let drops=Array(columns).fill(1);
     function draw(){ctx.fillStyle='rgba(0,0,0,0.05)';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#8A2BE2';ctx.font=fontSize+'px monospace';drops.forEach((y,i)=>{ctx.fillText(chars[Math.floor(Math.random()*chars.length)],i*fontSize,y*fontSize);if(y*fontSize>canvas.height&&Math.random()>0.975)drops[i]=0;drops[i]++;});}
