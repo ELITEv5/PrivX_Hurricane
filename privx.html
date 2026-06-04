@@ -647,6 +647,32 @@
         <tr><td>Reentrancy protection</td><td><span style="color:#00ff88">✅</span> OpenZeppelin</td></tr>
         <tr><td>Safe token transfers</td><td><span style="color:#00ff88">✅</span> OpenZeppelin SafeERC20</td></tr>
       </table>
+      <div class="docs-h2">Relayer Mode — Withdrawing Without Gas</div>
+      <p class="docs-p">Every withdrawal requires a small amount of PLS for gas. If your fresh wallet has never been funded, it can't submit the transaction itself. Relayer Mode solves this without any trusted third party.</p>
+
+      <p class="docs-p"><strong style="color:#fff">How it works:</strong> Instead of submitting the withdrawal directly, your browser generates the ZK proof and packages it as a JSON file. You send that JSON to any willing wallet — a friend, a community relayer, anyone — and they submit it on your behalf. The funds still go to your fresh wallet. The relayer receives nothing from the contract and cannot redirect your funds under any circumstances.</p>
+
+      <p class="docs-p"><strong style="color:#fff">Why the relayer can't steal:</strong> The recipient address is cryptographically embedded inside the ZK proof at generation time as a public signal. The contract enforces that the address passed to the function exactly matches what's inside the proof. If a relayer tries to change the recipient, the transaction reverts with <code style="font-family:monospace;font-size:12px;color:#aaa">recipient: mismatch</code>. This is mathematically enforced — not a policy.</p>
+
+      <div style="background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);border-radius:10px;padding:14px 16px;margin:14px 0">
+        <div style="font-size:12px;font-weight:700;color:#B57AFF;margin-bottom:10px;letter-spacing:0.5px">STEP BY STEP — RELAYER MODE</div>
+        <div style="font-size:13px;color:#aaa;line-height:2">
+          <span style="color:#B57AFF">1.</span> In the Withdraw tab, toggle <strong style="color:#fff">📦 Relayer Mode</strong> ON<br>
+          <span style="color:#B57AFF">2.</span> Paste your private note and enter the <strong style="color:#fff">recipient address</strong> (your fresh wallet)<br>
+          <span style="color:#B57AFF">3.</span> Click <strong style="color:#fff">Generate Proof for Relayer</strong> — takes 15–30 seconds, no wallet needed<br>
+          <span style="color:#B57AFF">4.</span> Copy or download the proof JSON<br>
+          <span style="color:#B57AFF">5.</span> Send the JSON to a relayer — share the <strong style="color:#fff">🔗 Open Relayer Page</strong> link with them<br>
+          <span style="color:#B57AFF">6.</span> Relayer pastes your JSON, connects their wallet, and submits<br>
+          <span style="color:#B57AFF">7.</span> Your fresh wallet receives the tokens + PRIVX reward automatically
+        </div>
+      </div>
+
+      <p class="docs-p" style="background:rgba(255,50,50,0.06);border:1px solid rgba(255,50,50,0.2);border-radius:8px;padding:12px 14px;color:#ff9999">
+        <strong style="color:#ff6666">⚠ Critical — note vs proof:</strong> Your <strong style="color:#fff">private note</strong> (the <code style="font-family:monospace;font-size:12px">privx-hurricane-…</code> string) must never be shared. It contains the nullifier and secret — anyone who has it can generate a proof to any recipient they choose. The <strong style="color:#fff">proof JSON</strong> is safe to share — it contains no private data, only the completed proof locked to your specified recipient.
+      </p>
+
+      <p class="docs-p"><strong style="color:#fff">Funding your fresh wallet another way:</strong> If you have a PLS shield deposit, withdraw it first. A PLS shield withdrawal sends native PLS directly to the recipient in the same transaction — your fresh wallet arrives already funded and can submit its own token shield withdrawals from that point on with no relayer needed.</p>
+
       <div style="margin-top:32px;padding-top:20px;border-top:1px solid rgba(138,43,226,0.25);text-align:center">
         <p class="docs-p" style="margin:0"><img src="privx-shield.png" style="height:16px;width:auto;vertical-align:middle;margin-right:6px;border-radius:4px" alt="">PrivX Hurricane &nbsp;·&nbsp; PulseChain Mainnet &nbsp;·&nbsp; 2025</p>
       </div>
