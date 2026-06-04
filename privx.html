@@ -231,7 +231,7 @@
           <div class="token-card"        id="token-plsx"    onclick="selectToken('plsx')"><div class="tc-name">PLSX</div><div class="tc-sub">DEX Token</div><div class="tc-soon">Coming Soon</div></div>
           <!-- Row 2 -->
           <div class="token-card live"   id="token-dai"     onclick="selectToken('dai')"><div class="tc-name">DAI</div><div class="tc-sub">Stablecoin</div><div class="tc-live">Live Now</div></div>
-          <div class="token-card"        id="token-weth"    onclick="selectToken('weth')"><div class="tc-name">WETH</div><div class="tc-sub">Wrapped Ether</div><div class="tc-soon">Coming Soon</div></div>
+          <div class="token-card live"   id="token-weth"    onclick="selectToken('weth')"><div class="tc-name">WETH</div><div class="tc-sub">Wrapped Ether</div><div class="tc-live">Live Now</div></div>
           <div class="token-card"        id="token-psundai" onclick="selectToken('psundai')"><div class="tc-name">pSunDAI</div><div class="tc-sub">Autonomous Stable</div><div class="tc-soon">Coming Soon</div></div>
           <!-- Row 3 -->
           <div class="token-card live"        id="token-pdai" onclick="selectToken('pdai')"><div class="tc-name">pDAI</div><div class="tc-sub">Stable Asset</div><div class="tc-live">Live Now</div></div>
@@ -562,10 +562,10 @@
 
       <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">WETH SHIELDS</p>
       <table class="contract-table">
-        <tr><td>0.01 WETH</td><td id="ct-weth-d0" style="color:#555">Deploying soon…</td></tr>
-        <tr><td>0.1 WETH</td><td id="ct-weth-d1" style="color:#555">Deploying soon…</td></tr>
-        <tr><td>1 WETH</td><td id="ct-weth-d2" style="color:#555">Deploying soon…</td></tr>
-        <tr><td>10 WETH</td><td id="ct-weth-d3" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>0.01 WETH</td><td><a href="https://scan.pulsechain.com/address/0xD446cbF3BBae6f90E7a1a48E853F35A269cE7Cde" target="_blank">0xD446cbF3BBae6f90E7a1a48E853F35A269cE7Cde ↗</a></td></tr>
+        <tr><td>0.1 WETH</td><td><a href="https://scan.pulsechain.com/address/0xC028eacB0c047bA28Df00Ab7399f5F60fE6D9a99" target="_blank">0xC028eacB0c047bA28Df00Ab7399f5F60fE6D9a99 ↗</a></td></tr>
+        <tr><td>1 WETH</td><td><a href="https://scan.pulsechain.com/address/0xEE47263286265Db0551a9895FB02CA892821251F" target="_blank">0xEE47263286265Db0551a9895FB02CA892821251F ↗</a></td></tr>
+        <tr><td>10 WETH</td><td><a href="https://scan.pulsechain.com/address/0xb7b951763A8794d2366C0cb9bd5FA79B239de6ee" target="_blank">0xb7b951763A8794d2366C0cb9bd5FA79B239de6ee ↗</a></td></tr>
       </table>
 
       <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">pSunDAI SHIELDS</p>
@@ -621,7 +621,7 @@
         <tr><td>HEX</td><td>1K / 10K / 100K / 1M</td><td>8 decimals</td></tr>
         <tr><td>PLSX</td><td>100K / 1M / 10M / 100M</td><td>Standard</td></tr>
         <tr><td>DAI</td><td>10 / 100 / 1K / 10K</td><td>Live ✓</td></tr>
-        <tr><td>WETH</td><td>0.01 / 0.1 / 1 / 10</td><td>Standard</td></tr>
+        <tr><td>WETH</td><td>0.01 / 0.1 / 1 / 10</td><td>Live ✓</td></tr>
         <tr><td>pSunDAI</td><td>10 / 100 / 1K / 10K</td><td>Standard</td></tr>
         <tr><td>pDAI</td><td>1K / 10K / 100K / 1M</td><td>Live ✓</td></tr>
         <tr><td>pCOCK</td><td>100 / 1K / 10K / 100K</td><td>Live ✓</td></tr>
@@ -810,7 +810,7 @@
         token: "0x02DcdD04e3F455D838cd1249292C58f3B79e3C3C",
         decimals: 18, feeBP: 50,
         swapUrl: "https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=0x02DcdD04e3F455D838cd1249292C58f3B79e3C3C",
-        contracts: { d0:"DEPLOY_FIRST", d1:"DEPLOY_FIRST", d2:"DEPLOY_FIRST", d3:"DEPLOY_FIRST" },
+        contracts: { d0:"0xD446cbF3BBae6f90E7a1a48E853F35A269cE7Cde", d1:"0xC028eacB0c047bA28Df00Ab7399f5F60fE6D9a99", d2:"0xEE47263286265Db0551a9895FB02CA892821251F", d3:"0xb7b951763A8794d2366C0cb9bd5FA79B239de6ee" },
         denoms:   ["0.01","0.1","1","10"],
         denomWei: { d0:10000000000000000n, d1:100000000000000000n, d2:1000000000000000000n, d3:10000000000000000000n },
       },
@@ -1387,6 +1387,7 @@
       { label:"DAI",   addr:"0xf0A963bD32d4BDF5da56dbB7B4C66f7d5976c5e6", assetFn:"asset", expectedAsset:"0xefD766cCb38EaF1dfd701853BFCe31359239F305" },
       { label:"pDAI",  addr:"0x94D0Df289cE310462Fee8137aF945381844B94D1", assetFn:"asset", expectedAsset:"0x6B175474E89094C44Da98b954EedeAC495271d0F" },
       { label:"pCOCK", addr:"0x8F63010C4e5FE11f09654B9ff3471e81C36b4883", assetFn:"asset", expectedAsset:"0xc10A4Ed9b4042222d69ff0B374eddd47ed90fC1F" },
+      { label:"WETH",  addr:"0xD446cbF3BBae6f90E7a1a48E853F35A269cE7Cde", assetFn:"asset", expectedAsset:"0x02DcdD04e3F455D838cd1249292C58f3B79e3C3C" },
       { label:"PrivX", addr:"0x74471E88588c2dF518379c4f9feC981158f741F4", assetFn:"asset", expectedAsset:"0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986" },
     ];
 
