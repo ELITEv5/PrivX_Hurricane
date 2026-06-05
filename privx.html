@@ -560,10 +560,10 @@
 
       <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">PLSX SHIELDS</p>
       <table class="contract-table">
-        <tr><td>100,000 PLSX</td><td id="ct-plsx-d0" style="color:#555">Deploying soon…</td></tr>
-        <tr><td>1,000,000 PLSX</td><td id="ct-plsx-d1" style="color:#555">Deploying soon…</td></tr>
-        <tr><td>10,000,000 PLSX</td><td id="ct-plsx-d2" style="color:#555">Deploying soon…</td></tr>
-        <tr><td>100,000,000 PLSX</td><td id="ct-plsx-d3" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>100,000 PLSX</td><td id="ct-plsx-d0"><a href="https://scan.pulsechain.com/address/0x9632527f45A93579C0c26b58c7d99267997264Fb" target="_blank">0x9632527f45A93579C0c26b58c7d99267997264Fb ↗</a></td></tr>
+        <tr><td>1,000,000 PLSX</td><td id="ct-plsx-d1"><a href="https://scan.pulsechain.com/address/0x0C0aFe4Df8DBf983A3045AC1FB04d6b2f503d4fe" target="_blank">0x0C0aFe4Df8DBf983A3045AC1FB04d6b2f503d4fe ↗</a></td></tr>
+        <tr><td>10,000,000 PLSX</td><td id="ct-plsx-d2"><a href="https://scan.pulsechain.com/address/0x951bde47464C6a1BB34BF10bC85a7cAE9C418534" target="_blank">0x951bde47464C6a1BB34BF10bC85a7cAE9C418534 ↗</a></td></tr>
+        <tr><td>100,000,000 PLSX</td><td id="ct-plsx-d3"><a href="https://scan.pulsechain.com/address/0xF039cEc211769bdc29De85FF19c3dAe85aabA75d" target="_blank">0xF039cEc211769bdc29De85FF19c3dAe85aabA75d ↗</a></td></tr>
       </table>
 
       <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">DAI SHIELDS</p>
@@ -823,7 +823,7 @@
         token: "0x95B303987A60C71504D99Aa1b13B4DA07b0790ab",
         decimals: 18, feeBP: 50,
         swapUrl: "https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=0x95B303987A60C71504D99Aa1b13B4DA07b0790ab",
-        contracts: { d0:"DEPLOY_FIRST", d1:"DEPLOY_FIRST", d2:"DEPLOY_FIRST", d3:"DEPLOY_FIRST" },
+        contracts: { d0:"0x9632527f45A93579C0c26b58c7d99267997264Fb", d1:"0x0C0aFe4Df8DBf983A3045AC1FB04d6b2f503d4fe", d2:"0x951bde47464C6a1BB34BF10bC85a7cAE9C418534", d3:"0xF039cEc211769bdc29De85FF19c3dAe85aabA75d" },
         denoms:   ["100000","1000000","10000000","100000000"],
         denomWei: { d0:100000000000000000000000n, d1:1000000000000000000000000n, d2:10000000000000000000000000n, d3:100000000000000000000000000n },
       },
@@ -1160,7 +1160,7 @@
       finally{
         btn.disabled=false;
         const s=SHIELDS[selectedToken],d=s.denoms[['d0','d1','d2','d3'].indexOf(selectedDenom)];
-        btn.textContent=`Shield ${d} ${s.label}`;
+        btn.textContent=`Shield ${Number(d).toLocaleString()} ${s.label}`;
       }
     }
 
@@ -1349,7 +1349,7 @@
         const denomNum=Number(denomStr);
         const feeNum=denomNum*shield.feeBP/10000;
         const feeDisplay=feeNum>=1?feeNum.toLocaleString():parseFloat(feeNum.toPrecision(2)).toString();
-        document.getElementById('denom-amount-'+k).textContent=denomStr;
+        document.getElementById('denom-amount-'+k).textContent=Number(denomStr).toLocaleString();
         document.getElementById('denom-label-'+k).textContent=shield.label;
         document.getElementById('denom-fee-'+k).textContent=`Fee: ${feeDisplay} ${shield.label} (0.5%)`;
       });
