@@ -238,7 +238,7 @@
           <!-- Row 2 -->
           <div class="token-card live"   id="token-dai"     onclick="selectToken('dai')"><div class="tc-name">DAI</div><div class="tc-sub">Stablecoin</div><div class="tc-live">Live Now</div></div>
           <div class="token-card live"   id="token-weth"    onclick="selectToken('weth')"><div class="tc-name">WETH</div><div class="tc-sub">Wrapped Ether</div><div class="tc-live">Live Now</div></div>
-          <div class="token-card"        id="token-psundai" onclick="selectToken('psundai')"><div class="tc-name">pSunDAI</div><div class="tc-sub">Autonomous Stable</div><div class="tc-soon">Coming Soon</div></div>
+          <div class="token-card live"   id="token-psundai" onclick="selectToken('psundai')"><div class="tc-name">pSunDAI</div><div class="tc-sub">Autonomous Stable</div><div class="tc-live">Live Now</div></div>
           <!-- Row 3 -->
           <div class="token-card live"        id="token-pdai" onclick="selectToken('pdai')"><div class="tc-name">pDAI</div><div class="tc-sub">Stable Asset</div><div class="tc-live">Live Now</div></div>
           <div class="token-card live"   id="token-pcock"   onclick="selectToken('pcock')"><div class="tc-name">pCOCK</div><div class="tc-sub">Community Token</div><div class="tc-live">Live Now</div></div>
@@ -584,10 +584,10 @@
 
       <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">pSunDAI SHIELDS</p>
       <table class="contract-table">
-        <tr><td>10 pSunDAI</td><td id="ct-psundai-d0" style="color:#555">Deploying soon…</td></tr>
-        <tr><td>100 pSunDAI</td><td id="ct-psundai-d1" style="color:#555">Deploying soon…</td></tr>
-        <tr><td>1,000 pSunDAI</td><td id="ct-psundai-d2" style="color:#555">Deploying soon…</td></tr>
-        <tr><td>10,000 pSunDAI</td><td id="ct-psundai-d3" style="color:#555">Deploying soon…</td></tr>
+        <tr><td>10 pSunDAI</td><td id="ct-psundai-d0"><a href="https://scan.pulsechain.com/address/0xb1ba7B8cE0F620D060e9bb72cE1bFc9B8DE6B850" target="_blank">0xb1ba7B8cE0F620D060e9bb72cE1bFc9B8DE6B850 ↗</a></td></tr>
+        <tr><td>100 pSunDAI</td><td id="ct-psundai-d1"><a href="https://scan.pulsechain.com/address/0xF212be1797ba1F3b6aB4ec43cdE466d7c82475AF" target="_blank">0xF212be1797ba1F3b6aB4ec43cdE466d7c82475AF ↗</a></td></tr>
+        <tr><td>1,000 pSunDAI</td><td id="ct-psundai-d2"><a href="https://scan.pulsechain.com/address/0xa5A2572092D65aaaCeA44E85c3ac029cf2F48F4E" target="_blank">0xa5A2572092D65aaaCeA44E85c3ac029cf2F48F4E ↗</a></td></tr>
+        <tr><td>10,000 pSunDAI</td><td id="ct-psundai-d3"><a href="https://scan.pulsechain.com/address/0x79301169e16b3c87DC0Ba2aAAE5EfC8311e700f7" target="_blank">0x79301169e16b3c87DC0Ba2aAAE5EfC8311e700f7 ↗</a></td></tr>
       </table>
 
       <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">pDAI SHIELDS</p>
@@ -860,7 +860,7 @@
         token: "0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f",
         decimals: 18, feeBP: 50,
         swapUrl: "https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f",
-        contracts: { d0:"DEPLOY_FIRST", d1:"DEPLOY_FIRST", d2:"DEPLOY_FIRST", d3:"DEPLOY_FIRST" },
+        contracts: { d0:"0xb1ba7B8cE0F620D060e9bb72cE1bFc9B8DE6B850", d1:"0xF212be1797ba1F3b6aB4ec43cdE466d7c82475AF", d2:"0xa5A2572092D65aaaCeA44E85c3ac029cf2F48F4E", d3:"0x79301169e16b3c87DC0Ba2aAAE5EfC8311e700f7" },
         denoms:   ["10","100","1000","10000"],
         denomWei: { d0:10000000000000000000n, d1:100000000000000000000n, d2:1000000000000000000000n, d3:10000000000000000000000n },
       },
@@ -1430,8 +1430,10 @@
       { label:"pDAI",  addr:"0x94D0Df289cE310462Fee8137aF945381844B94D1", assetFn:"asset", expectedAsset:"0x6B175474E89094C44Da98b954EedeAC495271d0F" },
       { label:"pCOCK", addr:"0x8F63010C4e5FE11f09654B9ff3471e81C36b4883", assetFn:"asset", expectedAsset:"0xc10A4Ed9b4042222d69ff0B374eddd47ed90fC1F" },
       { label:"WETH",  addr:"0xD446cbF3BBae6f90E7a1a48E853F35A269cE7Cde", assetFn:"asset", expectedAsset:"0x02DcdD04e3F455D838cd1249292C58f3B79e3C3C" },
-      { label:"HEX",   addr:"0x833F7eDDbCe1e713e83b83006A793C3A51d00eE2", assetFn:"asset", expectedAsset:"0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39" },
-      { label:"PrivX", addr:"0x74471E88588c2dF518379c4f9feC981158f741F4", assetFn:"asset", expectedAsset:"0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986" },
+      { label:"HEX",    addr:"0x833F7eDDbCe1e713e83b83006A793C3A51d00eE2", assetFn:"asset", expectedAsset:"0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39" },
+      { label:"PrivX",  addr:"0x74471E88588c2dF518379c4f9feC981158f741F4", assetFn:"asset", expectedAsset:"0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986" },
+      { label:"PLSX",   addr:"0x9632527f45A93579C0c26b58c7d99267997264Fb", assetFn:"asset", expectedAsset:"0x95B303987A60C71504D99Aa1b13B4DA07b0790ab" },
+      { label:"pSunDAI",addr:"0xb1ba7B8cE0F620D060e9bb72cE1bFc9B8DE6B850", assetFn:"asset", expectedAsset:"0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f" },
     ];
 
     let _verifyResults = null;
