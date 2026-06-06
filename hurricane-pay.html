@@ -612,13 +612,34 @@ async function getMerkleProof(shieldContract, targetCommitment) {
 // ─── Wallet ───────────────────────────────────────────────────────────────────
 
 async function connectWallet() {
-  if (!window.ethereum) throw new Error("No wallet detected. Install MetaMask.");
-  await window.ethereum.request({ method:"eth_requestAccounts" });
-  try { await window.ethereum.request({ method:"wallet_switchEthereumChain", params:[{chainId:"0x171"}] }); }
-  catch(e) { if (e.code === 4902) await window.ethereum.request({ method:"wallet_addEthereumChain", params:[PULSECHAIN] }); }
-  const w = new Web3(window.ethereum);
+  // Support EIP-1193 providers: single window.ethereum or multi-provider array
+  let provider = window.ethereum;
+  if (!provider && window.web3) provider = window.web3.currentProvider;
+  if (!provider) throw new Error("No wallet detected. Install MetaMask, Rabby, or any EIP-1193 browser wallet.");
+
+  // If multiple extensions injected (e.g. MetaMask + Coinbase), prefer the first non-Coinbase
+  if (provider.providers?.length) {
+    provider = provider.providers.find(p => p.isMetaMask || p.isRabby) || provider.providers[0];
+  }
+
+  await provider.request({ method: "eth_requestAccounts" });
+
+  // Switch to PulseChain — handle both "not added" (4902) and silent failure
+  try {
+    await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0x171" }] });
+  } catch(e) {
+    if (e.code === 4902 || e.code === -32603) {
+      await provider.request({ method: "wallet_addEthereumChain", params: [PULSECHAIN] });
+    } else if (e.code === 4001) {
+      throw new Error("Chain switch rejected — please switch to PulseChain manually in your wallet.");
+    }
+    // Other errors: wallet may already be on PulseChain, continue
+  }
+
+  const w = new Web3(provider);
   w.eth.transactionPollingTimeout = 600;
   const accounts = await w.eth.getAccounts();
+  if (!accounts.length) throw new Error("No accounts found — unlock your wallet and try again.");
   return { web3: w, account: accounts[0] };
 }
 
@@ -678,7 +699,8 @@ async function connectBuy() {
 }
 
 async function buyNote() {
-  if (!buyAccount || !selectedDenom) return;
+  if (!buyAccount) return connectBuy();
+  if (!selectedDenom) return;
   if (!poseidonFn) return setStatus('buyStatus', 'error', 'Poseidon not ready — wait a moment.');
   const token      = HP_TOKENS[selectedBuyToken];
   const shieldAddr = token.shields[selectedDenom];
@@ -854,7 +876,7 @@ async function acceptNote() {
   const recipient = document.getElementById('acceptRecipient').value.trim();
   if (!raw)       return setStatus('acceptStatus', 'error', 'Paste the customer note first.');
   if (!recipient) return setStatus('acceptStatus', 'error', 'Enter your wallet address (recipient).');
-  if (!acceptAccount) return setStatus('acceptStatus', 'error', 'Connect your wallet first.');
+  if (!acceptAccount) return connectAccept();
   if (!poseidonFn)    return setStatus('acceptStatus', 'error', 'Poseidon not ready — wait a moment.');
 
   const match = raw.match(HP_NOTE_RE) || raw.match(LEGACY_NOTE_RE);
@@ -967,11 +989,12 @@ async function loadStats() {
     document.getElementById('stat-total-mined').textContent = fmt18(totalMined) + ' PRIVX';
     document.getElementById('stat-sealed').textContent      = sealed ? 'Sealed ✓' : 'Open';
 
-    const ratePct = peakBal > 0n
+    const peakBalBig = BigInt(peakBal);
+    const ratePct = peakBalBig > 0n
       ? (parseFloat(rateBp) / 100).toFixed(2)
       : '0.00';
     document.getElementById('stat-rate').textContent     = ratePct + '%';
-    document.getElementById('stat-rate-sub').textContent = peakBal > 0n
+    document.getElementById('stat-rate-sub').textContent = peakBalBig > 0n
       ? `vault at ${((Number(vaultBal) / Number(peakBal)) * 100).toFixed(0)}% capacity`
       : 'vault empty — fund to activate rewards';
 
