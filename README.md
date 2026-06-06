@@ -2,7 +2,7 @@
 
 > Zero-knowledge token shielding on PulseChain. Shield tokens. Generate a Proof of Privacy. Mine PRIVX.
 
-**Live:** [privx.html](https://elitev5.github.io/PrivX_Hurricane/privx.html) &nbsp;·&nbsp; **IPFS:** [bafybeibmgiosbl7z7vdjgd7a5fpg6ctyeuhxp5tzugyxblu4rsccripqzq](https://ipfs.io/ipfs/bafybeibmgiosbl7z7vdjgd7a5fpg6ctyeuhxp5tzugyxblu4rsccripqzq) &nbsp;·&nbsp; **Chain:** PulseChain (chainId 369)
+**Live:** [privx.html](https://elitev5.github.io/PrivX_Hurricane/privx.html) &nbsp;·&nbsp; **IPFS:** [bafybeig45ccddxr6j3rwi44nzjdpwu5i7yxcvffuw3h6vdlenkzx45ebea](https://ipfs.io/ipfs/bafybeig45ccddxr6j3rwi44nzjdpwu5i7yxcvffuw3h6vdlenkzx45ebea) &nbsp;·&nbsp; **Chain:** PulseChain (chainId 369)
 
 ---
 
@@ -290,9 +290,9 @@ The shield contracts are immutable from the moment of deployment. The developmen
 
 ### Circuit Analysis
 
-The PrivXMixer(14) circuit was analysed against its compiled R1CS using snarkjs constraint inspection.
+The PrivXMixer(14) circuit was analysed using two independent methods: snarkjs R1CS constraint inspection and **Ecne** — a Julia-based SMT solver that mechanically verifies every signal in the R1CS is uniquely determined by the inputs.
 
-**Signal counts verified:**
+**Signal counts verified (snarkjs R1CS):**
 
 | Signal | Expected | Actual | |
 |---|---|---|---|
@@ -300,6 +300,14 @@ The PrivXMixer(14) circuit was analysed against its compiled R1CS using snarkjs 
 | Public inputs | 4 | 4 | ✅ |
 | Total constraints | ~8,300 | 8,330 | ✅ |
 | Wire / constraint gap | < 50 | 19 | ✅ |
+
+**Ecne SMT analysis — under-constrained signal check:**
+
+| Check | Result | |
+|---|---|---|
+| Variables solved | 8,349 / 8,349 | ✅ |
+| Under-constrained signals | 0 | ✅ |
+| Bad constraints | 0 | ✅ |
 
 **Critical constraints confirmed:**
 
@@ -312,7 +320,7 @@ The PrivXMixer(14) circuit was analysed against its compiled R1CS using snarkjs 
 | denomination in constraint system | Squaring constraint + nullifierHash use |
 | recipient in constraint system | Squaring + PLONK public input commitment |
 
-The wire/constraint gap of 19 is consistent with a correctly constrained circuit. Under-constrained circuits exhibit a much larger unexplained gap.
+Ecne confirmed all 8,349 signals are uniquely determined — no signal can be freely set by a prover without violating a constraint. The wire/constraint gap of 19 is consistent with this result.
 
 ---
 
@@ -398,4 +406,4 @@ MIT
 
 ---
 
-*Part of the [Sun Systems Protocol](https://elitev5.github.io/Sun-Systems/) · 2026 © PrivX Protocol*
+*Part of the [Sun Systems Protocol](https://elitev5.github.io/SunDAI/) · 2026 © PrivX Protocol*
