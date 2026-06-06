@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hurricane Pay — Private Digital Cash</title>
+  <link rel="icon" href="privx-shield.png" type="image/png">
+  <meta name="theme-color" content="#8A2BE2">
+  <meta name="description" content="Hurricane Pay — private digital cash on PulseChain. Buy, spend, and accept DAI, pSunDAI, and USDC privately with zero on-chain identity.">
+  <style>
+    :root{--primary:#8A2BE2;--accent:#00ffea;--bg:#000;--glow:rgba(138,43,226,0.6)}
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{overscroll-behavior:none;-webkit-text-size-adjust:100%}
+    body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 20px 80px;overflow-x:hidden}
+    canvas#matrix-bg{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+    .page-wrap{width:100%;max-width:640px;position:relative;z-index:10;margin-top:60px}
+    .container{background:rgba(10,10,10,0.7);backdrop-filter:blur(20px);border-radius:24px;padding:36px 28px;border:1px solid var(--primary);box-shadow:0 0 80px var(--glow),inset 0 0 40px rgba(138,43,226,0.1)}
+    .top-nav{position:fixed;top:20px;left:20px;display:flex;gap:10px;z-index:9999;flex-wrap:wrap}
+    .nav-link{background:rgba(10,10,10,0.8);backdrop-filter:blur(10px);padding:10px 18px;border:1px solid rgba(138,43,226,0.5);border-radius:10px;color:#aaa;font-size:13px;font-weight:600;text-decoration:none;transition:all .3s}
+    .nav-link:hover{border-color:var(--accent);color:var(--accent)}
+    /* Header */
+    .logo-header{text-align:center;margin-bottom:28px}
+    h1{font-size:clamp(2.2em,7vw,3em);font-weight:900;background:linear-gradient(90deg,#00ffea,#8A2BE2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+    .tagline{color:#666;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
+    .cash-badge{display:inline-block;background:rgba(0,255,234,0.07);border:1px solid rgba(0,255,234,0.2);border-radius:20px;padding:5px 16px;font-size:11px;font-weight:700;color:var(--accent);letter-spacing:1.5px}
+    /* Tabs */
+    .tabs{display:flex;gap:8px;margin-bottom:24px}
+    .tab{flex:1;padding:13px 4px;border:2px solid rgba(255,255,255,0.1);border-radius:12px;background:rgba(20,20,20,0.6);cursor:pointer;transition:all .3s;text-align:center;font-weight:700;font-size:13px;user-select:none}
+    .tab:hover{border-color:var(--primary)}
+    .tab.active{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 0 30px var(--glow)}
+    .hidden{display:none!important}
+    /* Common elements */
+    .section-label{font-size:11px;color:#666;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px}
+    input[type=text],textarea{width:100%;padding:14px 16px;background:#111;border:1px solid rgba(138,43,226,0.3);border-radius:12px;color:#fff;font-size:14px;font-family:monospace;outline:none;transition:border-color .2s;margin-bottom:14px}
+    input[type=text]:focus,textarea:focus{border-color:var(--accent)}
+    textarea{height:80px;resize:vertical;line-height:1.5}
+    .btn{width:100%;padding:16px;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;transition:all .3s;letter-spacing:.3px}
+    .btn-primary{background:var(--primary);color:#fff;box-shadow:0 0 30px var(--glow)}
+    .btn-primary:hover{background:var(--accent);color:#000;transform:translateY(-2px)}
+    .btn-primary:disabled{background:#333;color:#666;cursor:not-allowed;box-shadow:none;transform:none}
+    .btn-outline{background:transparent;border:1px solid rgba(138,43,226,0.4);color:#888;padding:12px;font-size:13px;font-weight:600;border-radius:10px;cursor:pointer;transition:all .2s;width:100%;margin-top:8px}
+    .btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+    .btn-teal{background:rgba(0,255,234,0.08);border:1px solid rgba(0,255,234,0.3);color:var(--accent);padding:12px;font-size:13px;font-weight:700;border-radius:10px;cursor:pointer;transition:all .2s;width:100%}
+    .btn-teal:hover{background:rgba(0,255,234,0.16)}
+    .info-box{background:rgba(138,43,226,0.06);border:1px solid rgba(138,43,226,0.2);border-radius:12px;padding:14px 16px;font-size:13px;color:#aaa;line-height:1.75;margin-bottom:20px}
+    .info-box strong{color:#B57AFF}
+    .status{padding:14px 16px;border-radius:12px;font-size:13px;line-height:1.6;font-family:monospace;margin-top:8px;display:none;white-space:pre-wrap}
+    .status.success{background:rgba(0,255,100,0.07);border:1px solid rgba(0,255,100,0.2);color:#00e664;display:block}
+    .status.error{background:rgba(255,50,50,0.07);border:1px solid rgba(255,50,50,0.2);color:#ff6666;display:block}
+    .status.pending{background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);color:#B57AFF;display:block}
+    /* Wallet row */
+    .wallet-row{display:flex;gap:10px;align-items:center;margin-bottom:14px}
+    .wallet-btn{padding:10px 16px;border:1px solid rgba(138,43,226,0.4);border-radius:10px;background:rgba(138,43,226,0.08);color:#aaa;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+    .wallet-btn:hover{border-color:var(--primary);color:#fff}
+    .wallet-btn.connected{border-color:rgba(0,255,100,0.4);color:#00e664;background:rgba(0,255,100,0.05)}
+    .wallet-addr{font-family:monospace;font-size:12px;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    /* Token grid */
+    .token-grid{display:flex;gap:10px;margin-bottom:16px}
+    .token-card{flex:1;padding:12px 8px;border:2px solid rgba(255,255,255,0.1);border-radius:12px;background:rgba(20,20,20,0.6);cursor:pointer;text-align:center;transition:all .3s}
+    .token-card:hover{border-color:var(--primary)}
+    .token-card.active{border-color:var(--accent);background:rgba(0,255,234,0.07);box-shadow:0 0 20px rgba(0,255,234,0.15)}
+    .tc-name{font-weight:800;font-size:15px;color:#fff;margin-bottom:2px}
+    .tc-sub{font-size:10px;color:#555}
+    /* Denomination grid — $1 $5 $10 $20 $50 $100 */
+    .denom-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+    .denom-card{padding:14px 8px;border:2px solid rgba(255,255,255,0.1);border-radius:12px;background:rgba(20,20,20,0.6);cursor:pointer;text-align:center;transition:all .3s}
+    .denom-card:hover{border-color:var(--primary);transform:translateY(-2px)}
+    .denom-card.active{border-color:var(--accent);background:rgba(0,255,234,0.07);box-shadow:0 0 20px rgba(0,255,234,0.15);transform:scale(1.03)}
+    .denom-amount{font-size:22px;font-weight:900;color:#fff}
+    .denom-label{font-size:11px;color:#888;margin-top:3px}
+    .denom-fee{font-size:10px;color:#555;margin-top:4px}
+    /* Note display */
+    .note-display{background:#111;border:2px solid var(--primary);border-radius:14px;padding:20px;margin-top:16px;display:none}
+    .note-warn{font-size:12px;font-weight:700;color:#ffb400;margin-bottom:12px;line-height:1.5}
+    .note-text{font-family:monospace;font-size:11px;color:var(--accent);word-break:break-all;line-height:1.6;margin-bottom:14px}
+    .note-actions{display:flex;gap:8px}
+    .note-actions button{flex:1;padding:10px;border-radius:8px;border:1px solid rgba(0,255,234,0.3);background:rgba(0,255,234,0.07);color:var(--accent);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
+    .note-actions button:hover{background:rgba(0,255,234,0.14)}
+    /* QR display */
+    .qr-wrap{text-align:center;margin:12px 0}
+    .qr-wrap canvas{border-radius:10px;border:2px solid rgba(138,43,226,0.3);display:inline-block}
+    .qr-note-text{font-family:monospace;font-size:10px;color:#555;word-break:break-all;text-align:center;margin-top:8px;line-height:1.5;padding:0 4px}
+    /* Saved notes list */
+    .saved-notes{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+    .saved-note-card{background:#111;border:1px solid rgba(138,43,226,0.2);border-radius:10px;padding:12px 14px;cursor:pointer;transition:all .2s;display:flex;justify-content:space-between;align-items:center}
+    .saved-note-card:hover{border-color:rgba(138,43,226,0.5)}
+    .saved-note-card.active{border-color:var(--accent);background:rgba(0,255,234,0.05)}
+    .snc-info{display:flex;flex-direction:column;gap:3px}
+    .snc-denom{font-weight:800;font-size:15px}
+    .snc-token{font-size:11px;color:#888}
+    .snc-date{font-size:10px;color:#555;font-family:monospace}
+    .snc-actions{display:flex;gap:6px}
+    .snc-btn{padding:6px 10px;border:1px solid rgba(255,255,255,0.1);border-radius:6px;background:transparent;color:#666;font-size:11px;cursor:pointer;transition:all .2s}
+    .snc-btn:hover{border-color:rgba(255,50,50,0.4);color:#ff6666}
+    .divider{height:1px;background:rgba(255,255,255,0.06);margin:16px 0}
+    @media(max-width:600px){
+      .page-wrap{margin-top:70px}
+      .container{padding:22px 14px}
+      .top-nav{top:10px;left:10px}
+      .nav-link{padding:7px 10px;font-size:11px}
+      .tabs{gap:6px}
+      .tab{font-size:12px;padding:11px 4px}
+      .denom-amount{font-size:18px}
+    }
+  </style>
+</head>
+<body>
+<canvas id="matrix-bg"></canvas>
+
+<div class="top-nav">
+  <a href="index.html" class="nav-link">← PrivX Hurricane</a>
+  <a href="relayer.html" class="nav-link">📦 Relayer</a>
+</div>
+
+<div class="page-wrap">
+<div class="container">
+
+  <div class="logo-header">
+    <img src="privx-shield.png" style="width:54px;border-radius:14px;margin-bottom:10px;filter:drop-shadow(0 0 20px var(--glow))">
+    <h1>Hurricane Pay</h1>
+    <div class="tagline">Private Stablecoin Cash</div>
+    <div class="cash-badge">POWERED BY PRIVX HURRICANE</div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" id="tab-buy"    onclick="switchTab('buy')">Buy Cash</div>
+    <div class="tab"        id="tab-spend"  onclick="switchTab('spend')">Spend</div>
+    <div class="tab"        id="tab-accept" onclick="switchTab('accept')">Accept</div>
+  </div>
+
+  <!-- ─── BUY CASH TAB ───────────────────────────────────────────────────── -->
+  <div id="buyTab">
+    <div class="info-box">
+      Deposit stablecoins into a Hurricane Pay shield to receive a <strong>private note</strong> — your digital cash bill. The note lets anyone (you or a merchant) withdraw the exact amount to any address, with no on-chain link to your deposit.
+    </div>
+
+    <div class="section-label">Choose Currency</div>
+    <div class="token-grid">
+      <div class="token-card active" id="buy-tok-dai"     onclick="selectBuyToken('dai')">    <div class="tc-name">DAI</div>    <div class="tc-sub">Stablecoin</div></div>
+      <div class="token-card"        id="buy-tok-psundai" onclick="selectBuyToken('psundai')"><div class="tc-name">pSunDAI</div><div class="tc-sub">Autonomous</div></div>
+      <div class="token-card"        id="buy-tok-usdc"    onclick="selectBuyToken('usdc')">   <div class="tc-name">USDC</div>   <div class="tc-sub">USD Coin</div></div>
+    </div>
+
+    <div class="section-label">Choose Denomination</div>
+    <div class="denom-grid" id="buyDenomGrid">
+      <!-- built by JS -->
+    </div>
+
+    <div class="wallet-row">
+      <button class="wallet-btn" id="buyWalletBtn" onclick="connectBuy()">Connect Wallet</button>
+      <span class="wallet-addr" id="buyWalletAddr">Not connected</span>
+    </div>
+
+    <button class="btn btn-primary" id="buyBtn" onclick="buyNote()" disabled>Select Denomination</button>
+
+    <div class="note-display" id="noteDisplay">
+      <div class="note-warn">SAVE THIS NOTE — it is your digital cash. Anyone with it can redeem the funds.</div>
+      <div class="note-text" id="noteText"></div>
+      <div class="note-actions">
+        <button onclick="copyNote()">Copy Note</button>
+        <button onclick="saveNote()">Save to Wallet</button>
+      </div>
+    </div>
+
+    <div class="status" id="buyStatus"></div>
+  </div>
+
+  <!-- ─── SPEND TAB ─────────────────────────────────────────────────────── -->
+  <div id="spendTab" class="hidden">
+    <div class="info-box">
+      Show a note QR code to your merchant — they scan it and redeem the funds to their wallet. Like handing over a <strong>bearer bill</strong>: once shown, the note is theirs to redeem.
+    </div>
+
+    <div id="savedNotesSection">
+      <div class="section-label">Your Saved Notes</div>
+      <div class="saved-notes" id="savedNotesList">
+        <div style="color:#555;font-size:13px;font-family:monospace">No saved notes. Buy cash first, then tap "Save to Wallet".</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-label">Or paste a note to display</div>
+    <input type="text" id="spendNoteInput" placeholder="hp-dai-10-abc123…" oninput="renderSpendQR()">
+
+    <div class="qr-wrap" id="spendQrWrap" style="display:none">
+      <canvas id="spendQrCanvas"></canvas>
+      <div class="qr-note-text" id="spendQrText"></div>
+    </div>
+
+    <div class="status" id="spendStatus"></div>
+  </div>
+
+  <!-- ─── ACCEPT TAB ────────────────────────────────────────────────────── -->
+  <div id="acceptTab" class="hidden">
+    <div class="info-box">
+      Received a note from a customer? Paste it below, enter your wallet address, and redeem the funds. <strong>You generate the ZK proof</strong> and submit the withdrawal — the funds arrive in your wallet.
+    </div>
+
+    <div class="section-label">Customer Note</div>
+    <textarea id="acceptNote" placeholder="hp-dai-10-abc123… or privx-hurricane-dai-10-abc123…" oninput="detectAcceptNote()"></textarea>
+
+    <div id="acceptDetected" style="background:#111;border:1px solid rgba(0,255,234,0.2);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;font-family:monospace;line-height:1.8;display:none">
+      <div style="display:flex;gap:8px"><span style="color:#555;min-width:80px;font-size:10px;text-transform:uppercase;letter-spacing:.5px">Token</span><span style="color:var(--accent)" id="acc-token">—</span></div>
+      <div style="display:flex;gap:8px"><span style="color:#555;min-width:80px;font-size:10px;text-transform:uppercase;letter-spacing:.5px">Amount</span><span style="color:var(--accent)" id="acc-amount">—</span></div>
+      <div style="display:flex;gap:8px"><span style="color:#555;min-width:80px;font-size:10px;text-transform:uppercase;letter-spacing:.5px">Shield</span><span style="color:var(--accent)" id="acc-shield">—</span></div>
+    </div>
+
+    <div class="section-label">Your Wallet Address (recipient)</div>
+    <input type="text" id="acceptRecipient" placeholder="0x — funds arrive here">
+
+    <div class="wallet-row">
+      <button class="wallet-btn" id="acceptWalletBtn" onclick="connectAccept()">Connect Wallet (pays gas)</button>
+      <span class="wallet-addr" id="acceptWalletAddr">Not connected</span>
+    </div>
+
+    <button class="btn btn-primary" id="acceptBtn" onclick="acceptNote()" disabled>Connect Wallet First</button>
+
+    <div class="status" id="acceptStatus"></div>
+  </div>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+<script src="web3.min.js"></script>
+<script src="snarkjs.min.js"></script>
+<script type="module">
+  const { buildPoseidon } = await import('https://esm.sh/circomlibjs@0.1.7');
+  window._buildPoseidon = buildPoseidon;
+</script>
+<script>
+
+// ─── Hurricane Pay Token Config ───────────────────────────────────────────────
+// Contracts are DEPLOY_FIRST until Hurricane Pay shields are deployed.
+// Denominations: $1 $5 $10 $20 $50 $100
+
+const HP_TOKENS = {
+  dai: {
+    label: "DAI", sublabel: "Stablecoin",
+    addr:  "0xefD766cCb38EaF1dfd701853BFCe31359239F305",
+    decimals: 18, feeBP: 50,
+    shields: {
+      "1":   "DEPLOY_FIRST",
+      "5":   "DEPLOY_FIRST",
+      "10":  "DEPLOY_FIRST",
+      "20":  "DEPLOY_FIRST",
+      "50":  "DEPLOY_FIRST",
+      "100": "DEPLOY_FIRST"
+    },
+    denomWei: {
+      "1":   1000000000000000000n,
+      "5":   5000000000000000000n,
+      "10":  10000000000000000000n,
+      "20":  20000000000000000000n,
+      "50":  50000000000000000000n,
+      "100": 100000000000000000000n
+    }
+  },
+  psundai: {
+    label: "pSunDAI", sublabel: "Autonomous Stable",
+    addr:  "0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f",
+    decimals: 18, feeBP: 50,
+    shields: {
+      "1":   "DEPLOY_FIRST",
+      "5":   "DEPLOY_FIRST",
+      "10":  "DEPLOY_FIRST",
+      "20":  "DEPLOY_FIRST",
+      "50":  "DEPLOY_FIRST",
+      "100": "DEPLOY_FIRST"
+    },
+    denomWei: {
+      "1":   1000000000000000000n,
+      "5":   5000000000000000000n,
+      "10":  10000000000000000000n,
+      "20":  20000000000000000000n,
+      "50":  50000000000000000000n,
+      "100": 100000000000000000000n
+    }
+  },
+  usdc: {
+    label: "USDC", sublabel: "USD Coin",
+    addr:  "0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07",
+    decimals: 6, feeBP: 50,
+    shields: {
+      "1":   "DEPLOY_FIRST",
+      "5":   "DEPLOY_FIRST",
+      "10":  "DEPLOY_FIRST",
+      "20":  "DEPLOY_FIRST",
+      "50":  "DEPLOY_FIRST",
+      "100": "DEPLOY_FIRST"
+    },
+    denomWei: {
+      "1":   1000000n,
+      "5":   5000000n,
+      "10":  10000000n,
+      "20":  20000000n,
+      "50":  50000000n,
+      "100": 100000000n
+    }
+  }
+};
+
+const DENOMS    = ["1","5","10","20","50","100"];
+const TREE_LEVELS = 14;
+const WASM_URL  = "./PrivXMixer14.wasm";
+const ZKEY_CID  = "bafybeiahcycu5sbkgdxfxt4py3qagjrce2nxrbxenwv7oxkg67xoy4qwmu";
+const ZKEY_URLS = [
+  `https://amaranth-rear-platypus-218.mypinata.cloud/ipfs/${ZKEY_CID}`,
+  `https://gateway.pinata.cloud/ipfs/${ZKEY_CID}`,
+  `https://ipfs.io/ipfs/${ZKEY_CID}`,
+  `https://${ZKEY_CID}.ipfs.dweb.link`
+];
+const PULSECHAIN = {
+  chainId:"0x171", chainName:"PulseChain",
+  rpcUrls:["https://rpc.pulsechain.com"],
+  nativeCurrency:{name:"PLS",symbol:"PLS",decimals:18},
+  blockExplorerUrls:["https://scan.pulsechain.com"]
+};
+
+// ─── ABIs ─────────────────────────────────────────────────────────────────────
+
+const SHIELD_ABI = [
+  { inputs:[{type:"bytes32",name:"_commitment"}], name:"deposit", outputs:[], stateMutability:"nonpayable", type:"function" },
+  { inputs:[{type:"uint256[24]",name:"proof"},{type:"uint256[4]",name:"pubSignals"},{type:"address",name:"recipient"}], name:"withdraw", outputs:[], stateMutability:"nonpayable", type:"function" },
+  { inputs:[], name:"getLastRoot", outputs:[{type:"bytes32"}], stateMutability:"view", type:"function" },
+  { anonymous:false, inputs:[{indexed:true,type:"bytes32",name:"commitment"},{indexed:false,type:"uint32",name:"leafIndex"},{indexed:false,type:"uint256",name:"timestamp"}], name:"Deposit", type:"event" }
+];
+
+const ERC20_ABI = [
+  { inputs:[{type:"address",name:"spender"},{type:"uint256",name:"amount"}],   name:"approve",   outputs:[{type:"bool"}], stateMutability:"nonpayable", type:"function" },
+  { inputs:[{type:"address",name:"owner"},{type:"address",name:"spender"}],    name:"allowance", outputs:[{type:"uint256"}], stateMutability:"view", type:"function" }
+];
+
+// ─── State ────────────────────────────────────────────────────────────────────
+
+let buyWeb3, buyAccount;
+let acceptWeb3, acceptAccount;
+let poseidonFn   = null;
+let _zkeyBlobUrl = null;
+let selectedBuyToken = 'dai';
+let selectedDenom    = null;
+let _currentNote     = null;
+
+// ─── Tab switching ────────────────────────────────────────────────────────────
+
+function switchTab(t) {
+  ['buy','spend','accept'].forEach(id => {
+    document.getElementById(id+'Tab').classList.toggle('hidden', id !== t);
+    document.getElementById('tab-'+id).classList.toggle('active', id === t);
+  });
+  if (t === 'spend') renderSavedNotes();
+}
+
+// ─── Poseidon ─────────────────────────────────────────────────────────────────
+
+async function initPoseidon() {
+  for (let i = 0; i < 100; i++) { if (window._buildPoseidon) break; await new Promise(r=>setTimeout(r,100)); }
+  if (!window._buildPoseidon) throw new Error("circomlibjs failed to load");
+  const lib = await window._buildPoseidon();
+  poseidonFn = (...inputs) => lib.F.toObject(lib(inputs.map(x => BigInt(x))));
+}
+
+async function getZkeyUrl(setStatus) {
+  if (_zkeyBlobUrl) return _zkeyBlobUrl;
+  for (let i = 0; i < ZKEY_URLS.length; i++) {
+    try {
+      setStatus(`Downloading proving key… (${i+1}/${ZKEY_URLS.length})`);
+      const resp = await fetch(ZKEY_URLS[i]);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      _zkeyBlobUrl = URL.createObjectURL(await resp.blob());
+      return _zkeyBlobUrl;
+    } catch(e) { console.warn(`zkey source ${i+1} failed:`, e.message); }
+  }
+  throw new Error("Could not download proving key from any source.");
+}
+
+// ─── Merkle tree ──────────────────────────────────────────────────────────────
+
+function buildFullTree(leaves) {
+  const size = 1 << TREE_LEVELS, padded = [...leaves];
+  while (padded.length < size) padded.push(0n);
+  const tree = [padded];
+  for (let lvl = 0; lvl < TREE_LEVELS; lvl++) {
+    const prev = tree[lvl], next = [];
+    for (let i = 0; i < prev.length; i += 2) next.push(poseidonFn(prev[i], prev[i+1]));
+    tree.push(next);
+  }
+  return { tree, root: tree[TREE_LEVELS][0] };
+}
+
+async function getMerkleProof(shieldContract, targetCommitment) {
+  const events = await shieldContract.getPastEvents("Deposit", { fromBlock:0, toBlock:"latest" });
+  if (!events.length) throw new Error("No deposits in this shield");
+  events.sort((a,b) => Number(a.returnValues.leafIndex) - Number(b.returnValues.leafIndex));
+  const leaves    = events.map(e => BigInt(e.returnValues.commitment));
+  const leafIndex = leaves.findIndex(l => l === targetCommitment);
+  if (leafIndex === -1) throw new Error("Commitment not found — is this the correct note?");
+  const { tree, root } = buildFullTree(leaves);
+  const siblings = [], pathIndices = [];
+  let idx = leafIndex;
+  for (let lvl = 0; lvl < TREE_LEVELS; lvl++) {
+    siblings.push(tree[lvl][idx^1].toString());
+    pathIndices.push(idx & 1);
+    idx >>= 1;
+  }
+  const onChainRoot = await shieldContract.methods.getLastRoot().call();
+  const localRoot   = "0x" + root.toString(16).padStart(64,"0");
+  if (localRoot.toLowerCase() !== onChainRoot.toLowerCase())
+    throw new Error("Merkle root mismatch — a deposit may have just occurred, please try again.");
+  return { pathIndices, siblings, proofRoot: root };
+}
+
+// ─── Wallet ───────────────────────────────────────────────────────────────────
+
+async function connectWallet() {
+  if (!window.ethereum) throw new Error("No wallet detected. Install MetaMask.");
+  await window.ethereum.request({ method:"eth_requestAccounts" });
+  try { await window.ethereum.request({ method:"wallet_switchEthereumChain", params:[{chainId:"0x171"}] }); }
+  catch(e) { if (e.code === 4902) await window.ethereum.request({ method:"wallet_addEthereumChain", params:[PULSECHAIN] }); }
+  const w = new Web3(window.ethereum);
+  w.eth.transactionPollingTimeout = 600;
+  const accounts = await w.eth.getAccounts();
+  return { web3: w, account: accounts[0] };
+}
+
+// ─── BUY CASH TAB ────────────────────────────────────────────────────────────
+
+function selectBuyToken(tok) {
+  selectedBuyToken = tok;
+  selectedDenom    = null;
+  document.querySelectorAll('.token-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('buy-tok-'+tok).classList.add('active');
+  document.getElementById('noteDisplay').style.display = 'none';
+  renderDenomGrid();
+  updateBuyBtn();
+}
+
+function renderDenomGrid() {
+  const token = HP_TOKENS[selectedBuyToken];
+  const grid  = document.getElementById('buyDenomGrid');
+  grid.innerHTML = '';
+  DENOMS.forEach(d => {
+    const feeAmt = (Number(d) * token.feeBP / 10000).toFixed(4).replace(/\.?0+$/,'');
+    const div = document.createElement('div');
+    div.className = 'denom-card';
+    div.id = 'denom-'+d;
+    div.innerHTML = `<div class="denom-amount">$${d}</div><div class="denom-label">${token.label}</div><div class="denom-fee">Fee: $${feeAmt}</div>`;
+    div.onclick = () => selectDenom(d);
+    grid.appendChild(div);
+  });
+}
+
+function selectDenom(d) {
+  selectedDenom = d;
+  document.querySelectorAll('.denom-card').forEach(c => c.classList.remove('active'));
+  const el = document.getElementById('denom-'+d);
+  if (el) el.classList.add('active');
+  document.getElementById('noteDisplay').style.display = 'none';
+  updateBuyBtn();
+}
+
+function updateBuyBtn() {
+  const btn = document.getElementById('buyBtn');
+  if (!buyAccount) { btn.disabled = true; btn.textContent = 'Connect Wallet'; return; }
+  if (!selectedDenom) { btn.disabled = true; btn.textContent = 'Select Denomination'; return; }
+  btn.disabled = false;
+  btn.textContent = `Buy $${selectedDenom} ${HP_TOKENS[selectedBuyToken].label}`;
+}
+
+async function connectBuy() {
+  try {
+    const { web3, account } = await connectWallet();
+    buyWeb3 = web3; buyAccount = account;
+    document.getElementById('buyWalletBtn').textContent = account.slice(0,6)+'…'+account.slice(-4);
+    document.getElementById('buyWalletBtn').className   = 'wallet-btn connected';
+    document.getElementById('buyWalletAddr').textContent = account;
+    updateBuyBtn();
+  } catch(e) { setStatus('buyStatus', 'error', e.message); }
+}
+
+async function buyNote() {
+  if (!buyAccount || !selectedDenom) return;
+  if (!poseidonFn) return setStatus('buyStatus', 'error', 'Poseidon not ready — wait a moment.');
+  const token      = HP_TOKENS[selectedBuyToken];
+  const shieldAddr = token.shields[selectedDenom];
+  if (!shieldAddr || shieldAddr === "DEPLOY_FIRST")
+    return setStatus('buyStatus', 'error', `Hurricane Pay $${selectedDenom} ${token.label} shield is not yet deployed. Coming soon.`);
+
+  const btn = document.getElementById('buyBtn');
+  btn.disabled = true;
+  setStatus('buyStatus', 'pending', 'Generating note…');
+
+  try {
+    const nBytes = crypto.getRandomValues(new Uint8Array(31));
+    const sBytes = crypto.getRandomValues(new Uint8Array(31));
+    const nHex   = [...nBytes].map(b=>b.toString(16).padStart(2,"0")).join("");
+    const sHex   = [...sBytes].map(b=>b.toString(16).padStart(2,"0")).join("");
+    const nullifier  = BigInt("0x"+nHex);
+    const secret     = BigInt("0x"+sHex);
+    const commitment = poseidonFn(nullifier, secret);
+    const commitHex  = "0x" + commitment.toString(16).padStart(64,"0");
+
+    const note = `hp-${selectedBuyToken}-${selectedDenom}-${nHex}-${sHex}`;
+    _currentNote = { note, token: selectedBuyToken, denom: selectedDenom, ts: Date.now() };
+
+    document.getElementById('noteText').textContent = note;
+    document.getElementById('noteDisplay').style.display = 'block';
+
+    const denomWei  = token.denomWei[selectedDenom];
+    const feeWei    = (denomWei * BigInt(token.feeBP)) / 10000n;
+    const totalWei  = denomWei + feeWei;
+    const shieldC   = new buyWeb3.eth.Contract(SHIELD_ABI, shieldAddr);
+    const tokenC    = new buyWeb3.eth.Contract(ERC20_ABI, token.addr);
+
+    setStatus('buyStatus', 'pending', `Checking ${token.label} allowance…`);
+    const allow = await tokenC.methods.allowance(buyAccount, shieldAddr).call();
+    if (BigInt(allow) < totalWei) {
+      setStatus('buyStatus', 'pending', `Approving ${token.label}…`);
+      await tokenC.methods.approve(shieldAddr, totalWei.toString()).send({ from: buyAccount });
+    }
+
+    setStatus('buyStatus', 'pending', 'Depositing into Hurricane Pay shield…');
+    const tx = await shieldC.methods.deposit(commitHex).send({ from: buyAccount });
+    if (!tx.status) throw new Error("Transaction reverted. TX: " + tx.transactionHash);
+
+    setStatus('buyStatus', 'success',
+      `$${selectedDenom} ${token.label} note minted!\n\nTX: ${tx.transactionHash}\n\nSave your note — it is now your digital cash.`
+    );
+  } catch(e) {
+    console.error(e);
+    const isTimeout = e.message && (e.message.includes('50 blocks') || e.message.includes('not mined'));
+    if (!isTimeout) setStatus('buyStatus', 'error', 'Deposit failed: ' + (e.message || 'check console'));
+  } finally {
+    btn.disabled = false;
+    updateBuyBtn();
+  }
+}
+
+function copyNote() {
+  if (!_currentNote) return;
+  navigator.clipboard.writeText(_currentNote.note).then(() => alert('Note copied to clipboard.'));
+}
+
+function saveNote() {
+  if (!_currentNote) return;
+  const saved = getSavedNotes();
+  if (saved.find(n => n.note === _currentNote.note)) return alert('This note is already saved.');
+  saved.push(_currentNote);
+  localStorage.setItem('hp_notes', JSON.stringify(saved));
+  alert(`$${_currentNote.denom} ${HP_TOKENS[_currentNote.token].label} note saved to your browser wallet.`);
+}
+
+// ─── SPEND TAB ────────────────────────────────────────────────────────────────
+
+function getSavedNotes() {
+  try { return JSON.parse(localStorage.getItem('hp_notes') || '[]'); } catch { return []; }
+}
+
+function renderSavedNotes() {
+  const list  = document.getElementById('savedNotesList');
+  const notes = getSavedNotes();
+  if (!notes.length) {
+    list.innerHTML = '<div style="color:#555;font-size:13px;font-family:monospace">No saved notes. Buy cash first, then tap "Save to Wallet".</div>';
+    return;
+  }
+  list.innerHTML = '';
+  notes.forEach((n, i) => {
+    const tok  = HP_TOKENS[n.token];
+    const date = new Date(n.ts).toLocaleDateString();
+    const div  = document.createElement('div');
+    div.className = 'saved-note-card';
+    div.id = 'snc-'+i;
+    div.innerHTML = `
+      <div class="snc-info">
+        <span class="snc-denom">$${n.denom} <span style="color:var(--accent)">${tok ? tok.label : n.token}</span></span>
+        <span class="snc-date">${date}</span>
+      </div>
+      <div class="snc-actions">
+        <button class="snc-btn" onclick="deleteNote(${i})" title="Delete">✕</button>
+      </div>
+    `;
+    div.onclick = e => { if (!e.target.closest('.snc-actions')) showNoteQR(n.note, i); };
+    list.appendChild(div);
+  });
+}
+
+function deleteNote(i) {
+  if (!confirm('Delete this note? Make sure you have a copy if it has not been spent.')) return;
+  const saved = getSavedNotes();
+  saved.splice(i, 1);
+  localStorage.setItem('hp_notes', JSON.stringify(saved));
+  renderSavedNotes();
+  document.getElementById('spendQrWrap').style.display = 'none';
+}
+
+function showNoteQR(note, i) {
+  document.querySelectorAll('.saved-note-card').forEach(c => c.classList.remove('active'));
+  const el = document.getElementById('snc-'+i);
+  if (el) el.classList.add('active');
+  document.getElementById('spendNoteInput').value = note;
+  renderSpendQR();
+}
+
+function renderSpendQR() {
+  const note = document.getElementById('spendNoteInput').value.trim();
+  const wrap = document.getElementById('spendQrWrap');
+  if (!note) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  QRCode.toCanvas(document.getElementById('spendQrCanvas'), note, {
+    width: 240, margin: 2,
+    color: { dark:'#ffffff', light:'#000000' }
+  }, err => { if (err) console.error(err); });
+  const short = note.length > 50 ? note.slice(0,28)+'…'+note.slice(-20) : note;
+  document.getElementById('spendQrText').textContent = short;
+}
+
+// ─── ACCEPT TAB ──────────────────────────────────────────────────────────────
+
+// Accept both hp- notes and legacy privx-hurricane- notes
+const HP_NOTE_RE     = /^hp-(dai|psundai|usdc)-(\d+)-([a-fA-F0-9]{62,64})-([a-fA-F0-9]{62,64})$/i;
+const LEGACY_NOTE_RE = /^privx-hurricane-(dai|psundai)-(\d+[.0-9]*)-([a-fA-F0-9]{62,64})-([a-fA-F0-9]{62,64})$/i;
+
+function detectAcceptNote() {
+  const raw = document.getElementById('acceptNote').value.trim();
+  const el  = document.getElementById('acceptDetected');
+  const match = raw.match(HP_NOTE_RE) || raw.match(LEGACY_NOTE_RE);
+  if (!match) { el.style.display = 'none'; return; }
+  const [, tokenKey, denomStr] = match;
+  const token = HP_TOKENS[tokenKey.toLowerCase()];
+  if (!token) { el.style.display = 'none'; return; }
+  const shieldAddr = token.shields[denomStr];
+  document.getElementById('acc-token').textContent  = `${token.label}`;
+  document.getElementById('acc-amount').textContent = `$${denomStr} (${denomStr} ${token.label})`;
+  document.getElementById('acc-shield').textContent = shieldAddr && shieldAddr !== 'DEPLOY_FIRST'
+    ? shieldAddr.slice(0,12)+'…'+shieldAddr.slice(-8) : 'Not yet deployed';
+  el.style.display = 'block';
+}
+
+async function connectAccept() {
+  try {
+    const { web3, account } = await connectWallet();
+    acceptWeb3 = web3; acceptAccount = account;
+    document.getElementById('acceptWalletBtn').textContent = account.slice(0,6)+'…'+account.slice(-4);
+    document.getElementById('acceptWalletBtn').className  = 'wallet-btn connected';
+    document.getElementById('acceptWalletAddr').textContent = account;
+    const recip = document.getElementById('acceptRecipient');
+    if (!recip.value) recip.value = account;
+    document.getElementById('acceptBtn').disabled  = false;
+    document.getElementById('acceptBtn').textContent = 'Redeem Note';
+  } catch(e) { setStatus('acceptStatus', 'error', e.message); }
+}
+
+async function acceptNote() {
+  const raw       = document.getElementById('acceptNote').value.trim();
+  const recipient = document.getElementById('acceptRecipient').value.trim();
+  if (!raw)       return setStatus('acceptStatus', 'error', 'Paste the customer note first.');
+  if (!recipient) return setStatus('acceptStatus', 'error', 'Enter your wallet address (recipient).');
+  if (!acceptAccount) return setStatus('acceptStatus', 'error', 'Connect your wallet first.');
+  if (!poseidonFn)    return setStatus('acceptStatus', 'error', 'Poseidon not ready — wait a moment.');
+
+  const match = raw.match(HP_NOTE_RE) || raw.match(LEGACY_NOTE_RE);
+  if (!match) return setStatus('acceptStatus', 'error', 'Invalid note format. Expected: hp-dai-10-… or privx-hurricane-dai-10-…');
+  const [, tokenKey, denomStr, nHex, sHex] = match;
+  const token = HP_TOKENS[tokenKey.toLowerCase()];
+  if (!token) return setStatus('acceptStatus', 'error', 'Unknown token: ' + tokenKey);
+
+  const shieldAddr = token.shields[denomStr];
+  if (!shieldAddr || shieldAddr === "DEPLOY_FIRST")
+    return setStatus('acceptStatus', 'error', `Hurricane Pay $${denomStr} ${token.label} shield is not yet deployed.`);
+
+  const denomWei      = token.denomWei[denomStr];
+  const nullifier     = BigInt("0x"+nHex);
+  const secret        = BigInt("0x"+sHex);
+  const commitment    = poseidonFn(nullifier, secret);
+  const nullifierHash = poseidonFn(nullifier, denomWei);
+
+  const btn = document.getElementById('acceptBtn');
+  btn.disabled = true;
+  setStatus('acceptStatus', 'pending', 'Fetching deposit events from shield…');
+
+  try {
+    const rpcWeb3  = new Web3("https://rpc.pulsechain.com");
+    const shieldC  = new rpcWeb3.eth.Contract(SHIELD_ABI, shieldAddr);
+    const { pathIndices, siblings, proofRoot } = await getMerkleProof(shieldC, commitment);
+
+    const circuitInput = {
+      nullifier:     nullifier.toString(),
+      secret:        secret.toString(),
+      pathIndices:   pathIndices.map(String),
+      siblings,
+      root:          proofRoot.toString(),
+      denomination:  denomWei.toString(),
+      nullifierHash: nullifierHash.toString(),
+      recipient:     BigInt(recipient).toString()
+    };
+
+    const zkeyUrl = await getZkeyUrl(msg => setStatus('acceptStatus', 'pending', msg));
+    setStatus('acceptStatus', 'pending', 'Generating ZK proof… (10–30s on desktop)');
+    const { proof: zkProof, publicSignals } = await snarkjs.plonk.fullProve(circuitInput, WASM_URL, zkeyUrl);
+    const calldata = await snarkjs.plonk.exportSolidityCallData(zkProof, publicSignals);
+    const argv     = calldata.replace(/\]\s*\[/g,",").replace(/["[\]\s]/g,"").split(",").filter(Boolean);
+
+    setStatus('acceptStatus', 'pending', 'Submitting withdrawal…');
+    const submitC = new acceptWeb3.eth.Contract(SHIELD_ABI, shieldAddr);
+    const tx = await submitC.methods.withdraw(argv.slice(0,24), argv.slice(24,28), recipient).send({ from: acceptAccount });
+    if (!tx.status) throw new Error("Transaction reverted. TX: " + tx.transactionHash);
+
+    setStatus('acceptStatus', 'success',
+      `Payment received!\n\nTX: ${tx.transactionHash}\n\n$${denomStr} ${token.label} sent to:\n${recipient}\n\nView: https://scan.pulsechain.com/tx/${tx.transactionHash}`
+    );
+  } catch(e) {
+    console.error(e);
+    const msg = e.message || 'Unknown error';
+    let userMsg = 'Redemption failed: ' + msg;
+    if (msg.includes('already spent') || msg.includes('nullifier'))
+      userMsg = 'This note has already been spent — it cannot be redeemed again.';
+    else if (msg.includes('root') || msg.includes('mismatch'))
+      userMsg = 'Merkle root mismatch — a deposit may have just occurred. Please try again.';
+    setStatus('acceptStatus', 'error', userMsg);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Redeem Note';
+  }
+}
+
+// ─── Shared helpers ───────────────────────────────────────────────────────────
+
+function setStatus(id, type, msg) {
+  const el = document.getElementById(id);
+  el.className = 'status ' + type;
+  el.textContent = msg;
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+
+window.addEventListener('load', async () => {
+  selectBuyToken('dai');
+  try { await initPoseidon(); }
+  catch(e) { console.error("Poseidon init failed:", e.message); }
+});
+
+// ─── Matrix bg ────────────────────────────────────────────────────────────────
+
+const canvas = document.getElementById('matrix-bg'), ctx = canvas.getContext('2d');
+canvas.width = innerWidth; canvas.height = innerHeight;
+let fontSize = innerWidth < 600 ? 10 : 14;
+const chars  = '01HURRICANEPAY$$$';
+let columns  = Math.floor(canvas.width / fontSize);
+let drops    = Array(columns).fill(1);
+function draw() {
+  ctx.fillStyle = 'rgba(0,0,0,0.05)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = '#8A2BE2'; ctx.font = fontSize+'px monospace';
+  drops.forEach((y,i) => {
+    ctx.fillText(chars[Math.floor(Math.random()*chars.length)], i*fontSize, y*fontSize);
+    if (y*fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+    drops[i]++;
+  });
+}
+(function loop(){ draw(); requestAnimationFrame(loop); })();
+addEventListener('resize', () => {
+  canvas.width = innerWidth; canvas.height = innerHeight;
+  fontSize = innerWidth < 600 ? 10 : 14;
+  columns  = Math.floor(canvas.width / fontSize);
+  drops    = Array(columns).fill(1);
+});
+
+</script>
+</body>
+</html>
