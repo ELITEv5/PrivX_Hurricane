@@ -1075,8 +1075,47 @@
         const count   = counts[i];
         const badgeEl = document.getElementById('pool-badge-' + k);
         const cardEl  = document.getElementById('denom-card-' + k);
+        const countEl = document.getElementById('pool-count-' + k);
+        const scoreEl = document.getElementById('privacy-score-' + k);
 
         if (count === -1) return; // not deployed
+
+        // Deposit count label
+        if (countEl) {
+          if (count === 0) {
+            countEl.textContent = '0 deposits';
+            countEl.className = 'pool-count count-none';
+          } else if (count < 10) {
+            countEl.textContent = count + ' deposit' + (count === 1 ? '' : 's');
+            countEl.className = 'pool-count count-mid';
+          } else if (count < 50) {
+            countEl.textContent = count + ' deposits';
+            countEl.className = 'pool-count count-mid';
+          } else {
+            countEl.textContent = count + ' deposits';
+            countEl.className = 'pool-count count-high';
+          }
+        }
+
+        // Privacy level indicator
+        if (scoreEl) {
+          if (count === 0) {
+            scoreEl.textContent = '';
+            scoreEl.className = 'privacy-score ps-none';
+          } else if (count < 10) {
+            scoreEl.textContent = '⬆ Privacy Increasing';
+            scoreEl.className = 'privacy-score ps-fair';
+          } else if (count < 50) {
+            scoreEl.textContent = '◆ Privacy Growing';
+            scoreEl.className = 'privacy-score ps-fair';
+          } else if (count < 100) {
+            scoreEl.textContent = '✓ Good Privacy';
+            scoreEl.className = 'privacy-score ps-good';
+          } else {
+            scoreEl.textContent = '✦ Strong Privacy';
+            scoreEl.className = 'privacy-score ps-strong';
+          }
+        }
 
         // Most popular badge
         if (badgeEl) {
