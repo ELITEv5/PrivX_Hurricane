@@ -1083,16 +1083,16 @@
         // Deposit count label
         if (countEl) {
           if (count === 0) {
-            countEl.textContent = '0 deposits';
+            countEl.textContent = '0 deposits made';
             countEl.className = 'pool-count count-none';
           } else if (count < 10) {
-            countEl.textContent = count + ' deposit' + (count === 1 ? '' : 's');
+            countEl.textContent = count + ' deposit' + (count === 1 ? '' : 's') + ' made';
             countEl.className = 'pool-count count-mid';
           } else if (count < 50) {
-            countEl.textContent = count + ' deposits';
+            countEl.textContent = count + ' deposits made';
             countEl.className = 'pool-count count-mid';
           } else {
-            countEl.textContent = count + ' deposits';
+            countEl.textContent = count + ' deposits made';
             countEl.className = 'pool-count count-high';
           }
         }
