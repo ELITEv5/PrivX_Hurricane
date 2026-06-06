@@ -93,6 +93,18 @@
     .snc-btn{padding:6px 10px;border:1px solid rgba(255,255,255,0.1);border-radius:6px;background:transparent;color:#666;font-size:11px;cursor:pointer;transition:all .2s}
     .snc-btn:hover{border-color:rgba(255,50,50,0.4);color:#ff6666}
     .divider{height:1px;background:rgba(255,255,255,0.06);margin:16px 0}
+    /* Fund Rewards box */
+    .fund-box{width:100%;max-width:640px;position:relative;z-index:10;margin-top:18px}
+    .fund-inner{background:rgba(10,10,10,0.7);backdrop-filter:blur(20px);border-radius:18px;padding:20px 22px;border:1px solid rgba(138,43,226,0.3);box-shadow:0 0 40px rgba(138,43,226,0.15)}
+    .fund-title{font-size:13px;font-weight:800;color:#B57AFF;letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px}
+    .fund-row{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+    .fund-addr{font-family:monospace;font-size:11px;color:#555;word-break:break-all;flex:1;line-height:1.5}
+    .fund-bal{font-size:12px;color:#888;margin-bottom:12px}
+    .fund-bal span{color:var(--accent);font-weight:700}
+    .fund-input-row{display:flex;gap:8px;align-items:center}
+    .fund-input-row input{flex:1;margin-bottom:0;padding:10px 14px;font-size:14px}
+    .fund-input-row button{white-space:nowrap;padding:10px 18px;border:none;border-radius:10px;background:var(--primary);color:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
+    .fund-input-row button:hover{background:var(--accent);color:#000}
     @media(max-width:600px){
       .page-wrap{margin-top:70px}
       .container{padding:22px 14px}
@@ -101,6 +113,7 @@
       .tabs{gap:6px}
       .tab{font-size:12px;padding:11px 4px}
       .denom-amount{font-size:18px}
+      .fund-box{margin-top:12px}
     }
   </style>
 </head>
@@ -122,6 +135,39 @@
     <div class="cash-badge">POWERED BY PRIVX HURRICANE</div>
   </div>
 
+  <div class="info-box" style="margin-bottom:20px">
+    <strong>What is Hurricane Pay?</strong><br>
+    Hurricane Pay turns stablecoins into private digital cash — like a $20 bill, but on-chain. You deposit DAI, pSunDAI, or USDC and receive a <strong>private note</strong>. The note proves ownership of exactly that amount, with no on-chain connection to your wallet. Hand the note to a merchant, they redeem it — you've paid privately.
+    <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
+      <span style="background:rgba(0,255,234,0.07);border:1px solid rgba(0,255,234,0.2);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--accent)">Zero-knowledge proofs</span>
+      <span style="background:rgba(0,255,234,0.07);border:1px solid rgba(0,255,234,0.2);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--accent)">No on-chain identity</span>
+      <span style="background:rgba(0,255,234,0.07);border:1px solid rgba(0,255,234,0.2);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--accent)">Bearer instrument</span>
+      <span style="background:rgba(0,255,234,0.07);border:1px solid rgba(0,255,234,0.2);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--accent)">0.5% fee</span>
+    </div>
+  </div>
+
+  <!-- How it Works -->
+  <div style="margin-bottom:22px">
+    <div class="section-label" style="margin-bottom:12px">How it works</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+      <div style="background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);border-radius:14px;padding:14px 12px;text-align:center">
+        <div style="font-size:22px;margin-bottom:6px">💰</div>
+        <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">1. Buy Cash</div>
+        <div style="font-size:11px;color:#666;line-height:1.5">Deposit a fixed amount. Receive a secret note — your digital bill.</div>
+      </div>
+      <div style="background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);border-radius:14px;padding:14px 12px;text-align:center">
+        <div style="font-size:22px;margin-bottom:6px">📲</div>
+        <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">2. Spend</div>
+        <div style="font-size:11px;color:#666;line-height:1.5">Show the QR code to your merchant. Like handing over cash.</div>
+      </div>
+      <div style="background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);border-radius:14px;padding:14px 12px;text-align:center">
+        <div style="font-size:22px;margin-bottom:6px">✅</div>
+        <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">3. Accept</div>
+        <div style="font-size:11px;color:#666;line-height:1.5">Merchant scans the note, generates a ZK proof, funds arrive.</div>
+      </div>
+    </div>
+  </div>
+
   <div class="tabs">
     <div class="tab active" id="tab-buy"    onclick="switchTab('buy')">Buy Cash</div>
     <div class="tab"        id="tab-spend"  onclick="switchTab('spend')">Spend</div>
@@ -131,7 +177,12 @@
   <!-- ─── BUY CASH TAB ───────────────────────────────────────────────────── -->
   <div id="buyTab">
     <div class="info-box">
-      Deposit stablecoins into a Hurricane Pay shield to receive a <strong>private note</strong> — your digital cash bill. The note lets anyone (you or a merchant) withdraw the exact amount to any address, with no on-chain link to your deposit.
+      <strong>Buying private cash:</strong><br>
+      <span style="color:#888">1.</span> Choose your currency and denomination below.<br>
+      <span style="color:#888">2.</span> Connect your wallet and approve the token spend.<br>
+      <span style="color:#888">3.</span> Confirm the deposit — funds enter the Hurricane shield.<br>
+      <span style="color:#888">4.</span> <strong style="color:#ffb400">Save your note.</strong> It is the only proof of your deposit. Losing it means losing the funds.<br>
+      <div style="margin-top:8px;font-size:11px;color:#555">A 0.5% fee is deducted when the note is redeemed, not on deposit. You always receive the full denomination in your note.</div>
     </div>
 
     <div class="section-label">Choose Currency</div>
@@ -168,7 +219,11 @@
   <!-- ─── SPEND TAB ─────────────────────────────────────────────────────── -->
   <div id="spendTab" class="hidden">
     <div class="info-box">
-      Show a note QR code to your merchant — they scan it and redeem the funds to their wallet. Like handing over a <strong>bearer bill</strong>: once shown, the note is theirs to redeem.
+      <strong>Spending your note:</strong><br>
+      Select a saved note or paste one below — a QR code will appear. Show it to your merchant and they scan or manually enter it into the <em>Accept</em> tab to redeem the funds.<br>
+      <div style="margin-top:8px;background:rgba(255,180,0,0.07);border:1px solid rgba(255,180,0,0.2);border-radius:8px;padding:8px 12px;font-size:11px;color:#ffb400">
+        <strong>Treat a shown note like spent cash.</strong> A note is a bearer instrument — whoever has it can redeem it. Once you show the QR, consider the funds transferred.
+      </div>
     </div>
 
     <div id="savedNotesSection">
@@ -194,7 +249,19 @@
   <!-- ─── ACCEPT TAB ────────────────────────────────────────────────────── -->
   <div id="acceptTab" class="hidden">
     <div class="info-box">
-      Received a note from a customer? Paste it below, enter your wallet address, and redeem the funds. <strong>You generate the ZK proof</strong> and submit the withdrawal — the funds arrive in your wallet.
+      <strong>Accepting a Hurricane Pay note:</strong><br>
+      <span style="color:#888">1.</span> Paste the customer's note (or scan their QR and copy the text).<br>
+      <span style="color:#888">2.</span> Enter your wallet address — this is where funds will arrive.<br>
+      <span style="color:#888">3.</span> Connect a wallet to pay the gas fee (PLS), then click <strong>Redeem</strong>.<br>
+      <span style="color:#888">4.</span> Your browser generates a ZK proof, then submits the withdrawal on-chain.<br>
+      <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px">
+        <div style="background:rgba(255,180,0,0.07);border:1px solid rgba(255,180,0,0.2);border-radius:8px;padding:8px 12px;font-size:11px;color:#ffb400">
+          <strong>Proof generation takes 1–3 minutes</strong> on desktop and longer on mobile. Keep this tab open — do not refresh.
+        </div>
+        <div style="background:rgba(0,255,100,0.05);border:1px solid rgba(0,255,100,0.15);border-radius:8px;padding:8px 12px;font-size:11px;color:#00e664">
+          You receive the denomination minus the 0.5% protocol fee. You also earn <strong>PRIVX mining rewards</strong> for every redemption.
+        </div>
+      </div>
     </div>
 
     <div class="section-label">Customer Note</div>
@@ -222,7 +289,50 @@
 </div>
 </div>
 
+<!-- Fund Mining Rewards -->
+<div class="fund-box">
+  <div class="fund-inner">
+    <div class="fund-title">Fund Mining Rewards</div>
+    <div class="fund-bal">HP Vault Balance: <span id="vaultPrivxBal">—</span> PRIVX</div>
+    <div class="fund-addr" id="vaultAddrDisplay">0xf7Abeb9a3ccea1B8c30ca8a6d359c609B0751650</div>
+    <div style="font-size:10px;color:#444;margin:6px 0 12px">Anyone can top up the vault — rewards are paid to merchants who accept Hurricane Pay notes.</div>
+    <div class="fund-input-row">
+      <input type="text" id="fundAmount" placeholder="PRIVX amount (e.g. 10000)">
+      <button onclick="fundVault()">Fund Vault</button>
+    </div>
+    <div class="status" id="fundStatus"></div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+<!-- Privacy & FAQ -->
+<div class="fund-box" style="margin-top:14px">
+  <div class="fund-inner">
+    <div class="fund-title">Privacy &amp; Security</div>
+    <div style="display:flex;flex-direction:column;gap:10px;font-size:12px;color:#888;line-height:1.7">
+      <div><strong style="color:#B57AFF">How is my privacy protected?</strong><br>
+        When you deposit, a cryptographic commitment is stored on-chain — not your address or amount. When the note is redeemed, a zero-knowledge proof confirms the note is valid without revealing which deposit it came from. No on-chain link between sender and receiver exists.
+      </div>
+      <div class="divider"></div>
+      <div><strong style="color:#B57AFF">What if I lose my note?</strong><br>
+        The note is your only key. If lost, the funds in that shield slot cannot be recovered by anyone — including the protocol. Back up notes immediately after buying, ideally in a password manager or encrypted storage.
+      </div>
+      <div class="divider"></div>
+      <div><strong style="color:#B57AFF">Can a note be used twice?</strong><br>
+        No. Each note has a unique nullifier that is recorded on-chain the moment it's redeemed. Any second attempt with the same note will revert. This is enforced by the smart contract, not the UI.
+      </div>
+      <div class="divider"></div>
+      <div><strong style="color:#B57AFF">What are PRIVX mining rewards?</strong><br>
+        Merchants who redeem notes earn PRIVX tokens from the Hurricane Pay Mining Vault. Rewards scale with denomination — larger bills earn more PRIVX per redemption. Rewards reduce proportionally as the vault empties and refill when the community tops it up.
+      </div>
+      <div class="divider"></div>
+      <div><strong style="color:#B57AFF">Who controls the contracts?</strong><br>
+        The Hurricane Pay shields are fully immutable after deployment — no admin can pause, upgrade, or confiscate funds. The protocol fee (0.5%) and mining rewards are set at construction and cannot be changed.
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="web3.min.js"></script>
 <script src="snarkjs.min.js"></script>
 <script type="module">
@@ -241,12 +351,12 @@ const HP_TOKENS = {
     addr:  "0xefD766cCb38EaF1dfd701853BFCe31359239F305",
     decimals: 18, feeBP: 50,
     shields: {
-      "1":   "DEPLOY_FIRST",
-      "5":   "DEPLOY_FIRST",
-      "10":  "DEPLOY_FIRST",
-      "20":  "DEPLOY_FIRST",
-      "50":  "DEPLOY_FIRST",
-      "100": "DEPLOY_FIRST"
+      "1":   "0x9ABb21e92f4f589515A65aEa79dc920b40A799D4",
+      "5":   "0x0840430d8870933614EFE7f3F45119CcA738B6E2",
+      "10":  "0x19a9Db059A2C1777Ea4d09dC8d234aD79b21F406",
+      "20":  "0x1eeB506568054d0bb7e6977c8030B0ffd05Ef0D2",
+      "50":  "0xc88c22f57a24A2559a3dd3780cE160241aec709F",
+      "100": "0x9e85fDdD5d231265b247d3cBC4dB80505582486b"
     },
     denomWei: {
       "1":   1000000000000000000n,
@@ -262,12 +372,12 @@ const HP_TOKENS = {
     addr:  "0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f",
     decimals: 18, feeBP: 50,
     shields: {
-      "1":   "DEPLOY_FIRST",
-      "5":   "DEPLOY_FIRST",
-      "10":  "DEPLOY_FIRST",
-      "20":  "DEPLOY_FIRST",
-      "50":  "DEPLOY_FIRST",
-      "100": "DEPLOY_FIRST"
+      "1":   "0x38e1D3fd69F7A978e6fe5e4de787Cf96b71Fa688",
+      "5":   "0xfd2d44332a54eB89016f95705fBb7C84f917a9B3",
+      "10":  "0x3007cFf2B4b79998905146bF41a6730f4f22c629",
+      "20":  "0x7c3CAC0556F00e48fB0E5400EF1877f966609952",
+      "50":  "0x91EF673aECE26703D9B72E8eB591253F7b26F6B6",
+      "100": "0xcDff42f6803Df9B9D76723263E73F017c97F68F7"
     },
     denomWei: {
       "1":   1000000000000000000n,
@@ -283,12 +393,12 @@ const HP_TOKENS = {
     addr:  "0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07",
     decimals: 6, feeBP: 50,
     shields: {
-      "1":   "DEPLOY_FIRST",
-      "5":   "DEPLOY_FIRST",
-      "10":  "DEPLOY_FIRST",
-      "20":  "DEPLOY_FIRST",
-      "50":  "DEPLOY_FIRST",
-      "100": "DEPLOY_FIRST"
+      "1":   "0x2856661A94483486e25dE8F37DCf867938a13778",
+      "5":   "0x53B91dB1485f687D8d162f1268D8485EBB85dF13",
+      "10":  "0x59f40474834C6Cb3Bf3A5189f6B6f525d22f80A4",
+      "20":  "0x5965FEa1E24472d64F3a24Edb9e663Bc728Caee6",
+      "50":  "0x124A85fDB4ec3F11Ab257F6d4fC2eD8A4A6661fe",
+      "100": "0x883c74eFC878105cbDd15FB546A1a32F4fA45d5b"
     },
     denomWei: {
       "1":   1000000n,
@@ -329,8 +439,16 @@ const SHIELD_ABI = [
 
 const ERC20_ABI = [
   { inputs:[{type:"address",name:"spender"},{type:"uint256",name:"amount"}],   name:"approve",   outputs:[{type:"bool"}], stateMutability:"nonpayable", type:"function" },
-  { inputs:[{type:"address",name:"owner"},{type:"address",name:"spender"}],    name:"allowance", outputs:[{type:"uint256"}], stateMutability:"view", type:"function" }
+  { inputs:[{type:"address",name:"owner"},{type:"address",name:"spender"}],    name:"allowance", outputs:[{type:"uint256"}], stateMutability:"view", type:"function" },
+  { inputs:[{type:"address",name:"account"}], name:"balanceOf", outputs:[{type:"uint256"}], stateMutability:"view", type:"function" }
 ];
+
+const MINING_VAULT_ABI = [
+  { inputs:[{type:"uint256",name:"_amount"}], name:"topUp", outputs:[], stateMutability:"nonpayable", type:"function" }
+];
+
+const HP_MINING_VAULT = "0xf7Abeb9a3ccea1B8c30ca8a6d359c609B0751650";
+const PRIVX_TOKEN     = "0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986";
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
@@ -732,10 +850,49 @@ function setStatus(id, type, msg) {
   el.textContent = msg;
 }
 
+// ─── Fund Mining Vault ────────────────────────────────────────────────────────
+
+async function loadVaultBalance() {
+  try {
+    const w3 = new Web3(window.ethereum || "https://rpc.pulsechain.com");
+    const privx = new w3.eth.Contract(ERC20_ABI, PRIVX_TOKEN);
+    const raw = await privx.methods.balanceOf(HP_MINING_VAULT).call();
+    const bal = parseFloat(BigInt(raw) * 100n / BigInt(1e18)) / 100;
+    document.getElementById('vaultPrivxBal').textContent = bal.toLocaleString();
+  } catch(e) { /* silent */ }
+}
+
+async function fundVault() {
+  const amtStr = document.getElementById('fundAmount').value.trim();
+  if (!amtStr || isNaN(Number(amtStr)) || Number(amtStr) <= 0)
+    return setStatus('fundStatus','error','Enter a valid PRIVX amount.');
+
+  if (!buyAccount) return setStatus('fundStatus','error','Connect your wallet first (use the Buy Cash tab).');
+
+  setStatus('fundStatus','pending','Approving PRIVX…');
+  try {
+    const w3     = buyWeb3;
+    const amtWei = (BigInt(Math.round(Number(amtStr) * 1e6)) * BigInt(1e12)).toString();
+    const privx  = new w3.eth.Contract(ERC20_ABI, PRIVX_TOKEN);
+    const vault  = new w3.eth.Contract(MINING_VAULT_ABI, HP_MINING_VAULT);
+
+    await privx.methods.approve(HP_MINING_VAULT, amtWei).send({ from: buyAccount });
+    setStatus('fundStatus','pending','Sending PRIVX to vault…');
+    await vault.methods.topUp(amtWei).send({ from: buyAccount });
+
+    setStatus('fundStatus','success',`Funded! ${amtStr} PRIVX sent to the HP Mining Vault.`);
+    document.getElementById('fundAmount').value = '';
+    await loadVaultBalance();
+  } catch(e) {
+    setStatus('fundStatus','error', e.message || 'Transaction failed.');
+  }
+}
+
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
 window.addEventListener('load', async () => {
   selectBuyToken('dai');
+  loadVaultBalance();
   try { await initPoseidon(); }
   catch(e) { console.error("Poseidon init failed:", e.message); }
 });
