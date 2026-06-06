@@ -218,7 +218,7 @@
 
       <div class="verify-wrap">
         <div id="verify-badge" class="verify-badge checking">⏳ Verifying contracts on-chain…</div>
-        <div class="verify-ipfs">IPFS: <a href="https://ipfs.io/ipfs/bafybeibmgiosbl7z7vdjgd7a5fpg6ctyeuhxp5tzugyxblu4rsccripqzq" target="_blank" title="Censorship-resistant build — CID is the content hash">bafybei…qzq ↗</a></div>
+        <div class="verify-ipfs">IPFS: <a href="https://ipfs.io/ipfs/bafybeig45ccddxr6j3rwi44nzjdpwu5i7yxcvffuw3h6vdlenkzx45ebea" target="_blank" title="Censorship-resistant build — CID is the content hash">bafybei…qzq ↗</a></div>
       </div>
 
       <div class="tabs">
@@ -665,15 +665,23 @@
         <tr><td>Safe token transfers</td><td><span style="color:#00ff88">✅</span> OpenZeppelin SafeERC20</td></tr>
       </table>
       <div class="docs-h2">Circuit Analysis</div>
-      <p class="docs-p">The PrivXMixer(14) circuit was analysed against its compiled R1CS using snarkjs constraint inspection. The circuit source, compiled R1CS, and symbol file are published on GitHub for independent verification by anyone.</p>
+      <p class="docs-p">The PrivXMixer(14) circuit was analysed using two independent methods: snarkjs R1CS constraint inspection and <strong style="color:#fff">Ecne</strong> — a Julia-based SMT solver that mechanically verifies every signal in the R1CS is uniquely determined by the inputs. The circuit source, compiled R1CS, and symbol file are published on GitHub for independent verification by anyone.</p>
 
-      <p class="docs-p" style="margin-top:10px"><strong style="color:#fff">Signal counts verified:</strong></p>
+      <p class="docs-p" style="margin-top:10px"><strong style="color:#fff">Signal counts verified (snarkjs R1CS):</strong></p>
       <table class="docs-table" style="margin-top:8px">
         <tr><th>Signal</th><th>Expected</th><th>Actual</th><th></th></tr>
         <tr><td>Private inputs</td><td>30</td><td>30</td><td><span style="color:#00ff88">✅</span></td></tr>
         <tr><td>Public inputs</td><td>4</td><td>4</td><td><span style="color:#00ff88">✅</span></td></tr>
         <tr><td>Total constraints</td><td>~8,300</td><td>8,330</td><td><span style="color:#00ff88">✅</span></td></tr>
         <tr><td>Wire / constraint gap</td><td>&lt; 50</td><td>19</td><td><span style="color:#00ff88">✅</span></td></tr>
+      </table>
+
+      <p class="docs-p" style="margin-top:14px"><strong style="color:#fff">Ecne SMT analysis — under-constrained signal check:</strong></p>
+      <table class="docs-table" style="margin-top:8px">
+        <tr><th>Check</th><th>Result</th><th></th></tr>
+        <tr><td>Variables solved</td><td>8,349 / 8,349</td><td><span style="color:#00ff88">✅</span></td></tr>
+        <tr><td>Under-constrained signals</td><td>0</td><td><span style="color:#00ff88">✅</span></td></tr>
+        <tr><td>Bad constraints</td><td>0</td><td><span style="color:#00ff88">✅</span></td></tr>
       </table>
 
       <p class="docs-p" style="margin-top:14px"><strong style="color:#fff">Critical constraints confirmed:</strong></p>
@@ -687,7 +695,7 @@
         <tr><td>recipient in constraint system</td><td>Squaring + PLONK public input commitment</td><td><span style="color:#00ff88">✅</span></td></tr>
       </table>
 
-      <p class="docs-p" style="margin-top:14px">The wire/constraint gap of 19 is consistent with a correctly constrained circuit. Under-constrained circuits exhibit a much larger unexplained gap. The two equality constraints (nullifierHash binding and Merkle root) are enforced through R1CS signal aliasing — the circom compiler merged them to the same wire, which is a stricter form of enforcement than an explicit constraint row.</p>
+      <p class="docs-p" style="margin-top:14px">Ecne confirmed all 8,349 signals are uniquely determined — no signal can be freely set by a prover without violating a constraint. The wire/constraint gap of 19 is consistent with this result. The two equality constraints (nullifierHash binding and Merkle root) are enforced through R1CS signal aliasing — the circom compiler merged them to the same wire, which is a stricter form of enforcement than an explicit constraint row.</p>
 
       <p class="docs-p" style="margin-top:10px;font-size:13px;color:#888">Circuit source: <code style="font-family:monospace;font-size:12px;color:#aaa">circuits/PrivXMixer.circom</code> · R1CS: <code style="font-family:monospace;font-size:12px;color:#aaa">build/PrivXMixer.r1cs</code> · Symbol file: <code style="font-family:monospace;font-size:12px;color:#aaa">build/PrivXMixer.sym</code> — all published on GitHub for independent analysis.</p>
 
