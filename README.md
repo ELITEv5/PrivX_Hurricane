@@ -259,6 +259,11 @@ Unlike Groth16 — used by earlier privacy protocols — **PLONK requires no cir
 SHA256: 489be9e5ac65d524f7b1685baac8a183c6e77924fdb73d2b8105e335f277895d
 ```
 
+To cryptographically verify the full contribution chain (54 contributors):
+```bash
+snarkjs powersoftau verify build/powersOfTau28_hez_final_14.ptau
+```
+
 The proving key (`PrivXMixer14_final.zkey`) is pinned to IPFS and served directly to the browser for fully client-side proof generation.
 
 ---
@@ -393,4 +398,4 @@ MIT
 
 ---
 
-*Part of the [Sun Systems Protocol](https://elitev5.github.io/Sun-Systems/) · 2026 © PrivX Protocol*
+*Part of the [Sun Systems Protocol](https://elitev5.github.io/SunDAI/) · 2026 © PrivX Protocol*
