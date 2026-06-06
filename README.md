@@ -393,4 +393,4 @@ MIT
 
 ---
 
-*Part of the [Sun Systems Protocol](https://elitev5.github.io/Sun-Systems/)) · 2026 © PrivX Protocol*
+*Part of the [Sun Systems Protocol](https://elitev5.github.io/Sun-Systems/) · 2026 © PrivX Protocol*
