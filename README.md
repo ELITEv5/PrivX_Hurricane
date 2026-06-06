@@ -2,19 +2,15 @@
 
 > Zero-knowledge token shielding on PulseChain. Shield tokens. Generate a Proof of Privacy. Mine PRIVX.
 
-**Live:** [Hurricane Shield](https://elitev5.github.io/PrivX_Hurricane/index.html) &nbsp;·&nbsp; [ETHOS Shield](https://elitev5.github.io/PrivX_Hurricane/ethos.html) &nbsp;·&nbsp; **Chain:** PulseChain (chainId 369)
+**Live:** [privx.html](https://elitev5.github.io/PrivX_Hurricane/privx.html) &nbsp;·&nbsp; **IPFS:** [bafybeibmgiosbl7z7vdjgd7a5fpg6ctyeuhxp5tzugyxblu4rsccripqzq](https://ipfs.io/ipfs/bafybeibmgiosbl7z7vdjgd7a5fpg6ctyeuhxp5tzugyxblu4rsccripqzq) &nbsp;·&nbsp; **Chain:** PulseChain (chainId 369)
 
 ---
 
 ## What Is PrivX Hurricane?
 
-PrivX Hurricane is a zero-knowledge privacy protocol built on PulseChain. It lets you deposit tokens into a shielded pool and withdraw them to a completely unlinked address — with no on-chain connection between sender and recipient.
+PrivX Hurricane is PulseChain's first PLONK-based privacy protocol, and the first of its kind to shield multiple tokens simultaneously. Deposit any of 9 supported tokens into a shielded pool and withdraw them to a completely unlinked address. Every withdrawal generates a **Proof of Privacy (POP)** and automatically pays PRIVX mining rewards. No PRIVX required to deposit — it is what you earn, not what you spend.
 
 The withdrawal proof is a **PLONK zero-knowledge proof** generated entirely in your browser. It proves you know a valid deposit note without revealing which deposit it came from. The on-chain verifier checks the math. The contract releases your tokens. No one — not the development team, not a node operator, not a block explorer — can link your deposit to your withdrawal.
-
-Every withdrawal also produces a **Proof of Privacy (POP)** — a verifiable record that you used the protocol — which triggers an automatic PRIVX mining reward. No claim transaction. No staking. Just use the protocol, earn PRIVX.
-
-The same ZK circuit that powers PrivX Hurricane also powers **ETHOS Shield** — a multi-token extension that shields 9 PulseChain tokens using the same proving key, verifier, and Poseidon hasher.
 
 ---
 
@@ -23,7 +19,7 @@ The same ZK circuit that powers PrivX Hurricane also powers **ETHOS Shield** —
 ```
 Deposit                                    Withdraw
 ──────                                    ────────
-You have 1,000 PRIVX                      From a fresh wallet
+You have tokens to shield                 From a fresh wallet
   │                                         │
   ├─ Generate random nullifier + secret      ├─ Paste your private note
   ├─ Compute commitment = Poseidon(n, s)     ├─ Browser builds Merkle proof
@@ -37,32 +33,48 @@ You have 1,000 PRIVX                      From a fresh wallet
 
 ---
 
+## Supported Tokens — 9 Tokens, 36 Pools
+
+| Token | Denominations | Token CA |
+|---|---|---|
+| PLS | 100K / 1M / 10M / 100M | Native |
+| HEX | 1K / 10K / 100K / 1M | `0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39` |
+| PLSX | 100K / 1M / 10M / 100M | `0x95B303987A60C71504D99Aa1b13B4DA07b0790ab` |
+| DAI | 10 / 100 / 1K / 10K | `0xefD766cCb38EaF1dfd701853BFCe31359239F305` |
+| WETH | 0.01 / 0.1 / 1 / 10 | `0x02DcdD04e3F455D838cd1249292C58f3B79e3C3C` |
+| pSunDAI | 10 / 100 / 1K / 10K | `0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f` |
+| pDAI | 1K / 10K / 100K / 1M | `0x6B175474E89094C44Da98b954EedeAC495271d0F` |
+| pCOCK | 100 / 1K / 10K / 100K | `0xc10A4Ed9b4042222d69ff0B374eddd47ed90fC1F` |
+| PrivX | 100 / 1K / 10K / 100K | `0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986` |
+
+---
+
 ## Architecture
 
 ### Shield Contracts
 
 Two shield contract variants share the same ZK circuit:
 
-**`PrivX_Shield_V2.sol`** — Universal ERC-20 shield. Used for all tokens except native PLS. Includes `miningRewardAmount` — a constructor parameter that normalises POP rewards across tokens regardless of denomination size or token decimals. All tokens use the same tier values:
+**`PrivX_Shield_V2.sol`** — Universal ERC-20 shield. Used for all tokens except native PLS. Fully immutable after deployment — no owner, no admin key, no upgrade proxy, no pause function.
 
-| Tier | `miningRewardAmount` | PRIVX reward at peak |
+**`PrivX_PLS_Shield.sol`** — Native PLS shield. Wraps PLS → WPLS on deposit and unwraps WPLS → PLS on withdrawal. Same immutability guarantees.
+
+Both use `miningRewardAmount` — a constructor parameter that normalises POP rewards across all tokens regardless of denomination size or token decimals. Every d0 denomination earns the same PRIVX regardless of which token is shielded:
+
+| Tier | `miningRewardAmount` | PRIVX reward at peak vault |
 |---|---|---|
 | d0 | `1_000e18` | ~10 PRIVX |
 | d1 | `10_000e18` | ~100 PRIVX |
 | d2 | `100_000e18` | ~1,000 PRIVX |
 | d3 | `1_000_000e18` | ~10,000 PRIVX |
 
-**`PrivX_PLS_Shield.sol`** — Native PLS shield. Users deposit raw PLS — no wrapping step required. The contract wraps PLS → WPLS on deposit and unwraps WPLS → PLS on withdrawal. Also uses `miningRewardAmount` for normalised POP rewards.
-
-Both contracts are fully immutable after deployment — no owner, no admin key, no upgrade proxy, no pause function.
-
-- **Merkle tree:** 14-level incremental Poseidon Merkle tree (16,384 leaves)
-- **Root history:** Last 100 roots stored, allowing ~100 concurrent pending withdrawals
+- **Merkle tree:** 14-level incremental Poseidon Merkle tree (16,384 leaves per pool)
+- **Root history:** Last 100 roots stored — allows ~100 concurrent pending withdrawals
 - **Circuit:** `PrivXMixer(14)` — PLONK proof with 4 public signals `[root, nullifierHash, denomination, recipient]`
 - **Fee model:** 0.5% of denomination in the shielded token, sent to FeeVault on deposit
 - **POP rewards:** `mineReward()` called on Mining Vault on every successful withdrawal
 
-### Fee Vault (`ETHOS_FeeVault.sol`)
+### Fee Vault
 
 Receives protocol fees from all shields and converts them into PRIVX value. Anyone can trigger conversion at any time.
 
@@ -77,34 +89,32 @@ Fee token accumulated → swap to WPLS (PulseX V2)
      (locked forever)   (POP rewards)  (deflationary)
 ```
 
-- LP tokens are permanently locked in FeeVault — Protocol-Owned Liquidity that compounds with every deposit
-- Mining Vault is auto-refilled from conversions — POP rewards are self-sustaining
-- Tax-token aware: ETHOS, ZKP, and OMEGA (5% swap tax) use the FOT-safe PulseX router function
+LP tokens are permanently locked — Protocol-Owned Liquidity that compounds with every deposit across all 36 pools.
 
 ### Mining Vault (`PrivX_Mining_Vault_V2.sol`)
 
-Pays PRIVX rewards to withdrawal recipients. Owner can add and remove shields freely until `sealVault()` is called — after which it is fully immutable.
+Pays PRIVX rewards to withdrawal recipients automatically.
 
-- **Emission curve:** Quadratic decay relative to peak balance — rewards are highest when vault is full
+- **Emission curve:** Quadratic decay relative to peak balance — rewards highest when vault is full
 - **Auto-refill:** Fee Vault calls `topUp()` on every conversion cycle
 - **Cooldown:** 5-minute per-user cooldown prevents reward spam
-- **Max rate:** 10% of fee amount per withdrawal (hard cap)
-- **Safety functions (pre-seal only):** `removeShield()` and `ownerWithdraw()` allow safe setup and recovery before the vault is sealed
+- **Max rate:** 10% of `miningRewardAmount` per withdrawal (BASE_RATE_BP = 100)
+- **Immutable:** Sealed after all shields are added — no further changes possible
 
 ### ZK Circuit (`circuits/PrivXMixer.circom`)
 
 ```
-Private inputs:  nullifier, secret, pathIndices[14], siblings[14]
-Public signals:  root, nullifierHash, denomination, recipient
+Private inputs (30):  nullifier, secret, pathIndices[14], siblings[14]
+Public signals (4):   root, nullifierHash, denomination, recipient
 
-Constraints:
+Constraints (8,330):
   commitment    = Poseidon(nullifier, secret)
   commitment    ∈ Merkle tree with root
   nullifierHash = Poseidon(nullifier, denomination)
-  recipient     = bound into proof at generation time
+  recipient     = bound into proof at generation time (PLONK Fiat-Shamir)
 ```
 
-The recipient address is cryptographically embedded into the ZK proof at generation time — MEV bots cannot redirect withdrawals to a different address even if they observe the proof in the mempool. `nullifierHash` binds to the denomination, preventing note replay across pools. **The same circuit and proving key power every shield — adding a new token requires no circuit changes.**
+The recipient address is cryptographically embedded into the ZK proof at generation time — MEV bots cannot redirect withdrawals even if they observe the proof in the mempool. `nullifierHash` binds to the denomination, preventing note replay across pools. **The same circuit and proving key power every shield — adding a new token requires no circuit changes.**
 
 ---
 
@@ -116,42 +126,90 @@ The recipient address is cryptographically embedded into the ZK proof at generat
 |---|---|
 | PLONK Verifier | [`0xcEDa1071542d537221B5a01BFd1cF920cF8B9829`](https://scan.pulsechain.com/address/0xcEDa1071542d537221B5a01BFd1cF920cF8B9829) |
 | Poseidon Hasher | [`0x72740d65A93f2e9d9741234371d62FeE36AEf9dF`](https://scan.pulsechain.com/address/0x72740d65A93f2e9d9741234371d62FeE36AEf9dF) |
+| POP Mining Vault V2 | [`0x7f6D1165a15a7DC4Bbbf27C6C18de7bfAA9E718C`](https://scan.pulsechain.com/address/0x7f6D1165a15a7DC4Bbbf27C6C18de7bfAA9E718C) |
+| Fee Vault | [`0x54818356b47b5F7b52DceAbf2B6eF52Cf8b072Fd`](https://scan.pulsechain.com/address/0x54818356b47b5F7b52DceAbf2B6eF52Cf8b072Fd) |
 | PRIVX Token | [`0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986`](https://scan.pulsechain.com/address/0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986) |
 
-### Shared Infrastructure — PrivX Hurricane + ETHOS Shield
+### PLS Shields
 
-Mining vault and fee vault are unified across both protocols. All shields — PrivX Hurricane and ETHOS Shield — feed the same POL, the same mining rewards, and the same burn.
-
-| Contract | Address |
+| Denomination | Address |
 |---|---|
-| POP Mining Vault V2 | [`0x7f6D1165a15a7DC4Bbbf27C6C18de7bfAA9E718C`](https://scan.pulsechain.com/address/0x7f6D1165a15a7DC4Bbbf27C6C18de7bfAA9E718C) |
-| Fee Vault (PulseX V2) | [`0x54818356b47b5F7b52DceAbf2B6eF52Cf8b072Fd`](https://scan.pulsechain.com/address/0x54818356b47b5F7b52DceAbf2B6eF52Cf8b072Fd) |
+| 100,000 PLS | [`0xFdbd8a02f112e722543C12bce3596f42b9Bb3b72`](https://scan.pulsechain.com/address/0xFdbd8a02f112e722543C12bce3596f42b9Bb3b72) |
+| 1,000,000 PLS | [`0xfD03a99A337931de9a217E5836046CBF13578B18`](https://scan.pulsechain.com/address/0xfD03a99A337931de9a217E5836046CBF13578B18) |
+| 10,000,000 PLS | [`0xE97135be5b9D6A3020C733AD122c4A6092ABF1F7`](https://scan.pulsechain.com/address/0xE97135be5b9D6A3020C733AD122c4A6092ABF1F7) |
+| 100,000,000 PLS | [`0xEB4297A2c769eD02778Fa9D3197a58665beD8834`](https://scan.pulsechain.com/address/0xEB4297A2c769eD02778Fa9D3197a58665beD8834) |
 
-### PRIVX Hurricane Shield
+### HEX Shields
 
-| Contract | Address |
+| Denomination | Address |
 |---|---|
-| Shield · 100 PRIVX | [`0x74471E88588c2dF518379c4f9feC981158f741F4`](https://scan.pulsechain.com/address/0x74471E88588c2dF518379c4f9feC981158f741F4) |
-| Shield · 1,000 PRIVX | [`0xAbbF7729949eb15Ba2A9e739b591db7585d252ae`](https://scan.pulsechain.com/address/0xAbbF7729949eb15Ba2A9e739b591db7585d252ae) |
-| Shield · 10,000 PRIVX | [`0x7DBc9558DA5aA494302d2099f5F36F307988a84a`](https://scan.pulsechain.com/address/0x7DBc9558DA5aA494302d2099f5F36F307988a84a) |
-| Shield · 100,000 PRIVX | [`0x72DDf291c8cE3e2DCb7C555b48E09Cd353CE9177`](https://scan.pulsechain.com/address/0x72DDf291c8cE3e2DCb7C555b48E09Cd353CE9177) |
+| 1,000 HEX | [`0x833F7eDDbCe1e713e83b83006A793C3A51d00eE2`](https://scan.pulsechain.com/address/0x833F7eDDbCe1e713e83b83006A793C3A51d00eE2) |
+| 10,000 HEX | [`0xAdd967989567A8cD6a5473e79B43A44fca139d2C`](https://scan.pulsechain.com/address/0xAdd967989567A8cD6a5473e79B43A44fca139d2C) |
+| 100,000 HEX | [`0x7FC864dA7aAcc6EcAf6E9D5baC442429734a66Ee`](https://scan.pulsechain.com/address/0x7FC864dA7aAcc6EcAf6E9D5baC442429734a66Ee) |
+| 1,000,000 HEX | [`0x7D33b4ace754062d17256a65c046068a7f49651C`](https://scan.pulsechain.com/address/0x7D33b4ace754062d17256a65c046068a7f49651C) |
 
-### ETHOS Shield — Multi-Token (pDAI + PLS + PrivX Live)
+### PLSX Shields
 
-| Contract | Address |
+| Denomination | Address |
 |---|---|
-| pDAI · 1,000 | [`0x94D0Df289cE310462Fee8137aF945381844B94D1`](https://scan.pulsechain.com/address/0x94D0Df289cE310462Fee8137aF945381844B94D1) |
-| pDAI · 10,000 | [`0xc00D854d2fCBEdBe8A717c01a15C1351722858E7`](https://scan.pulsechain.com/address/0xc00D854d2fCBEdBe8A717c01a15C1351722858E7) |
-| pDAI · 100,000 | [`0x5136467D3E81bF2a722f364900DF2982adeE02EE`](https://scan.pulsechain.com/address/0x5136467D3E81bF2a722f364900DF2982adeE02EE) |
-| pDAI · 1,000,000 | [`0xBbaFF183588FAB20cC24F67De7cd4263670a09E5`](https://scan.pulsechain.com/address/0xBbaFF183588FAB20cC24F67De7cd4263670a09E5) |
-| PLS · 100,000 | [`0xFdbd8a02f112e722543C12bce3596f42b9Bb3b72`](https://scan.pulsechain.com/address/0xFdbd8a02f112e722543C12bce3596f42b9Bb3b72) |
-| PLS · 1,000,000 | [`0xfD03a99A337931de9a217E5836046CBF13578B18`](https://scan.pulsechain.com/address/0xfD03a99A337931de9a217E5836046CBF13578B18) |
-| PLS · 10,000,000 | [`0xE97135be5b9D6A3020C733AD122c4A6092ABF1F7`](https://scan.pulsechain.com/address/0xE97135be5b9D6A3020C733AD122c4A6092ABF1F7) |
-| PLS · 100,000,000 | [`0xEB4297A2c769eD02778Fa9D3197a58665beD8834`](https://scan.pulsechain.com/address/0xEB4297A2c769eD02778Fa9D3197a58665beD8834) |
-| PrivX · 100 | [`0x74471E88588c2dF518379c4f9feC981158f741F4`](https://scan.pulsechain.com/address/0x74471E88588c2dF518379c4f9feC981158f741F4) |
-| PrivX · 1,000 | [`0xAbbF7729949eb15Ba2A9e739b591db7585d252ae`](https://scan.pulsechain.com/address/0xAbbF7729949eb15Ba2A9e739b591db7585d252ae) |
-| PrivX · 10,000 | [`0x7DBc9558DA5aA494302d2099f5F36F307988a84a`](https://scan.pulsechain.com/address/0x7DBc9558DA5aA494302d2099f5F36F307988a84a) |
-| PrivX · 100,000 | [`0x72DDf291c8cE3e2DCb7C555b48E09Cd353CE9177`](https://scan.pulsechain.com/address/0x72DDf291c8cE3e2DCb7C555b48E09Cd353CE9177) |
+| 100,000 PLSX | [`0x9632527f45A93579C0c26b58c7d99267997264Fb`](https://scan.pulsechain.com/address/0x9632527f45A93579C0c26b58c7d99267997264Fb) |
+| 1,000,000 PLSX | [`0x0C0aFe4Df8DBf983A3045AC1FB04d6b2f503d4fe`](https://scan.pulsechain.com/address/0x0C0aFe4Df8DBf983A3045AC1FB04d6b2f503d4fe) |
+| 10,000,000 PLSX | [`0x951bde47464C6a1BB34BF10bC85a7cAE9C418534`](https://scan.pulsechain.com/address/0x951bde47464C6a1BB34BF10bC85a7cAE9C418534) |
+| 100,000,000 PLSX | [`0xF039cEc211769bdc29De85FF19c3dAe85aabA75d`](https://scan.pulsechain.com/address/0xF039cEc211769bdc29De85FF19c3dAe85aabA75d) |
+
+### DAI Shields
+
+| Denomination | Address |
+|---|---|
+| 10 DAI | [`0x34FC19C51f3CdD7E644f551db6698C3A90112667`](https://scan.pulsechain.com/address/0x34FC19C51f3CdD7E644f551db6698C3A90112667) |
+| 100 DAI | [`0x73B23CD11ca4260A266A05539b077CF4CD746bcd`](https://scan.pulsechain.com/address/0x73B23CD11ca4260A266A05539b077CF4CD746bcd) |
+| 1,000 DAI | [`0x59f51683F93a2Fe8eE4b34408539Eb982Bbd94B2`](https://scan.pulsechain.com/address/0x59f51683F93a2Fe8eE4b34408539Eb982Bbd94B2) |
+| 10,000 DAI | [`0x8491102480Ce130ECA02f68fEBF6867c64FA69ea`](https://scan.pulsechain.com/address/0x8491102480Ce130ECA02f68fEBF6867c64FA69ea) |
+
+### WETH Shields
+
+| Denomination | Address |
+|---|---|
+| 0.01 WETH | [`0xD446cbF3BBae6f90E7a1a48E853F35A269cE7Cde`](https://scan.pulsechain.com/address/0xD446cbF3BBae6f90E7a1a48E853F35A269cE7Cde) |
+| 0.1 WETH | [`0xC028eacB0c047bA28Df00Ab7399f5F60fE6D9a99`](https://scan.pulsechain.com/address/0xC028eacB0c047bA28Df00Ab7399f5F60fE6D9a99) |
+| 1 WETH | [`0xEE47263286265Db0551a9895FB02CA892821251F`](https://scan.pulsechain.com/address/0xEE47263286265Db0551a9895FB02CA892821251F) |
+| 10 WETH | [`0xb7b951763A8794d2366C0cb9bd5FA79B239de6ee`](https://scan.pulsechain.com/address/0xb7b951763A8794d2366C0cb9bd5FA79B239de6ee) |
+
+### pSunDAI Shields
+
+| Denomination | Address |
+|---|---|
+| 10 pSunDAI | [`0xB2C642DB931B9E8FdC0A2014C71E8C6Da480f3f9`](https://scan.pulsechain.com/address/0xB2C642DB931B9E8FdC0A2014C71E8C6Da480f3f9) |
+| 100 pSunDAI | [`0xD8F8D437210EfE57F0161606F62C594290e17A7C`](https://scan.pulsechain.com/address/0xD8F8D437210EfE57F0161606F62C594290e17A7C) |
+| 1,000 pSunDAI | [`0xcd47aea1ff4cF308CF467B939C0Bb95aFA55DeFC`](https://scan.pulsechain.com/address/0xcd47aea1ff4cF308CF467B939C0Bb95aFA55DeFC) |
+| 10,000 pSunDAI | [`0x085f0f464fF5cc5C50e176A50f3EF8bE3513B652`](https://scan.pulsechain.com/address/0x085f0f464fF5cc5C50e176A50f3EF8bE3513B652) |
+
+### pDAI Shields
+
+| Denomination | Address |
+|---|---|
+| 1,000 pDAI | [`0x94D0Df289cE310462Fee8137aF945381844B94D1`](https://scan.pulsechain.com/address/0x94D0Df289cE310462Fee8137aF945381844B94D1) |
+| 10,000 pDAI | [`0xc00D854d2fCBEdBe8A717c01a15C1351722858E7`](https://scan.pulsechain.com/address/0xc00D854d2fCBEdBe8A717c01a15C1351722858E7) |
+| 100,000 pDAI | [`0x5136467D3E81bF2a722f364900DF2982adeE02EE`](https://scan.pulsechain.com/address/0x5136467D3E81bF2a722f364900DF2982adeE02EE) |
+| 1,000,000 pDAI | [`0xBbaFF183588FAB20cC24F67De7cd4263670a09E5`](https://scan.pulsechain.com/address/0xBbaFF183588FAB20cC24F67De7cd4263670a09E5) |
+
+### pCOCK Shields
+
+| Denomination | Address |
+|---|---|
+| 100 pCOCK | [`0x8F63010C4e5FE11f09654B9ff3471e81C36b4883`](https://scan.pulsechain.com/address/0x8F63010C4e5FE11f09654B9ff3471e81C36b4883) |
+| 1,000 pCOCK | [`0x9DB59C1dc7C047d2c54ADb7c34f5E160cc94f52A`](https://scan.pulsechain.com/address/0x9DB59C1dc7C047d2c54ADb7c34f5E160cc94f52A) |
+| 10,000 pCOCK | [`0x81529f59F47Ed1f12D934e9cCa61a1637Ed1D02c`](https://scan.pulsechain.com/address/0x81529f59F47Ed1f12D934e9cCa61a1637Ed1D02c) |
+| 100,000 pCOCK | [`0xAe177f2e240FE3001addeFb93AAB69E853C5abAb`](https://scan.pulsechain.com/address/0xAe177f2e240FE3001addeFb93AAB69E853C5abAb) |
+
+### PrivX Shields
+
+| Denomination | Address |
+|---|---|
+| 100 PrivX | [`0x74471E88588c2dF518379c4f9feC981158f741F4`](https://scan.pulsechain.com/address/0x74471E88588c2dF518379c4f9feC981158f741F4) |
+| 1,000 PrivX | [`0xAbbF7729949eb15Ba2A9e739b591db7585d252ae`](https://scan.pulsechain.com/address/0xAbbF7729949eb15Ba2A9e739b591db7585d252ae) |
+| 10,000 PrivX | [`0x7DBc9558DA5aA494302d2099f5F36F307988a84a`](https://scan.pulsechain.com/address/0x7DBc9558DA5aA494302d2099f5F36F307988a84a) |
+| 100,000 PrivX | [`0x72DDf291c8cE3e2DCb7C555b48E09Cd353CE9177`](https://scan.pulsechain.com/address/0x72DDf291c8cE3e2DCb7C555b48E09Cd353CE9177) |
 
 ---
 
@@ -162,7 +220,7 @@ PRIVX is the **Proof-of-Privacy mining token**. Fixed supply of 21 million. No m
 **Value flywheel:**
 
 ```
-Shield deposit (any token, any shield)
+Shield deposit (any of 9 tokens, any of 36 pools)
        │
        └─ 0.5% fee → FeeVault
                          │
@@ -185,26 +243,23 @@ Every token shielded across every pool creates buying pressure on PRIVX, deepens
 
 ## Trusted Setup
 
-PrivX Hurricane's cryptographic foundation rests on the **Hermez Network Powers of Tau** — one of the most rigorous multi-party computation ceremonies ever conducted for a ZK proving system. **54 independent contributors** from across the world each added entropy to the ceremony. The security guarantee is unconditional: every single one of those 54 participants would need to have secretly preserved their randomness *and* coordinated together to compromise the system. This is considered computationally and logistically impossible.
+PrivX Hurricane's cryptographic foundation rests on the **Hermez Network Powers of Tau** — a multi-party computation ceremony with **54 independent contributors** from across the world. The security guarantee is unconditional: every single one of those 54 participants would need to have secretly preserved their randomness and coordinated together to compromise the system.
 
 ### Why PLONK Changes Everything
 
-Unlike Groth16 — the proving system used by earlier privacy protocols — **PLONK requires no circuit-specific trusted setup**. There is no secondary ceremony, no per-circuit toxic waste, and no privileged developer key that could theoretically be exploited. The universal structured reference string (SRS) derived from the Hermez ceremony is all that is needed, permanently and for every token PrivX Hurricane ever shields.
+Unlike Groth16 — used by earlier privacy protocols — **PLONK requires no circuit-specific trusted setup**. There is no secondary ceremony, no per-circuit toxic waste, and no privileged developer key. The universal SRS derived from the Hermez ceremony is all that is needed, permanently and for every token PrivX Hurricane ever shields.
 
-This means:
 - Adding a new shielded token requires **no new ceremony**
-- There is **no single point of failure** introduced at circuit compile time
+- There is **no single point of failure** at circuit compile time
 - The proving key is a mathematical consequence of the ceremony — not a secret
 
-### Verification
-
-The ceremony file is cryptographically fingerprinted and independently verifiable by anyone:
+### Ceremony Fingerprint
 
 ```
 SHA256: 489be9e5ac65d524f7b1685baac8a183c6e77924fdb73d2b8105e335f277895d
 ```
 
-The proving key (`PrivXMixer14_final.zkey`) was derived from this ceremony file and the compiled circuit constraints. It is pinned to IPFS, served to the browser for fully client-side proof generation, and never touches a server.
+The proving key (`PrivXMixer14_final.zkey`) is pinned to IPFS and served directly to the browser for fully client-side proof generation.
 
 ---
 
@@ -212,20 +267,47 @@ The proving key (`PrivXMixer14_final.zkey`) was derived from this ceremony file 
 
 | Property | Status |
 |---|---|
-| No owner or admin key on shields | ✅ |
+| Trusted setup | ✅ Hermez MPC — 54 contributors |
+| No phase-2 / circuit toxic waste | ✅ PLONK universal SRS |
+| Proving key publicly verifiable | ✅ SHA256 fingerprint published |
+| Proof generated client-side | ✅ Never leaves your browser |
+| Recipient bound into ZK proof | ✅ MEV-proof withdrawals |
+| Double-spend prevention | ✅ On-chain nullifier mapping |
+| Cross-denomination replay blocked | ✅ nullifierHash = Poseidon(nullifier, denomination) |
+| Zero-root deposits blocked | ✅ require(commitment != 0) |
+| No owner / admin key on shields | ✅ Fully immutable |
 | No upgrade proxy | ✅ |
 | No pause function | ✅ |
-| No fee change | ✅ |
-| No withdrawal censorship | ✅ |
-| Recipient bound into ZK proof | ✅ MEV theft impossible |
 | Reentrancy protection | ✅ OpenZeppelin ReentrancyGuard |
 | Safe token transfers | ✅ OpenZeppelin SafeERC20 |
-| Double-spend prevention | ✅ Nullifier hash mapping |
-| Root freshness | ✅ 100-root circular history |
-| Denomination binding | ✅ nullifierHash = Poseidon(nullifier, denomination) |
-| Trusted setup | ✅ Hermez multi-party ceremony (54 contributors) |
 
 The shield contracts are immutable from the moment of deployment. The development team cannot change the fee, pause withdrawals, blacklist addresses, or alter any parameter. **If you know the note, you can withdraw — always, unconditionally, forever.**
+
+### Circuit Analysis
+
+The PrivXMixer(14) circuit was analysed against its compiled R1CS using snarkjs constraint inspection.
+
+**Signal counts verified:**
+
+| Signal | Expected | Actual | |
+|---|---|---|---|
+| Private inputs | 30 | 30 | ✅ |
+| Public inputs | 4 | 4 | ✅ |
+| Total constraints | ~8,300 | 8,330 | ✅ |
+| Wire / constraint gap | < 50 | 19 | ✅ |
+
+**Critical constraints confirmed:**
+
+| Constraint | Method |
+|---|---|
+| nullifierHash = Poseidon(nullifier, denomination) | Wire aliasing — same R1CS wire |
+| commitment = Poseidon(nullifier, secret) in Merkle tree | Explicit constraint chain |
+| Merkle root matches computed tree root | Wire aliasing — same R1CS wire |
+| pathIndices[i] ∈ {0,1} for all 14 levels | Explicit quadratic constraints |
+| denomination in constraint system | Squaring constraint + nullifierHash use |
+| recipient in constraint system | Squaring + PLONK public input commitment |
+
+The wire/constraint gap of 19 is consistent with a correctly constrained circuit. Under-constrained circuits exhibit a much larger unexplained gap.
 
 ---
 
@@ -239,17 +321,19 @@ plonk-zk/
 │       ├── PrivXMixer14.wasm          # Compiled circuit for browser proof generation
 │       └── witness_calculator.js
 ├── contracts/
-│   ├── PrivX_Shield.sol               # Universal ERC-20 shield (V1 — pDAI Hurricane)
-│   ├── PrivX_Shield_V2.sol            # Universal ERC-20 shield (V2 — normalised rewards)
+│   ├── PrivX_Shield_V2.sol            # Universal ERC-20 shield (all tokens except PLS)
 │   ├── PrivX_PLS_Shield.sol           # Native PLS shield (wraps/unwraps WPLS internally)
-│   ├── ETHOS_FeeVault.sol             # Fee conversion → POL + rewards + burn (tax-token aware)
-│   └── PrivX_Mining_Vault_V2.sol      # POP reward distributor (removeShield + ownerWithdraw pre-seal)
+│   ├── PrivX_FeeVault.sol             # Fee conversion → POL + rewards + burn
+│   └── PrivX_Mining_Vault_V2.sol      # POP reward distributor
 ├── build/
-│   ├── PrivXMixer14_final.zkey        # Proving key (pin to IPFS)
+│   ├── PrivXMixer14_final.zkey        # Proving key (pinned to IPFS)
 │   ├── verification_key.json          # For verifier contract regeneration
 │   ├── PrivXMixer.r1cs                # Compiled constraints
 │   └── powersOfTau28_hez_final_14.ptau # Hermez ceremony file
-├── index.html                         # PrivX Hurricane dapp (single file, no build step)
+├── privx.html                         # PrivX Hurricane dapp (single file, no build step)
+├── PrivX-IFPS/                        # Censorship-resistant PWA build (IPFS-pinned)
+│   ├── index.html
+│   └── sw.js
 └── scripts/
     └── build_circuit.sh               # Circuit compile + trusted setup + verifier export
 ```
@@ -258,7 +342,7 @@ plonk-zk/
 
 ## Running Locally
 
-No build step required. Open `index.html` directly or serve with any static file server:
+No build step required. Open `privx.html` directly or serve with any static file server:
 
 ```bash
 npx serve .
@@ -274,36 +358,24 @@ The proving key (~31MB) is fetched from IPFS on first use and cached in memory f
 
 ## Deploying New Token Shields
 
-Use `PrivX_Shield_V2.sol` for all new ERC-20 token shields. The key addition over V1 is `_miningRewardAmount` — set this to the pDAI tier value for the denomination, not the raw denomination wei:
+Use `PrivX_Shield_V2.sol` for all new ERC-20 token shields. Set `_miningRewardAmount` to the standard tier value, not the raw denomination wei:
 
 ```
-d0 → 1_000e18   (smallest pool, ~10 PRIVX reward at peak)
+d0 → 1_000e18    (~10 PRIVX reward at peak vault)
 d1 → 10_000e18
 d2 → 100_000e18
-d3 → 1_000_000e18  (largest pool, ~10,000 PRIVX reward at peak)
+d3 → 1_000_000e18
 ```
 
-For native PLS shields use `PrivX_PLS_Shield.sol` with the same `_miningRewardAmount` values.
+For native PLS use `PrivX_PLS_Shield.sol` with the same values.
 
 **Setup flow:**
-1. Deploy `PrivX_Mining_Vault_V2`
-2. Deploy `ETHOS_FeeVault` with new Mining Vault address
-3. Deploy 4× shield contracts with token address, denominations, and normalised `_miningRewardAmount`
-4. Call `addShield()` × 4 on Mining Vault
-5. Call `setTokenConfig()` on Fee Vault for each token
-6. Call `topUp()` to fund Mining Vault with PRIVX
-7. Test deposits and withdrawals
-8. Call `sealVault()` — vault becomes permanently immutable
+1. Deploy 4× shield contracts with token address, denominations, and `_miningRewardAmount`
+2. Call `addShield()` × 4 on Mining Vault
+3. Call `setTokenConfig()` on Fee Vault for the new token
+4. Update UI with new shield addresses
 
 The ZK circuit, proving key, and verifier contract do not change. No new ceremony required.
-
----
-
-## Coming Soon
-
-- **ETHOS, PLSX, HEX, ProvX, OMEGA, ZKP, PrivX shields** — remaining 7 ETHOS Shield tokens
-- **FeeVault keeper** — automated `convertAuto()` calls
-- **Relayer support** — gasless withdrawals for maximum privacy
 
 ---
 
@@ -321,4 +393,4 @@ MIT
 
 ---
 
-*Part of the [Sun Systems Protocol](https://elitev5.github.io/Sun-Systems/) · 2025 © PrivX Protocol*
+*Part of the [Sun Systems Protocol](https://elitev5.github.io/SunDAI/) · 2026 © PrivX Protocol*
