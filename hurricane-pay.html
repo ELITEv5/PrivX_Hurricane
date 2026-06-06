@@ -290,7 +290,7 @@
       <span class="wallet-addr" id="acceptWalletAddr">Not connected</span>
     </div>
 
-    <button class="btn btn-primary" id="acceptBtn" onclick="acceptNote()" disabled>Connect Wallet First</button>
+    <button class="btn btn-primary" id="acceptBtn" onclick="acceptNote()">Connect Wallet</button>
 
     <div class="status" id="acceptStatus"></div>
   </div>
@@ -681,7 +681,7 @@ function selectDenom(d) {
 
 function updateBuyBtn() {
   const btn = document.getElementById('buyBtn');
-  if (!buyAccount) { btn.disabled = true; btn.textContent = 'Connect Wallet'; return; }
+  if (!buyAccount) { btn.disabled = false; btn.textContent = 'Connect Wallet'; return; }
   if (!selectedDenom) { btn.disabled = true; btn.textContent = 'Select Denomination'; return; }
   btn.disabled = false;
   btn.textContent = `Buy $${selectedDenom} ${HP_TOKENS[selectedBuyToken].label}`;
