@@ -401,29 +401,14 @@
   </div>
 </div>
 
-<script src="./web3.min.js"></script>
-<script src="./snarkjs.min.js"></script>
-<script src="./circomlibjs.js"></script>
-<script>
-  if (window.circomlibjs && window.circomlibjs.buildPoseidon) {
-    window._buildPoseidon = window.circomlibjs.buildPoseidon;
-  }
-</script>
+<script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/snarkjs@0.7.4/build/snarkjs.min.js"></script>
 <script type="module">
-  if (!window._buildPoseidon) {
-    const sources = [
-      'https://esm.sh/circomlibjs@0.1.7',
-      'https://cdn.skypack.dev/circomlibjs@0.1.7',
-      'https://unpkg.com/circomlibjs@0.1.7/main.js'
-    ];
-    for (const src of sources) {
-      try {
-        const { buildPoseidon } = await import(src);
-        window._buildPoseidon = buildPoseidon;
-        break;
-      } catch(e) { console.warn('circomlibjs CDN failed:', src, e.message); }
-    }
-    if (!window._buildPoseidon) console.error('All circomlibjs sources failed');
+  try {
+    const { buildPoseidon } = await import('https://esm.sh/circomlibjs@0.1.7');
+    window._buildPoseidon = buildPoseidon;
+  } catch(e) {
+    console.error('circomlibjs load failed:', e);
   }
 </script>
 <script>
