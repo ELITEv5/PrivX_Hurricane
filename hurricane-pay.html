@@ -105,6 +105,15 @@
     .fund-input-row input{flex:1;margin-bottom:0;padding:10px 14px;font-size:14px}
     .fund-input-row button{white-space:nowrap;padding:10px 18px;border:none;border-radius:10px;background:var(--primary);color:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
     .fund-input-row button:hover{background:var(--accent);color:#000}
+    /* Stats panel */
+    .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+    .stat-card{background:rgba(20,20,20,0.8);border:1px solid rgba(138,43,226,0.2);border-radius:12px;padding:12px 14px}
+    .stat-label{font-size:10px;color:#555;font-weight:700;letter-spacing:.6px;text-transform:uppercase;margin-bottom:4px}
+    .stat-value{font-size:15px;font-weight:800;color:#fff;font-family:monospace}
+    .stat-sub{font-size:10px;color:#555;margin-top:2px}
+    .stat-accent{color:var(--accent)}
+    .stat-green{color:#00e664}
+    .stats-divider{grid-column:1/-1;height:1px;background:rgba(255,255,255,0.05);margin:2px 0}
     @media(max-width:600px){
       .page-wrap{margin-top:70px}
       .container{padding:22px 14px}
@@ -289,6 +298,65 @@
 </div>
 </div>
 
+<!-- Protocol Stats -->
+<div class="fund-box" style="margin-top:18px">
+  <div class="fund-inner">
+    <div class="fund-title">Protocol Stats</div>
+
+    <div style="font-size:10px;color:#444;margin-bottom:12px;text-transform:uppercase;letter-spacing:.6px;font-weight:700">HP Mining Vault</div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">PRIVX Balance</div>
+        <div class="stat-value stat-accent" id="stat-vault-bal">—</div>
+        <div class="stat-sub">available for rewards</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Reward Rate</div>
+        <div class="stat-value stat-green" id="stat-rate">—</div>
+        <div class="stat-sub" id="stat-rate-sub">of mRA per withdrawal</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total PRIVX Paid Out</div>
+        <div class="stat-value" id="stat-total-mined">—</div>
+        <div class="stat-sub">since launch</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Vault Status</div>
+        <div class="stat-value" id="stat-sealed">—</div>
+        <div class="stat-sub">18 shields registered</div>
+      </div>
+    </div>
+
+    <div style="font-size:10px;color:#444;margin:4px 0 12px;text-transform:uppercase;letter-spacing:.6px;font-weight:700">Fee Vault — Accumulated Fees</div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">DAI Fees</div>
+        <div class="stat-value stat-accent" id="stat-fee-dai">—</div>
+        <div class="stat-sub">pending conversion</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">pSunDAI Fees</div>
+        <div class="stat-value stat-accent" id="stat-fee-psundai">—</div>
+        <div class="stat-sub">pending conversion</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">USDC Fees</div>
+        <div class="stat-value stat-accent" id="stat-fee-usdc">—</div>
+        <div class="stat-sub">pending conversion</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">PRIVX Burned</div>
+        <div class="stat-value stat-green" id="stat-burned">—</div>
+        <div class="stat-sub">total all-time</div>
+      </div>
+    </div>
+
+    <div style="text-align:right;margin-top:4px">
+      <button class="btn-outline" style="width:auto;padding:6px 16px;font-size:11px" onclick="loadStats()">Refresh Stats</button>
+    </div>
+  </div>
+</div>
+
 <!-- Fund Mining Rewards -->
 <div class="fund-box">
   <div class="fund-inner">
@@ -444,10 +512,22 @@ const ERC20_ABI = [
 ];
 
 const MINING_VAULT_ABI = [
-  { inputs:[{type:"uint256",name:"_amount"}], name:"topUp", outputs:[], stateMutability:"nonpayable", type:"function" }
+  { inputs:[{type:"uint256",name:"_amount"}], name:"topUp",          outputs:[], stateMutability:"nonpayable", type:"function" },
+  { inputs:[], name:"vaultBalance",  outputs:[{type:"uint256"}], stateMutability:"view", type:"function" },
+  { inputs:[], name:"currentRateBp", outputs:[{type:"uint256"}], stateMutability:"view", type:"function" },
+  { inputs:[], name:"totalMined",    outputs:[{type:"uint256"}], stateMutability:"view", type:"function" },
+  { inputs:[], name:"peakBalance",   outputs:[{type:"uint256"}], stateMutability:"view", type:"function" },
+  { inputs:[], name:"isSealed",      outputs:[{type:"bool"}],    stateMutability:"view", type:"function" }
+];
+
+const FEE_VAULT_ABI = [
+  { inputs:[{type:"address",name:"token"}], name:"accumulated",      outputs:[{type:"uint256"}], stateMutability:"view", type:"function" },
+  { inputs:[], name:"totalPrivxBurned",     outputs:[{type:"uint256"}], stateMutability:"view", type:"function" },
+  { inputs:[], name:"totalPrivxToVault",    outputs:[{type:"uint256"}], stateMutability:"view", type:"function" }
 ];
 
 const HP_MINING_VAULT = "0xf7Abeb9a3ccea1B8c30ca8a6d359c609B0751650";
+const FEE_VAULT       = "0x54818356b47b5F7b52DceAbf2B6eF52Cf8b072Fd";
 const PRIVX_TOKEN     = "0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986";
 
 // ─── State ────────────────────────────────────────────────────────────────────
@@ -850,16 +930,68 @@ function setStatus(id, type, msg) {
   el.textContent = msg;
 }
 
+// ─── Protocol Stats ───────────────────────────────────────────────────────────
+
+function fmt18(raw, dec=2) {
+  const n = parseFloat((BigInt(raw) * BigInt(10**dec) / BigInt(1e18)).toString()) / 10**dec;
+  return n.toLocaleString(undefined, {maximumFractionDigits: dec});
+}
+function fmt6(raw, dec=2) {
+  const n = parseFloat((BigInt(raw) * BigInt(10**dec) / BigInt(1e6)).toString()) / 10**dec;
+  return n.toLocaleString(undefined, {maximumFractionDigits: dec});
+}
+
+async function loadStats() {
+  try {
+    const w3      = new Web3("https://rpc.pulsechain.com");
+    const vault   = new w3.eth.Contract(MINING_VAULT_ABI, HP_MINING_VAULT);
+    const feeV    = new w3.eth.Contract(FEE_VAULT_ABI, FEE_VAULT);
+
+    const [
+      vaultBal, rateBp, totalMined, peakBal, sealed,
+      feeDai, feePsundai, feeUsdc, burned
+    ] = await Promise.all([
+      vault.methods.vaultBalance().call(),
+      vault.methods.currentRateBp().call(),
+      vault.methods.totalMined().call(),
+      vault.methods.peakBalance().call(),
+      vault.methods.isSealed().call(),
+      feeV.methods.accumulated(HP_TOKENS.dai.addr).call(),
+      feeV.methods.accumulated(HP_TOKENS.psundai.addr).call(),
+      feeV.methods.accumulated(HP_TOKENS.usdc.addr).call(),
+      feeV.methods.totalPrivxBurned().call(),
+    ]);
+
+    // Mining vault
+    document.getElementById('stat-vault-bal').textContent   = fmt18(vaultBal) + ' PRIVX';
+    document.getElementById('stat-total-mined').textContent = fmt18(totalMined) + ' PRIVX';
+    document.getElementById('stat-sealed').textContent      = sealed ? 'Sealed ✓' : 'Open';
+
+    const ratePct = peakBal > 0n
+      ? (parseFloat(rateBp) / 100).toFixed(2)
+      : '0.00';
+    document.getElementById('stat-rate').textContent     = ratePct + '%';
+    document.getElementById('stat-rate-sub').textContent = peakBal > 0n
+      ? `vault at ${((Number(vaultBal) / Number(peakBal)) * 100).toFixed(0)}% capacity`
+      : 'vault empty — fund to activate rewards';
+
+    // Fee vault
+    document.getElementById('stat-fee-dai').textContent     = fmt18(feeDai) + ' DAI';
+    document.getElementById('stat-fee-psundai').textContent = fmt18(feePsundai) + ' pSunDAI';
+    document.getElementById('stat-fee-usdc').textContent    = fmt6(feeUsdc) + ' USDC';
+    document.getElementById('stat-burned').textContent      = fmt18(burned) + ' PRIVX';
+
+    // Also update the Fund box balance
+    document.getElementById('vaultPrivxBal').textContent = fmt18(vaultBal);
+  } catch(e) {
+    console.error('loadStats:', e.message);
+  }
+}
+
 // ─── Fund Mining Vault ────────────────────────────────────────────────────────
 
 async function loadVaultBalance() {
-  try {
-    const w3 = new Web3(window.ethereum || "https://rpc.pulsechain.com");
-    const privx = new w3.eth.Contract(ERC20_ABI, PRIVX_TOKEN);
-    const raw = await privx.methods.balanceOf(HP_MINING_VAULT).call();
-    const bal = parseFloat(BigInt(raw) * 100n / BigInt(1e18)) / 100;
-    document.getElementById('vaultPrivxBal').textContent = bal.toLocaleString();
-  } catch(e) { /* silent */ }
+  await loadStats();
 }
 
 async function fundVault() {
