@@ -401,11 +401,30 @@
   </div>
 </div>
 
-<script src="web3.min.js"></script>
-<script src="snarkjs.min.js"></script>
+<script src="./web3.min.js"></script>
+<script src="./snarkjs.min.js"></script>
+<script src="./circomlibjs.js"></script>
+<script>
+  if (window.circomlibjs && window.circomlibjs.buildPoseidon) {
+    window._buildPoseidon = window.circomlibjs.buildPoseidon;
+  }
+</script>
 <script type="module">
-  const { buildPoseidon } = await import('https://esm.sh/circomlibjs@0.1.7');
-  window._buildPoseidon = buildPoseidon;
+  if (!window._buildPoseidon) {
+    const sources = [
+      'https://esm.sh/circomlibjs@0.1.7',
+      'https://cdn.skypack.dev/circomlibjs@0.1.7',
+      'https://unpkg.com/circomlibjs@0.1.7/main.js'
+    ];
+    for (const src of sources) {
+      try {
+        const { buildPoseidon } = await import(src);
+        window._buildPoseidon = buildPoseidon;
+        break;
+      } catch(e) { console.warn('circomlibjs CDN failed:', src, e.message); }
+    }
+    if (!window._buildPoseidon) console.error('All circomlibjs sources failed');
+  }
 </script>
 <script>
 
@@ -612,34 +631,16 @@ async function getMerkleProof(shieldContract, targetCommitment) {
 // ─── Wallet ───────────────────────────────────────────────────────────────────
 
 async function connectWallet() {
-  // Support EIP-1193 providers: single window.ethereum or multi-provider array
-  let provider = window.ethereum;
-  if (!provider && window.web3) provider = window.web3.currentProvider;
-  if (!provider) throw new Error("No wallet detected. Install MetaMask, Rabby, or any EIP-1193 browser wallet.");
-
-  // If multiple extensions injected (e.g. MetaMask + Coinbase), prefer the first non-Coinbase
-  if (provider.providers?.length) {
-    provider = provider.providers.find(p => p.isMetaMask || p.isRabby) || provider.providers[0];
-  }
-
-  await provider.request({ method: "eth_requestAccounts" });
-
-  // Switch to PulseChain — handle both "not added" (4902) and silent failure
+  if (!window.ethereum) throw new Error("No wallet detected — install MetaMask or any EIP-1193 wallet.");
+  await window.ethereum.request({ method: "eth_requestAccounts" });
   try {
-    await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0x171" }] });
+    await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0x171" }] });
   } catch(e) {
-    if (e.code === 4902 || e.code === -32603) {
-      await provider.request({ method: "wallet_addEthereumChain", params: [PULSECHAIN] });
-    } else if (e.code === 4001) {
-      throw new Error("Chain switch rejected — please switch to PulseChain manually in your wallet.");
-    }
-    // Other errors: wallet may already be on PulseChain, continue
+    if (e.code === 4902) await window.ethereum.request({ method: "wallet_addEthereumChain", params: [PULSECHAIN] });
   }
-
-  const w = new Web3(provider);
+  const w = new Web3(window.ethereum);
   w.eth.transactionPollingTimeout = 600;
   const accounts = await w.eth.getAccounts();
-  if (!accounts.length) throw new Error("No accounts found — unlock your wallet and try again.");
   return { web3: w, account: accounts[0] };
 }
 
