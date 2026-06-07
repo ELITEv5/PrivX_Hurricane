@@ -147,6 +147,24 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t);
 .dep-status.err{color:#ff7070}
 .dep-status.ok{color:var(--g)}
 
+/* ── Wallet picker ── */
+.wallet-opt{display:flex;align-items:center;gap:14px;width:100%;padding:15px 16px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;color:#fff;cursor:pointer;margin-bottom:10px;
+  transition:all .15s;touch-action:manipulation;text-align:left;font-family:inherit}
+.wallet-opt:active{background:rgba(255,255,255,.09)}
+.wallet-opt-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;
+  justify-content:center;font-size:16px;font-weight:900;flex-shrink:0;letter-spacing:0}
+.wallet-opt-name{font-size:14px;font-weight:700;line-height:1.2}
+.wallet-opt-desc{font-size:11px;color:var(--t2);margin-top:2px}
+.wallet-opt svg{margin-left:auto;color:#333;flex-shrink:0}
+.wallet-copy-wrap{border-top:1px solid #1c1c1c;margin-top:8px;padding-top:18px}
+.wallet-copy-lbl{font-size:11px;color:#3a3a3a;text-align:center;margin-bottom:10px}
+.wallet-copy-btn{width:100%;padding:13px;background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);border-radius:12px;color:var(--t2);
+  font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
+.wallet-copy-btn:active{color:#fff;border-color:rgba(255,255,255,.2)}
+
 /* ── Actions ── */
 .wallet-actions{display:flex;gap:10px;margin-bottom:22px}
 .btn-scan{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
@@ -321,9 +339,9 @@ input[type=text]:focus{border-color:var(--a)}
     <div class="w-total-lbl">Available Cash</div>
     <div class="w-total-amt" id="total-amount">$0</div>
     <div class="w-stats" id="w-stats"></div>
-    <button class="web3-chip" id="web3-chip" onclick="_web3Connect()" style="display:none">
+    <button class="web3-chip" id="web3-chip" onclick="_web3ChipTap()">
       <span class="dot" id="web3-dot"></span>
-      <span id="web3-label">Connect Wallet</span>
+      <span id="web3-label">Open in Wallet</span>
     </button>
   </div>
 
@@ -440,6 +458,38 @@ input[type=text]:focus{border-color:var(--a)}
     <div class="dep-fee-row">0.5% protocol fee · <span id="dep-fee-lbl">select amount</span></div>
     <button class="btn-shield" id="btn-shield" onclick="_doDeposit()" disabled>Shield &amp; Save Note</button>
     <div class="dep-status" id="dep-status"></div>
+  </div>
+</div>
+
+<!-- ── WALLET PICKER ── -->
+<div class="dep-overlay" id="wallet-picker" onclick="if(event.target===this)closeWalletPicker()">
+  <div class="dep-sheet">
+    <div class="dep-handle"></div>
+    <div class="dep-title">Open in Wallet</div>
+    <div class="dep-sub">PrivX Pay works inside your wallet's browser</div>
+
+    <button class="wallet-opt" onclick="_openInWallet('metamask')">
+      <div class="wallet-opt-icon" style="background:#E8831A22;color:#E8831A">MM</div>
+      <div><div class="wallet-opt-name">MetaMask</div><div class="wallet-opt-desc">Popular Ethereum &amp; PulseChain wallet</div></div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+
+    <button class="wallet-opt" onclick="_openInWallet('trust')">
+      <div class="wallet-opt-icon" style="background:#3375BB22;color:#3375BB">TW</div>
+      <div><div class="wallet-opt-name">Trust Wallet</div><div class="wallet-opt-desc">Multi-chain mobile wallet</div></div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+
+    <button class="wallet-opt" onclick="_openInWallet('coinbase')">
+      <div class="wallet-opt-icon" style="background:#0052FF22;color:#0052FF">CB</div>
+      <div><div class="wallet-opt-name">Coinbase Wallet</div><div class="wallet-opt-desc">Self-custody wallet</div></div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+
+    <div class="wallet-copy-wrap">
+      <div class="wallet-copy-lbl">Or copy the URL and paste it in your wallet's browser</div>
+      <button class="wallet-copy-btn" onclick="_copyWalletUrl()">Copy Page URL</button>
+    </div>
   </div>
 </div>
 
@@ -1099,7 +1149,8 @@ function _setDepStatus(type, msg) {
 async function _doDeposit() {
   if (!_depDenom) return;
   if (!window.ethereum) {
-    _setDepStatus('error', 'Open in MetaMask or Trust Wallet to deposit');
+    closeDeposit();
+    openWalletPicker();
     return;
   }
   _depBtnDisable(true);
@@ -1171,9 +1222,7 @@ async function _doDeposit() {
 // ─── Web3 Wallet ──────────────────────────────────────────────────────────────
 
 async function _detectWeb3() {
-  if (!window.ethereum) return;
-  const chip = document.getElementById('web3-chip');
-  if (chip) chip.style.display = 'inline-flex';
+  if (!window.ethereum) return; // chip stays as "Open in Wallet"
   try {
     const accounts = await window.ethereum.request({ method: 'eth_accounts' });
     if (accounts.length) _showWeb3Addr(accounts[0]);
@@ -1183,12 +1232,15 @@ async function _detectWeb3() {
   } catch { /* no-op */ }
 }
 
-async function _web3Connect() {
-  if (!window.ethereum) return;
-  try {
-    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    if (accounts.length) _showWeb3Addr(accounts[0]);
-  } catch { /* user rejected */ }
+async function _web3ChipTap() {
+  if (window.ethereum) {
+    try {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      if (accounts.length) _showWeb3Addr(accounts[0]);
+    } catch { /* user rejected */ }
+  } else {
+    openWalletPicker();
+  }
 }
 
 function _showWeb3Addr(addr) {
@@ -1201,8 +1253,38 @@ function _showWeb3Addr(addr) {
 function _hideWeb3Addr() {
   const el = document.getElementById('web3-label');
   const dot = document.getElementById('web3-dot');
-  if (el) el.textContent = 'Connect Wallet';
+  if (el) el.textContent = 'Open in Wallet';
   if (dot) dot.classList.remove('live');
+}
+
+// ─── Wallet picker ────────────────────────────────────────────────────────────
+
+function openWalletPicker() {
+  document.getElementById('wallet-picker').classList.add('open');
+  _resetLockTimer();
+}
+
+function closeWalletPicker() {
+  document.getElementById('wallet-picker').classList.remove('open');
+}
+
+function _openInWallet(wallet) {
+  const url  = window.location.href;
+  const enc  = encodeURIComponent(url);
+  const host = url.replace(/^https?:\/\//, '');
+  const links = {
+    metamask: `https://metamask.app.link/dapp/${host}`,
+    trust:    `https://link.trustwallet.com/open_url?coin_id=60&url=${enc}`,
+    coinbase: `https://go.cb-wallet.io/dapp?url=${enc}`
+  };
+  window.open(links[wallet], '_blank');
+}
+
+async function _copyWalletUrl() {
+  try {
+    await navigator.clipboard.writeText(window.location.href);
+    _showToast('URL copied!');
+  } catch { _showToast('Copy failed'); }
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
