@@ -500,29 +500,40 @@ const PULSECHAIN = {
   blockExplorerUrls:["https://scan.pulsechain.com"]
 };
 
-// ─── ABIs ─────────────────────────────────────────────────────────────────────
+// ─── Raw RPC helpers (no Web3 ABI coder — avoids abi/5.7.0 CDN bug) ──────────
 
+const RPC = "https://rpc.pulsechain.com";
 
-const ERC20_ABI = [
-  { inputs:[{type:"address",name:"spender"},{type:"uint256",name:"amount"}],   name:"approve",   outputs:[{type:"bool"}], stateMutability:"nonpayable", type:"function" },
-  { inputs:[{type:"address",name:"owner"},{type:"address",name:"spender"}],    name:"allowance", outputs:[{type:"uint256"}], stateMutability:"view", type:"function" },
-  { inputs:[{type:"address",name:"account"}], name:"balanceOf", outputs:[{type:"uint256"}], stateMutability:"view", type:"function" }
-];
+async function ethCall(to, selector, argPadded) {
+  const data = argPadded ? selector + argPadded : selector;
+  const body = JSON.stringify({ jsonrpc:"2.0", id:1, method:"eth_call", params:[{to, data}, "latest"] });
+  const j = await (await fetch(RPC, { method:"POST", headers:{"Content-Type":"application/json"}, body })).json();
+  if (j.error) throw new Error(j.error.message);
+  return j.result;
+}
 
-const MINING_VAULT_ABI = [
-  { inputs:[{type:"uint256",name:"_amount"}], name:"topUp",          outputs:[], stateMutability:"nonpayable", type:"function" },
-  { inputs:[], name:"vaultBalance",  outputs:[{type:"uint256"}], stateMutability:"view", type:"function" },
-  { inputs:[], name:"currentRateBp", outputs:[{type:"uint256"}], stateMutability:"view", type:"function" },
-  { inputs:[], name:"totalMined",    outputs:[{type:"uint256"}], stateMutability:"view", type:"function" },
-  { inputs:[], name:"peakBalance",   outputs:[{type:"uint256"}], stateMutability:"view", type:"function" },
-  { inputs:[], name:"isSealed",      outputs:[{type:"bool"}],    stateMutability:"view", type:"function" }
-];
+async function ethSend(from, to, data) {
+  return window.ethereum.request({ method:"eth_sendTransaction", params:[{ from, to, data }] });
+}
 
-const FEE_VAULT_ABI = [
-  { inputs:[{type:"address",name:"token"}], name:"accumulated",      outputs:[{type:"uint256"}], stateMutability:"view", type:"function" },
-  { inputs:[], name:"totalPrivxBurned",     outputs:[{type:"uint256"}], stateMutability:"view", type:"function" },
-  { inputs:[], name:"totalPrivxToVault",    outputs:[{type:"uint256"}], stateMutability:"view", type:"function" }
-];
+async function waitForReceipt(txHash, timeoutMs=360000) {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    await new Promise(r => setTimeout(r, 3000));
+    const j = await (await fetch(RPC, { method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ jsonrpc:"2.0", id:1, method:"eth_getTransactionReceipt", params:[txHash] }) })).json();
+    if (j.result) {
+      if (j.result.status === "0x0") throw new Error("Transaction reverted. TX: " + txHash);
+      return j.result;
+    }
+  }
+  throw new Error("Transaction not confirmed after 6 minutes. TX: " + txHash);
+}
+
+function addrArg(addr)    { return addr.toLowerCase().replace("0x","").padStart(64,"0"); }
+function uint256Arg(val)  { return BigInt(val).toString(16).padStart(64,"0"); }
+function hexToUint(hex)   { return hex === "0x" ? 0n : BigInt(hex); }
+function hexToBool(hex)   { return hex !== "0x" && BigInt(hex) !== 0n; }
 
 const HP_MINING_VAULT = "0xf7Abeb9a3ccea1B8c30ca8a6d359c609B0751650";
 const FEE_VAULT       = "0x54818356b47b5F7b52DceAbf2B6eF52Cf8b072Fd";
@@ -530,8 +541,8 @@ const PRIVX_TOKEN     = "0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986";
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
-let buyWeb3, buyAccount;
-let acceptWeb3, acceptAccount;
+let buyAccount;
+let acceptAccount;
 let poseidonFn   = null;
 let _zkeyBlobUrl = null;
 let selectedBuyToken = 'dai';
@@ -616,12 +627,7 @@ async function getMerkleProof(shieldAddr, targetCommitment) {
     idx >>= 1;
   }
 
-  // Fetch on-chain root via raw eth_call (selector 0xba70f757)
-  const rootBody = JSON.stringify({ jsonrpc:"2.0", id:2, method:"eth_call",
-    params:[{ to: shieldAddr, data: "0xba70f757" }, "latest"] });
-  const rootRes  = await fetch("https://rpc.pulsechain.com", { method:"POST", headers:{"Content-Type":"application/json"}, body:rootBody });
-  const rootJson = await rootRes.json();
-  const onChainRoot = rootJson.result;
+  const onChainRoot = await ethCall(shieldAddr, "0xba70f757");
   const localRoot   = "0x" + root.toString(16).padStart(64,"0");
   if (localRoot.toLowerCase() !== onChainRoot.toLowerCase())
     throw new Error("Merkle root mismatch — a deposit may have just occurred, please try again.");
@@ -633,16 +639,13 @@ async function getMerkleProof(shieldAddr, targetCommitment) {
 
 async function connectWallet() {
   if (!window.ethereum) throw new Error("No wallet detected — install MetaMask or any EIP-1193 wallet.");
-  await window.ethereum.request({ method: "eth_requestAccounts" });
+  const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
   try {
     await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0x171" }] });
   } catch(e) {
     if (e.code === 4902) await window.ethereum.request({ method: "wallet_addEthereumChain", params: [PULSECHAIN] });
   }
-  const w = new Web3(window.ethereum);
-  w.eth.transactionPollingTimeout = 600;
-  const accounts = await w.eth.getAccounts();
-  return { web3: w, account: accounts[0] };
+  return accounts[0];
 }
 
 // ─── BUY CASH TAB ────────────────────────────────────────────────────────────
@@ -691,8 +694,8 @@ function updateBuyBtn() {
 
 async function connectBuy() {
   try {
-    const { web3, account } = await connectWallet();
-    buyWeb3 = web3; buyAccount = account;
+    const account = await connectWallet();
+    buyAccount = account;
     document.getElementById('buyWalletBtn').textContent = account.slice(0,6)+'…'+account.slice(-4);
     document.getElementById('buyWalletBtn').className   = 'wallet-btn connected';
     document.getElementById('buyWalletAddr').textContent = account;
@@ -732,24 +735,24 @@ async function buyNote() {
     const denomWei  = token.denomWei[selectedDenom];
     const feeWei    = (denomWei * BigInt(token.feeBP)) / 10000n;
     const totalWei  = denomWei + feeWei;
-    // Minimal ABIs — no exotic types that break web3@1.10.0 CDN ABI coder
-    const tokenC  = new buyWeb3.eth.Contract(ERC20_ABI, token.addr);
-    const depositABI = [{ inputs:[{type:"bytes32",name:"_commitment"}], name:"deposit", outputs:[], stateMutability:"nonpayable", type:"function" }];
-    const shieldC = new buyWeb3.eth.Contract(depositABI, shieldAddr);
 
+    // Raw calls — no Web3 ABI coder
     setStatus('buyStatus', 'pending', `Checking ${token.label} allowance…`);
-    const allow = await tokenC.methods.allowance(buyAccount, shieldAddr).call();
-    if (BigInt(allow) < totalWei) {
+    const allowHex = await ethCall(token.addr, "0xdd62ed3e", addrArg(buyAccount) + addrArg(shieldAddr));
+    if (hexToUint(allowHex) < totalWei) {
       setStatus('buyStatus', 'pending', `Approving ${token.label}…`);
-      await tokenC.methods.approve(shieldAddr, totalWei.toString()).send({ from: buyAccount });
+      const approveTx = await ethSend(buyAccount, token.addr,
+        "0x095ea7b3" + addrArg(shieldAddr) + uint256Arg(totalWei));
+      await waitForReceipt(approveTx);
     }
 
     setStatus('buyStatus', 'pending', 'Depositing into Hurricane Pay shield…');
-    const tx = await shieldC.methods.deposit(commitHex).send({ from: buyAccount });
-    if (!tx.status) throw new Error("Transaction reverted. TX: " + tx.transactionHash);
+    const depositTx = await ethSend(buyAccount, shieldAddr,
+      "0xb214faa5" + commitHex.slice(2));
+    const receipt = await waitForReceipt(depositTx);
 
     setStatus('buyStatus', 'success',
-      `$${selectedDenom} ${token.label} note minted!\n\nTX: ${tx.transactionHash}\n\nSave your note — it is now your digital cash.`
+      `$${selectedDenom} ${token.label} note minted!\n\nTX: ${depositTx}\n\nSave your note — it is now your digital cash.`
     );
   } catch(e) {
     console.error(e);
@@ -863,8 +866,8 @@ function detectAcceptNote() {
 
 async function connectAccept() {
   try {
-    const { web3, account } = await connectWallet();
-    acceptWeb3 = web3; acceptAccount = account;
+    const account = await connectWallet();
+    acceptAccount = account;
     document.getElementById('acceptWalletBtn').textContent = account.slice(0,6)+'…'+account.slice(-4);
     document.getElementById('acceptWalletBtn').className  = 'wallet-btn connected';
     document.getElementById('acceptWalletAddr').textContent = account;
@@ -988,19 +991,6 @@ function fmt6(raw, dec=2) {
 }
 
 async function loadStats() {
-  // Raw JSON-RPC calls — no Web3 ABI encoding, avoids abi/5.7.0 bugs
-  async function ethCall(to, selector, argPadded) {
-    const data = argPadded ? selector + argPadded : selector;
-    const body = JSON.stringify({ jsonrpc:"2.0", id:1, method:"eth_call", params:[{to, data}, "latest"] });
-    const r = await fetch("https://rpc.pulsechain.com", { method:"POST", headers:{"Content-Type":"application/json"}, body });
-    const j = await r.json();
-    if (j.error) throw new Error(j.error.message);
-    return j.result; // hex string
-  }
-  function hexToUint(hex) { return hex === "0x" ? 0n : BigInt(hex); }
-  function hexToBool(hex) { return hex !== "0x" && BigInt(hex) !== 0n; }
-  function addrToArg(addr) { return addr.toLowerCase().replace("0x","").padStart(64,"0"); }
-
   try {
     const [
       vaultBal, rateBp, totalMined, peakBal, sealedHex,
@@ -1011,9 +1001,9 @@ async function loadStats() {
       ethCall(HP_MINING_VAULT, "0x5556db65"),
       ethCall(HP_MINING_VAULT, "0xf91510ce"),
       ethCall(HP_MINING_VAULT, "0x631f9852"),
-      ethCall(FEE_VAULT,       "0xcc2153d1", addrToArg(HP_TOKENS.dai.addr)),
-      ethCall(FEE_VAULT,       "0xcc2153d1", addrToArg(HP_TOKENS.psundai.addr)),
-      ethCall(FEE_VAULT,       "0xcc2153d1", addrToArg(HP_TOKENS.usdc.addr)),
+      ethCall(FEE_VAULT,       "0xcc2153d1", addrArg(HP_TOKENS.dai.addr)),
+      ethCall(FEE_VAULT,       "0xcc2153d1", addrArg(HP_TOKENS.psundai.addr)),
+      ethCall(FEE_VAULT,       "0xcc2153d1", addrArg(HP_TOKENS.usdc.addr)),
       ethCall(FEE_VAULT,       "0x828fc637"),
     ]);
 
@@ -1056,15 +1046,14 @@ async function fundVault() {
 
   setStatus('fundStatus','pending','Approving PRIVX…');
   try {
-    const w3     = buyWeb3;
     const amtWei = (BigInt(Math.round(Number(amtStr) * 1e6)) * BigInt(1e12)).toString();
-    const privx  = new w3.eth.Contract(ERC20_ABI, PRIVX_TOKEN);
-    const vault  = new w3.eth.Contract(MINING_VAULT_ABI, HP_MINING_VAULT);
-
-    await privx.methods.approve(HP_MINING_VAULT, amtWei).send({ from: buyAccount });
+    const approveTx = await ethSend(buyAccount, PRIVX_TOKEN,
+      "0x095ea7b3" + addrArg(HP_MINING_VAULT) + uint256Arg(amtWei));
+    await waitForReceipt(approveTx);
     setStatus('fundStatus','pending','Sending PRIVX to vault…');
-    await vault.methods.topUp(amtWei).send({ from: buyAccount });
-
+    const topUpTx = await ethSend(buyAccount, HP_MINING_VAULT,
+      "0x50017f3e" + uint256Arg(amtWei));
+    await waitForReceipt(topUpTx);
     setStatus('fundStatus','success',`Funded! ${amtStr} PRIVX sent to the HP Mining Vault.`);
     document.getElementById('fundAmount').value = '';
     await loadVaultBalance();
