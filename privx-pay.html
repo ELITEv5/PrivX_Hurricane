@@ -164,7 +164,7 @@
 
   <div class="info-box" style="margin-bottom:20px">
     <strong>This is your PrivX ATM.</strong><br>
-    You lock stablecoins into a private shield vault and get an encrypted denomination note back — like withdrawing $20 bills from an ATM. Notes live in your phone wallet. At the register, you show a QR. The merchant's computer generates a ZK proof and receives funds privately. No on-chain link between payer and payee ever exists.
+    Deposit stablecoins into a private shield vault and receive an encrypted denomination note — exactly like withdrawing $20 bills from a cash machine. Scan the note QR into the PrivX Pay mobile wallet on your phone. Your notes are private digital cash, held in your pocket.
     <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
       <span style="background:rgba(0,255,234,0.07);border:1px solid rgba(0,255,234,0.2);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--accent)">Zero-knowledge proofs</span>
       <span style="background:rgba(0,255,234,0.07);border:1px solid rgba(0,255,234,0.2);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--accent)">No on-chain identity</span>
@@ -179,23 +179,23 @@
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <div style="background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);border-radius:14px;padding:14px 12px;text-align:center">
         <div style="font-size:22px;margin-bottom:6px">🏧</div>
-        <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">1. ATM Withdrawal</div>
-        <div style="font-size:11px;color:#666;line-height:1.5">Deposit stablecoins here on desktop. Get an encrypted note — exactly like withdrawing cash.</div>
+        <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">1. Shield Stablecoins</div>
+        <div style="font-size:11px;color:#666;line-height:1.5">Deposit DAI, pSunDAI or USDC here on desktop. Choose a denomination and confirm — funds enter the private shield vault.</div>
+      </div>
+      <div style="background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);border-radius:14px;padding:14px 12px;text-align:center">
+        <div style="font-size:22px;margin-bottom:6px">🧾</div>
+        <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">2. Receive a Note</div>
+        <div style="font-size:11px;color:#666;line-height:1.5">You receive an encrypted bearer note — a secret string representing that denomination, like a $20 bill in digital form.</div>
       </div>
       <div style="background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);border-radius:14px;padding:14px 12px;text-align:center">
         <div style="font-size:22px;margin-bottom:6px">📱</div>
-        <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">2. Load Phone Wallet</div>
-        <div style="font-size:11px;color:#666;line-height:1.5">Scan the note QR with the PrivX Pay mobile wallet. Your bills are now in your pocket.</div>
+        <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">3. Scan to Phone</div>
+        <div style="font-size:11px;color:#666;line-height:1.5">Open the PrivX Pay mobile wallet, tap Scan Note, and point it at the QR on this screen to load the note into your phone.</div>
       </div>
       <div style="background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);border-radius:14px;padding:14px 12px;text-align:center">
-        <div style="font-size:22px;margin-bottom:6px">📲</div>
-        <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">3. Pay by QR</div>
-        <div style="font-size:11px;color:#666;line-height:1.5">At the register, tap a bill in your wallet and show the QR to the merchant.</div>
-      </div>
-      <div style="background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);border-radius:14px;padding:14px 12px;text-align:center">
-        <div style="font-size:22px;margin-bottom:6px">✅</div>
-        <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">4. Merchant Accepts</div>
-        <div style="font-size:11px;color:#666;line-height:1.5">Merchant scans the QR on the Accept tab. ZK proof generated. Funds arrive — no link to you.</div>
+        <div style="font-size:22px;margin-bottom:6px">💵</div>
+        <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">4. Private Digital Cash</div>
+        <div style="font-size:11px;color:#666;line-height:1.5">Your phone holds your notes as private, spendable cash. No on-chain link between your deposit and any future redemption.</div>
       </div>
     </div>
   </div>
@@ -209,14 +209,14 @@
   <!-- ─── BUY CASH TAB ───────────────────────────────────────────────────── -->
   <div id="buyTab" class="hidden">
     <div class="info-box">
-      <strong>You're at the ATM.</strong> You're locking real stablecoins into a private shield vault and getting an encrypted denomination note back. That note is your cash — a bearer instrument, like a $20 bill. Store it in your phone wallet and spend it at any PrivX Pay merchant.<br>
+      <strong>You're at the ATM.</strong> Shield stablecoins into a private vault and receive an encrypted denomination note — a bearer instrument, like a $20 bill in digital form.<br>
       <div style="margin-top:10px">
         <span style="color:#888">1.</span> Choose currency &amp; denomination below.<br>
         <span style="color:#888">2.</span> Connect wallet → approve → confirm deposit.<br>
-        <span style="color:#888">3.</span> <strong style="color:#00ffea">Scan the note QR into your phone</strong> to carry it as digital cash — or copy the note text as a backup.<br>
-        <span style="color:#888">4.</span> At the register, show your phone wallet QR. The merchant redeems it privately on their computer.
+        <span style="color:#888">3.</span> <strong style="color:#00ffea">Scan the note QR into your phone</strong> using the PrivX Pay mobile wallet.<br>
+        <span style="color:#888">4.</span> Your note is now in your pocket — private digital cash.
       </div>
-      <div style="margin-top:8px;font-size:11px;color:#555">Do this at home on a computer. A 0.5% fee is charged at deposit — merchants receive the full denomination plus PRIVX mining rewards.</div>
+      <div style="margin-top:8px;font-size:11px;color:#555">Do this at home on desktop. A 0.5% fee is charged at deposit.</div>
     </div>
 
     <div class="section-label">Choose Currency</div>
@@ -239,7 +239,7 @@
     <button class="btn btn-primary" id="buyBtn" onclick="buyNote()" disabled>Select Denomination</button>
 
     <div class="note-display" id="noteDisplay">
-      <div class="note-warn">Note minted and saved — scan this QR with your phone wallet to load the bill, or copy the note text as a backup.</div>
+      <div class="note-warn">Note shielded — scan this QR with the PrivX Pay mobile wallet to load it onto your phone, or copy the note text as a backup.</div>
       <div class="qr-wrap" style="margin:0 0 14px">
         <canvas id="buyNoteQR"></canvas>
       </div>
@@ -256,17 +256,17 @@
   <!-- ─── WALLET TAB ──────────────────────────────────────────────────────── -->
   <div id="spendTab">
     <div class="info-box">
-      <strong>Your PrivX Pay wallet:</strong><br>
-      Tap any note to show its QR code. Point your phone at the merchant — they scan it in the <em>Register</em> tab to accept payment. Load more cash from the <em>Deposit</em> tab at home.<br>
+      <strong>Notes saved on this device:</strong><br>
+      These are your shielded notes — saved in this browser after each deposit. Tap any note to show its QR, then scan it into the PrivX Pay mobile wallet on your phone. Once a note is on your phone, it's in your pocket.<br>
       <div style="margin-top:8px;background:rgba(255,180,0,0.07);border:1px solid rgba(255,180,0,0.2);border-radius:8px;padding:8px 12px;font-size:11px;color:#ffb400">
-        <strong>A shown note is spent cash.</strong> Notes are bearer instruments — whoever has one can redeem it. Once you show the QR, consider the funds transferred.
+        <strong>Notes are bearer instruments.</strong> Whoever holds the note string can redeem it. Scan to your phone wallet and remove it from this device once transferred.
       </div>
     </div>
 
     <div id="savedNotesSection">
       <div class="section-label">Your Cash</div>
       <div class="saved-notes" id="savedNotesList">
-        <div style="color:#555;font-size:13px;font-family:monospace">No notes loaded. Go to <strong style="color:#B57AFF">Deposit</strong> to shield stablecoins and generate your first note.</div>
+        <div style="color:#555;font-size:13px;font-family:monospace">No notes yet. Go to <strong style="color:#B57AFF">Deposit</strong> to shield stablecoins and receive your first note.</div>
       </div>
     </div>
 
@@ -330,7 +330,7 @@
 
     <div style="margin-top:10px;font-size:11px;color:#444;text-align:center;line-height:1.7">
       Proof generation takes 30–90 sec — keep this tab open.<br>
-      Exact denominations only. No change given. You earn PRIVX rewards on each payment.
+      Exact denominations only. No change given. You earn PRIVX rewards on each redemption.
     </div>
 
     <div class="status" id="acceptStatus"></div>
@@ -446,7 +446,7 @@
       </div>
       <div class="divider"></div>
       <div><strong style="color:#B57AFF">What if I lose my note?</strong><br>
-        The note is your only key. If lost, the funds in that shield slot cannot be recovered by anyone — including the protocol. Back up notes immediately after buying, ideally in a password manager or encrypted storage.
+        The note is your only key. If lost, the funds in that shield slot cannot be recovered by anyone — including the protocol. Scan notes to your phone wallet immediately after shielding, and keep a text backup in encrypted storage.
       </div>
       <div class="divider"></div>
       <div><strong style="color:#B57AFF">Can a note be used twice?</strong><br>
