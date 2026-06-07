@@ -215,6 +215,10 @@
 
     <div class="note-display" id="noteDisplay">
       <div class="note-warn">SAVE THIS NOTE — it is your digital cash. Anyone with it can redeem the funds.</div>
+      <div class="qr-wrap" style="margin-bottom:14px">
+        <canvas id="buyNoteQR"></canvas>
+        <div style="font-size:10px;color:#666;margin-top:6px">Show this QR to the merchant — they scan it in the Accept tab</div>
+      </div>
       <div class="note-text" id="noteText"></div>
       <div class="note-actions">
         <button onclick="copyNote()">Copy Note</button>
@@ -372,7 +376,7 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
 <!-- Privacy & FAQ -->
 <div class="fund-box" style="margin-top:14px">
   <div class="fund-inner">
@@ -598,7 +602,7 @@ function buildFullTree(leaves) {
 
 async function getMerkleProof(shieldAddr, targetCommitment) {
   // Fetch Deposit events via eth_getLogs (avoids Web3 ABI processing of uint32/uint256[24])
-  const DEPOSIT_TOPIC = "0xa945e51e04ce4e5fdab3ac81dde753fcf61dce5f82b5b3e37efb8734c4a5e26";
+  const DEPOSIT_TOPIC = "0xa945e51eec50ab98c161376f0db4cf2aeba3ec92755fe2fcd388bdbbb80ff196";
   const logsBody = JSON.stringify({ jsonrpc:"2.0", id:1, method:"eth_getLogs",
     params:[{ address: shieldAddr, topics:[DEPOSIT_TOPIC], fromBlock:"0x0", toBlock:"latest" }] });
   const logsRes = await fetch("https://rpc.pulsechain.com", { method:"POST", headers:{"Content-Type":"application/json"}, body:logsBody });
@@ -731,6 +735,9 @@ async function buyNote() {
 
     document.getElementById('noteText').textContent = note;
     document.getElementById('noteDisplay').style.display = 'block';
+    QRCode.toCanvas(document.getElementById('buyNoteQR'), note,
+      { width:220, margin:2, color:{dark:'#ffffff',light:'#000000'} },
+      err => { if (err) console.error('QR error:', err); });
 
     const denomWei  = token.denomWei[selectedDenom];
     const feeWei    = (denomWei * BigInt(token.feeBP)) / 10000n;
@@ -833,6 +840,7 @@ function renderSpendQR() {
   const note = document.getElementById('spendNoteInput').value.trim();
   const wrap = document.getElementById('spendQrWrap');
   if (!note) { wrap.style.display = 'none'; return; }
+  if (typeof QRCode === 'undefined') { console.error('QRCode library not loaded'); return; }
   wrap.style.display = 'block';
   QRCode.toCanvas(document.getElementById('spendQrCanvas'), note, {
     width: 240, margin: 2,
