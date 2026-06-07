@@ -45,9 +45,10 @@
     .info-box{background:rgba(138,43,226,0.06);border:1px solid rgba(138,43,226,0.2);border-radius:12px;padding:14px 16px;font-size:13px;color:#aaa;line-height:1.75;margin-bottom:20px}
     .info-box strong{color:#B57AFF}
     .status{padding:14px 16px;border-radius:12px;font-size:13px;line-height:1.6;font-family:monospace;margin-top:8px;display:none;white-space:pre-wrap}
-    .status.success{background:rgba(0,255,100,0.07);border:1px solid rgba(0,255,100,0.2);color:#00e664;display:block}
-    .status.error{background:rgba(255,50,50,0.07);border:1px solid rgba(255,50,50,0.2);color:#ff6666;display:block}
+    .status.success{background:rgba(0,255,100,0.07);border:1px solid rgba(0,255,100,0.2);color:#00e664;display:block;white-space:pre-line}
+    .status.error{background:rgba(255,50,50,0.07);border:1px solid rgba(255,50,50,0.2);color:#ff6666;display:block;white-space:pre-line}
     .status.pending{background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);color:#B57AFF;display:block}
+    .status.warning{background:rgba(255,180,0,0.07);border:1px solid rgba(255,180,0,0.25);color:#ffb400;display:block;white-space:pre-line}
     /* Wallet row */
     .wallet-row{display:flex;gap:10px;align-items:center;margin-bottom:14px}
     .wallet-btn{padding:10px 16px;border:1px solid rgba(138,43,226,0.4);border-radius:10px;background:rgba(138,43,226,0.08);color:#aaa;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
@@ -832,8 +833,20 @@ async function buyNote() {
     );
   } catch(e) {
     console.error(e);
-    const isTimeout = e.message && (e.message.includes('50 blocks') || e.message.includes('not mined'));
-    if (!isTimeout) setStatus('buyStatus', 'error', 'Deposit failed: ' + (e.message || 'check console'));
+    const isTimeout = e.message && (
+      e.message.includes('50 blocks') || e.message.includes('not mined') || e.message.includes('not confirmed')
+    );
+    if (isTimeout) {
+      const txMatch = e.message.match(/TX: (0x[0-9a-fA-F]+)/i);
+      const txHash  = txMatch ? txMatch[1] : '';
+      setStatus('buyStatus', 'warning',
+        '⚠️ Timed out waiting — but the deposit may have gone through.\n\n' +
+        'Your note is shown above — copy it now if you haven\'t already.\n\n' +
+        (txHash ? 'Check the scanner before creating a new note:\nhttps://scan.pulsechain.com/tx/' + txHash : 'Check scan.pulsechain.com before creating a new note.')
+      );
+    } else {
+      setStatus('buyStatus', 'error', 'Deposit failed: ' + (e.message || 'check console'));
+    }
   } finally {
     btn.disabled = false;
     updateBuyBtn();
@@ -1035,12 +1048,27 @@ async function acceptNote() {
   } catch(e) {
     console.error(e);
     const msg = e.message || 'Unknown error';
-    let userMsg = 'Redemption failed: ' + msg;
-    if (msg.includes('already spent') || msg.includes('nullifier'))
+    const isTimeout = msg.includes('not confirmed') || msg.includes('6 minutes');
+    const txMatch   = msg.match(/TX: (0x[0-9a-fA-F]+)/i);
+    const txHash    = txMatch ? txMatch[1] : '';
+    let userMsg, statusType;
+    if (isTimeout) {
+      statusType = 'warning';
+      userMsg =
+        '⚠️ Timed out — but the redemption may have succeeded.\n\n' +
+        'Do NOT delete or re-use this note without checking the scanner first.\n\n' +
+        (txHash ? 'https://scan.pulsechain.com/tx/' + txHash : 'Check scan.pulsechain.com for your recent transactions.');
+    } else if (msg.includes('already spent') || msg.includes('nullifier')) {
+      statusType = 'error';
       userMsg = 'This note has already been spent — it cannot be redeemed again.';
-    else if (msg.includes('root') || msg.includes('mismatch'))
+    } else if (msg.includes('root') || msg.includes('mismatch')) {
+      statusType = 'error';
       userMsg = 'Merkle root mismatch — a deposit may have just occurred. Please try again.';
-    setStatus('acceptStatus', 'error', userMsg);
+    } else {
+      statusType = 'error';
+      userMsg = 'Redemption failed: ' + msg;
+    }
+    setStatus('acceptStatus', statusType, userMsg);
   } finally {
     btn.disabled = false;
     btn.textContent = 'Accept Payment';
