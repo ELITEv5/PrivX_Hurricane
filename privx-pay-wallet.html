@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a0a">
+<title>PrivX Pay</title>
+<style>
+:root{
+  --p:#8A2BE2;--a:#00ffea;--bg:#0a0a0a;
+  --t:#fff;--t2:#888;--t3:#3a3a3a;--g:#00e664;
+  --glow:rgba(138,43,226,0.35);--r:16px;
+  --safe-top:env(safe-area-inset-top);
+  --safe-bot:env(safe-area-inset-bottom);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+#app{display:flex;flex-direction:column;height:100%;padding-top:var(--safe-top)}
+
+/* ── Screens ── */
+#screens{flex:1;position:relative;overflow:hidden}
+.screen{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  opacity:0;pointer-events:none;transition:opacity .18s ease;padding:20px 18px 100px}
+.screen.active{opacity:1;pointer-events:all}
+@media(min-width:600px){.screen{max-width:520px;margin:0 auto}}
+
+/* ── Screen headers ── */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-top:4px}
+.sh-title{font-size:22px;font-weight:800;letter-spacing:-.4px}
+.sh-badge{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--a);background:rgba(0,255,234,.07);border:1px solid rgba(0,255,234,.2);
+  border-radius:20px;padding:4px 10px}
+
+/* ── Bottom nav ── */
+#nav{display:flex;background:rgba(10,10,10,.95);backdrop-filter:blur(20px);
+  border-top:1px solid rgba(255,255,255,.06);
+  padding:10px 0 calc(10px + var(--safe-bot));flex-shrink:0}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
+  border:none;background:none;color:var(--t3);cursor:pointer;
+  padding:6px 0;transition:color .15s ease;font-size:10px;font-weight:700;letter-spacing:.5px}
+.ni svg{width:22px;height:22px;transition:all .15s ease}
+.ni.active{color:var(--p)}
+.ni.active svg{filter:drop-shadow(0 0 8px var(--glow))}
+
+/* ── Wallet screen ── */
+.w-total{text-align:center;padding:16px 0 28px}
+.w-total-lbl{font-size:11px;color:var(--t2);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:8px}
+.w-total-amt{font-size:52px;font-weight:900;letter-spacing:-2px;line-height:1}
+.w-total-sub{font-size:13px;color:var(--t2);margin-top:8px}
+
+.wallet-actions{display:flex;gap:10px;margin-bottom:22px}
+.btn-scan{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:13px;border:1px solid rgba(255,255,255,.1);border-radius:14px;
+  background:rgba(255,255,255,.04);color:var(--t2);font-size:14px;font-weight:700;
+  cursor:pointer;transition:all .2s}
+.btn-scan:active{border-color:rgba(0,255,234,.4);color:var(--a)}
+.btn-atm{flex:1.4;padding:13px;border:1px solid rgba(138,43,226,.3);border-radius:14px;
+  background:rgba(138,43,226,.06);color:#B57AFF;font-size:14px;font-weight:800;
+  cursor:pointer;transition:all .2s;text-align:center}
+.btn-atm:active{background:rgba(138,43,226,.15)}
+
+.bills-list{display:flex;flex-direction:column;gap:10px}
+
+/* ── Bill card ── */
+.bill{background:linear-gradient(145deg,#141414,#1c1c1c);border:1px solid rgba(138,43,226,.18);
+  border-radius:var(--r);padding:18px 20px;cursor:pointer;position:relative;overflow:hidden;
+  transition:transform .13s ease,box-shadow .13s ease,border-color .13s ease;
+  display:flex;flex-direction:column;gap:14px}
+.bill::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--p),var(--a));opacity:.5}
+.bill:active{transform:scale(.98);box-shadow:0 0 28px rgba(138,43,226,.25);border-color:rgba(138,43,226,.45)}
+.bill-top{display:flex;justify-content:space-between;align-items:flex-start}
+.bill-amount{font-size:38px;font-weight:900;letter-spacing:-1.5px;line-height:1}
+.bill-token{font-size:12px;font-weight:800;color:var(--a);letter-spacing:.6px;margin-top:3px;text-transform:uppercase}
+.bill-arrow{color:rgba(255,255,255,.25);font-size:18px;margin-top:4px;flex-shrink:0}
+.bill-bottom{display:flex;justify-content:space-between;align-items:center}
+.bill-brand{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:2px;font-weight:700}
+.bill-date{font-size:9px;color:var(--t3);font-family:monospace}
+.bill-spent-badge{font-size:9px;font-weight:800;color:#ff5555;text-transform:uppercase;
+  letter-spacing:1px;background:rgba(255,85,85,.1);border:1px solid rgba(255,85,85,.2);
+  border-radius:4px;padding:2px 6px}
+
+/* ── Empty state ── */
+.empty{display:flex;flex-direction:column;align-items:center;padding:48px 24px;gap:16px}
+.empty-icon{font-size:52px;opacity:.3}
+.empty-title{font-size:18px;font-weight:700;color:var(--t2);text-align:center}
+.empty-sub{font-size:13px;color:var(--t3);text-align:center;line-height:1.7;max-width:280px}
+
+/* ── Accept screen ── */
+.info{background:rgba(138,43,226,.06);border:1px solid rgba(138,43,226,.18);
+  border-radius:12px;padding:14px 16px;font-size:13px;color:var(--t2);line-height:1.75;margin-bottom:18px}
+.info strong{color:#B57AFF}
+.detected-box{background:#0f0f0f;border:1px solid rgba(0,255,234,.18);border-radius:12px;
+  padding:13px 15px;margin-bottom:14px;font-size:12px;font-family:monospace;line-height:1.9;display:none}
+.det-row{display:flex;gap:8px}
+.det-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.6px;color:#444;min-width:70px;padding-top:1px}
+.det-val{color:var(--a)}
+
+/* ── Shared form elements ── */
+.lbl{font-size:11px;color:var(--t2);font-weight:700;letter-spacing:.7px;text-transform:uppercase;margin-bottom:8px}
+.lbl-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.lbl-row .lbl{margin-bottom:0}
+input,textarea{width:100%;padding:13px 15px;background:#0f0f0f;border:1px solid rgba(138,43,226,.25);
+  border-radius:12px;color:#fff;font-size:14px;font-family:monospace;outline:none;
+  transition:border-color .2s;margin-bottom:14px}
+input:focus,textarea:focus{border-color:var(--a)}
+textarea{height:78px;resize:vertical;line-height:1.5;font-size:12px}
+
+.btn{width:100%;padding:16px;border:none;border-radius:14px;font-size:16px;font-weight:800;
+  cursor:pointer;transition:all .25s;letter-spacing:.3px}
+.btn-primary{background:var(--p);color:#fff;box-shadow:0 0 24px var(--glow)}
+.btn-primary:active{background:var(--a);color:#000}
+.btn-primary:disabled{background:#1a1a1a;color:#333;cursor:not-allowed;box-shadow:none}
+.btn-outline{background:transparent;border:1px solid rgba(138,43,226,.3);color:var(--t2);
+  padding:12px;font-size:14px;font-weight:700;border-radius:12px;cursor:pointer;
+  transition:all .2s;width:100%;margin-top:8px}
+.btn-outline:active{border-color:var(--a);color:var(--a)}
+
+.wallet-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.wbtn{padding:10px 16px;border:1px solid rgba(138,43,226,.35);border-radius:10px;
+  background:rgba(138,43,226,.07);color:var(--t2);font-size:13px;font-weight:700;
+  cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+.wbtn.connected{border-color:rgba(0,230,100,.4);color:var(--g);background:rgba(0,230,100,.05)}
+.waddr{font-family:monospace;font-size:11px;color:#444;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.status{padding:13px 15px;border-radius:12px;font-size:13px;line-height:1.6;
+  font-family:monospace;margin-top:10px;display:none;white-space:pre-wrap;word-break:break-word}
+.status.ok{background:rgba(0,255,100,.06);border:1px solid rgba(0,255,100,.18);color:var(--g);display:block}
+.status.err{background:rgba(255,80,80,.06);border:1px solid rgba(255,80,80,.18);color:#ff6666;display:block}
+.status.pend{background:rgba(138,43,226,.07);border:1px solid rgba(138,43,226,.2);color:#B57AFF;display:block}
+
+.divider{height:1px;background:rgba(255,255,255,.05);margin:18px 0}
+
+/* ── Proof progress ── */
+.proof-progress{display:none;flex-direction:column;gap:6px;margin-top:10px}
+.proof-progress.active{display:flex}
+.progress-bar-wrap{background:#111;border-radius:99px;height:4px;overflow:hidden}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--p),var(--a));
+  border-radius:99px;width:0%;transition:width .5s ease;animation:pulse-bar 2s ease infinite}
+@keyframes pulse-bar{0%,100%{opacity:1}50%{opacity:.6}}
+.progress-lbl{font-size:12px;color:#B57AFF;font-family:monospace}
+
+/* ── Modals ── */
+.modal{position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;
+  background:var(--bg);transition:opacity .2s ease;
+  padding-top:var(--safe-top);padding-bottom:var(--safe-bot)}
+.modal.hidden{opacity:0;pointer-events:none}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;flex-shrink:0}
+.modal-back{background:none;border:none;color:var(--t2);font-size:14px;font-weight:700;
+  cursor:pointer;display:flex;align-items:center;gap:6px;padding:8px 0}
+.modal-back:active{color:#fff}
+.modal-htitle{font-size:16px;font-weight:800}
+
+/* ── QR modal ── */
+#modal-qr{background:#000;justify-content:space-between}
+.qr-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:0 24px}
+.qr-info{text-align:center}
+.qr-denom{font-size:42px;font-weight:900;letter-spacing:-1.5px}
+.qr-token{font-size:14px;font-weight:700;color:var(--a);margin-top:2px;letter-spacing:.6px}
+.qr-canvas-wrap{background:#fff;border-radius:16px;padding:16px;box-shadow:0 0 60px rgba(255,255,255,.08)}
+#qr-canvas{display:block;border-radius:4px}
+.qr-hint{font-size:11px;color:#444;text-align:center;max-width:240px;line-height:1.6}
+.qr-footer{display:flex;gap:10px;padding:16px 20px;flex-shrink:0}
+.btn-spent{flex:1;padding:14px;border:1px solid rgba(255,85,85,.25);border-radius:12px;
+  background:rgba(255,85,85,.06);color:#ff7070;font-size:14px;font-weight:700;cursor:pointer}
+.btn-done{flex:1;padding:14px;border:1px solid rgba(138,43,226,.3);border-radius:12px;
+  background:rgba(138,43,226,.15);color:#B57AFF;font-size:14px;font-weight:700;cursor:pointer}
+
+/* ── Camera modal ── */
+#modal-camera{background:#000}
+.camera-wrap{flex:1;position:relative;overflow:hidden}
+#cam-video{width:100%;height:100%;object-fit:cover}
+#cam-canvas{display:none}
+.cam-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.viewfinder{width:240px;height:240px;position:relative}
+.vf-corner{position:absolute;width:28px;height:28px;border-color:var(--a);border-style:solid;border-width:0}
+.vf-tl{top:0;left:0;border-top-width:3px;border-left-width:3px;border-radius:4px 0 0 0}
+.vf-tr{top:0;right:0;border-top-width:3px;border-right-width:3px;border-radius:0 4px 0 0}
+.vf-bl{bottom:0;left:0;border-bottom-width:3px;border-left-width:3px;border-radius:0 0 0 4px}
+.vf-br{bottom:0;right:0;border-bottom-width:3px;border-right-width:3px;border-radius:0 0 4px 0}
+.cam-status{position:absolute;bottom:0;left:0;right:0;text-align:center;
+  padding:16px;font-size:13px;color:rgba(255,255,255,.7);
+  background:linear-gradient(transparent,rgba(0,0,0,.7))}
+
+@media(max-width:380px){
+  .bill-amount{font-size:32px}
+  .w-total-amt{font-size:44px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<div id="screens">
+
+  <!-- ── WALLET ── -->
+  <div class="screen active" id="screen-wallet">
+    <div class="sh">
+      <div class="sh-title">PrivX Pay</div>
+      <div class="sh-badge">PRIVATE CASH</div>
+    </div>
+
+    <div class="w-total">
+      <div class="w-total-lbl">Available Cash</div>
+      <div class="w-total-amt" id="total-amount">$0</div>
+      <div class="w-total-sub" id="total-sub">No notes loaded</div>
+    </div>
+
+    <div class="wallet-actions">
+      <button class="btn-scan" onclick="openCamera('wallet')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:20px;height:20px">
+          <polyline points="23 7 23 1 17 1"/><line x1="16" y1="8" x2="23" y2="1"/>
+          <polyline points="1 17 1 23 7 23"/><line x1="8" y1="16" x2="1" y2="23"/>
+          <rect x="3" y="3" width="18" height="18" rx="3"/>
+        </svg>
+        Scan Note
+      </button>
+      <button class="btn-atm" onclick="showAtmInfo()">Load from ATM</button>
+    </div>
+
+    <div class="bills-list" id="bills-list"></div>
+
+    <div style="margin-top:16px">
+      <div class="divider"></div>
+      <div class="lbl" style="margin-bottom:6px">Or paste a note</div>
+      <input type="text" id="paste-note-input" placeholder="hp-dai-20-abc123…" oninput="onPasteNote(this.value)">
+    </div>
+  </div>
+
+  <!-- ── ACCEPT ── -->
+  <div class="screen" id="screen-accept">
+    <div class="sh">
+      <div class="sh-title">Accept</div>
+      <div class="sh-badge" style="color:#ffb400;background:rgba(255,180,0,.07);border-color:rgba(255,180,0,.2)">MERCHANT</div>
+    </div>
+
+    <div class="info">
+      <strong>Merchant terminal</strong> — run on a desktop or tablet.<br>
+      Customer shows a QR from their Wallet. Scan or paste the note, connect your wallet, and click Redeem. Your browser generates the ZK proof and funds arrive instantly.
+    </div>
+
+    <div class="lbl-row">
+      <div class="lbl">Customer Note</div>
+      <button class="btn-scan" onclick="openCamera('accept')" style="padding:6px 12px;font-size:11px;border-radius:8px;width:auto">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:14px;height:14px">
+          <polyline points="23 7 23 1 17 1"/><line x1="16" y1="8" x2="23" y2="1"/>
+          <polyline points="1 17 1 23 7 23"/><line x1="8" y1="16" x2="1" y2="23"/>
+          <rect x="3" y="3" width="18" height="18" rx="3"/>
+        </svg>
+        Scan QR
+      </button>
+    </div>
+    <textarea id="accept-note-input" placeholder="hp-dai-20-abc123…" oninput="onAcceptNoteInput()" style="margin-top:8px"></textarea>
+
+    <div class="detected-box" id="accept-detected">
+      <div class="det-row"><span class="det-lbl">Token</span><span class="det-val" id="det-token">—</span></div>
+      <div class="det-row"><span class="det-lbl">Amount</span><span class="det-val" id="det-amount">—</span></div>
+      <div class="det-row"><span class="det-lbl">Shield</span><span class="det-val" id="det-shield">—</span></div>
+    </div>
+
+    <div class="lbl">Recipient Address</div>
+    <input type="text" id="accept-recipient" placeholder="0x — funds arrive here">
+
+    <div class="wallet-row">
+      <button class="wbtn" id="accept-wbtn" onclick="connectWallet()">Connect Wallet</button>
+      <span class="waddr" id="accept-waddr">Not connected</span>
+    </div>
+
+    <button class="btn btn-primary" id="accept-btn" onclick="redeemNote()" disabled>Connect Wallet to Redeem</button>
+
+    <div class="proof-progress" id="proof-progress">
+      <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+      <div class="progress-lbl" id="progress-lbl">Generating proof…</div>
+    </div>
+
+    <div class="status" id="accept-status"></div>
+  </div>
+
+</div><!-- /screens -->
+
+<!-- ── QR modal ── -->
+<div class="modal hidden" id="modal-qr">
+  <div class="modal-head">
+    <button class="modal-back" onclick="closeModal('qr')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Back
+    </button>
+    <div class="modal-htitle">Show to Merchant</div>
+    <div style="width:60px"></div>
+  </div>
+  <div class="qr-body">
+    <div class="qr-info">
+      <div class="qr-denom" id="qr-denom">$20</div>
+      <div class="qr-token" id="qr-token">DAI</div>
+    </div>
+    <div class="qr-canvas-wrap">
+      <canvas id="qr-canvas"></canvas>
+    </div>
+    <div class="qr-hint">Show this to the merchant — they scan it on the Accept tab</div>
+  </div>
+  <div class="qr-footer">
+    <button class="btn-spent" onclick="markCurrentNoteSpent()">Mark Spent</button>
+    <button class="btn-done" onclick="closeModal('qr')">Done</button>
+  </div>
+</div>
+
+<!-- ── Camera modal ── -->
+<div class="modal hidden" id="modal-camera">
+  <div class="modal-head">
+    <button class="modal-back" onclick="closeCamera()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Cancel
+    </button>
+    <div class="modal-htitle">Scan Note</div>
+    <div style="width:60px"></div>
+  </div>
+  <div class="camera-wrap">
+    <video id="cam-video" autoplay playsinline muted></video>
+    <canvas id="cam-canvas"></canvas>
+    <div class="cam-overlay">
+      <div class="viewfinder">
+        <div class="vf-corner vf-tl"></div>
+        <div class="vf-corner vf-tr"></div>
+        <div class="vf-corner vf-bl"></div>
+        <div class="vf-corner vf-br"></div>
+      </div>
+    </div>
+    <div class="cam-status" id="cam-status">Point at a PrivX Pay note QR code</div>
+  </div>
+</div>
+
+<!-- ── Bottom nav ── -->
+<nav id="nav">
+  <button class="ni active" id="ni-wallet" onclick="showScreen('wallet')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>
+      <circle cx="7" cy="15" r="1" fill="currentColor" stroke="none"/>
+    </svg>
+    Wallet
+  </button>
+  <button class="ni" id="ni-accept" onclick="showScreen('accept')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+    Accept
+  </button>
+</nav>
+
+</div><!-- /app -->
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+<script>
+
+// ─── Config ───────────────────────────────────────────────────────────────────
+
+const RPC = "https://rpc.pulsechain.com";
+
+const PULSECHAIN = {
+  chainId:"0x171", chainName:"PulseChain",
+  rpcUrls:["https://rpc.pulsechain.com"],
+  nativeCurrency:{name:"PLS",symbol:"PLS",decimals:18},
+  blockExplorerUrls:["https://scan.pulsechain.com"]
+};
+
+const WASM_URL = "./PrivXMixer14.wasm";
+const ZKEY_CID = "bafybeiahcycu5sbkgdxfxt4py3qagjrce2nxrbxenwv7oxkg67xoy4qwmu";
+const ZKEY_URLS = [
+  `https://amaranth-rear-platypus-218.mypinata.cloud/ipfs/${ZKEY_CID}`,
+  `https://gateway.pinata.cloud/ipfs/${ZKEY_CID}`,
+  `https://ipfs.io/ipfs/${ZKEY_CID}`,
+  `https://${ZKEY_CID}.ipfs.dweb.link`
+];
+
+const TREE_LEVELS = 14;
+const ZERO = 21663839004416932945382355908790599225266501822907911457504978515578255421292n;
+const DEPOSIT_TOPIC = "0xa945e51eec50ab98c161376f0db4cf2aeba3ec92755fe2fcd388bdbbb80ff196";
+
+const TOKENS = {
+  dai:     { label:"DAI",     decimals:18, shields:{"1":"0x9ABb21e92f4f589515A65aEa79dc920b40A799D4","5":"0x0840430d8870933614EFE7f3F45119CcA738B6E2","10":"0x19a9Db059A2C1777Ea4d09dC8d234aD79b21F406","20":"0x1eeB506568054d0bb7e6977c8030B0ffd05Ef0D2","50":"0xc88c22f57a24A2559a3dd3780cE160241aec709F","100":"0x9e85fDdD5d231265b247d3cBC4dB80505582486b"}, denomWei:{"1":1000000000000000000n,"5":5000000000000000000n,"10":10000000000000000000n,"20":20000000000000000000n,"50":50000000000000000000n,"100":100000000000000000000n} },
+  psundai: { label:"pSunDAI", decimals:18, shields:{"1":"0x38e1D3fd69F7A978e6fe5e4de787Cf96b71Fa688","5":"0xfd2d44332a54eB89016f95705fBb7C84f917a9B3","10":"0x3007cFf2B4b79998905146bF41a6730f4f22c629","20":"0x7c3CAC0556F00e48fB0E5400EF1877f966609952","50":"0x91EF673aECE26703D9B72E8eB591253F7b26F6B6","100":"0xcDff42f6803Df9B9D76723263E73F017c97F68F7"}, denomWei:{"1":1000000000000000000n,"5":5000000000000000000n,"10":10000000000000000000n,"20":20000000000000000000n,"50":50000000000000000000n,"100":100000000000000000000n} },
+  usdc:    { label:"USDC",    decimals:6,  shields:{"1":"0x2856661A94483486e25dE8F37DCf867938a13778","5":"0x53B91dB1485f687D8d162f1268D8485EBB85dF13","10":"0x59f40474834C6Cb3Bf3A5189f6B6f525d22f80A4","20":"0x5965FEa1E24472d64F3a24Edb9e663Bc728Caee6","50":"0x124A85fDB4ec3F11Ab257F6d4fC2eD8A4A6661fe","100":"0x883c74eFC878105cbDd15FB546A1a32F4fA45d5b"}, denomWei:{"1":1000000n,"5":5000000n,"10":10000000n,"20":20000000n,"50":50000000n,"100":100000000n} }
+};
+
+// ─── State ────────────────────────────────────────────────────────────────────
+
+let account       = null;
+let poseidonFn    = null;
+let _zkeyBlobUrl  = null;
+let _zeroValues   = null;
+let _camStream    = null;
+let _camFrameId   = null;
+let _cameraTarget = 'wallet';
+let _currentQRNoteId = null;
+
+// ─── RPC helpers ──────────────────────────────────────────────────────────────
+
+async function rpcCall(method, params) {
+  const r = await fetch(RPC, { method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({jsonrpc:"2.0",id:1,method,params}) });
+  const j = await r.json();
+  if (j.error) throw new Error(j.error.message);
+  return j.result;
+}
+const ethCall = (to, sel, arg="") => rpcCall("eth_call",[{to,data:arg?sel+arg:sel},"latest"]);
+const ethSend = (from,to,data) => window.ethereum.request({method:"eth_sendTransaction",params:[{from,to,data}]});
+
+function addrArg(a) { return a.toLowerCase().replace("0x","").padStart(64,"0"); }
+function hexToUint(h) { return h==="0x"?0n:BigInt(h); }
+
+async function waitTx(hash, ms=360000) {
+  const t = Date.now();
+  while (Date.now()-t < ms) {
+    await new Promise(r=>setTimeout(r,3000));
+    const j = await rpcCall("eth_getTransactionReceipt",[hash]);
+    if (j) { if(j.status==="0x0") throw new Error("Reverted: "+hash); return j; }
+  }
+  throw new Error("Not confirmed after 6 min: "+hash);
+}
+
+// ─── Wallet connect ───────────────────────────────────────────────────────────
+
+async function connectWallet() {
+  try {
+    if (!window.ethereum) throw new Error("No wallet detected — open in MetaMask or a Web3 browser.");
+    const [addr] = await window.ethereum.request({method:"eth_requestAccounts"});
+    try {
+      await window.ethereum.request({method:"wallet_switchEthereumChain",params:[{chainId:"0x171"}]});
+    } catch(e) {
+      if (e.code===4902) await window.ethereum.request({method:"wallet_addEthereumChain",params:[PULSECHAIN]});
+    }
+    account = addr;
+    const btn = document.getElementById('accept-wbtn');
+    btn.textContent = account.slice(0,6)+"…"+account.slice(-4);
+    btn.className = "wbtn connected";
+    document.getElementById('accept-waddr').textContent = account;
+    const recip = document.getElementById('accept-recipient');
+    if (!recip.value) recip.value = account;
+    document.getElementById('accept-btn').disabled = false;
+    document.getElementById('accept-btn').textContent = "Redeem Note";
+  } catch(e) { setStatus('accept-status','err',e.message); }
+}
+
+// ─── Navigation ───────────────────────────────────────────────────────────────
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  document.getElementById('ni-'+name).classList.add('active');
+  if (name==='wallet') renderWallet();
+  if (name==='accept') {
+    lazyLoadSnarkjs();
+    if (!_zkeyBlobUrl) getZkeyUrl(() => {}).catch(() => {});
+  }
+}
+function openModal(id)  { document.getElementById('modal-'+id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById('modal-'+id).classList.add('hidden'); }
+
+// ─── Note storage ─────────────────────────────────────────────────────────────
+
+const STORE = 'privxpay_notes_v1';
+function getNotes() { try { return JSON.parse(localStorage.getItem(STORE)||'[]'); } catch { return []; } }
+function putNotes(n) { localStorage.setItem(STORE, JSON.stringify(n)); }
+
+function saveNote(note, token, denom) {
+  const notes = getNotes();
+  if (notes.find(n=>n.note===note)) return;
+  notes.unshift({ id:crypto.randomUUID(), note, token, denom, ts:Date.now(), spent:false });
+  putNotes(notes);
+}
+function deleteNoteById(id) { putNotes(getNotes().filter(n=>n.id!==id)); renderWallet(); }
+function markSpentById(id) {
+  const notes = getNotes();
+  const n = notes.find(n=>n.id===id);
+  if (n) { n.spent=true; putNotes(notes); }
+  renderWallet();
+}
+
+function parseNote(str) {
+  str = str.trim();
+  const m = str.match(/^hp-([a-z]+)-(\d+)-([0-9a-f]{60,})-([0-9a-f]{60,})$/i);
+  if (m) return { token:m[1].toLowerCase(), denom:m[2], nullifierHex:m[3], secretHex:m[4], note:str };
+  return null;
+}
+
+// ─── Wallet render ────────────────────────────────────────────────────────────
+
+function showAtmInfo() {
+  alert('Load cash from the PrivX Pay ATM — open privx-pay.html on a desktop browser, deposit stablecoins, and your note will appear here after you scan or paste it.');
+}
+
+function renderWallet() {
+  const notes  = getNotes();
+  const list   = document.getElementById('bills-list');
+  const unspent = notes.filter(n=>!n.spent);
+  let total = 0;
+  const tally = {};
+  unspent.forEach(n => {
+    total += Number(n.denom);
+    tally[n.token] = (tally[n.token]||0)+1;
+  });
+  document.getElementById('total-amount').textContent = total>0?`$${total}`:'$0';
+  const sub = Object.entries(tally).map(([t,c])=>`${c} × ${TOKENS[t]?.label||t}`).join(' · ');
+  document.getElementById('total-sub').textContent = sub||(notes.length?'All notes spent':'No notes — load cash from the ATM');
+
+  if (!notes.length) {
+    list.innerHTML = `<div class="empty">
+      <div class="empty-icon">💸</div>
+      <div class="empty-title">Wallet is empty</div>
+      <div class="empty-sub">Use the PrivX Pay ATM (privx-pay.html) on a desktop to load cash, then scan the note QR into this wallet.</div>
+    </div>`;
+    return;
+  }
+  list.innerHTML = '';
+  notes.forEach(n => {
+    const tok  = TOKENS[n.token];
+    const date = new Date(n.ts).toLocaleDateString(undefined,{month:'short',year:'numeric'});
+    const div  = document.createElement('div');
+    div.className = 'bill'+(n.spent?' spent':'');
+    div.style.pointerEvents = n.spent ? 'none' : 'auto';
+    div.innerHTML = `
+      <div class="bill-top">
+        <div>
+          <div class="bill-amount">$${n.denom}</div>
+          <div class="bill-token">${tok?.label||n.token}</div>
+        </div>
+        <div class="bill-arrow">›</div>
+      </div>
+      <div class="bill-bottom">
+        <div class="bill-brand">PrivX Pay</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${n.spent?'<div class="bill-spent-badge">Spent</div>':''}
+          <div class="bill-date">${date}</div>
+        </div>
+      </div>`;
+    if (!n.spent) {
+      div.onclick = () => showQRModal(n);
+    } else {
+      const del = document.createElement('button');
+      del.className = 'btn-outline';
+      del.style.cssText = 'margin-top:10px;padding:8px;font-size:12px;pointer-events:all';
+      del.textContent = 'Remove';
+      del.onclick = e => { e.stopPropagation(); deleteNoteById(n.id); };
+      div.appendChild(del);
+      div.style.pointerEvents = 'none';
+      del.style.pointerEvents = 'all';
+    }
+    list.appendChild(div);
+  });
+}
+
+// ─── QR modal ─────────────────────────────────────────────────────────────────
+
+function showQRModal(noteObj) {
+  _currentQRNoteId = noteObj.id;
+  const tok = TOKENS[noteObj.token];
+  document.getElementById('qr-denom').textContent = '$'+noteObj.denom;
+  document.getElementById('qr-token').textContent = tok?.label||noteObj.token;
+  const canvas = document.getElementById('qr-canvas');
+  const size = Math.min(window.innerWidth - 96, 280);
+  QRCode.toCanvas(canvas, noteObj.note, {width:size,margin:1,color:{dark:'#000',light:'#fff'}}, err => {
+    if (err) console.error('QR error:', err);
+  });
+  openModal('qr');
+}
+
+function markCurrentNoteSpent() {
+  if (!_currentQRNoteId) return;
+  markSpentById(_currentQRNoteId);
+  closeModal('qr');
+}
+
+function onPasteNote(val) {
+  const parsed = parseNote(val);
+  if (!parsed) return;
+  saveNote(parsed.note, parsed.token, parsed.denom);
+  document.getElementById('paste-note-input').value = '';
+  renderWallet();
+  showQRModal(getNotes().find(n=>n.note===parsed.note));
+}
+
+// ─── Camera ───────────────────────────────────────────────────────────────────
+
+async function loadJsQR() {
+  if (window.jsQR) return;
+  return new Promise((res,rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
+    s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+
+async function openCamera(target='wallet') {
+  _cameraTarget = target;
+  try {
+    await loadJsQR();
+    _camStream = await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}
+    });
+    const vid = document.getElementById('cam-video');
+    vid.srcObject = _camStream;
+    openModal('camera');
+    vid.onloadedmetadata = () => { vid.play(); _camFrameId = requestAnimationFrame(scanFrame); };
+  } catch(e) {
+    alert(e.name==='NotAllowedError'
+      ? 'Camera permission denied. Allow camera access and try again.'
+      : 'Camera unavailable: '+e.message);
+  }
+}
+
+function closeCamera() {
+  if (_camFrameId) { cancelAnimationFrame(_camFrameId); _camFrameId = null; }
+  if (_camStream)  { _camStream.getTracks().forEach(t=>t.stop()); _camStream = null; }
+  document.getElementById('cam-video').srcObject = null;
+  closeModal('camera');
+}
+
+function scanFrame() {
+  const vid = document.getElementById('cam-video');
+  const canvas = document.getElementById('cam-canvas');
+  if (!vid.videoWidth) { _camFrameId = requestAnimationFrame(scanFrame); return; }
+  canvas.width = vid.videoWidth; canvas.height = vid.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(vid, 0, 0);
+  const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const result = jsQR(img.data, img.width, img.height, {inversionAttempts:'attemptBoth'});
+  if (result) {
+    const parsed = parseNote(result.data);
+    if (parsed) {
+      closeCamera();
+      if (_cameraTarget === 'accept') {
+        document.getElementById('accept-note-input').value = parsed.note;
+        onAcceptNoteInput();
+      } else {
+        saveNote(parsed.note, parsed.token, parsed.denom);
+        renderWallet();
+        showQRModal(getNotes().find(n=>n.note===parsed.note));
+      }
+      return;
+    }
+    document.getElementById('cam-status').textContent = 'Not a PrivX Pay note — keep scanning…';
+    setTimeout(()=>{ document.getElementById('cam-status').textContent='Point at a PrivX Pay note QR code'; }, 2000);
+  }
+  _camFrameId = requestAnimationFrame(scanFrame);
+}
+
+// ─── Accept / Redeem ──────────────────────────────────────────────────────────
+
+function onAcceptNoteInput() {
+  const val = document.getElementById('accept-note-input').value.trim();
+  const parsed = parseNote(val);
+  const box = document.getElementById('accept-detected');
+  if (!parsed) { box.style.display='none'; return; }
+  const tok = TOKENS[parsed.token];
+  const shield = tok?.shields?.[parsed.denom];
+  document.getElementById('det-token').textContent  = tok?.label||parsed.token;
+  document.getElementById('det-amount').textContent = `$${parsed.denom} ${tok?.label||''}`;
+  document.getElementById('det-shield').textContent = shield
+    ? shield.slice(0,10)+'…'+shield.slice(-6) : 'Unknown denomination';
+  box.style.display = 'block';
+}
+
+function setProgress(pct, lbl) {
+  const el = document.getElementById('proof-progress');
+  el.classList.toggle('active', pct>0);
+  if (pct>0) {
+    document.getElementById('progress-bar').style.width = pct+'%';
+    document.getElementById('progress-lbl').textContent = lbl;
+  }
+}
+
+async function redeemNote() {
+  if (!account) { connectWallet(); return; }
+
+  const noteStr   = document.getElementById('accept-note-input').value.trim();
+  const recipient = document.getElementById('accept-recipient').value.trim();
+  const parsed    = parseNote(noteStr);
+
+  if (!parsed) return setStatus('accept-status','err','Invalid note format.');
+  if (!recipient||!/^0x[0-9a-fA-F]{40}$/.test(recipient))
+    return setStatus('accept-status','err','Enter a valid recipient address.');
+
+  const tok = TOKENS[parsed.token];
+  if (!tok) return setStatus('accept-status','err','Unknown token: '+parsed.token);
+  const shieldAddr = tok.shields[parsed.denom];
+  if (!shieldAddr) return setStatus('accept-status','err','No shield for this denomination.');
+
+  if (!poseidonFn) {
+    setStatus('accept-status','pend','Loading Poseidon…');
+    try { await initPoseidon(); }
+    catch(e) { setStatus('accept-status','err','Poseidon failed: '+e.message); return; }
+  }
+
+  const nullifier     = BigInt("0x"+parsed.nullifierHex);
+  const secret        = BigInt("0x"+parsed.secretHex);
+  const denomWei      = tok.denomWei[parsed.denom];
+  const nullifierHash = poseidonFn(nullifier, denomWei);
+  const commitment    = poseidonFn(nullifier, secret);
+
+  document.getElementById('accept-btn').disabled = true;
+  setStatus('accept-status','pend','Building Merkle proof…');
+  setProgress(10,'Reading shield deposits…');
+  try {
+    const { pathIndices, siblings, proofRoot } = await getMerkleProof(shieldAddr, commitment);
+    const circuitInput = {
+      nullifier:    nullifier.toString(),
+      secret:       secret.toString(),
+      pathIndices:  pathIndices.map(String),
+      siblings,
+      root:         proofRoot.toString(),
+      denomination: denomWei.toString(),
+      nullifierHash:nullifierHash.toString(),
+      recipient:    BigInt(recipient).toString()
+    };
+
+    setProgress(25,'Loading snarkjs…');
+    await lazyLoadSnarkjs();
+    setProgress(35,'Downloading proving key…');
+    const zkeyUrl = await getZkeyUrl(msg => setProgress(50, msg));
+    setProgress(60,'Generating ZK proof (30–60 sec)…');
+    setStatus('accept-status','pend','Generating ZK proof — keep this tab open…');
+
+    const { proof: zkProof, publicSignals } = await snarkjs.plonk.fullProve(circuitInput, WASM_URL, zkeyUrl);
+    setProgress(90,'Submitting transaction…');
+
+    const calldata = await snarkjs.plonk.exportSolidityCallData(zkProof, publicSignals);
+    const argv = calldata.replace(/\]\s*\[/g,",").replace(/["[\]\s]/g,"").split(",").filter(Boolean);
+    const pad  = v => BigInt(v).toString(16).padStart(64,"0");
+    const data = "0x8172d2d0"
+      + argv.slice(0,24).map(pad).join("")
+      + argv.slice(24,28).map(pad).join("")
+      + recipient.toLowerCase().replace("0x","").padStart(64,"0");
+
+    const txHash = await ethSend(account, shieldAddr, data);
+    setProgress(100,'Confirmed!');
+    await waitTx(txHash);
+    setProgress(0,'');
+    setStatus('accept-status','ok',`Redeemed! $${parsed.denom} ${tok.label} → ${recipient.slice(0,8)}…\nTX: ${txHash}`);
+    document.getElementById('accept-note-input').value = '';
+    document.getElementById('accept-detected').style.display = 'none';
+  } catch(e) {
+    setProgress(0,'');
+    if (!e.message?.includes('not mined')) setStatus('accept-status','err','Failed: '+e.message);
+  } finally {
+    document.getElementById('accept-btn').disabled = false;
+  }
+}
+
+// ─── Merkle proof (sparse tree) ───────────────────────────────────────────────
+
+function getZeroValues() {
+  if (_zeroValues) return _zeroValues;
+  const z = [ZERO];
+  for (let i=1; i<=TREE_LEVELS; i++) z.push(poseidonFn(z[i-1], z[i-1]));
+  _zeroValues = z;
+  return z;
+}
+
+async function getMerkleProof(shieldAddr, targetCommitment) {
+  const logs = await rpcCall("eth_getLogs",[{
+    address:shieldAddr, topics:[DEPOSIT_TOPIC], fromBlock:"earliest", toBlock:"latest"
+  }]);
+  if (!logs.length) throw new Error("No deposits found in this shield.");
+
+  const leaves = logs
+    .map(log => ({ commitment:BigInt(log.topics[1]), idx:Number(BigInt("0x"+log.data.slice(2,66))) }))
+    .sort((a,b)=>a.idx-b.idx)
+    .map(e=>e.commitment);
+
+  const leafIndex = leaves.findIndex(l=>l===targetCommitment);
+  if (leafIndex===-1) throw new Error("Commitment not found — wrong note for this shield.");
+
+  const Z = getZeroValues();
+  const treeByLevel = [leaves.slice()];
+  let layer = leaves.slice();
+  for (let l=0; l<TREE_LEVELS; l++) {
+    const next = [];
+    for (let i=0; i<Math.ceil(layer.length/2); i++) {
+      const left  = layer[2*i];
+      const right = (2*i+1 < layer.length) ? layer[2*i+1] : Z[l];
+      next.push(poseidonFn(left, right));
+    }
+    layer = next;
+    treeByLevel.push(next.slice());
+  }
+  const root = layer.length ? layer[0] : Z[TREE_LEVELS];
+
+  const siblings=[], pathIndices=[];
+  let idx = leafIndex;
+  for (let l=0; l<TREE_LEVELS; l++) {
+    const lyr = treeByLevel[l];
+    siblings.push((((idx^1) < lyr.length) ? lyr[idx^1] : Z[l]).toString());
+    pathIndices.push(idx&1);
+    idx >>= 1;
+  }
+
+  const onChain = await ethCall(shieldAddr,"0xba70f757");
+  const local   = "0x"+root.toString(16).padStart(64,"0");
+  if (local.toLowerCase()!==onChain.toLowerCase())
+    throw new Error("Merkle root mismatch — a deposit just occurred, please retry.");
+
+  return { pathIndices, siblings, proofRoot:root };
+}
+
+// ─── Lazy loaders ─────────────────────────────────────────────────────────────
+
+async function initPoseidon() {
+  if (!window._buildPoseidon) {
+    const { buildPoseidon } = await import('https://esm.sh/circomlibjs@0.1.7');
+    window._buildPoseidon = buildPoseidon;
+  }
+  const lib = await window._buildPoseidon();
+  poseidonFn = (...args) => lib.F.toObject(lib(args.map(x=>BigInt(x))));
+}
+
+async function lazyLoadSnarkjs() {
+  if (window.snarkjs) return;
+  return new Promise((res,rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/snarkjs@0.7.4/build/snarkjs.min.js';
+    s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+
+async function getZkeyUrl(onProgress) {
+  if (_zkeyBlobUrl) return _zkeyBlobUrl;
+  for (let i=0; i<ZKEY_URLS.length; i++) {
+    try {
+      onProgress(`Downloading proving key… (source ${i+1}/${ZKEY_URLS.length})`);
+      const r = await fetch(ZKEY_URLS[i]);
+      if (!r.ok) throw new Error('HTTP '+r.status);
+      _zkeyBlobUrl = URL.createObjectURL(await r.blob());
+      return _zkeyBlobUrl;
+    } catch(e) { console.warn('zkey source '+i+' failed:', e.message); }
+  }
+  throw new Error("Could not download proving key from any IPFS gateway.");
+}
+
+// ─── Status ───────────────────────────────────────────────────────────────────
+
+function setStatus(id, type, msg) {
+  const el = document.getElementById(id);
+  el.className = 'status '+type;
+  el.textContent = msg;
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+
+window.addEventListener('load', () => {
+  renderWallet();
+  // Pre-connect if wallet already authorised (silent, no prompt)
+  if (window.ethereum) {
+    window.ethereum.request({method:'eth_accounts'}).then(accounts => {
+      if (accounts.length) {
+        account = accounts[0];
+        const btn = document.getElementById('accept-wbtn');
+        btn.textContent = account.slice(0,6)+'…'+account.slice(-4);
+        btn.className = 'wbtn connected';
+        document.getElementById('accept-waddr').textContent = account;
+        document.getElementById('accept-btn').disabled = false;
+        document.getElementById('accept-btn').textContent = 'Redeem Note';
+        const recip = document.getElementById('accept-recipient');
+        if (!recip.value) recip.value = account;
+      }
+    }).catch(()=>{});
+  }
+});
+</script>
+</body>
+</html>
