@@ -235,13 +235,12 @@ textarea{height:78px;resize:vertical;line-height:1.5;font-size:12px}
   <!-- ── ACCEPT ── -->
   <div class="screen" id="screen-accept">
     <div class="sh">
-      <div class="sh-title">Accept</div>
+      <div class="sh-title">Register</div>
       <div class="sh-badge" style="color:#ffb400;background:rgba(255,180,0,.07);border-color:rgba(255,180,0,.2)">MERCHANT</div>
     </div>
 
     <div class="info">
-      <strong>Merchant terminal</strong> — run on a desktop or tablet.<br>
-      Customer shows a QR from their Wallet. Scan or paste the note, connect your wallet, and click Redeem. Your browser generates the ZK proof and funds arrive instantly.
+      <strong>Payment terminal</strong> — scan the customer's QR, connect your wallet, and tap Accept Payment. Your browser generates a ZK proof and the full denomination arrives at your address privately.
     </div>
 
     <div class="lbl-row">
@@ -271,7 +270,7 @@ textarea{height:78px;resize:vertical;line-height:1.5;font-size:12px}
       <span class="waddr" id="accept-waddr">Not connected</span>
     </div>
 
-    <button class="btn btn-primary" id="accept-btn" onclick="redeemNote()" disabled>Connect Wallet to Redeem</button>
+    <button class="btn btn-primary" id="accept-btn" onclick="redeemNote()" disabled>Connect Wallet to Accept</button>
 
     <div class="proof-progress" id="proof-progress">
       <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar"></div></div>
@@ -347,7 +346,7 @@ textarea{height:78px;resize:vertical;line-height:1.5;font-size:12px}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="20 6 9 17 4 12"/>
     </svg>
-    Accept
+    Register
   </button>
 </nav>
 
@@ -441,7 +440,7 @@ async function connectWallet() {
     const recip = document.getElementById('accept-recipient');
     if (!recip.value) recip.value = account;
     document.getElementById('accept-btn').disabled = false;
-    document.getElementById('accept-btn').textContent = "Redeem Note";
+    document.getElementById('accept-btn').textContent = "Accept Payment";
   } catch(e) { setStatus('accept-status','err',e.message); }
 }
 
@@ -741,7 +740,7 @@ async function redeemNote() {
     setProgress(100,'Confirmed!');
     await waitTx(txHash);
     setProgress(0,'');
-    setStatus('accept-status','ok',`Redeemed! $${parsed.denom} ${tok.label} → ${recipient.slice(0,8)}…\nTX: ${txHash}`);
+    setStatus('accept-status','ok',`Payment accepted! $${parsed.denom} ${tok.label} → ${recipient.slice(0,8)}…\nTX: ${txHash}`);
     document.getElementById('accept-note-input').value = '';
     document.getElementById('accept-detected').style.display = 'none';
   } catch(e) {
@@ -865,7 +864,7 @@ window.addEventListener('load', () => {
         btn.className = 'wbtn connected';
         document.getElementById('accept-waddr').textContent = account;
         document.getElementById('accept-btn').disabled = false;
-        document.getElementById('accept-btn').textContent = 'Redeem Note';
+        document.getElementById('accept-btn').textContent = 'Accept Payment';
         const recip = document.getElementById('accept-recipient');
         if (!recip.value) recip.value = account;
       }
