@@ -950,48 +950,54 @@ function fmt6(raw, dec=2) {
 }
 
 async function loadStats() {
-  try {
-    const w3      = new Web3("https://rpc.pulsechain.com");
-    const vault   = new w3.eth.Contract(MINING_VAULT_ABI, HP_MINING_VAULT);
-    const feeV    = new w3.eth.Contract(FEE_VAULT_ABI, FEE_VAULT);
+  // Raw JSON-RPC calls — no Web3 ABI encoding, avoids abi/5.7.0 bugs
+  async function ethCall(to, selector, argPadded) {
+    const data = argPadded ? selector + argPadded : selector;
+    const body = JSON.stringify({ jsonrpc:"2.0", id:1, method:"eth_call", params:[{to, data}, "latest"] });
+    const r = await fetch("https://rpc.pulsechain.com", { method:"POST", headers:{"Content-Type":"application/json"}, body });
+    const j = await r.json();
+    if (j.error) throw new Error(j.error.message);
+    return j.result; // hex string
+  }
+  function hexToUint(hex) { return hex === "0x" ? 0n : BigInt(hex); }
+  function hexToBool(hex) { return hex !== "0x" && BigInt(hex) !== 0n; }
+  function addrToArg(addr) { return addr.toLowerCase().replace("0x","").padStart(64,"0"); }
 
+  try {
     const [
-      vaultBal, rateBp, totalMined, peakBal, sealed,
+      vaultBal, rateBp, totalMined, peakBal, sealedHex,
       feeDai, feePsundai, feeUsdc, burned
     ] = await Promise.all([
-      vault.methods.vaultBalance().call(),
-      vault.methods.currentRateBp().call(),
-      vault.methods.totalMined().call(),
-      vault.methods.peakBalance().call(),
-      vault.methods.isSealed().call(),
-      feeV.methods.accumulated(HP_TOKENS.dai.addr).call(),
-      feeV.methods.accumulated(HP_TOKENS.psundai.addr).call(),
-      feeV.methods.accumulated(HP_TOKENS.usdc.addr).call(),
-      feeV.methods.totalPrivxBurned().call(),
+      ethCall(HP_MINING_VAULT, "0x0bf6cc08"),
+      ethCall(HP_MINING_VAULT, "0x8542dff7"),
+      ethCall(HP_MINING_VAULT, "0x5556db65"),
+      ethCall(HP_MINING_VAULT, "0xf91510ce"),
+      ethCall(HP_MINING_VAULT, "0x631f9852"),
+      ethCall(FEE_VAULT,       "0xcc2153d1", addrToArg(HP_TOKENS.dai.addr)),
+      ethCall(FEE_VAULT,       "0xcc2153d1", addrToArg(HP_TOKENS.psundai.addr)),
+      ethCall(FEE_VAULT,       "0xcc2153d1", addrToArg(HP_TOKENS.usdc.addr)),
+      ethCall(FEE_VAULT,       "0x828fc637"),
     ]);
 
-    // Mining vault
-    document.getElementById('stat-vault-bal').textContent   = fmt18(vaultBal) + ' PRIVX';
-    document.getElementById('stat-total-mined').textContent = fmt18(totalMined) + ' PRIVX';
-    document.getElementById('stat-sealed').textContent      = sealed ? 'Sealed ✓' : 'Open';
+    const vB = hexToUint(vaultBal);
+    const pB = hexToUint(peakBal);
 
-    const peakBalBig = BigInt(peakBal);
-    const ratePct = peakBalBig > 0n
-      ? (parseFloat(rateBp) / 100).toFixed(2)
-      : '0.00';
+    document.getElementById('stat-vault-bal').textContent   = fmt18(vB) + ' PRIVX';
+    document.getElementById('stat-total-mined').textContent = fmt18(hexToUint(totalMined)) + ' PRIVX';
+    document.getElementById('stat-sealed').textContent      = hexToBool(sealedHex) ? 'Sealed ✓' : 'Open';
+
+    const ratePct = pB > 0n ? (Number(hexToUint(rateBp)) / 100).toFixed(2) : '0.00';
     document.getElementById('stat-rate').textContent     = ratePct + '%';
-    document.getElementById('stat-rate-sub').textContent = peakBalBig > 0n
-      ? `vault at ${((Number(vaultBal) / Number(peakBal)) * 100).toFixed(0)}% capacity`
+    document.getElementById('stat-rate-sub').textContent = pB > 0n
+      ? `vault at ${(Number(vB * 100n / pB)).toFixed(0)}% capacity`
       : 'vault empty — fund to activate rewards';
 
-    // Fee vault
-    document.getElementById('stat-fee-dai').textContent     = fmt18(feeDai) + ' DAI';
-    document.getElementById('stat-fee-psundai').textContent = fmt18(feePsundai) + ' pSunDAI';
-    document.getElementById('stat-fee-usdc').textContent    = fmt6(feeUsdc) + ' USDC';
-    document.getElementById('stat-burned').textContent      = fmt18(burned) + ' PRIVX';
+    document.getElementById('stat-fee-dai').textContent     = fmt18(hexToUint(feeDai)) + ' DAI';
+    document.getElementById('stat-fee-psundai').textContent = fmt18(hexToUint(feePsundai)) + ' pSunDAI';
+    document.getElementById('stat-fee-usdc').textContent    = fmt6(hexToUint(feeUsdc)) + ' USDC';
+    document.getElementById('stat-burned').textContent      = fmt18(hexToUint(burned)) + ' PRIVX';
 
-    // Also update the Fund box balance
-    document.getElementById('vaultPrivxBal').textContent = fmt18(vaultBal);
+    document.getElementById('vaultPrivxBal').textContent = fmt18(vB);
   } catch(e) {
     console.error('loadStats:', e.message);
   }
