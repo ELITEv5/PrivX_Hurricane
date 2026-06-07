@@ -10,6 +10,9 @@
 <meta name="referrer" content="no-referrer">
 <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
+<meta name="apple-mobile-web-app-title" content="PrivX Pay">
+<link rel="apple-touch-icon" href="./privx-shield.png">
+<link rel="manifest" href="./privx-pay-wallet-manifest.json">
 <title>PrivX Pay</title>
 <style>
 :root{
@@ -90,6 +93,59 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t);
 .w-stats{font-size:12px;color:var(--t2);margin-top:8px;letter-spacing:.3px}
 .w-stats .live{color:var(--g)}
 .w-stats .spent-ct{color:#ff6666}
+.web3-chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;
+  color:rgba(255,255,255,.28);background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:4px 10px;
+  cursor:pointer;margin-top:10px;transition:all .2s;touch-action:manipulation;
+  font-family:inherit}
+.web3-chip:active{color:var(--a);border-color:rgba(0,255,234,.2)}
+.web3-chip .dot{width:6px;height:6px;border-radius:50%;background:#2a2a2a;flex-shrink:0}
+.web3-chip .dot.live{background:var(--g);box-shadow:0 0 6px rgba(0,230,100,.5)}
+
+/* ── Deposit button ── */
+.btn-deposit{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;
+  padding:14px;border:1px solid rgba(138,43,226,.35);border-radius:14px;
+  background:rgba(138,43,226,.08);color:var(--p);font-size:14px;font-weight:700;
+  cursor:pointer;transition:all .2s;touch-action:manipulation}
+.btn-deposit:active{background:rgba(138,43,226,.22);border-color:rgba(138,43,226,.6)}
+
+/* ── Deposit sheet ── */
+.dep-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;
+  display:flex;align-items:flex-end;backdrop-filter:blur(6px);
+  opacity:0;pointer-events:none;transition:opacity .25s}
+.dep-overlay.open{opacity:1;pointer-events:auto}
+.dep-sheet{width:100%;background:#111;border-radius:24px 24px 0 0;
+  padding:16px 24px calc(36px + var(--safe-bot));max-height:92vh;overflow-y:auto;
+  transform:translateY(100%);transition:transform .32s cubic-bezier(.32,1,.52,1)}
+.dep-overlay.open .dep-sheet{transform:translateY(0)}
+.dep-handle{width:36px;height:4px;background:#2a2a2a;border-radius:2px;margin:0 auto 22px}
+.dep-title{font-size:20px;font-weight:800;margin-bottom:4px}
+.dep-sub{font-size:13px;color:var(--t2);margin-bottom:24px}
+.dep-lbl{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--t2);margin-bottom:10px}
+.dep-tokens{display:flex;gap:8px;margin-bottom:24px}
+.dep-tok{flex:1;padding:10px 4px;border:1px solid rgba(255,255,255,.08);border-radius:12px;
+  background:rgba(255,255,255,.04);color:var(--t2);font-size:13px;font-weight:700;
+  cursor:pointer;text-align:center;transition:all .15s;touch-action:manipulation;font-family:inherit}
+.dep-tok.sel{border-color:var(--p);background:rgba(138,43,226,.12);color:#fff}
+.dep-tok:active{opacity:.7}
+.dep-denoms{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+.dep-den{padding:15px 6px;border:1px solid rgba(255,255,255,.08);border-radius:12px;
+  background:rgba(255,255,255,.04);color:var(--t2);font-size:18px;font-weight:800;
+  cursor:pointer;text-align:center;transition:all .15s;touch-action:manipulation;font-family:inherit}
+.dep-den.sel{border-color:var(--a);background:rgba(0,255,234,.07);color:var(--a)}
+.dep-den:active{opacity:.7}
+.dep-fee-row{font-size:11px;color:#3a3a3a;text-align:center;margin-bottom:20px;min-height:16px}
+.dep-fee-row span{color:#555}
+.btn-shield{width:100%;padding:17px;background:linear-gradient(135deg,#6b1eb8,var(--p));
+  border:none;border-radius:14px;color:#fff;font-size:16px;font-weight:800;cursor:pointer;
+  transition:all .2s;touch-action:manipulation;font-family:inherit;letter-spacing:-.2px}
+.btn-shield:active{filter:brightness(.85)}
+.btn-shield:disabled{opacity:.35;cursor:not-allowed}
+.dep-status{min-height:38px;margin-top:14px;text-align:center;font-size:13px;
+  font-weight:600;color:var(--t2);line-height:1.4;word-break:break-all}
+.dep-status.err{color:#ff7070}
+.dep-status.ok{color:var(--g)}
 
 /* ── Actions ── */
 .wallet-actions{display:flex;gap:10px;margin-bottom:22px}
@@ -265,16 +321,26 @@ input[type=text]:focus{border-color:var(--a)}
     <div class="w-total-lbl">Available Cash</div>
     <div class="w-total-amt" id="total-amount">$0</div>
     <div class="w-stats" id="w-stats"></div>
+    <button class="web3-chip" id="web3-chip" onclick="_web3Connect()" style="display:none">
+      <span class="dot" id="web3-dot"></span>
+      <span id="web3-label">Connect Wallet</span>
+    </button>
   </div>
 
   <div class="wallet-actions">
     <button class="btn-scan" onclick="openCamera()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:20px;height:20px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:18px;height:18px">
         <polyline points="23 7 23 1 17 1"/><line x1="16" y1="8" x2="23" y2="1"/>
         <polyline points="1 17 1 23 7 23"/><line x1="8" y1="16" x2="1" y2="23"/>
         <rect x="3" y="3" width="18" height="18" rx="3"/>
       </svg>
       Scan Note
+    </button>
+    <button class="btn-deposit" onclick="openDeposit()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:18px;height:18px">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Deposit
     </button>
     <button class="btn-clear" id="btn-clear-spent" onclick="clearAllSpent()">Clear Spent</button>
   </div>
@@ -347,6 +413,36 @@ input[type=text]:focus{border-color:var(--a)}
 
 </div><!-- /app -->
 
+<!-- ── DEPOSIT SHEET ── -->
+<div class="dep-overlay" id="dep-overlay" onclick="if(event.target===this)closeDeposit()">
+  <div class="dep-sheet">
+    <div class="dep-handle"></div>
+    <div class="dep-title">Deposit Cash</div>
+    <div class="dep-sub">Shield stablecoins → save an encrypted note</div>
+
+    <div class="dep-lbl">Token</div>
+    <div class="dep-tokens">
+      <button class="dep-tok sel" id="dep-tok-dai"     onclick="_setDepToken('dai')">DAI</button>
+      <button class="dep-tok"     id="dep-tok-psundai" onclick="_setDepToken('psundai')">pSunDAI</button>
+      <button class="dep-tok"     id="dep-tok-usdc"    onclick="_setDepToken('usdc')">USDC</button>
+    </div>
+
+    <div class="dep-lbl">Amount</div>
+    <div class="dep-denoms">
+      <button class="dep-den" onclick="_setDepDenom('1')">$1</button>
+      <button class="dep-den" onclick="_setDepDenom('5')">$5</button>
+      <button class="dep-den" onclick="_setDepDenom('10')">$10</button>
+      <button class="dep-den" onclick="_setDepDenom('20')">$20</button>
+      <button class="dep-den" onclick="_setDepDenom('50')">$50</button>
+      <button class="dep-den" onclick="_setDepDenom('100')">$100</button>
+    </div>
+
+    <div class="dep-fee-row">0.5% protocol fee · <span id="dep-fee-lbl">select amount</span></div>
+    <button class="btn-shield" id="btn-shield" onclick="_doDeposit()" disabled>Shield &amp; Save Note</button>
+    <div class="dep-status" id="dep-status"></div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
 <script>
 
@@ -369,10 +465,19 @@ const SHIELDS = {
     wei:       {"1":1000000000000000000n,"5":5000000000000000000n,"10":10000000000000000000n,"20":20000000000000000000n,"50":50000000000000000000n,"100":100000000000000000000n}
   },
   usdc: {
-    contracts: {"1":"0x2856661A94483486e25dE8F37DCf867938a13778","5":"0x53B91dB1485f687D8d162f1268D8485EBB85dF13","10":"0x59f40474834C6Cb3Bf3A5189f6B6f525d22f80A4","20":"0x5965FEa1E24472d64F3a24Edb9e663Bc728Caee6","50":"0x124A85fDB4ec3F11Ab257F6d4fC2eED8A4A6661fe","100":"0x883c74eFC878105cbDd15FB546A1a32F4fA45d5b"},
+    contracts: {"1":"0x2856661A94483486e25dE8F37DCf867938a13778","5":"0x53B91dB1485f687D8d162f1268D8485EBB85dF13","10":"0x59f40474834C6Cb3Bf3A5189f6B6f525d22f80A4","20":"0x5965FEa1E24472d64F3a24Edb9e663Bc728Caee6","50":"0x124A85fDB4ec3F11Ab257F6d4fC2eD8A4A6661fe","100":"0x883c74eFC878105cbDd15FB546A1a32F4fA45d5b"},
     wei:       {"1":1000000n,"5":5000000n,"10":10000000n,"20":20000000n,"50":50000000n,"100":100000000n}
   }
 };
+
+const TOKEN_ADDRS = {
+  dai:     '0xefD766cCb38EaF1dfd701853BFCe31359239F305',
+  psundai: '0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f',
+  usdc:    '0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07'
+};
+const TOKEN_DECIMALS = { dai: 18, psundai: 18, usdc: 6 };
+const FEE_BP = 50n; // 0.5% (50 / 10000)
+const PULSECHAIN_ID = '0x171';
 
 // Runtime state — null means locked
 let _notes        = null;
@@ -923,6 +1028,183 @@ function _scanFrame() {
   _camFrameId = requestAnimationFrame(_scanFrame);
 }
 
+// ─── Deposit ──────────────────────────────────────────────────────────────────
+
+let _depToken = 'dai';
+let _depDenom = null;
+let _depAcct  = null;
+
+function _addrArg(a)    { return a.toLowerCase().replace('0x','').padStart(64,'0'); }
+function _uint256Arg(n) { return n.toString(16).padStart(64,'0'); }
+function _hexToUint(h)  { return (h && h !== '0x') ? BigInt(h) : 0n; }
+
+async function _ethSend(from, to, data) {
+  return window.ethereum.request({ method: 'eth_sendTransaction', params: [{ from, to, data }] });
+}
+
+async function _waitReceipt(tx) {
+  for (let i = 0; i < 60; i++) {
+    await new Promise(r => setTimeout(r, 3000));
+    const rec = await _rpc('eth_getTransactionReceipt', [tx]);
+    if (rec) {
+      if (rec.status === '0x0') throw new Error('Transaction reverted');
+      return rec;
+    }
+  }
+  throw new Error('Not confirmed after timeout — check your wallet');
+}
+
+function openDeposit() {
+  document.getElementById('dep-overlay').classList.add('open');
+  _resetLockTimer();
+}
+
+function closeDeposit() {
+  document.getElementById('dep-overlay').classList.remove('open');
+  _setDepStatus('', '');
+}
+
+function _setDepToken(tok) {
+  _depToken = tok;
+  ['dai','psundai','usdc'].forEach(t =>
+    document.getElementById('dep-tok-'+t)?.classList.toggle('sel', t === tok)
+  );
+  if (_depDenom) _setDepDenom(_depDenom);
+}
+
+function _setDepDenom(d) {
+  _depDenom = d;
+  document.querySelectorAll('.dep-den').forEach(el =>
+    el.classList.toggle('sel', el.textContent === '$'+d)
+  );
+  const dw  = SHIELDS[_depToken].wei[d];
+  const fee = (dw * FEE_BP) / 10000n;
+  const dec = TOKEN_DECIMALS[_depToken];
+  const total = Number(dw + fee) / (10 ** dec);
+  document.getElementById('dep-fee-lbl').textContent =
+    `total ${total % 1 === 0 ? total : total.toFixed(dec === 6 ? 2 : 4)} ${TOKEN_LABELS[_depToken]}`;
+  document.getElementById('btn-shield').disabled = false;
+  _setDepStatus('', '');
+}
+
+function _depBtnDisable(v) { document.getElementById('btn-shield').disabled = v; }
+
+function _setDepStatus(type, msg) {
+  const el = document.getElementById('dep-status');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'dep-status' + (type === 'error' ? ' err' : type === 'ok' ? ' ok' : '');
+}
+
+async function _doDeposit() {
+  if (!_depDenom) return;
+  if (!window.ethereum) {
+    _setDepStatus('error', 'Open in MetaMask or Trust Wallet to deposit');
+    return;
+  }
+  _depBtnDisable(true);
+  try {
+    _setDepStatus('', 'Connecting wallet…');
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    _depAcct = accounts[0];
+    _showWeb3Addr(_depAcct);
+
+    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+    if (chainId !== PULSECHAIN_ID) {
+      _setDepStatus('', 'Switching to PulseChain…');
+      try {
+        await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: PULSECHAIN_ID }] });
+      } catch (sw) {
+        if (sw.code === 4902) {
+          await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{
+            chainId: PULSECHAIN_ID, chainName: 'PulseChain',
+            nativeCurrency: { name: 'Pulse', symbol: 'PLS', decimals: 18 },
+            rpcUrls: ['https://rpc.pulsechain.com'],
+            blockExplorerUrls: ['https://scan.pulsechain.com']
+          }]});
+        } else throw sw;
+      }
+    }
+
+    _setDepStatus('', 'Generating note…');
+    await _loadPoseidon();
+
+    const nBytes = crypto.getRandomValues(new Uint8Array(31));
+    const sBytes = crypto.getRandomValues(new Uint8Array(31));
+    const nHex = [...nBytes].map(b=>b.toString(16).padStart(2,'0')).join('');
+    const sHex = [...sBytes].map(b=>b.toString(16).padStart(2,'0')).join('');
+    const commitment = _poseidon(BigInt('0x'+nHex), BigInt('0x'+sHex));
+    const commitHex  = '0x' + commitment.toString(16).padStart(64,'0');
+
+    const shieldAddr = SHIELDS[_depToken].contracts[_depDenom];
+    const denomWei   = SHIELDS[_depToken].wei[_depDenom];
+    const totalWei   = denomWei + (denomWei * FEE_BP) / 10000n;
+    const tokenAddr  = TOKEN_ADDRS[_depToken];
+
+    _setDepStatus('', `Checking ${TOKEN_LABELS[_depToken]} allowance…`);
+    const allowHex = await _rpc('eth_call', [{ to: tokenAddr, data: '0xdd62ed3e' + _addrArg(_depAcct) + _addrArg(shieldAddr) }, 'latest']);
+    if (_hexToUint(allowHex) < totalWei) {
+      _setDepStatus('', `Approve ${TOKEN_LABELS[_depToken]} in your wallet…`);
+      const approveTx = await _ethSend(_depAcct, tokenAddr, '0x095ea7b3' + _addrArg(shieldAddr) + _uint256Arg(totalWei));
+      _setDepStatus('', 'Waiting for approval…');
+      await _waitReceipt(approveTx);
+    }
+
+    _setDepStatus('', 'Confirm deposit in your wallet…');
+    const depositTx = await _ethSend(_depAcct, shieldAddr, '0xb214faa5' + commitHex.slice(2));
+    _setDepStatus('', 'Waiting for confirmation…');
+    await _waitReceipt(depositTx);
+
+    const noteStr = `hp-${_depToken}-${_depDenom}-${nHex}-${sHex}`;
+    await saveNote(noteStr, _depToken, _depDenom);
+    renderWallet();
+
+    _setDepStatus('ok', `$${_depDenom} ${TOKEN_LABELS[_depToken]} note saved ✓`);
+    setTimeout(closeDeposit, 1800);
+  } catch(e) {
+    const msg = e.code === 4001 ? 'Cancelled' : (e.message || 'Unknown error');
+    _setDepStatus('error', msg);
+    _depBtnDisable(false);
+  }
+}
+
+// ─── Web3 Wallet ──────────────────────────────────────────────────────────────
+
+async function _detectWeb3() {
+  if (!window.ethereum) return;
+  const chip = document.getElementById('web3-chip');
+  if (chip) chip.style.display = 'inline-flex';
+  try {
+    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+    if (accounts.length) _showWeb3Addr(accounts[0]);
+    window.ethereum.on('accountsChanged', accs =>
+      accs.length ? _showWeb3Addr(accs[0]) : _hideWeb3Addr()
+    );
+  } catch { /* no-op */ }
+}
+
+async function _web3Connect() {
+  if (!window.ethereum) return;
+  try {
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    if (accounts.length) _showWeb3Addr(accounts[0]);
+  } catch { /* user rejected */ }
+}
+
+function _showWeb3Addr(addr) {
+  const el = document.getElementById('web3-label');
+  const dot = document.getElementById('web3-dot');
+  if (el) el.textContent = addr.slice(0,6) + '…' + addr.slice(-4);
+  if (dot) dot.classList.add('live');
+}
+
+function _hideWeb3Addr() {
+  const el = document.getElementById('web3-label');
+  const dot = document.getElementById('web3-dot');
+  if (el) el.textContent = 'Connect Wallet';
+  if (dot) dot.classList.remove('live');
+}
+
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
 window.addEventListener('load', () => {
@@ -930,6 +1212,8 @@ window.addEventListener('load', () => {
   _pinMode = hasSalt ? 'enter' : 'set';
   _setPrompt(hasSalt ? 'Enter your PIN' : 'Create a 6-digit PIN');
   document.getElementById('ls-reset').style.display = hasSalt ? 'block' : 'none';
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('./privx-pay-wallet-sw.js').catch(()=>{});
+  _detectWeb3();
 });
 
 </script>
