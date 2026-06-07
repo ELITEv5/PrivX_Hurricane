@@ -1101,7 +1101,7 @@ async function _waitReceipt(tx) {
       return rec;
     }
   }
-  throw new Error('Not confirmed after timeout — check your wallet');
+  throw new Error('timeout:' + tx);
 }
 
 function openDeposit() {
@@ -1201,20 +1201,30 @@ async function _doDeposit() {
       await _waitReceipt(approveTx);
     }
 
+    // Save note BEFORE sending deposit tx — if receipt times out, note is already safe
+    const noteStr = `hp-${_depToken}-${_depDenom}-${nHex}-${sHex}`;
+    await saveNote(noteStr, _depToken, _depDenom);
+    renderWallet();
+
     _setDepStatus('', 'Confirm deposit in your wallet…');
     const depositTx = await _ethSend(_depAcct, shieldAddr, '0xb214faa5' + commitHex.slice(2));
     _setDepStatus('', 'Waiting for confirmation…');
     await _waitReceipt(depositTx);
 
-    const noteStr = `hp-${_depToken}-${_depDenom}-${nHex}-${sHex}`;
-    await saveNote(noteStr, _depToken, _depDenom);
-    renderWallet();
-
-    _setDepStatus('ok', `$${_depDenom} ${TOKEN_LABELS[_depToken]} note saved ✓`);
+    _setDepStatus('ok', `$${_depDenom} ${TOKEN_LABELS[_depToken]} note deposited ✓`);
     setTimeout(closeDeposit, 1800);
   } catch(e) {
-    const msg = e.code === 4001 ? 'Cancelled' : (e.message || 'Unknown error');
-    _setDepStatus('error', msg);
+    if (e.message && e.message.startsWith('timeout:')) {
+      const tx = e.message.slice(8);
+      _setDepStatus('error',
+        'Timed out — your note is already saved in this wallet.\n\n' +
+        'Check the scanner to confirm the deposit went through before using the note:\n' +
+        'scan.pulsechain.com/tx/' + tx
+      );
+    } else {
+      const msg = e.code === 4001 ? 'Cancelled' : (e.message || 'Unknown error');
+      _setDepStatus('error', msg);
+    }
     _depBtnDisable(false);
   }
 }
