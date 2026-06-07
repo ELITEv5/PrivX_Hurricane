@@ -141,38 +141,43 @@
     <img src="privx-shield.png" style="width:54px;border-radius:14px;margin-bottom:10px;filter:drop-shadow(0 0 20px var(--glow))">
     <h1>PrivX Pay</h1>
     <div class="tagline">Private Stablecoin Cash</div>
-    <div class="cash-badge">POWERED BY PRIVX HURRICANE</div>
+    <div class="cash-badge">PRIVATE DIGITAL CASH</div>
   </div>
 
   <div class="info-box" style="margin-bottom:20px">
-    <strong>What is PrivX Pay?</strong><br>
-    PrivX Pay turns stablecoins into private digital cash. Load notes at home like withdrawing from an ATM. At point of sale, open your Wallet tab and show a QR — the merchant scans it, generates a ZK proof, and receives funds. No on-chain link between payer and payee.
+    <strong>This is your PrivX ATM.</strong><br>
+    You lock stablecoins into a private shield vault and get an encrypted denomination note back — like withdrawing $20 bills from an ATM. Notes live in your phone wallet. At the register, you show a QR. The merchant's computer generates a ZK proof and receives funds privately. No on-chain link between payer and payee ever exists.
     <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
       <span style="background:rgba(0,255,234,0.07);border:1px solid rgba(0,255,234,0.2);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--accent)">Zero-knowledge proofs</span>
       <span style="background:rgba(0,255,234,0.07);border:1px solid rgba(0,255,234,0.2);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--accent)">No on-chain identity</span>
-      <span style="background:rgba(0,255,234,0.07);border:1px solid rgba(0,255,234,0.2);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--accent)">Bearer instrument</span>
-      <span style="background:rgba(0,255,234,0.07);border:1px solid rgba(0,255,234,0.2);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--accent)">0.5% fee</span>
+      <span style="background:rgba(0,255,234,0.07);border:1px solid rgba(0,255,234,0.2);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--accent)">Bearer notes</span>
+      <span style="background:rgba(0,255,234,0.07);border:1px solid rgba(0,255,234,0.2);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--accent)">0.5% deposit fee</span>
     </div>
   </div>
 
   <!-- How it Works -->
   <div style="margin-bottom:22px">
     <div class="section-label" style="margin-bottom:12px">How it works</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <div style="background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);border-radius:14px;padding:14px 12px;text-align:center">
         <div style="font-size:22px;margin-bottom:6px">🏧</div>
-        <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">1. Load Cash</div>
-        <div style="font-size:11px;color:#666;line-height:1.5">Deposit at home. Notes auto-save to your Wallet — like an ATM withdrawal.</div>
+        <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">1. ATM Withdrawal</div>
+        <div style="font-size:11px;color:#666;line-height:1.5">Deposit stablecoins here on desktop. Get an encrypted note — exactly like withdrawing cash.</div>
+      </div>
+      <div style="background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);border-radius:14px;padding:14px 12px;text-align:center">
+        <div style="font-size:22px;margin-bottom:6px">📱</div>
+        <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">2. Load Phone Wallet</div>
+        <div style="font-size:11px;color:#666;line-height:1.5">Scan the note QR with the PrivX Pay mobile wallet. Your bills are now in your pocket.</div>
       </div>
       <div style="background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);border-radius:14px;padding:14px 12px;text-align:center">
         <div style="font-size:22px;margin-bottom:6px">📲</div>
-        <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">2. Show QR</div>
-        <div style="font-size:11px;color:#666;line-height:1.5">Open Wallet, tap a note. Point your phone — the merchant scans it.</div>
+        <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">3. Pay by QR</div>
+        <div style="font-size:11px;color:#666;line-height:1.5">At the register, tap a bill in your wallet and show the QR to the merchant.</div>
       </div>
       <div style="background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);border-radius:14px;padding:14px 12px;text-align:center">
         <div style="font-size:22px;margin-bottom:6px">✅</div>
-        <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">3. Accept</div>
-        <div style="font-size:11px;color:#666;line-height:1.5">Merchant generates ZK proof on their computer. Funds arrive privately.</div>
+        <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">4. Merchant Accepts</div>
+        <div style="font-size:11px;color:#666;line-height:1.5">Merchant scans the QR on the Accept tab. ZK proof generated. Funds arrive — no link to you.</div>
       </div>
     </div>
   </div>
@@ -186,12 +191,14 @@
   <!-- ─── BUY CASH TAB ───────────────────────────────────────────────────── -->
   <div id="buyTab" class="hidden">
     <div class="info-box">
-      <strong>Loading private cash:</strong><br>
-      <span style="color:#888">1.</span> Choose your currency and denomination below.<br>
-      <span style="color:#888">2.</span> Connect your wallet and approve the token spend.<br>
-      <span style="color:#888">3.</span> Confirm the deposit — the note is automatically saved to your wallet.<br>
-      <span style="color:#888">4.</span> Go to your <strong style="color:#00ffea">Wallet</strong> tab to show QR codes at point of sale.<br>
-      <div style="margin-top:8px;font-size:11px;color:#555">Do this at home on desktop — proof generation for merchants is heavy, so keep this on a computer. A 0.5% fee is paid on deposit; merchants receive the full denomination.</div>
+      <strong>You're at the ATM.</strong> You're locking real stablecoins into a private shield vault and getting an encrypted denomination note back. That note is your cash — a bearer instrument, like a $20 bill. Store it in your phone wallet and spend it at any PrivX Pay merchant.<br>
+      <div style="margin-top:10px">
+        <span style="color:#888">1.</span> Choose currency &amp; denomination below.<br>
+        <span style="color:#888">2.</span> Connect wallet → approve → confirm deposit.<br>
+        <span style="color:#888">3.</span> <strong style="color:#00ffea">Scan the note QR into your phone</strong> to carry it as digital cash — or copy the note text as a backup.<br>
+        <span style="color:#888">4.</span> At the register, show your phone wallet QR. The merchant redeems it privately on their computer.
+      </div>
+      <div style="margin-top:8px;font-size:11px;color:#555">Do this at home on a computer. A 0.5% fee is charged at deposit — merchants receive the full denomination plus PRIVX mining rewards.</div>
     </div>
 
     <div class="section-label">Choose Currency</div>
@@ -214,11 +221,14 @@
     <button class="btn btn-primary" id="buyBtn" onclick="buyNote()" disabled>Select Denomination</button>
 
     <div class="note-display" id="noteDisplay">
-      <div class="note-warn">Note saved to your Wallet — go to the Wallet tab to show QR codes.</div>
+      <div class="note-warn">Note minted and saved — scan this QR with your phone wallet to load the bill, or copy the note text as a backup.</div>
+      <div class="qr-wrap" style="margin:0 0 14px">
+        <canvas id="buyNoteQR"></canvas>
+      </div>
       <div class="note-text" id="noteText"></div>
       <div class="note-actions">
         <button onclick="copyNote()">Copy Note</button>
-        <button onclick="switchToWallet()" style="background:rgba(0,255,234,0.12);border-color:rgba(0,255,234,0.4);color:var(--accent)">Go to Wallet →</button>
+        <button onclick="switchToWallet()" style="background:rgba(0,255,234,0.12);border-color:rgba(0,255,234,0.4);color:var(--accent)">Wallet →</button>
       </div>
     </div>
 
@@ -303,7 +313,7 @@
   <div class="fund-inner">
     <div class="fund-title">Protocol Stats</div>
 
-    <div style="font-size:10px;color:#444;margin-bottom:12px;text-transform:uppercase;letter-spacing:.6px;font-weight:700">HP Mining Vault</div>
+    <div style="font-size:10px;color:#444;margin-bottom:12px;text-transform:uppercase;letter-spacing:.6px;font-weight:700">PrivX Pay Mining Vault</div>
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-label">PRIVX Balance</div>
@@ -557,6 +567,7 @@ function switchTab(t) {
     document.getElementById('tab-'+id).classList.toggle('active', id === t);
   });
   if (t === 'spend') renderSavedNotes();
+  if (t === 'accept' && !_zkeyBlobUrl) getZkeyUrl(() => {}).catch(() => {});
 }
 
 function switchToWallet() { switchTab('spend'); }
@@ -734,7 +745,7 @@ async function buyNote() {
     document.getElementById('noteText').textContent = note;
     document.getElementById('noteDisplay').style.display = 'block';
     QRCode.toCanvas(document.getElementById('buyNoteQR'), note,
-      { width:220, margin:2, color:{dark:'#ffffff',light:'#000000'} },
+      { width:220, margin:2, color:{dark:'#000000',light:'#ffffff'} },
       err => { if (err) console.error('QR error:', err); });
 
     const denomWei  = token.denomWei[selectedDenom];
@@ -760,7 +771,7 @@ async function buyNote() {
     const saved = getSavedNotes();
     if (!saved.find(n => n.note === _currentNote.note)) {
       saved.push(_currentNote);
-      localStorage.setItem('hp_notes', JSON.stringify(saved));
+      localStorage.setItem('privxpay_notes_v1', JSON.stringify(saved));
     }
 
     setStatus('buyStatus', 'success',
@@ -786,13 +797,13 @@ function saveNote() {
   const saved = getSavedNotes();
   if (saved.find(n => n.note === _currentNote.note)) return;
   saved.push(_currentNote);
-  localStorage.setItem('hp_notes', JSON.stringify(saved));
+  localStorage.setItem('privxpay_notes_v1', JSON.stringify(saved));
 }
 
 // ─── SPEND TAB ────────────────────────────────────────────────────────────────
 
 function getSavedNotes() {
-  try { return JSON.parse(localStorage.getItem('hp_notes') || '[]'); } catch { return []; }
+  try { return JSON.parse(localStorage.getItem('privxpay_notes_v1') || '[]'); } catch { return []; }
 }
 
 function renderSavedNotes() {
@@ -827,7 +838,7 @@ function deleteNote(i) {
   if (!confirm('Delete this note? Make sure you have a copy if it has not been spent.')) return;
   const saved = getSavedNotes();
   saved.splice(i, 1);
-  localStorage.setItem('hp_notes', JSON.stringify(saved));
+  localStorage.setItem('privxpay_notes_v1', JSON.stringify(saved));
   renderSavedNotes();
   document.getElementById('spendQrWrap').style.display = 'none';
 }
@@ -848,7 +859,7 @@ function renderSpendQR() {
   wrap.style.display = 'block';
   QRCode.toCanvas(document.getElementById('spendQrCanvas'), note, {
     width: 240, margin: 2,
-    color: { dark:'#ffffff', light:'#000000' }
+    color: { dark:'#000000', light:'#ffffff' }
   }, err => { if (err) console.error(err); });
   const short = note.length > 50 ? note.slice(0,28)+'…'+note.slice(-20) : note;
   document.getElementById('spendQrText').textContent = short;
@@ -1088,7 +1099,7 @@ window.addEventListener('load', async () => {
 const canvas = document.getElementById('matrix-bg'), ctx = canvas.getContext('2d');
 canvas.width = innerWidth; canvas.height = innerHeight;
 let fontSize = innerWidth < 600 ? 10 : 14;
-const chars  = '01HURRICANEPAY$$$';
+const chars  = '01PRIVXPAY$$$';
 let columns  = Math.floor(canvas.width / fontSize);
 let drops    = Array(columns).fill(1);
 function draw() {
