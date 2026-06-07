@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hurricane Pay — Private Digital Cash</title>
+  <title>PrivX Pay — Private Digital Cash</title>
   <link rel="icon" href="privx-shield.png" type="image/png">
   <meta name="theme-color" content="#8A2BE2">
-  <meta name="description" content="Hurricane Pay — private digital cash on PulseChain. Buy, spend, and accept DAI, pSunDAI, and USDC privately with zero on-chain identity.">
+  <meta name="description" content="PrivX Pay — private digital cash on PulseChain. Buy, spend, and accept DAI, pSunDAI, and USDC privately with zero on-chain identity.">
   <style>
     :root{--primary:#8A2BE2;--accent:#00ffea;--bg:#000;--glow:rgba(138,43,226,0.6)}
     *{margin:0;padding:0;box-sizing:border-box}
@@ -130,7 +130,7 @@
 <canvas id="matrix-bg"></canvas>
 
 <div class="top-nav">
-  <a href="index.html" class="nav-link">← PrivX Hurricane</a>
+  <a href="index.html" class="nav-link">← PrivX</a>
   <a href="relayer.html" class="nav-link">📦 Relayer</a>
 </div>
 
@@ -139,14 +139,14 @@
 
   <div class="logo-header">
     <img src="privx-shield.png" style="width:54px;border-radius:14px;margin-bottom:10px;filter:drop-shadow(0 0 20px var(--glow))">
-    <h1>Hurricane Pay</h1>
+    <h1>PrivX Pay</h1>
     <div class="tagline">Private Stablecoin Cash</div>
     <div class="cash-badge">POWERED BY PRIVX HURRICANE</div>
   </div>
 
   <div class="info-box" style="margin-bottom:20px">
-    <strong>What is Hurricane Pay?</strong><br>
-    Hurricane Pay turns stablecoins into private digital cash. Load notes at home like withdrawing from an ATM. At point of sale, open your Wallet tab and show a QR — the merchant scans it, generates a ZK proof, and receives funds. No on-chain link between payer and payee.
+    <strong>What is PrivX Pay?</strong><br>
+    PrivX Pay turns stablecoins into private digital cash. Load notes at home like withdrawing from an ATM. At point of sale, open your Wallet tab and show a QR — the merchant scans it, generates a ZK proof, and receives funds. No on-chain link between payer and payee.
     <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
       <span style="background:rgba(0,255,234,0.07);border:1px solid rgba(0,255,234,0.2);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--accent)">Zero-knowledge proofs</span>
       <span style="background:rgba(0,255,234,0.07);border:1px solid rgba(0,255,234,0.2);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--accent)">No on-chain identity</span>
@@ -228,7 +228,7 @@
   <!-- ─── WALLET TAB ──────────────────────────────────────────────────────── -->
   <div id="spendTab">
     <div class="info-box">
-      <strong>Your Hurricane Pay wallet:</strong><br>
+      <strong>Your PrivX Pay wallet:</strong><br>
       Tap any note to show its QR code. Point your phone at the merchant — they scan it in the <em>Accept</em> tab to redeem. Load more cash from the <em>Load Cash</em> tab at home.<br>
       <div style="margin-top:8px;background:rgba(255,180,0,0.07);border:1px solid rgba(255,180,0,0.2);border-radius:8px;padding:8px 12px;font-size:11px;color:#ffb400">
         <strong>A shown note is spent cash.</strong> Notes are bearer instruments — whoever has one can redeem it. Once you show the QR, consider the funds transferred.
@@ -274,7 +274,7 @@
     </div>
 
     <div class="section-label">Customer Note</div>
-    <textarea id="acceptNote" placeholder="hp-dai-10-abc123… or privx-hurricane-dai-10-abc123…" oninput="detectAcceptNote()"></textarea>
+    <textarea id="acceptNote" placeholder="hp-dai-10-abc123… or privx-pay-dai-10-abc123…" oninput="detectAcceptNote()"></textarea>
 
     <div id="acceptDetected" style="background:#111;border:1px solid rgba(0,255,234,0.2);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;font-family:monospace;line-height:1.8;display:none">
       <div style="display:flex;gap:8px"><span style="color:#555;min-width:80px;font-size:10px;text-transform:uppercase;letter-spacing:.5px">Token</span><span style="color:var(--accent)" id="acc-token">—</span></div>
@@ -363,7 +363,7 @@
     <div class="fund-title">Fund Mining Rewards</div>
     <div class="fund-bal">HP Vault Balance: <span id="vaultPrivxBal">—</span> PRIVX</div>
     <div class="fund-addr" id="vaultAddrDisplay">0xf7Abeb9a3ccea1B8c30ca8a6d359c609B0751650</div>
-    <div style="font-size:10px;color:#444;margin:6px 0 12px">Anyone can top up the vault — rewards are paid to merchants who accept Hurricane Pay notes.</div>
+    <div style="font-size:10px;color:#444;margin:6px 0 12px">Anyone can top up the vault — rewards are paid to merchants who accept PrivX Pay notes.</div>
     <div class="fund-input-row">
       <input type="text" id="fundAmount" placeholder="PRIVX amount (e.g. 10000)">
       <button onclick="fundVault()">Fund Vault</button>
@@ -391,11 +391,11 @@
       </div>
       <div class="divider"></div>
       <div><strong style="color:#B57AFF">What are PRIVX mining rewards?</strong><br>
-        Merchants who redeem notes earn PRIVX tokens from the Hurricane Pay Mining Vault. Rewards scale with denomination — larger bills earn more PRIVX per redemption. Rewards reduce proportionally as the vault empties and refill when the community tops it up.
+        Merchants who redeem notes earn PRIVX tokens from the PrivX Pay Mining Vault. Rewards scale with denomination — larger bills earn more PRIVX per redemption. Rewards reduce proportionally as the vault empties and refill when the community tops it up.
       </div>
       <div class="divider"></div>
       <div><strong style="color:#B57AFF">Who controls the contracts?</strong><br>
-        The Hurricane Pay shields are fully immutable after deployment — no admin can pause, upgrade, or confiscate funds. The protocol fee (0.5%) and mining rewards are set at construction and cannot be changed.
+        The PrivX Pay shields are fully immutable after deployment — no admin can pause, upgrade, or confiscate funds. The protocol fee (0.5%) and mining rewards are set at construction and cannot be changed.
       </div>
     </div>
   </div>
@@ -413,8 +413,8 @@
 </script>
 <script>
 
-// ─── Hurricane Pay Token Config ───────────────────────────────────────────────
-// Contracts are DEPLOY_FIRST until Hurricane Pay shields are deployed.
+// ─── PrivX Pay Token Config ───────────────────────────────────────────────
+// Contracts are DEPLOY_FIRST until PrivX Pay shields are deployed.
 // Denominations: $1 $5 $10 $20 $50 $100
 
 const HP_TOKENS = {
@@ -712,7 +712,7 @@ async function buyNote() {
   const token      = HP_TOKENS[selectedBuyToken];
   const shieldAddr = token.shields[selectedDenom];
   if (!shieldAddr || shieldAddr === "DEPLOY_FIRST")
-    return setStatus('buyStatus', 'error', `Hurricane Pay $${selectedDenom} ${token.label} shield is not yet deployed. Coming soon.`);
+    return setStatus('buyStatus', 'error', `PrivX Pay $${selectedDenom} ${token.label} shield is not yet deployed. Coming soon.`);
 
   const btn = document.getElementById('buyBtn');
   btn.disabled = true;
@@ -751,7 +751,7 @@ async function buyNote() {
       await waitForReceipt(approveTx);
     }
 
-    setStatus('buyStatus', 'pending', 'Depositing into Hurricane Pay shield…');
+    setStatus('buyStatus', 'pending', 'Depositing into PrivX Pay shield…');
     const depositTx = await ethSend(buyAccount, shieldAddr,
       "0xb214faa5" + commitHex.slice(2));
     const receipt = await waitForReceipt(depositTx);
@@ -856,14 +856,13 @@ function renderSpendQR() {
 
 // ─── ACCEPT TAB ──────────────────────────────────────────────────────────────
 
-// Accept both hp- notes and legacy privx-hurricane- notes
+// Note format: hp-<token>-<denom>-<nullifierHex>-<secretHex>
 const HP_NOTE_RE     = /^hp-(dai|psundai|usdc)-(\d+)-([a-fA-F0-9]{62,64})-([a-fA-F0-9]{62,64})$/i;
-const LEGACY_NOTE_RE = /^privx-hurricane-(dai|psundai)-(\d+[.0-9]*)-([a-fA-F0-9]{62,64})-([a-fA-F0-9]{62,64})$/i;
 
 function detectAcceptNote() {
   const raw = document.getElementById('acceptNote').value.trim();
   const el  = document.getElementById('acceptDetected');
-  const match = raw.match(HP_NOTE_RE) || raw.match(LEGACY_NOTE_RE);
+  const match = raw.match(HP_NOTE_RE);
   if (!match) { el.style.display = 'none'; return; }
   const [, tokenKey, denomStr] = match;
   const token = HP_TOKENS[tokenKey.toLowerCase()];
@@ -898,15 +897,15 @@ async function acceptNote() {
   if (!acceptAccount) return connectAccept();
   if (!poseidonFn)    return setStatus('acceptStatus', 'error', 'Poseidon not ready — wait a moment.');
 
-  const match = raw.match(HP_NOTE_RE) || raw.match(LEGACY_NOTE_RE);
-  if (!match) return setStatus('acceptStatus', 'error', 'Invalid note format. Expected: hp-dai-10-… or privx-hurricane-dai-10-…');
+  const match = raw.match(HP_NOTE_RE);
+  if (!match) return setStatus('acceptStatus', 'error', 'Invalid note format. Expected: hp-dai-10-… or privx-pay-dai-10-…');
   const [, tokenKey, denomStr, nHex, sHex] = match;
   const token = HP_TOKENS[tokenKey.toLowerCase()];
   if (!token) return setStatus('acceptStatus', 'error', 'Unknown token: ' + tokenKey);
 
   const shieldAddr = token.shields[denomStr];
   if (!shieldAddr || shieldAddr === "DEPLOY_FIRST")
-    return setStatus('acceptStatus', 'error', `Hurricane Pay $${denomStr} ${token.label} shield is not yet deployed.`);
+    return setStatus('acceptStatus', 'error', `PrivX Pay $${denomStr} ${token.label} shield is not yet deployed.`);
 
   const denomWei      = token.denomWei[denomStr];
   const nullifier     = BigInt("0x"+nHex);
