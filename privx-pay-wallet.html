@@ -4,8 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0a0a0a">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
 <title>PrivX Pay</title>
 <style>
 :root{
@@ -374,7 +377,7 @@ const ZKEY_URLS = [
 ];
 
 const TREE_LEVELS = 14;
-const ZERO = 21663839004416932945382355908790599225266501822907911457504978515578255421292n;
+const ZERO = 0n;
 const DEPOSIT_TOPIC = "0xa945e51eec50ab98c161376f0db4cf2aeba3ec92755fe2fcd388bdbbb80ff196";
 
 const TOKENS = {
@@ -623,7 +626,7 @@ function scanFrame() {
   const canvas = document.getElementById('cam-canvas');
   if (!vid.videoWidth) { _camFrameId = requestAnimationFrame(scanFrame); return; }
   canvas.width = vid.videoWidth; canvas.height = vid.videoHeight;
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', {willReadFrequently:true});
   ctx.drawImage(vid, 0, 0);
   const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
   const result = jsQR(img.data, img.width, img.height, {inversionAttempts:'attemptBoth'});
@@ -761,7 +764,7 @@ function getZeroValues() {
 
 async function getMerkleProof(shieldAddr, targetCommitment) {
   const logs = await rpcCall("eth_getLogs",[{
-    address:shieldAddr, topics:[DEPOSIT_TOPIC], fromBlock:"earliest", toBlock:"latest"
+    address:shieldAddr, topics:[DEPOSIT_TOPIC], fromBlock:"0x0", toBlock:"latest"
   }]);
   if (!logs.length) throw new Error("No deposits found in this shield.");
 
