@@ -55,6 +55,12 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t);
 .ls-reset{font-size:11px;color:#2a2a2a;cursor:pointer;text-decoration:underline;
   margin-top:2px;padding:8px;display:none}
 .ls-reset:active{color:#555}
+.ls-cancel{font-size:13px;font-weight:600;color:var(--t2);cursor:pointer;padding:10px;
+  display:none;touch-action:manipulation}
+.ls-cancel:active{color:#fff}
+.change-pin-link{font-size:11px;color:#2a2a2a;cursor:pointer;text-decoration:underline;
+  text-align:center;padding:16px 0 4px;touch-action:manipulation}
+.change-pin-link:active{color:#555}
 
 /* ── App ── */
 #app.hidden{display:none}
@@ -184,6 +190,15 @@ input[type=text]:focus{border-color:var(--a)}
   background:linear-gradient(transparent,rgba(0,0,0,.7))}
 
 @media(max-width:380px){.bill-amount{font-size:32px}.w-total-amt{font-size:44px}}
+
+/* ── Spent toast ── */
+#spend-toast{
+  position:fixed;bottom:calc(40px + var(--safe-bot));left:50%;transform:translateX(-50%);
+  background:var(--g);color:#000;font-size:13px;font-weight:800;letter-spacing:.3px;
+  padding:11px 22px;border-radius:24px;white-space:nowrap;pointer-events:none;
+  opacity:0;transition:opacity .3s;z-index:5000
+}
+#spend-toast.show{opacity:1}
 </style>
 </head>
 <body>
@@ -219,6 +234,7 @@ input[type=text]:focus{border-color:var(--a)}
     <div></div>
   </div>
   <div class="ls-reset" id="ls-reset" onclick="confirmReset()">Reset wallet</div>
+  <div class="ls-cancel" id="ls-cancel" onclick="cancelChangePin()">← Cancel</div>
 </div>
 
 <!-- ── MAIN APP (hidden until unlocked) ── -->
@@ -265,6 +281,8 @@ input[type=text]:focus{border-color:var(--a)}
       autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
       oninput="onPasteNote(this.value)">
   </div>
+
+  <div class="change-pin-link" onclick="startChangePin()">· change PIN ·</div>
 
 </div><!-- /main -->
 
@@ -319,6 +337,8 @@ input[type=text]:focus{border-color:var(--a)}
   </div>
 </div>
 
+<div id="spend-toast"></div>
+
 </div><!-- /app -->
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
@@ -330,14 +350,36 @@ const STORE        = 'privxpay_notes_v1';
 const PIN_LEN      = 6;
 const LOCK_MS      = 5 * 60 * 1000; // 5 min idle
 
+const RPC           = 'https://rpc.pulsechain.com';
+const NULL_HASH_SEL = '0x17cc915c'; // nullifierHashes(bytes32)
+
+const SHIELDS = {
+  dai: {
+    contracts: {"1":"0x9ABb21e92f4f589515A65aEa79dc920b40A799D4","5":"0x0840430d8870933614EFE7f3F45119CcA738B6E2","10":"0x19a9Db059A2C1777Ea4d09dC8d234aD79b21F406","20":"0x1eeB506568054d0bb7e6977c8030B0ffd05Ef0D2","50":"0xc88c22f57a24A2559a3dd3780cE160241aec709F","100":"0x9e85fDdD5d231265b247d3cBC4dB80505582486b"},
+    wei:       {"1":1000000000000000000n,"5":5000000000000000000n,"10":10000000000000000000n,"20":20000000000000000000n,"50":50000000000000000000n,"100":100000000000000000000n}
+  },
+  psundai: {
+    contracts: {"1":"0x38e1D3fd69F7A978e6fe5e4de787Cf96b71Fa688","5":"0xfd2d44332a54eB89016f95705fBb7C84f917a9B3","10":"0x3007cFf2B4b79998905146bF41a6730f4f22c629","20":"0x7c3CAC0556F00e48fB0E5400EF1877f966609952","50":"0x91EF673aECE26703D9B72E8eB591253F7b26F6B6","100":"0xcDff42f6803Df9B9D76723263E73F017c97F68F7"},
+    wei:       {"1":1000000000000000000n,"5":5000000000000000000n,"10":10000000000000000000n,"20":20000000000000000000n,"50":50000000000000000000n,"100":100000000000000000000n}
+  },
+  usdc: {
+    contracts: {"1":"0x2856661A94483486e25dE8F37DCf867938a13778","5":"0x53B91dB1485f687D8d162f1268D8485EBB85dF13","10":"0x59f40474834C6Cb3Bf3A5189f6B6f525d22f80A4","20":"0x5965FEa1E24472d64F3a24Edb9e663Bc728Caee6","50":"0x124A85fDB4ec3F11Ab257F6d4fC2eED8A4A6661fe","100":"0x883c74eFC878105cbDd15FB546A1a32F4fA45d5b"},
+    wei:       {"1":1000000n,"5":5000000n,"10":10000000n,"20":20000000n,"50":50000000n,"100":100000000n}
+  }
+};
+
 // Runtime state — null means locked
-let _notes     = null;
-let _key       = null;
-let _lockTimer = null;
+let _notes        = null;
+let _key          = null;
+let _lockTimer    = null;
+let _changingPin  = false;
+let _poseidon     = null;   // lazy loaded
+let _spendWatchId = null;
+let _spendWatchNoteId = null;
 
 // PIN state
 let _pin      = '';
-let _pinMode  = 'enter';  // 'set' | 'confirm' | 'enter'
+let _pinMode  = 'enter';  // 'set' | 'confirm' | 'enter' | 'change-new' | 'change-confirm'
 let _pinFirst = '';
 
 // ─── Crypto ──────────────────────────────────────────────────────────────────
@@ -411,6 +453,21 @@ async function _submitPin() {
     }
     return;
   }
+  if (_pinMode === 'change-new') {
+    _pinFirst = entered; _pinMode = 'change-confirm';
+    _setPrompt('Confirm new PIN');
+    return;
+  }
+  if (_pinMode === 'change-confirm') {
+    if (entered !== _pinFirst) {
+      _pinMode = 'change-new'; _pinFirst = '';
+      _setPrompt('Enter new PIN');
+      _pinErr("PINs don't match — try again");
+    } else {
+      await _applyNewPin(_pinFirst);
+    }
+    return;
+  }
   // 'enter' mode
   _setPrompt('Unlocking…');
   await _tryUnlock(entered);
@@ -462,6 +519,7 @@ function _unlock() {
 }
 
 function lock() {
+  _stopSpendWatch();
   _notes = null; _key = null;
   _pin = ''; _pinFirst = '';
   _pinMode = localStorage.getItem(SALT_KEY) ? 'enter' : 'set';
@@ -488,6 +546,114 @@ document.addEventListener('visibilitychange', () => {
 ['touchstart','click','keydown'].forEach(ev =>
   document.addEventListener(ev, () => { if (_key) _resetTimer(); }, {passive:true})
 );
+
+// ─── Spend detection ──────────────────────────────────────────────────────────
+
+async function _loadPoseidon() {
+  if (_poseidon) return;
+  try {
+    if (window._buildPoseidon) {            // IPFS: local circomlibjs.js
+      const p = await window._buildPoseidon();
+      _poseidon = (a,b) => p.F.toObject(p([BigInt(a), BigInt(b)]));
+      return;
+    }
+    const { buildPoseidon } = await import('https://esm.sh/circomlibjs@0.1.7');
+    const p = await buildPoseidon();
+    _poseidon = (a,b) => p.F.toObject(p([BigInt(a), BigInt(b)]));
+  } catch { /* spend check unavailable offline */ }
+}
+
+async function _rpc(method, params) {
+  const r = await fetch(RPC, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({jsonrpc:'2.0',id:1,method,params})
+  });
+  const j = await r.json();
+  if (j.error) throw new Error(j.error.message);
+  return j.result;
+}
+
+async function _isNoteSpentOnChain(noteObj) {
+  await _loadPoseidon();
+  if (!_poseidon) return false;
+  const cfg = SHIELDS[noteObj.token];
+  if (!cfg) return false;
+  const addr   = cfg.contracts[noteObj.denom];
+  const denomW = cfg.wei[noteObj.denom];
+  if (!addr || !denomW) return false;
+  const parts      = noteObj.note.split('-');
+  const nullifier  = BigInt('0x' + parts[3]);
+  const nullHash   = _poseidon(nullifier, denomW);
+  const hashHex    = nullHash.toString(16).padStart(64, '0');
+  const result     = await _rpc('eth_call', [{to:addr, data:NULL_HASH_SEL+hashHex}, 'latest']);
+  return result === '0x0000000000000000000000000000000000000000000000000000000000000001';
+}
+
+function _startSpendWatch(noteId) {
+  _stopSpendWatch();
+  _spendWatchNoteId = noteId;
+  _spendWatchId = setInterval(async () => {
+    const note = getNotes().find(n => n.id === _spendWatchNoteId);
+    if (!note || note.spent) { _stopSpendWatch(); return; }
+    try {
+      if (await _isNoteSpentOnChain(note)) {
+        _stopSpendWatch();
+        await markSpentById(note.id);
+        document.getElementById('modal-qr').classList.add('hidden');
+        _showToast('Note spent — removed from active wallet');
+      }
+    } catch { /* silent — network may be unavailable */ }
+  }, 8000);
+}
+
+function _stopSpendWatch() {
+  if (_spendWatchId) { clearInterval(_spendWatchId); _spendWatchId = null; }
+  _spendWatchNoteId = null;
+}
+
+function _showToast(msg) {
+  const t = document.getElementById('spend-toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ─── Change PIN (while unlocked) ──────────────────────────────────────────────
+
+function startChangePin() {
+  _changingPin = true;
+  _pin = ''; _pinFirst = ''; _pinMode = 'change-new';
+  _drawDots(); _pinErr('');
+  _setPrompt('Enter new PIN');
+  document.getElementById('ls-cancel').style.display = 'block';
+  document.getElementById('ls-reset').style.display  = 'none';
+  document.getElementById('lock-scr').classList.remove('hidden');
+  document.getElementById('app').classList.add('hidden');
+}
+
+function cancelChangePin() {
+  _changingPin = false;
+  _pin = ''; _pinFirst = ''; _drawDots(); _pinErr('');
+  document.getElementById('ls-cancel').style.display = 'none';
+  document.getElementById('ls-reset').style.display  = 'block';
+  document.getElementById('lock-scr').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+}
+
+async function _applyNewPin(pin) {
+  _setPrompt('Saving…');
+  const saltBytes = crypto.getRandomValues(new Uint8Array(16));
+  localStorage.setItem(SALT_KEY, [...saltBytes].map(b=>b.toString(16).padStart(2,'0')).join(''));
+  const newKey = await _deriveKey(pin, saltBytes);
+  localStorage.setItem(STORE, await _encrypt(_notes, newKey));
+  _key = newKey; _changingPin = false;
+  _pin = ''; _pinFirst = ''; _drawDots();
+  document.getElementById('ls-cancel').style.display = 'none';
+  document.getElementById('ls-reset').style.display  = 'block';
+  document.getElementById('lock-scr').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  _resetTimer();
+}
 
 // ─── Reset wallet ─────────────────────────────────────────────────────────────
 
@@ -613,6 +779,7 @@ function showQRModal(noteObj) {
     if (err) console.error('QR error:', err);
   });
   openModal('qr');
+  _startSpendWatch(noteObj.id);
 }
 
 function markCurrentNoteSpent() {
@@ -632,7 +799,10 @@ async function onPasteNote(val) {
 }
 
 function openModal(id)  { document.getElementById('modal-'+id).classList.remove('hidden'); }
-function closeModal(id) { document.getElementById('modal-'+id).classList.add('hidden'); }
+function closeModal(id) {
+  if (id === 'qr') _stopSpendWatch();
+  document.getElementById('modal-'+id).classList.add('hidden');
+}
 
 // ─── Camera ──────────────────────────────────────────────────────────────────
 
