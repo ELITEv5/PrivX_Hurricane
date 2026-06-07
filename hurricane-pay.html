@@ -502,12 +502,6 @@ const PULSECHAIN = {
 
 // ─── ABIs ─────────────────────────────────────────────────────────────────────
 
-const SHIELD_ABI = [
-  { inputs:[{type:"bytes32",name:"_commitment"}], name:"deposit", outputs:[], stateMutability:"nonpayable", type:"function" },
-  { inputs:[{type:"uint256[24]",name:"proof"},{type:"uint256[4]",name:"pubSignals"},{type:"address",name:"recipient"}], name:"withdraw", outputs:[], stateMutability:"nonpayable", type:"function" },
-  { inputs:[], name:"getLastRoot", outputs:[{type:"bytes32"}], stateMutability:"view", type:"function" },
-  { anonymous:false, inputs:[{indexed:true,type:"bytes32",name:"commitment"},{indexed:false,type:"uint32",name:"leafIndex"},{indexed:false,type:"uint256",name:"timestamp"}], name:"Deposit", type:"event" }
-];
 
 const ERC20_ABI = [
   { inputs:[{type:"address",name:"spender"},{type:"uint256",name:"amount"}],   name:"approve",   outputs:[{type:"bool"}], stateMutability:"nonpayable", type:"function" },
@@ -591,13 +585,28 @@ function buildFullTree(leaves) {
   return { tree, root: tree[TREE_LEVELS][0] };
 }
 
-async function getMerkleProof(shieldContract, targetCommitment) {
-  const events = await shieldContract.getPastEvents("Deposit", { fromBlock:0, toBlock:"latest" });
-  if (!events.length) throw new Error("No deposits in this shield");
-  events.sort((a,b) => Number(a.returnValues.leafIndex) - Number(b.returnValues.leafIndex));
-  const leaves    = events.map(e => BigInt(e.returnValues.commitment));
+async function getMerkleProof(shieldAddr, targetCommitment) {
+  // Fetch Deposit events via eth_getLogs (avoids Web3 ABI processing of uint32/uint256[24])
+  const DEPOSIT_TOPIC = "0xa945e51e04ce4e5fdab3ac81dde753fcf61dce5f82b5b3e37efb8734c4a5e26";
+  const logsBody = JSON.stringify({ jsonrpc:"2.0", id:1, method:"eth_getLogs",
+    params:[{ address: shieldAddr, topics:[DEPOSIT_TOPIC], fromBlock:"0x0", toBlock:"latest" }] });
+  const logsRes = await fetch("https://rpc.pulsechain.com", { method:"POST", headers:{"Content-Type":"application/json"}, body:logsBody });
+  const logsJson = await logsRes.json();
+  if (logsJson.error) throw new Error(logsJson.error.message);
+  const logs = logsJson.result;
+  if (!logs.length) throw new Error("No deposits in this shield");
+
+  // Parse: topics[1]=commitment(bytes32), data=leafIndex(uint32)+timestamp(uint256) both padded to 32 bytes
+  const events = logs.map(log => ({
+    commitment: BigInt(log.topics[1]),
+    leafIndex:  Number(BigInt("0x" + log.data.slice(2, 66))),
+  }));
+  events.sort((a,b) => a.leafIndex - b.leafIndex);
+
+  const leaves    = events.map(e => e.commitment);
   const leafIndex = leaves.findIndex(l => l === targetCommitment);
   if (leafIndex === -1) throw new Error("Commitment not found — is this the correct note?");
+
   const { tree, root } = buildFullTree(leaves);
   const siblings = [], pathIndices = [];
   let idx = leafIndex;
@@ -606,10 +615,17 @@ async function getMerkleProof(shieldContract, targetCommitment) {
     pathIndices.push(idx & 1);
     idx >>= 1;
   }
-  const onChainRoot = await shieldContract.methods.getLastRoot().call();
+
+  // Fetch on-chain root via raw eth_call (selector 0xba70f757)
+  const rootBody = JSON.stringify({ jsonrpc:"2.0", id:2, method:"eth_call",
+    params:[{ to: shieldAddr, data: "0xba70f757" }, "latest"] });
+  const rootRes  = await fetch("https://rpc.pulsechain.com", { method:"POST", headers:{"Content-Type":"application/json"}, body:rootBody });
+  const rootJson = await rootRes.json();
+  const onChainRoot = rootJson.result;
   const localRoot   = "0x" + root.toString(16).padStart(64,"0");
   if (localRoot.toLowerCase() !== onChainRoot.toLowerCase())
     throw new Error("Merkle root mismatch — a deposit may have just occurred, please try again.");
+
   return { pathIndices, siblings, proofRoot: root };
 }
 
@@ -716,8 +732,10 @@ async function buyNote() {
     const denomWei  = token.denomWei[selectedDenom];
     const feeWei    = (denomWei * BigInt(token.feeBP)) / 10000n;
     const totalWei  = denomWei + feeWei;
-    const shieldC   = new buyWeb3.eth.Contract(SHIELD_ABI, shieldAddr);
-    const tokenC    = new buyWeb3.eth.Contract(ERC20_ABI, token.addr);
+    // Minimal ABIs — no exotic types that break web3@1.10.0 CDN ABI coder
+    const tokenC  = new buyWeb3.eth.Contract(ERC20_ABI, token.addr);
+    const depositABI = [{ inputs:[{type:"bytes32",name:"_commitment"}], name:"deposit", outputs:[], stateMutability:"nonpayable", type:"function" }];
+    const shieldC = new buyWeb3.eth.Contract(depositABI, shieldAddr);
 
     setStatus('buyStatus', 'pending', `Checking ${token.label} allowance…`);
     const allow = await tokenC.methods.allowance(buyAccount, shieldAddr).call();
@@ -886,9 +904,7 @@ async function acceptNote() {
   setStatus('acceptStatus', 'pending', 'Fetching deposit events from shield…');
 
   try {
-    const rpcWeb3  = new Web3("https://rpc.pulsechain.com");
-    const shieldC  = new rpcWeb3.eth.Contract(SHIELD_ABI, shieldAddr);
-    const { pathIndices, siblings, proofRoot } = await getMerkleProof(shieldC, commitment);
+    const { pathIndices, siblings, proofRoot } = await getMerkleProof(shieldAddr, commitment);
 
     const circuitInput = {
       nullifier:     nullifier.toString(),
@@ -907,13 +923,35 @@ async function acceptNote() {
     const calldata = await snarkjs.plonk.exportSolidityCallData(zkProof, publicSignals);
     const argv     = calldata.replace(/\]\s*\[/g,",").replace(/["[\]\s]/g,"").split(",").filter(Boolean);
 
+    // Encode withdraw(uint256[24],uint256[4],address) manually — avoids web3 CDN ABI bug with uint256[N]
+    // All three params are static types: encode inline (no dynamic offsets)
+    const pad = v => BigInt(v).toString(16).padStart(64,"0");
+    const withdrawData = "0x8172d2d0"                   // selector
+      + argv.slice(0,24).map(pad).join("")               // uint256[24] proof
+      + argv.slice(24,28).map(pad).join("")              // uint256[4] pubSignals
+      + recipient.toLowerCase().replace("0x","").padStart(64,"0"); // address
+
     setStatus('acceptStatus', 'pending', 'Submitting withdrawal…');
-    const submitC = new acceptWeb3.eth.Contract(SHIELD_ABI, shieldAddr);
-    const tx = await submitC.methods.withdraw(argv.slice(0,24), argv.slice(24,28), recipient).send({ from: acceptAccount });
-    if (!tx.status) throw new Error("Transaction reverted. TX: " + tx.transactionHash);
+    const txHash = await window.ethereum.request({
+      method: "eth_sendTransaction",
+      params: [{ from: acceptAccount, to: shieldAddr, data: withdrawData }]
+    });
+
+    // Poll for receipt
+    let receipt = null;
+    setStatus('acceptStatus', 'pending', 'Waiting for confirmation…');
+    for (let i = 0; i < 120; i++) {
+      await new Promise(r => setTimeout(r, 3000));
+      const r = await fetch("https://rpc.pulsechain.com", { method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ jsonrpc:"2.0", id:1, method:"eth_getTransactionReceipt", params:[txHash] }) });
+      const j = await r.json();
+      if (j.result) { receipt = j.result; break; }
+    }
+    if (!receipt) throw new Error("Transaction not confirmed after 6 minutes. TX: " + txHash);
+    if (receipt.status === "0x0") throw new Error("Transaction reverted. TX: " + txHash);
 
     setStatus('acceptStatus', 'success',
-      `Payment received!\n\nTX: ${tx.transactionHash}\n\n$${denomStr} ${token.label} sent to:\n${recipient}\n\nView: https://scan.pulsechain.com/tx/${tx.transactionHash}`
+      `Payment received!\n\nTX: ${txHash}\n\n$${denomStr} ${token.label} sent to:\n${recipient}\n\nView: https://scan.pulsechain.com/tx/${txHash}`
     );
   } catch(e) {
     console.error(e);
