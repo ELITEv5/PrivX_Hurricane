@@ -146,7 +146,7 @@
 
   <div class="info-box" style="margin-bottom:20px">
     <strong>What is Hurricane Pay?</strong><br>
-    Hurricane Pay turns stablecoins into private digital cash — like a $20 bill, but on-chain. You deposit DAI, pSunDAI, or USDC and receive a <strong>private note</strong>. The note proves ownership of exactly that amount, with no on-chain connection to your wallet. Hand the note to a merchant, they redeem it — you've paid privately.
+    Hurricane Pay turns stablecoins into private digital cash. Load notes at home like withdrawing from an ATM. At point of sale, open your Wallet tab and show a QR — the merchant scans it, generates a ZK proof, and receives funds. No on-chain link between payer and payee.
     <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
       <span style="background:rgba(0,255,234,0.07);border:1px solid rgba(0,255,234,0.2);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--accent)">Zero-knowledge proofs</span>
       <span style="background:rgba(0,255,234,0.07);border:1px solid rgba(0,255,234,0.2);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--accent)">No on-chain identity</span>
@@ -160,38 +160,38 @@
     <div class="section-label" style="margin-bottom:12px">How it works</div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
       <div style="background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);border-radius:14px;padding:14px 12px;text-align:center">
-        <div style="font-size:22px;margin-bottom:6px">💰</div>
-        <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">1. Buy Cash</div>
-        <div style="font-size:11px;color:#666;line-height:1.5">Deposit a fixed amount. Receive a secret note — your digital bill.</div>
+        <div style="font-size:22px;margin-bottom:6px">🏧</div>
+        <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">1. Load Cash</div>
+        <div style="font-size:11px;color:#666;line-height:1.5">Deposit at home. Notes auto-save to your Wallet — like an ATM withdrawal.</div>
       </div>
       <div style="background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);border-radius:14px;padding:14px 12px;text-align:center">
         <div style="font-size:22px;margin-bottom:6px">📲</div>
-        <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">2. Spend</div>
-        <div style="font-size:11px;color:#666;line-height:1.5">Show the QR code to your merchant. Like handing over cash.</div>
+        <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">2. Show QR</div>
+        <div style="font-size:11px;color:#666;line-height:1.5">Open Wallet, tap a note. Point your phone — the merchant scans it.</div>
       </div>
       <div style="background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);border-radius:14px;padding:14px 12px;text-align:center">
         <div style="font-size:22px;margin-bottom:6px">✅</div>
         <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">3. Accept</div>
-        <div style="font-size:11px;color:#666;line-height:1.5">Merchant scans the note, generates a ZK proof, funds arrive.</div>
+        <div style="font-size:11px;color:#666;line-height:1.5">Merchant generates ZK proof on their computer. Funds arrive privately.</div>
       </div>
     </div>
   </div>
 
   <div class="tabs">
-    <div class="tab active" id="tab-buy"    onclick="switchTab('buy')">Buy Cash</div>
-    <div class="tab"        id="tab-spend"  onclick="switchTab('spend')">Spend</div>
+    <div class="tab active" id="tab-spend"  onclick="switchTab('spend')">Wallet</div>
+    <div class="tab"        id="tab-buy"    onclick="switchTab('buy')">Load Cash</div>
     <div class="tab"        id="tab-accept" onclick="switchTab('accept')">Accept</div>
   </div>
 
   <!-- ─── BUY CASH TAB ───────────────────────────────────────────────────── -->
-  <div id="buyTab">
+  <div id="buyTab" class="hidden">
     <div class="info-box">
-      <strong>Buying private cash:</strong><br>
+      <strong>Loading private cash:</strong><br>
       <span style="color:#888">1.</span> Choose your currency and denomination below.<br>
       <span style="color:#888">2.</span> Connect your wallet and approve the token spend.<br>
-      <span style="color:#888">3.</span> Confirm the deposit — funds enter the Hurricane shield.<br>
-      <span style="color:#888">4.</span> <strong style="color:#ffb400">Save your note.</strong> It is the only proof of your deposit. Losing it means losing the funds.<br>
-      <div style="margin-top:8px;font-size:11px;color:#555">A 0.5% protocol fee is paid on deposit — you approve denomination + fee. The note is worth the full denomination and the merchant receives it in full.</div>
+      <span style="color:#888">3.</span> Confirm the deposit — the note is automatically saved to your wallet.<br>
+      <span style="color:#888">4.</span> Go to your <strong style="color:#00ffea">Wallet</strong> tab to show QR codes at point of sale.<br>
+      <div style="margin-top:8px;font-size:11px;color:#555">Do this at home on desktop — proof generation for merchants is heavy, so keep this on a computer. A 0.5% fee is paid on deposit; merchants receive the full denomination.</div>
     </div>
 
     <div class="section-label">Choose Currency</div>
@@ -214,35 +214,31 @@
     <button class="btn btn-primary" id="buyBtn" onclick="buyNote()" disabled>Select Denomination</button>
 
     <div class="note-display" id="noteDisplay">
-      <div class="note-warn">SAVE THIS NOTE — it is your digital cash. Anyone with it can redeem the funds.</div>
-      <div class="qr-wrap" style="margin-bottom:14px">
-        <canvas id="buyNoteQR"></canvas>
-        <div style="font-size:10px;color:#666;margin-top:6px">Show this QR to the merchant — they scan it in the Accept tab</div>
-      </div>
+      <div class="note-warn">Note saved to your Wallet — go to the Wallet tab to show QR codes.</div>
       <div class="note-text" id="noteText"></div>
       <div class="note-actions">
         <button onclick="copyNote()">Copy Note</button>
-        <button onclick="saveNote()">Save to Wallet</button>
+        <button onclick="switchToWallet()" style="background:rgba(0,255,234,0.12);border-color:rgba(0,255,234,0.4);color:var(--accent)">Go to Wallet →</button>
       </div>
     </div>
 
     <div class="status" id="buyStatus"></div>
   </div>
 
-  <!-- ─── SPEND TAB ─────────────────────────────────────────────────────── -->
-  <div id="spendTab" class="hidden">
+  <!-- ─── WALLET TAB ──────────────────────────────────────────────────────── -->
+  <div id="spendTab">
     <div class="info-box">
-      <strong>Spending your note:</strong><br>
-      Select a saved note or paste one below — a QR code will appear. Show it to your merchant and they scan or manually enter it into the <em>Accept</em> tab to redeem the funds.<br>
+      <strong>Your Hurricane Pay wallet:</strong><br>
+      Tap any note to show its QR code. Point your phone at the merchant — they scan it in the <em>Accept</em> tab to redeem. Load more cash from the <em>Load Cash</em> tab at home.<br>
       <div style="margin-top:8px;background:rgba(255,180,0,0.07);border:1px solid rgba(255,180,0,0.2);border-radius:8px;padding:8px 12px;font-size:11px;color:#ffb400">
-        <strong>Treat a shown note like spent cash.</strong> A note is a bearer instrument — whoever has it can redeem it. Once you show the QR, consider the funds transferred.
+        <strong>A shown note is spent cash.</strong> Notes are bearer instruments — whoever has one can redeem it. Once you show the QR, consider the funds transferred.
       </div>
     </div>
 
     <div id="savedNotesSection">
-      <div class="section-label">Your Saved Notes</div>
+      <div class="section-label">Your Cash</div>
       <div class="saved-notes" id="savedNotesList">
-        <div style="color:#555;font-size:13px;font-family:monospace">No saved notes. Buy cash first, then tap "Save to Wallet".</div>
+        <div style="color:#555;font-size:13px;font-family:monospace">No notes loaded. Go to <strong style="color:#B57AFF">Load Cash</strong> to deposit and generate your first note.</div>
       </div>
     </div>
 
@@ -262,17 +258,17 @@
   <!-- ─── ACCEPT TAB ────────────────────────────────────────────────────── -->
   <div id="acceptTab" class="hidden">
     <div class="info-box">
-      <strong>Accepting a Hurricane Pay note:</strong><br>
-      <span style="color:#888">1.</span> Paste the customer's note (or scan their QR and copy the text).<br>
-      <span style="color:#888">2.</span> Enter your wallet address — this is where funds will arrive.<br>
-      <span style="color:#888">3.</span> Connect a wallet to pay the gas fee (PLS), then click <strong>Redeem</strong>.<br>
-      <span style="color:#888">4.</span> Your browser generates a ZK proof, then submits the withdrawal on-chain.<br>
+      <strong>Merchant terminal — run this on a computer or tablet:</strong><br>
+      <span style="color:#888">1.</span> Customer shows you a QR from their Wallet tab. Scan it or copy the note text.<br>
+      <span style="color:#888">2.</span> Connect your wallet — your address auto-fills as recipient.<br>
+      <span style="color:#888">3.</span> Click <strong>Redeem</strong>. Your browser generates a ZK proof and submits it.<br>
+      <span style="color:#888">4.</span> Funds arrive at your wallet. No account. No payment processor. No KYC.<br>
       <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px">
         <div style="background:rgba(255,180,0,0.07);border:1px solid rgba(255,180,0,0.2);border-radius:8px;padding:8px 12px;font-size:11px;color:#ffb400">
-          <strong>Proof generation takes 1–3 minutes</strong> on desktop and longer on mobile. Keep this tab open — do not refresh.
+          <strong>Use a desktop or tablet for proof generation</strong> — takes 1–3 minutes. Keep this tab open, do not refresh.
         </div>
         <div style="background:rgba(0,255,100,0.05);border:1px solid rgba(0,255,100,0.15);border-radius:8px;padding:8px 12px;font-size:11px;color:#00e664">
-          You receive the <strong>full denomination</strong> — the 0.5% fee was paid by the buyer on deposit. You also earn <strong>PRIVX mining rewards</strong> for every redemption.
+          You receive the <strong>full denomination</strong> — fee was paid by the sender. You also earn <strong>PRIVX mining rewards</strong> for every redemption.
         </div>
       </div>
     </div>
@@ -563,6 +559,8 @@ function switchTab(t) {
   if (t === 'spend') renderSavedNotes();
 }
 
+function switchToWallet() { switchTab('spend'); }
+
 // ─── Poseidon ─────────────────────────────────────────────────────────────────
 
 async function initPoseidon() {
@@ -758,8 +756,15 @@ async function buyNote() {
       "0xb214faa5" + commitHex.slice(2));
     const receipt = await waitForReceipt(depositTx);
 
+    // Auto-save to wallet
+    const saved = getSavedNotes();
+    if (!saved.find(n => n.note === _currentNote.note)) {
+      saved.push(_currentNote);
+      localStorage.setItem('hp_notes', JSON.stringify(saved));
+    }
+
     setStatus('buyStatus', 'success',
-      `$${selectedDenom} ${token.label} note minted!\n\nTX: ${depositTx}\n\nSave your note — it is now your digital cash.`
+      `$${selectedDenom} ${token.label} note minted and saved to your Wallet!\n\nTX: ${depositTx}`
     );
   } catch(e) {
     console.error(e);
@@ -779,10 +784,9 @@ function copyNote() {
 function saveNote() {
   if (!_currentNote) return;
   const saved = getSavedNotes();
-  if (saved.find(n => n.note === _currentNote.note)) return alert('This note is already saved.');
+  if (saved.find(n => n.note === _currentNote.note)) return;
   saved.push(_currentNote);
   localStorage.setItem('hp_notes', JSON.stringify(saved));
-  alert(`$${_currentNote.denom} ${HP_TOKENS[_currentNote.token].label} note saved to your browser wallet.`);
 }
 
 // ─── SPEND TAB ────────────────────────────────────────────────────────────────
@@ -1074,6 +1078,7 @@ async function fundVault() {
 
 window.addEventListener('load', async () => {
   selectBuyToken('dai');
+  renderSavedNotes();
   loadVaultBalance();
   try { await initPoseidon(); }
   catch(e) { console.error("Poseidon init failed:", e.message); }
