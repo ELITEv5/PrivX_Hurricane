@@ -17,12 +17,17 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:#e0e0e0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem}
 h1{font-size:1.6rem;font-weight:800;background:linear-gradient(90deg,var(--accent),var(--primary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;text-align:center}
-.sub{color:#555;font-size:0.85rem;text-align:center;margin-bottom:2rem;font-family:monospace}
+.sub{color:#555;font-size:0.85rem;text-align:center;margin-bottom:1.2rem;font-family:monospace}
 .wrap{width:100%;max-width:640px;display:flex;flex-direction:column;gap:1.2rem}
 .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem}
-.card-title{font-size:0.75rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#555;margin-bottom:1rem}
+.card-title{font-size:0.75rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#555;margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+.step-badge{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--primary);color:#fff;font-size:0.65rem;font-weight:900;flex-shrink:0;letter-spacing:0}
 .info-box{background:rgba(138,43,226,0.06);border:1px solid rgba(138,43,226,0.2);border-radius:10px;padding:1rem 1.2rem;font-size:0.82rem;color:#888;line-height:1.7}
 .info-box strong{color:#B57AFF}
+.why-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-top:0.8rem}
+@media(max-width:500px){.why-grid{grid-template-columns:1fr}}
+.why-item{background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:8px;padding:0.8rem 1rem;font-size:0.78rem;color:#888;line-height:1.65}
+.why-item strong{color:var(--accent);display:block;margin-bottom:4px;font-size:0.68rem;letter-spacing:0.8px;text-transform:uppercase}
 textarea{width:100%;height:160px;background:#0a0a0a;border:1px solid #222;border-radius:10px;color:#666;font-family:monospace;font-size:11px;padding:12px;resize:vertical;outline:none;line-height:1.5;transition:border-color .2s}
 textarea:focus{border-color:rgba(138,43,226,0.4)}
 .btn{width:100%;padding:14px;border-radius:10px;border:none;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:0.5px}
@@ -31,8 +36,8 @@ textarea:focus{border-color:rgba(138,43,226,0.4)}
 .btn-primary:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none}
 .btn-outline{background:transparent;color:#888;border:1px solid #333}
 .btn-outline:hover{border-color:#555;color:#aaa}
-.btn-teal{background:rgba(0,255,234,0.08);color:var(--accent);border:1px solid rgba(0,255,234,0.25)}
-.btn-teal:hover{background:rgba(0,255,234,0.15)}
+.btn-teal{background:rgba(0,255,234,0.10);color:var(--accent);border:1px solid rgba(0,255,234,0.35);font-size:1rem}
+.btn-teal:hover{background:rgba(0,255,234,0.18);box-shadow:0 0 18px rgba(0,255,234,0.12);transform:translateY(-1px)}
 .file-drop{border:2px dashed #222;border-radius:10px;padding:1.5rem;text-align:center;color:#444;font-size:0.82rem;cursor:pointer;transition:all .2s;margin-bottom:0.8rem}
 .file-drop:hover,.file-drop.over{border-color:rgba(138,43,226,0.4);color:#888;background:rgba(138,43,226,0.04)}
 .proof-detail{display:flex;flex-direction:column;gap:0.6rem}
@@ -43,7 +48,7 @@ textarea:focus{border-color:rgba(138,43,226,0.4)}
 .dv a{color:#777;text-decoration:none}
 .dv a:hover{color:#aaa}
 .dv.recipient{color:var(--accent);font-weight:700}
-.status{padding:1rem 1.2rem;border-radius:10px;font-size:0.85rem;line-height:1.6;font-family:monospace;display:none}
+.status{padding:1rem 1.2rem;border-radius:10px;font-size:0.85rem;line-height:1.6;font-family:monospace;display:none;white-space:pre-line}
 .status.success{background:rgba(0,255,100,0.07);border:1px solid rgba(0,255,100,0.2);color:#00e664;display:block}
 .status.error{background:rgba(255,50,50,0.07);border:1px solid rgba(255,50,50,0.2);color:#ff6666;display:block}
 .status.pending{background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);color:#B57AFF;display:block}
@@ -60,52 +65,63 @@ textarea:focus{border-color:rgba(138,43,226,0.4)}
   <img src="privx-shield.png" style="width:36px;height:36px;border-radius:8px">
   <h1>PrivX Hurricane — Proof Relayer</h1>
 </div>
-<p class="sub">Submit a withdrawal proof on behalf of a fresh wallet. You pay gas. They receive the funds.</p>
+<p class="sub">Earn PLS tips by submitting withdrawals for others — no custody, no trust required.</p>
 
 <div class="wrap">
 
-  <!-- How it works -->
+  <!-- Why a relayer? -->
   <div class="card">
-    <div class="card-title">How this works</div>
+    <div class="card-title">Why a relayer?</div>
     <div class="info-box">
-      The user generated a <strong>ZK withdrawal proof</strong> in their browser and exported it as JSON. You paste it here, connect your wallet, and submit it on-chain. <strong>You receive nothing from the contract</strong> — the funds go directly to the recipient address that is cryptographically locked inside the proof. You cannot redirect them. No trust required.
+      Without a relayer, the user must submit the ZK proof <em>from their own wallet</em> — which links their withdrawal address to the shield contract on-chain. A relayer breaks that link.
+      <br><br>
+      The user generates the proof privately in their browser and sends you the JSON file. <strong>You submit it from your wallet.</strong> The funds go directly to their fresh address, which has never touched the shield. No visible connection. Clean privacy.
+      <br><br>
+      <strong>You cannot steal or redirect funds</strong> — the recipient address is cryptographically locked inside the ZK proof. The contract will reject any modification.
+    </div>
+    <div class="why-grid">
+      <div class="why-item"><strong>For the user</strong>Their withdrawal wallet never appears on-chain alongside the shield contract. Funds simply arrive.</div>
+      <div class="why-item"><strong>For the relayer</strong>You submit the proof and pay gas. You can agree an off-chain tip with the user before relaying.</div>
+      <div class="why-item"><strong>Zero custody</strong>You never hold funds. The contract routes directly to the locked recipient — you only pay the gas cost.</div>
+      <div class="why-item"><strong>Trustless</strong>The ZK proof is verified on-chain. If the proof is invalid or already spent, the transaction reverts. You lose only the gas.</div>
     </div>
   </div>
 
   <!-- Step 1: Paste JSON -->
   <div class="card">
-    <div class="card-title">Step 1 — Paste or upload proof JSON</div>
+    <div class="card-title"><span class="step-badge">1</span> Load the proof JSON</div>
     <div class="file-drop" id="fileDrop" onclick="document.getElementById('hidden-file').click()"
          ondragover="event.preventDefault();this.classList.add('over')"
          ondragleave="this.classList.remove('over')"
          ondrop="handleFileDrop(event)">
-      📂 Drop .json file here or click to browse
+      📂 Drop the .json proof file here, or click to browse
     </div>
     <input type="file" id="hidden-file" accept=".json,application/json" onchange="handleFileInput(event)">
-    <textarea id="proofInput" placeholder='Paste proof JSON here…&#10;&#10;{"protocol":"PrivX Hurricane","shield":"0x...","proof":[...],...}'></textarea>
-    <button class="btn btn-outline" style="margin-top:0.8rem" onclick="parseProof()">Parse Proof →</button>
+    <textarea id="proofInput" placeholder='Or paste the proof JSON the user sent you…&#10;&#10;{"protocol":"PrivX Hurricane","shield":"0x...","proof":[...],...}'></textarea>
+    <button class="btn btn-teal" style="margin-top:0.8rem" onclick="parseProof()">Verify &amp; Review Proof →</button>
   </div>
 
   <!-- Step 2: Review -->
   <div class="card" id="reviewCard" style="display:none">
-    <div class="card-title">Step 2 — Review before submitting</div>
+    <div class="card-title"><span class="step-badge">2</span> Review before submitting</div>
     <div class="proof-detail" id="proofDetail"></div>
     <div style="margin-top:1rem">
-      <div class="warn-box">⚠ Verify the recipient address is correct. Once submitted the nullifier is permanently spent — this proof cannot be used again.</div>
+      <div class="warn-box">⚠ Confirm the recipient address above is correct. Once submitted the nullifier is permanently spent — this proof cannot be used again by anyone.</div>
     </div>
   </div>
 
   <!-- Step 3: Connect + Submit -->
   <div class="card" id="submitCard" style="display:none">
-    <div class="card-title">Step 3 — Connect wallet &amp; submit</div>
+    <div class="card-title"><span class="step-badge">3</span> Connect your wallet &amp; submit</div>
+    <p style="font-size:0.8rem;color:#555;margin-bottom:1rem;line-height:1.6">Your wallet pays gas in PLS. The contract sends tokens directly to the recipient — nothing passes through you.</p>
     <div class="wallet-row" style="margin-bottom:1rem">
       <button class="btn btn-outline" id="connectBtn" onclick="connectWallet()" style="width:auto;padding:10px 20px;font-size:0.82rem">Connect Wallet</button>
       <span class="wallet-addr" id="walletAddr">Not connected</span>
     </div>
     <div class="divider" style="margin-bottom:1rem"></div>
-    <button class="btn btn-primary" id="submitBtn" onclick="submitProof()" disabled>Submit Withdrawal</button>
+    <button class="btn btn-primary" id="submitBtn" onclick="submitProof()" disabled>Submit Withdrawal on Behalf of User</button>
     <div style="color:#444;font-size:11px;font-family:monospace;text-align:center;margin-top:10px">
-      You pay gas in PLS. The contract sends tokens to the recipient. You receive nothing from the protocol.
+      Connect your wallet above to enable submission
     </div>
   </div>
 
@@ -151,11 +167,18 @@ function readFile(file) {
   reader.readAsText(file);
 }
 
+// Auto-parse when user pastes into textarea
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('proofInput').addEventListener('paste', () => {
+    setTimeout(parseProof, 60);
+  });
+});
+
 // ── Parse ──────────────────────────────────────────────────────────────────
 
 function parseProof() {
   const raw = document.getElementById('proofInput').value.trim();
-  if (!raw) return showStatus('error', 'Nothing to parse — paste the proof JSON first.');
+  if (!raw) return;
 
   let data;
   try { data = JSON.parse(raw); }
@@ -210,6 +233,7 @@ async function connectWallet() {
     document.getElementById('connectBtn').style.borderColor = 'rgba(0,255,100,0.4)';
     document.getElementById('connectBtn').style.color = '#00e664';
     document.getElementById('submitBtn').disabled = false;
+    document.getElementById('submitBtn').nextElementSibling.textContent = 'Ready — click above to submit the withdrawal.';
   } catch(e) {
     showStatus('error', 'Wallet connection failed: ' + e.message);
   }
@@ -235,18 +259,18 @@ async function submitProof() {
     if (!tx.status) throw new Error('Transaction reverted. TX: ' + tx.transactionHash);
 
     showStatus('success',
-      `✓ Withdrawal submitted successfully!\n\nTX: ${tx.transactionHash}\n\nFunds sent to: ${parsedProof.recipient}\n\nView on PulseScan: https://scan.pulsechain.com/tx/${tx.transactionHash}`
+      `✓ Withdrawal submitted successfully!\n\nTX: ${tx.transactionHash}\n\nFunds sent to: ${parsedProof.recipient}\n\nView on PulseScan:\nhttps://scan.pulsechain.com/tx/${tx.transactionHash}`
     );
     btn.textContent = '✓ Submitted';
   } catch(e) {
     console.error(e);
     const msg = e.message || 'Unknown error';
     if (msg.includes('already spent') || msg.includes('nullifier'))
-      showStatus('error', '✗ Note already spent — this proof has been used before. The nullifier is on-chain.');
+      showStatus('error', '✗ Note already spent — this proof has been used before. The nullifier is recorded on-chain.');
     else if (msg.includes('recipient'))
-      showStatus('error', '✗ recipient: mismatch — the proof was generated for a different recipient address. Do not modify the JSON.');
+      showStatus('error', '✗ Recipient mismatch — the proof was generated for a different recipient address. Do not modify the JSON.');
     else if (msg.includes('root'))
-      showStatus('error', '✗ root: unknown — the Merkle root is stale. Ask the user to regenerate the proof (more than 100 new deposits occurred since it was created).');
+      showStatus('error', '✗ Merkle root unknown — the root is stale. Ask the user to regenerate the proof (more than 100 new deposits occurred since it was created).');
     else
       showStatus('error', '✗ Failed: ' + msg);
 
