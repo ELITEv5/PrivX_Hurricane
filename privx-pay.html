@@ -114,6 +114,25 @@
     .stat-accent{color:var(--accent)}
     .stat-green{color:#00e664}
     .stats-divider{grid-column:1/-1;height:1px;background:rgba(255,255,255,0.05);margin:2px 0}
+    /* ── POS Terminal ── */
+    .pos-terminal{background:#050505;border:1px solid rgba(0,255,234,0.18);border-radius:16px;padding:18px;margin-bottom:18px}
+    .pos-screen{background:#000;border:1px solid rgba(0,255,234,0.08);border-radius:10px;padding:18px 16px;margin-bottom:14px;text-align:center;min-height:88px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+    .pos-lbl{font-size:9px;color:#444;letter-spacing:2.5px;text-transform:uppercase;font-weight:700;margin-bottom:8px}
+    .pos-amt{font-size:52px;font-weight:900;color:var(--accent);letter-spacing:-2px;line-height:1;font-family:monospace}
+    .pos-tok{font-size:12px;color:#555;margin-top:4px;letter-spacing:1px;font-weight:700}
+    .pos-keys{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+    .pos-key{padding:12px 6px;border:1px solid rgba(255,255,255,0.07);border-radius:10px;background:rgba(12,12,12,0.9);color:#777;font-size:14px;font-weight:800;cursor:pointer;transition:all .15s;text-align:center;user-select:none}
+    .pos-key:hover{border-color:rgba(0,255,234,0.3);color:var(--accent)}
+    .pos-key.selected{border-color:rgba(0,255,234,0.55);background:rgba(0,255,234,0.06);color:var(--accent);box-shadow:0 0 14px rgba(0,255,234,0.08)}
+    .pos-clr{color:#555;font-size:12px;border-color:rgba(255,255,255,0.05)}
+    .pos-clr:hover{border-color:rgba(255,80,80,0.35);color:#ff7070}
+    .pos-match{padding:10px 14px;border-radius:8px;font-size:12px;font-weight:700;margin-bottom:12px;text-align:center;display:none;line-height:1.5}
+    .pos-match.ok{background:rgba(0,255,100,0.05);border:1px solid rgba(0,255,100,0.18);color:#00e664;display:block}
+    .pos-match.warn{background:rgba(255,180,0,0.05);border:1px solid rgba(255,180,0,0.2);color:#ffb400;display:block}
+    .scan-row{display:flex;gap:8px;align-items:flex-start;margin-bottom:14px}
+    .scan-row textarea{margin-bottom:0;flex:1}
+    .scan-btn{padding:14px 14px;border:1px solid rgba(0,255,234,0.25);border-radius:10px;background:rgba(0,255,234,0.05);color:var(--accent);font-size:20px;cursor:pointer;transition:all .2s;flex-shrink:0;margin-top:0;line-height:1}
+    .scan-btn:hover{background:rgba(0,255,234,0.12);border-color:rgba(0,255,234,0.5)}
     @media(max-width:600px){
       .page-wrap{margin-top:70px}
       .container{padding:22px 14px}
@@ -184,8 +203,8 @@
 
   <div class="tabs">
     <div class="tab active" id="tab-spend"  onclick="switchTab('spend')">Wallet</div>
-    <div class="tab"        id="tab-buy"    onclick="switchTab('buy')">Load Cash</div>
-    <div class="tab"        id="tab-accept" onclick="switchTab('accept')">Accept</div>
+    <div class="tab"        id="tab-buy"    onclick="switchTab('buy')">Deposit</div>
+    <div class="tab"        id="tab-accept" onclick="switchTab('accept')">Register</div>
   </div>
 
   <!-- ─── BUY CASH TAB ───────────────────────────────────────────────────── -->
@@ -239,7 +258,7 @@
   <div id="spendTab">
     <div class="info-box">
       <strong>Your PrivX Pay wallet:</strong><br>
-      Tap any note to show its QR code. Point your phone at the merchant — they scan it in the <em>Accept</em> tab to redeem. Load more cash from the <em>Load Cash</em> tab at home.<br>
+      Tap any note to show its QR code. Point your phone at the merchant — they scan it in the <em>Register</em> tab to accept payment. Load more cash from the <em>Deposit</em> tab at home.<br>
       <div style="margin-top:8px;background:rgba(255,180,0,0.07);border:1px solid rgba(255,180,0,0.2);border-radius:8px;padding:8px 12px;font-size:11px;color:#ffb400">
         <strong>A shown note is spent cash.</strong> Notes are bearer instruments — whoever has one can redeem it. Once you show the QR, consider the funds transferred.
       </div>
@@ -248,7 +267,7 @@
     <div id="savedNotesSection">
       <div class="section-label">Your Cash</div>
       <div class="saved-notes" id="savedNotesList">
-        <div style="color:#555;font-size:13px;font-family:monospace">No notes loaded. Go to <strong style="color:#B57AFF">Load Cash</strong> to deposit and generate your first note.</div>
+        <div style="color:#555;font-size:13px;font-family:monospace">No notes loaded. Go to <strong style="color:#B57AFF">Deposit</strong> to shield stablecoins and generate your first note.</div>
       </div>
     </div>
 
@@ -265,26 +284,34 @@
     <div class="status" id="spendStatus"></div>
   </div>
 
-  <!-- ─── ACCEPT TAB ────────────────────────────────────────────────────── -->
+  <!-- ─── REGISTER TAB ────────────────────────────────────────────────────── -->
   <div id="acceptTab" class="hidden">
-    <div class="info-box">
-      <strong>Merchant terminal — run this on a computer or tablet:</strong><br>
-      <span style="color:#888">1.</span> Customer shows you a QR from their Wallet tab. Scan it or copy the note text.<br>
-      <span style="color:#888">2.</span> Connect your wallet — your address auto-fills as recipient.<br>
-      <span style="color:#888">3.</span> Click <strong>Redeem</strong>. Your browser generates a ZK proof and submits it.<br>
-      <span style="color:#888">4.</span> Funds arrive at your wallet. No account. No payment processor. No KYC.<br>
-      <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px">
-        <div style="background:rgba(255,180,0,0.07);border:1px solid rgba(255,180,0,0.2);border-radius:8px;padding:8px 12px;font-size:11px;color:#ffb400">
-          <strong>Use a desktop or tablet for proof generation</strong> — takes 1–3 minutes. Keep this tab open, do not refresh.
-        </div>
-        <div style="background:rgba(0,255,100,0.05);border:1px solid rgba(0,255,100,0.15);border-radius:8px;padding:8px 12px;font-size:11px;color:#00e664">
-          You receive the <strong>full denomination</strong> — fee was paid by the sender. You also earn <strong>PRIVX mining rewards</strong> for every redemption.
-        </div>
+
+    <!-- POS Terminal Display -->
+    <div class="pos-terminal">
+      <div class="pos-screen">
+        <div class="pos-lbl">SALE AMOUNT</div>
+        <div class="pos-amt" id="pos-amt">—</div>
+        <div class="pos-tok" id="pos-tok">select denomination</div>
+      </div>
+      <div class="pos-keys">
+        <div class="pos-key" id="pk-1"   onclick="setSaleDenom('1')">$1</div>
+        <div class="pos-key" id="pk-5"   onclick="setSaleDenom('5')">$5</div>
+        <div class="pos-key" id="pk-10"  onclick="setSaleDenom('10')">$10</div>
+        <div class="pos-key" id="pk-20"  onclick="setSaleDenom('20')">$20</div>
+        <div class="pos-key" id="pk-50"  onclick="setSaleDenom('50')">$50</div>
+        <div class="pos-key" id="pk-100" onclick="setSaleDenom('100')">$100</div>
+        <div class="pos-key pos-clr" style="grid-column:span 2" onclick="clearSale()">✕ Clear</div>
       </div>
     </div>
 
+    <div class="pos-match" id="pos-match"></div>
+
     <div class="section-label">Customer Note</div>
-    <textarea id="acceptNote" placeholder="hp-dai-10-abc123… or privx-pay-dai-10-abc123…" oninput="detectAcceptNote()"></textarea>
+    <div class="scan-row">
+      <textarea id="acceptNote" placeholder="hp-dai-20-abc123… — paste or scan QR" oninput="detectAcceptNote()"></textarea>
+      <button class="scan-btn" onclick="openAcceptCamera()" title="Scan QR">📷</button>
+    </div>
 
     <div id="acceptDetected" style="background:#111;border:1px solid rgba(0,255,234,0.2);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;font-family:monospace;line-height:1.8;display:none">
       <div style="display:flex;gap:8px"><span style="color:#555;min-width:80px;font-size:10px;text-transform:uppercase;letter-spacing:.5px">Token</span><span style="color:var(--accent)" id="acc-token">—</span></div>
@@ -292,15 +319,20 @@
       <div style="display:flex;gap:8px"><span style="color:#555;min-width:80px;font-size:10px;text-transform:uppercase;letter-spacing:.5px">Shield</span><span style="color:var(--accent)" id="acc-shield">—</span></div>
     </div>
 
-    <div class="section-label">Your Wallet Address (recipient)</div>
-    <input type="text" id="acceptRecipient" placeholder="0x — funds arrive here">
+    <div class="section-label">Your Wallet (recipient)</div>
+    <input type="text" id="acceptRecipient" placeholder="0x — payment arrives here">
 
     <div class="wallet-row">
-      <button class="wallet-btn" id="acceptWalletBtn" onclick="connectAccept()">Connect Wallet (pays gas)</button>
+      <button class="wallet-btn" id="acceptWalletBtn" onclick="connectAccept()">Connect Wallet</button>
       <span class="wallet-addr" id="acceptWalletAddr">Not connected</span>
     </div>
 
     <button class="btn btn-primary" id="acceptBtn" onclick="acceptNote()">Connect Wallet</button>
+
+    <div style="margin-top:10px;font-size:11px;color:#444;text-align:center;line-height:1.7">
+      Proof generation takes 30–90 sec — keep this tab open.<br>
+      Exact denominations only. No change given. You earn PRIVX rewards on each payment.
+    </div>
 
     <div class="status" id="acceptStatus"></div>
   </div>
@@ -379,6 +411,28 @@
       <button onclick="fundVault()">Fund Vault</button>
     </div>
     <div class="status" id="fundStatus"></div>
+  </div>
+</div>
+
+<!-- Camera Modal -->
+<div id="acceptCameraModal" style="display:none;position:fixed;inset:0;z-index:9999;background:#000;flex-direction:column">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,0.06)">
+    <button onclick="closeAcceptCamera()" style="background:none;border:none;color:#aaa;font-size:14px;font-weight:700;cursor:pointer;padding:4px 8px">✕ Cancel</button>
+    <div style="font-size:15px;font-weight:800;color:#fff">Scan Customer QR</div>
+    <div style="width:80px"></div>
+  </div>
+  <div style="flex:1;position:relative;overflow:hidden">
+    <video id="acc-cam-video" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover"></video>
+    <canvas id="acc-cam-canvas" style="display:none"></canvas>
+    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+      <div style="width:240px;height:240px;position:relative">
+        <div style="position:absolute;top:0;left:0;width:28px;height:28px;border-top:3px solid #00ffea;border-left:3px solid #00ffea;border-radius:4px 0 0 0"></div>
+        <div style="position:absolute;top:0;right:0;width:28px;height:28px;border-top:3px solid #00ffea;border-right:3px solid #00ffea;border-radius:0 4px 0 0"></div>
+        <div style="position:absolute;bottom:0;left:0;width:28px;height:28px;border-bottom:3px solid #00ffea;border-left:3px solid #00ffea;border-radius:0 0 0 4px"></div>
+        <div style="position:absolute;bottom:0;right:0;width:28px;height:28px;border-bottom:3px solid #00ffea;border-right:3px solid #00ffea;border-radius:0 0 4px 0"></div>
+      </div>
+    </div>
+    <div id="acc-cam-status" style="position:absolute;bottom:0;left:0;right:0;text-align:center;padding:16px;font-size:13px;color:rgba(255,255,255,.7);background:linear-gradient(transparent,rgba(0,0,0,.8))">Point at the customer's PrivX Pay QR code</div>
   </div>
 </div>
 
@@ -702,7 +756,7 @@ function updateBuyBtn() {
   if (!buyAccount) { btn.disabled = false; btn.textContent = 'Connect Wallet'; return; }
   if (!selectedDenom) { btn.disabled = true; btn.textContent = 'Select Denomination'; return; }
   btn.disabled = false;
-  btn.textContent = `Buy $${selectedDenom} ${HP_TOKENS[selectedBuyToken].label}`;
+  btn.textContent = `Deposit $${selectedDenom} ${HP_TOKENS[selectedBuyToken].label}`;
 }
 
 async function connectBuy() {
@@ -884,6 +938,7 @@ function detectAcceptNote() {
   document.getElementById('acc-shield').textContent = shieldAddr && shieldAddr !== 'DEPLOY_FIRST'
     ? shieldAddr.slice(0,12)+'…'+shieldAddr.slice(-8) : 'Not yet deployed';
   el.style.display = 'block';
+  updatePosMatch();
 }
 
 async function connectAccept() {
@@ -896,7 +951,7 @@ async function connectAccept() {
     const recip = document.getElementById('acceptRecipient');
     if (!recip.value) recip.value = account;
     document.getElementById('acceptBtn').disabled  = false;
-    document.getElementById('acceptBtn').textContent = 'Redeem Note';
+    document.getElementById('acceptBtn').textContent = 'Accept Payment';
   } catch(e) { setStatus('acceptStatus', 'error', e.message); }
 }
 
@@ -989,8 +1044,109 @@ async function acceptNote() {
     setStatus('acceptStatus', 'error', userMsg);
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Redeem Note';
+    btn.textContent = 'Accept Payment';
   }
+}
+
+// ─── POS Terminal ─────────────────────────────────────────────────────────────
+
+let selectedSaleDenom = null;
+
+function setSaleDenom(d) {
+  selectedSaleDenom = d;
+  document.querySelectorAll('.pos-key').forEach(k => k.classList.remove('selected'));
+  const key = document.getElementById('pk-'+d);
+  if (key) key.classList.add('selected');
+  document.getElementById('pos-amt').textContent = '$'+d;
+  document.getElementById('pos-tok').textContent = '';
+  updatePosMatch();
+}
+
+function clearSale() {
+  selectedSaleDenom = null;
+  document.querySelectorAll('.pos-key').forEach(k => k.classList.remove('selected'));
+  document.getElementById('pos-amt').textContent = '—';
+  document.getElementById('pos-tok').textContent = 'select denomination';
+  document.getElementById('pos-match').className = 'pos-match';
+}
+
+function updatePosMatch() {
+  const matchEl = document.getElementById('pos-match');
+  if (!selectedSaleDenom) { matchEl.className = 'pos-match'; return; }
+  const raw = document.getElementById('acceptNote').value.trim();
+  const match = raw.match(HP_NOTE_RE);
+  if (!match) { matchEl.className = 'pos-match'; return; }
+  const denom = match[2], tokenKey = match[1].toLowerCase();
+  const label = (HP_TOKENS[tokenKey] || {}).label || tokenKey.toUpperCase();
+  if (denom === selectedSaleDenom) {
+    document.getElementById('pos-tok').textContent = label;
+    matchEl.className = 'pos-match ok';
+    matchEl.textContent = `✓ Payment confirmed — $${denom} ${label}`;
+  } else {
+    matchEl.className = 'pos-match warn';
+    matchEl.textContent = `Note is $${denom} — sale is $${selectedSaleDenom}. Exact denomination required, no change given.`;
+  }
+}
+
+// ─── Accept Camera ────────────────────────────────────────────────────────────
+
+let _accCamStream = null, _accCamFrameId = null;
+
+async function loadJsQR() {
+  if (window.jsQR) return;
+  return new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
+    s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+
+async function openAcceptCamera() {
+  try {
+    await loadJsQR();
+    _accCamStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+    });
+    const vid = document.getElementById('acc-cam-video');
+    vid.srcObject = _accCamStream;
+    document.getElementById('acceptCameraModal').style.display = 'flex';
+    vid.onloadedmetadata = () => { vid.play(); _accCamFrameId = requestAnimationFrame(accScanFrame); };
+  } catch(e) {
+    alert(e.name === 'NotAllowedError' ? 'Camera permission denied — allow camera access and try again.' : 'Camera unavailable: ' + e.message);
+  }
+}
+
+function closeAcceptCamera() {
+  if (_accCamFrameId) { cancelAnimationFrame(_accCamFrameId); _accCamFrameId = null; }
+  if (_accCamStream)  { _accCamStream.getTracks().forEach(t => t.stop()); _accCamStream = null; }
+  document.getElementById('acc-cam-video').srcObject = null;
+  document.getElementById('acceptCameraModal').style.display = 'none';
+}
+
+function accScanFrame() {
+  const vid = document.getElementById('acc-cam-video');
+  const canvas = document.getElementById('acc-cam-canvas');
+  if (!vid.videoWidth) { _accCamFrameId = requestAnimationFrame(accScanFrame); return; }
+  canvas.width = vid.videoWidth; canvas.height = vid.videoHeight;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(vid, 0, 0);
+  const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const result = jsQR(img.data, img.width, img.height, { inversionAttempts: 'attemptBoth' });
+  if (result && result.data.match(HP_NOTE_RE)) {
+    closeAcceptCamera();
+    document.getElementById('acceptNote').value = result.data;
+    detectAcceptNote();
+    return;
+  }
+  if (result) {
+    document.getElementById('acc-cam-status').textContent = 'Not a PrivX Pay note — keep scanning…';
+    setTimeout(() => {
+      const el = document.getElementById('acc-cam-status');
+      if (el) el.textContent = 'Point at the customer\'s PrivX Pay QR code';
+    }, 2000);
+  }
+  _accCamFrameId = requestAnimationFrame(accScanFrame);
 }
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
