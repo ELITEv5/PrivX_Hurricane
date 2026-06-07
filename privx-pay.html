@@ -824,7 +824,7 @@ async function buyNote() {
     const saved = getSavedNotes();
     if (!saved.find(n => n.note === _currentNote.note)) {
       saved.push(_currentNote);
-      localStorage.setItem('privxpay_notes_v1', JSON.stringify(saved));
+      localStorage.setItem('privxpay_atm_notes_v1', JSON.stringify(saved));
     }
 
     setStatus('buyStatus', 'success',
@@ -850,13 +850,13 @@ function saveNote() {
   const saved = getSavedNotes();
   if (saved.find(n => n.note === _currentNote.note)) return;
   saved.push(_currentNote);
-  localStorage.setItem('privxpay_notes_v1', JSON.stringify(saved));
+  localStorage.setItem('privxpay_atm_notes_v1', JSON.stringify(saved));
 }
 
 // ─── SPEND TAB ────────────────────────────────────────────────────────────────
 
 function getSavedNotes() {
-  try { return JSON.parse(localStorage.getItem('privxpay_notes_v1') || '[]'); } catch { return []; }
+  try { return JSON.parse(localStorage.getItem('privxpay_atm_notes_v1') || '[]'); } catch { return []; }
 }
 
 function renderSavedNotes() {
@@ -891,7 +891,7 @@ function deleteNote(i) {
   if (!confirm('Delete this note? Make sure you have a copy if it has not been spent.')) return;
   const saved = getSavedNotes();
   saved.splice(i, 1);
-  localStorage.setItem('privxpay_notes_v1', JSON.stringify(saved));
+  localStorage.setItem('privxpay_atm_notes_v1', JSON.stringify(saved));
   renderSavedNotes();
   document.getElementById('spendQrWrap').style.display = 'none';
 }
