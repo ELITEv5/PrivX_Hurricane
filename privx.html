@@ -1202,7 +1202,12 @@
       } catch(err){
         console.error(err);
         const isTimeout=err.message&&(err.message.includes('50 blocks')||err.message.includes('not mined')||err.message.includes('polling timeout'));
-        if(!isTimeout) alert("Deposit failed: "+(err.message||"check MetaMask"));
+        if(isTimeout){
+          const txHash=err.transactionHash||'';
+          alert('⚠️ Timed out waiting — but the deposit may have gone through.\n\nYour note is shown above. Copy it now if you have not already.\n\n'+(txHash?'Check the scanner before assuming it failed:\nhttps://scan.pulsechain.com/tx/'+txHash:'Check scan.pulsechain.com before creating a new note.')+'\n\nDo NOT delete your note without verifying.');
+        } else {
+          alert("Deposit failed: "+(err.message||"check MetaMask"));
+        }
       }
       finally{
         btn.disabled=false;
@@ -1341,7 +1346,12 @@
       }catch(err){
         console.error(err);
         const isTimeout=err.message&&(err.message.includes('50 blocks')||err.message.includes('not mined')||err.message.includes('polling timeout'));
-        if(!isTimeout) alert("Withdrawal failed: "+(err.message||"check console"));
+        if(isTimeout){
+          const txHash=err.transactionHash||'';
+          alert('⚠️ Timed out — but the withdrawal may have succeeded.\n\n'+(txHash?'Check the scanner before re-using or deleting this note:\nhttps://scan.pulsechain.com/tx/'+txHash:'Check scan.pulsechain.com for your recent transactions.')+'\n\nDo NOT delete your note without verifying.');
+        } else {
+          alert("Withdrawal failed: "+(err.message||"check console"));
+        }
       }
       finally{btn.disabled=false;btn.textContent="Generate ZK Proof + Withdraw";}
     }
