@@ -246,6 +246,12 @@ input[type=text]:focus{border-color:var(--a)}
     <div class="sh-title">PrivX Pay</div>
     <div class="sh-right">
       <div class="sh-badge">WALLET</div>
+      <button class="btn-lock" id="btn-refresh" onclick="_checkAllLiveNotes()" title="Check spend status" style="opacity:.35">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+          <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+        </svg>
+      </button>
       <button class="btn-lock" onclick="lock()" title="Lock wallet">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="11" width="18" height="11" rx="2"/>
@@ -376,6 +382,8 @@ let _changingPin  = false;
 let _poseidon     = null;   // lazy loaded
 let _spendWatchId = null;
 let _spendWatchNoteId = null;
+let _bgPollId     = null;
+let _checking     = false;
 
 // PIN state
 let _pin      = '';
@@ -516,10 +524,12 @@ function _unlock() {
   _pin = ''; _pinFirst = ''; _drawDots();
   renderWallet();
   _resetTimer();
+  _startBgPoll();
 }
 
 function lock() {
   _stopSpendWatch();
+  _stopBgPoll();
   _notes = null; _key = null;
   _pin = ''; _pinFirst = '';
   _pinMode = localStorage.getItem(SALT_KEY) ? 'enter' : 'set';
@@ -587,6 +597,49 @@ async function _isNoteSpentOnChain(noteObj) {
   const hashHex    = nullHash.toString(16).padStart(64, '0');
   const result     = await _rpc('eth_call', [{to:addr, data:NULL_HASH_SEL+hashHex}, 'latest']);
   return result === '0x0000000000000000000000000000000000000000000000000000000000000001';
+}
+
+async function _checkAllLiveNotes() {
+  if (_checking) return;
+  _checking = true;
+  _setRefreshSpin(true);
+  try {
+    const notes = getNotes();
+    const live  = notes.filter(n => !n.spent);
+    if (!live.length) return;
+    let anySpent = false;
+    for (const note of live) {
+      try {
+        if (await _isNoteSpentOnChain(note)) {
+          const n = notes.find(x => x.id === note.id);
+          if (n && !n.spent) { n.spent = true; anySpent = true; }
+        }
+      } catch { /* silent per-note */ }
+    }
+    if (anySpent) {
+      await putNotes(notes);
+      renderWallet();
+      _showToast('Spent note detected and updated');
+    }
+  } finally {
+    _checking = false;
+    _setRefreshSpin(false);
+  }
+}
+
+function _startBgPoll() {
+  _stopBgPoll();
+  // First check after 4s (give Poseidon time to load), then every 90s
+  setTimeout(() => { _checkAllLiveNotes(); _bgPollId = setInterval(_checkAllLiveNotes, 90000); }, 4000);
+}
+
+function _stopBgPoll() {
+  if (_bgPollId) { clearInterval(_bgPollId); _bgPollId = null; }
+}
+
+function _setRefreshSpin(on) {
+  const btn = document.getElementById('btn-refresh');
+  if (btn) btn.style.opacity = on ? '1' : '';
 }
 
 function _startSpendWatch(noteId) {
