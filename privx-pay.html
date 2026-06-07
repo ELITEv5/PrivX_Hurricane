@@ -201,13 +201,13 @@
   </div>
 
   <div class="tabs">
-    <div class="tab active" id="tab-spend"  onclick="switchTab('spend')">Wallet</div>
-    <div class="tab"        id="tab-buy"    onclick="switchTab('buy')">Deposit</div>
+    <div class="tab active" id="tab-buy"    onclick="switchTab('buy')">Deposit</div>
+    <div class="tab"        id="tab-spend"  onclick="switchTab('spend')">Wallet</div>
     <div class="tab"        id="tab-accept" onclick="switchTab('accept')">Register</div>
   </div>
 
   <!-- ─── BUY CASH TAB ───────────────────────────────────────────────────── -->
-  <div id="buyTab" class="hidden">
+  <div id="buyTab">
     <div class="info-box">
       <strong>You're at the ATM.</strong> Shield stablecoins into a private vault and receive an encrypted denomination note — a bearer instrument, like a $20 bill in digital form.<br>
       <div style="margin-top:10px">
@@ -254,7 +254,7 @@
   </div>
 
   <!-- ─── WALLET TAB ──────────────────────────────────────────────────────── -->
-  <div id="spendTab">
+  <div id="spendTab" class="hidden">
     <div class="info-box">
       <strong>Notes saved on this device:</strong><br>
       These are your shielded notes — saved in this browser after each deposit. Tap any note to show its QR, then scan it into the PrivX Pay mobile wallet on your phone. Once a note is on your phone, it's in your pocket.<br>
