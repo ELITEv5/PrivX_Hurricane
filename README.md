@@ -2,11 +2,11 @@
 
 > Zero-knowledge token shielding on PulseChain. Shield tokens. Generate a Proof of Privacy. Mine PRIVX.
 
-**PrivX Hurricane** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx.html) &nbsp;·&nbsp; [IPFS](https://ipfs.io/ipfs/bafybeig45ccddxr6j3rwi44nzjdpwu5i7yxcvffuw3h6vdlenkzx45ebea)
+**PrivX Hurricane** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx.html) &nbsp;·&nbsp; [IPFS](https://ipfs.io/ipfs/bafybeihyohefvtegd6e7v7lclzaofhaokcqbaewd2n4xrxaatrkquyxpea/index.html)
 
-**PrivX Pay ATM** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx-pay.html) — private stablecoin cash, desktop ATM
+**PrivX Pay ATM** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx-pay.html) &nbsp;·&nbsp; [IPFS](https://ipfs.io/ipfs/bafybeihyohefvtegd6e7v7lclzaofhaokcqbaewd2n4xrxaatrkquyxpea/privx-pay.html) — private stablecoin cash, desktop ATM
 
-**PrivX Pay Wallet** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx-pay-wallet.html) — PIN-protected mobile wallet with seed recovery
+**PrivX Pay Wallet** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx-pay-wallet.html) &nbsp;·&nbsp; [IPFS](https://ipfs.io/ipfs/bafybeihyohefvtegd6e7v7lclzaofhaokcqbaewd2n4xrxaatrkquyxpea/privx-pay-wallet.html) — PIN-protected mobile wallet with seed recovery
 
 **Chain:** PulseChain (chainId 369)
 
@@ -354,14 +354,15 @@ plonk-zk/
 ├── relayer.html                       # Relayer UI — submit proofs on behalf of users
 ├── privx-pay.html                     # PrivX Pay ATM — deposit stablecoins, receive bearer notes
 ├── privx-pay-wallet.html              # PrivX Pay Wallet — PIN-protected, seed-derived note storage
-├── PrivX-IFPS/                        # Censorship-resistant IPFS build of PrivX Hurricane
-│   ├── index.html
+├── PrivX-IFPS/                        # Combined IPFS build — entire protocol in one directory
+│   ├── index.html                     #   PrivX Hurricane
+│   ├── privx-pay.html                 #   PrivX Pay ATM
+│   ├── privx-pay-wallet.html          #   PrivX Pay Wallet
 │   ├── relayer.html
-│   └── sw.js
-├── PrivXPay-IFPS/                     # IPFS build of PrivX Pay ATM
-│   └── index.html
-├── PrivXPayWallet-IFPS/               # IPFS build of PrivX Pay Wallet
-│   └── index.html
+│   ├── sw.js                          #   Shared service worker (all pages, one scope)
+│   ├── manifest.json                  #   Hurricane PWA manifest
+│   ├── privx-pay-manifest.json        #   Pay ATM PWA manifest
+│   └── privx-pay-wallet-manifest.json #   Wallet PWA manifest
 └── scripts/
     └── build_circuit.sh               # Circuit compile + trusted setup + verifier export
 ```
