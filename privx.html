@@ -1270,6 +1270,8 @@
       const nullifier    = BigInt("0x"+nHex), secret = BigInt("0x"+sHex);
       const commitment   = poseidonFn(nullifier, secret);
       const nullifierHash = poseidonFn(nullifier, denomWei);
+      // Quick spent check before slow Merkle + proof work
+      try{const sp=await(await fetch('https://rpc.pulsechain.com',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to:shieldAddr,data:'0x17cc915c'+nullifierHash.toString(16).padStart(64,'0')},'latest']})})).json();if(BigInt(sp.result||'0x0')===1n)return alert('This note has already been spent — it cannot be used again.');}catch{}
       const w = new Web3("https://rpc.pulsechain.com");
       const shieldC = new w.eth.Contract(SHIELD_ABI, shieldAddr);
       let pathIndices, siblings, proofRoot;
@@ -1327,6 +1329,8 @@
       const nullifier=BigInt("0x"+nHex), secret=BigInt("0x"+sHex);
       const commitment=poseidonFn(nullifier,secret);
       const nullifierHash=poseidonFn(nullifier,denomWei);
+      // Quick spent check before slow Merkle + proof work
+      try{const sp=await(await fetch('https://rpc.pulsechain.com',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to:shieldAddr,data:'0x17cc915c'+nullifierHash.toString(16).padStart(64,'0')},'latest']})})).json();if(BigInt(sp.result||'0x0')===1n)return alert('This note has already been spent — it cannot be withdrawn again.');}catch{}
       const shieldC=new web3.eth.Contract(SHIELD_ABI,shieldAddr);
       let pathIndices,siblings,proofRoot;
       try{const mp=await getMerkleProof(shieldC,commitment);pathIndices=mp.pathIndices;siblings=mp.siblings;proofRoot=mp.proofRoot;}
