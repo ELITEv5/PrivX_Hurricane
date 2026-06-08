@@ -978,7 +978,7 @@ async function _applyNewPin(pin) {
 
 function confirmReset() {
   if (!confirm(
-    'This permanently deletes all notes and your PIN.\nNotes cannot be recovered.\n\nContinue?'
+    'RESET WALLET\n\nThis permanently deletes all notes and your PIN from this device.\n\n⚠ Notes scanned in from outside (e.g. ATM) cannot be recovered — they will be gone.\n\n✓ Notes deposited through this wallet can be recovered later using your recovery seed.\n\nContinue?'
   )) return;
   localStorage.removeItem(STORE);
   localStorage.removeItem(SALT_KEY);
