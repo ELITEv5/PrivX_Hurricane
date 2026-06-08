@@ -506,6 +506,10 @@
           <summary style="cursor:pointer;font-weight:600;color:#fff;padding:12px 16px;background:rgba(138,43,226,0.1);list-style:none;display:flex;justify-content:space-between;align-items:center">Why does proof generation take so long? <span style="font-size:11px;color:var(--accent)">▼</span></summary>
           <p style="padding:12px 16px;color:#aaa;font-size:14px;line-height:1.6;border-left:2px solid var(--primary);margin-top:6px">PLONK zero-knowledge proofs require heavy computation — downloading the proving key and running polynomial operations on thousands of constraints, all inside your browser. Modern laptops take 15–30 seconds. This computation is what makes the privacy cryptographically sound and cannot be reduced without weakening the security model. Do not close the tab during proof generation.</p>
         </details>
+        <details style="border-radius:10px;overflow:hidden">
+          <summary style="cursor:pointer;font-weight:600;color:#fff;padding:12px 16px;background:rgba(138,43,226,0.1);list-style:none;display:flex;justify-content:space-between;align-items:center">What happens if I try to withdraw an already-spent note? <span style="font-size:11px;color:var(--accent)">▼</span></summary>
+          <p style="padding:12px 16px;color:#aaa;font-size:14px;line-height:1.6;border-left:2px solid var(--primary);margin-top:6px">Before starting proof generation, the app automatically queries the shield contract on-chain to check whether your note's nullifier has already been recorded as spent. If it has, you see an immediate error — saving the 15–30 seconds of proof computation that would result in a reverted transaction anyway. Valid, unspent notes pass this check instantly and proceed normally.</p>
+        </details>
       </div>
     </div>
 
@@ -663,6 +667,7 @@
         <tr><td>No pause function</td><td><span style="color:#00ff88">✅</span></td></tr>
         <tr><td>Reentrancy protection</td><td><span style="color:#00ff88">✅</span> OpenZeppelin</td></tr>
         <tr><td>Safe token transfers</td><td><span style="color:#00ff88">✅</span> OpenZeppelin SafeERC20</td></tr>
+        <tr><td>Pre-proof spent-note detection</td><td><span style="color:#00ff88">✅</span> On-chain check before proof generation — no wasted 30s compute</td></tr>
       </table>
       <div class="docs-h2">Circuit Analysis</div>
       <p class="docs-p">The PrivXMixer(14) circuit was analysed using two independent methods: snarkjs R1CS constraint inspection and <strong style="color:#fff">Ecne</strong> — a Julia-based SMT solver that mechanically verifies every signal in the R1CS is uniquely determined by the inputs. The circuit source, compiled R1CS, and symbol file are published on GitHub for independent verification by anyone.</p>
