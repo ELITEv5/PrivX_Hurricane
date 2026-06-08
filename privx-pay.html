@@ -993,9 +993,16 @@ async function acceptNote() {
 
   const btn = document.getElementById('acceptBtn');
   btn.disabled = true;
-  setStatus('acceptStatus', 'pending', 'Fetching deposit events from shield…');
 
   try {
+    // Fast spent check before the slow Merkle + proof work
+    setStatus('acceptStatus', 'pending', 'Checking note status…');
+    const nhHex   = nullifierHash.toString(16).padStart(64, '0');
+    const spentRes = await ethCall(shieldAddr, '0x17cc915c', nhHex);
+    if (BigInt(spentRes) === 1n)
+      return setStatus('acceptStatus', 'error', 'This note has already been spent — it cannot be redeemed again.');
+
+    setStatus('acceptStatus', 'pending', 'Fetching deposit events from shield…');
     const { pathIndices, siblings, proofRoot } = await getMerkleProof(shieldAddr, commitment);
 
     const circuitInput = {
