@@ -2,7 +2,13 @@
 
 > Zero-knowledge token shielding on PulseChain. Shield tokens. Generate a Proof of Privacy. Mine PRIVX.
 
-**Live:** [privx.html](https://elitev5.github.io/PrivX_Hurricane/privx.html) &nbsp;·&nbsp; **IPFS:** [bafybeig45ccddxr6j3rwi44nzjdpwu5i7yxcvffuw3h6vdlenkzx45ebea](https://ipfs.io/ipfs/bafybeig45ccddxr6j3rwi44nzjdpwu5i7yxcvffuw3h6vdlenkzx45ebea) &nbsp;·&nbsp; **Chain:** PulseChain (chainId 369)
+**PrivX Hurricane** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx.html) &nbsp;·&nbsp; [IPFS](https://ipfs.io/ipfs/bafybeig45ccddxr6j3rwi44nzjdpwu5i7yxcvffuw3h6vdlenkzx45ebea)
+
+**PrivX Pay ATM** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx-pay.html) — private stablecoin cash, desktop ATM
+
+**PrivX Pay Wallet** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx-pay-wallet.html) — PIN-protected mobile wallet with seed recovery
+
+**Chain:** PulseChain (chainId 369)
 
 ---
 
@@ -29,7 +35,7 @@ You have tokens to shield                 From a fresh wallet
   └─ Save your private note                 └─ PRIVX mining reward paid instantly
 ```
 
-**The note is the only key.** It encodes your nullifier and secret. Losing it means the funds are locked in the contract forever — there is no recovery mechanism.
+**The note is the only key.** It encodes your nullifier and secret. Losing it means the funds are locked in the contract forever. For seed-based note recovery, use the **PrivX Pay Wallet** — it derives every note from a master seed so your full history can be scanned back from the blockchain after device loss.
 
 ---
 
@@ -285,6 +291,7 @@ The proving key (`PrivXMixer14_final.zkey`) is pinned to IPFS and served directl
 | No pause function | ✅ |
 | Reentrancy protection | ✅ OpenZeppelin ReentrancyGuard |
 | Safe token transfers | ✅ OpenZeppelin SafeERC20 |
+| Pre-proof spent-note detection | ✅ On-chain check before proof generation — no wasted compute |
 
 The shield contracts are immutable from the moment of deployment. The development team cannot change the fee, pause withdrawals, blacklist addresses, or alter any parameter. **If you know the note, you can withdraw — always, unconditionally, forever.**
 
@@ -344,9 +351,17 @@ plonk-zk/
 │   ├── PrivXMixer.r1cs                # Compiled constraints
 │   └── powersOfTau28_hez_final_14.ptau # Hermez ceremony file
 ├── privx.html                         # PrivX Hurricane dapp (single file, no build step)
-├── PrivX-IFPS/                        # Censorship-resistant PWA build (IPFS-pinned)
+├── relayer.html                       # Relayer UI — submit proofs on behalf of users
+├── privx-pay.html                     # PrivX Pay ATM — deposit stablecoins, receive bearer notes
+├── privx-pay-wallet.html              # PrivX Pay Wallet — PIN-protected, seed-derived note storage
+├── PrivX-IFPS/                        # Censorship-resistant IPFS build of PrivX Hurricane
 │   ├── index.html
+│   ├── relayer.html
 │   └── sw.js
+├── PrivXPay-IFPS/                     # IPFS build of PrivX Pay ATM
+│   └── index.html
+├── PrivXPayWallet-IFPS/               # IPFS build of PrivX Pay Wallet
+│   └── index.html
 └── scripts/
     └── build_circuit.sh               # Circuit compile + trusted setup + verifier export
 ```
@@ -389,6 +404,40 @@ For native PLS use `PrivX_PLS_Shield.sol` with the same values.
 4. Update UI with new shield addresses
 
 The ZK circuit, proving key, and verifier contract do not change. No new ceremony required.
+
+---
+
+## PrivX Pay — Private Stablecoin Cash
+
+PrivX Pay extends the protocol into a cash-like payment system built on the same ZK infrastructure.
+
+### PrivX Pay ATM (`privx-pay.html`)
+
+Desktop interface for shielding stablecoins (DAI, pSunDAI, USDC) into bearer notes. Works like a cash machine — deposit, receive an encrypted denomination note, scan the QR into your phone wallet.
+
+- Notes are fixed denominations ($1 / $5 / $10 / $20 / $50 / $100)
+- 0.5% deposit fee, PRIVX mining reward on redemption
+- Automatic on-chain spent check before proof generation
+
+### PrivX Pay Wallet (`privx-pay-wallet.html`)
+
+PIN-protected mobile PWA for holding and redeeming notes. Designed to live on your phone's home screen.
+
+- AES-256-GCM encryption, PBKDF2 250k iterations
+- **Seed-derived notes:** every note deposited through the wallet is derived from a 128-bit master seed via `SHA-256(seed + ':n:' + index)` — full note history recoverable by scanning the blockchain with the seed alone
+- Seed is masked at rest, tap-to-reveal with 30-second auto-hide
+- Notes scanned in from the ATM are random (not seed-derived) and require the encrypted wallet backup for recovery
+- Relayer-style **Redeem** tab for merchants: scan customer QR, ZK proof generated in browser, funds arrive instantly
+
+### Note Format
+
+```
+hp-<token>-<denomination>-<nullifierHex(62)>-<secretHex(62)>
+
+Example: hp-dai-20-a3f9...c1d2-b8e4...7f03
+```
+
+Bearer instruments — whoever holds the string can redeem it. Treat like cash.
 
 ---
 
