@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PrivX Pay — Private Digital Cash</title>
   <link rel="icon" href="privx-shield.png" type="image/png">
+  <link rel="manifest" href="./privx-pay-manifest.json">
   <meta name="theme-color" content="#8A2BE2">
   <meta name="description" content="PrivX Pay — private digital cash on PulseChain. Buy, spend, and accept DAI, pSunDAI, and USDC privately with zero on-chain identity.">
   <style>
@@ -248,6 +249,7 @@
       <div class="note-text" id="noteText"></div>
       <div class="note-actions">
         <button onclick="copyNote()">Copy Note</button>
+        <button onclick="printNote()" style="background:rgba(138,43,226,0.1);border-color:rgba(138,43,226,0.4);color:#c084fc">🖨 Print</button>
         <button onclick="switchToWallet()" style="background:rgba(0,255,234,0.12);border-color:rgba(0,255,234,0.4);color:var(--accent)">Wallet →</button>
       </div>
     </div>
@@ -864,6 +866,16 @@ function copyNote() {
   navigator.clipboard.writeText(_currentNote.note).then(() => alert('Note copied to clipboard.'));
 }
 
+function printNote() {
+  if (!_currentNote) return;
+  window.open('./privx-notes.html?note=' + encodeURIComponent(_currentNote.note), '_blank');
+}
+
+function printSavedNote(btn) {
+  const note = btn.dataset.note;
+  if (note) window.open('./privx-notes.html?note=' + encodeURIComponent(note), '_blank');
+}
+
 function saveNote() {
   if (!_currentNote) return;
   const saved = getSavedNotes();
@@ -898,6 +910,7 @@ function renderSavedNotes() {
         <span class="snc-date">${date}</span>
       </div>
       <div class="snc-actions">
+        <button class="snc-btn" onclick="event.stopPropagation();printSavedNote(this)" data-note="${n.note}" title="Print Cash Note">🖨</button>
         <button class="snc-btn" onclick="deleteNote(${i})" title="Delete">✕</button>
       </div>
     `;
@@ -1315,6 +1328,7 @@ addEventListener('resize', () => {
   drops    = Array(columns).fill(1);
 });
 
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
 </body>
 </html>
