@@ -405,7 +405,7 @@ body {
 <!-- ── Note templates injected here by JS ── -->
 <div id="notes-container"></div>
 
-<script src="./qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
 <script>
 
 /* ── Denomination config ── */
@@ -478,7 +478,7 @@ function buildNotes() {
 
 /* ── Parse note string ── */
 function parseNote(str) {
-  const m = str.trim().match(/^hp-([a-z]+)-(\d+)-([0-9a-f]{62})-([0-9a-f]{62})$/i);
+  const m = str.trim().match(/^hp-([a-z]+)-(\d+)-([0-9a-f]{60,64})-([0-9a-f]{60,64})$/i);
   if (!m) return null;
   return { token: m[1].toLowerCase(), denom: m[2], nullifier: m[3], note: str.trim() };
 }
