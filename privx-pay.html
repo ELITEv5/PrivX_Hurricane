@@ -1,1317 +1,1560 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PrivX Pay — Private Digital Cash</title>
-  <link rel="icon" href="privx-shield.png" type="image/png">
-  <meta name="theme-color" content="#8A2BE2">
-  <meta name="description" content="PrivX Pay — private digital cash on PulseChain. Buy, spend, and accept DAI, pSunDAI, and USDC privately with zero on-chain identity.">
-  <style>
-    :root{--primary:#8A2BE2;--accent:#00ffea;--bg:#000;--glow:rgba(138,43,226,0.6)}
-    *{margin:0;padding:0;box-sizing:border-box}
-    html{overscroll-behavior:none;-webkit-text-size-adjust:100%}
-    body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 20px 80px;overflow-x:hidden}
-    canvas#matrix-bg{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
-    .page-wrap{width:100%;max-width:640px;position:relative;z-index:10;margin-top:60px}
-    .container{background:rgba(10,10,10,0.7);backdrop-filter:blur(20px);border-radius:24px;padding:36px 28px;border:1px solid var(--primary);box-shadow:0 0 80px var(--glow),inset 0 0 40px rgba(138,43,226,0.1)}
-    .top-nav{position:fixed;top:20px;left:20px;display:flex;gap:10px;z-index:9999;flex-wrap:wrap}
-    .nav-link{background:rgba(10,10,10,0.8);backdrop-filter:blur(10px);padding:10px 18px;border:1px solid rgba(138,43,226,0.5);border-radius:10px;color:#aaa;font-size:13px;font-weight:600;text-decoration:none;transition:all .3s}
-    .nav-link:hover{border-color:var(--accent);color:var(--accent)}
-    /* Header */
-    .logo-header{text-align:center;margin-bottom:28px}
-    h1{font-size:clamp(2.2em,7vw,3em);font-weight:900;background:linear-gradient(90deg,#00ffea,#8A2BE2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
-    .tagline{color:#666;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
-    .cash-badge{display:inline-block;background:rgba(0,255,234,0.07);border:1px solid rgba(0,255,234,0.2);border-radius:20px;padding:5px 16px;font-size:11px;font-weight:700;color:var(--accent);letter-spacing:1.5px}
-    /* Tabs */
-    .tabs{display:flex;gap:8px;margin-bottom:24px}
-    .tab{flex:1;padding:13px 4px;border:2px solid rgba(255,255,255,0.1);border-radius:12px;background:rgba(20,20,20,0.6);cursor:pointer;transition:all .3s;text-align:center;font-weight:700;font-size:13px;user-select:none}
-    .tab:hover{border-color:var(--primary)}
-    .tab.active{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 0 30px var(--glow)}
-    .hidden{display:none!important}
-    /* Common elements */
-    .section-label{font-size:11px;color:#666;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px}
-    input[type=text],textarea{width:100%;padding:14px 16px;background:#111;border:1px solid rgba(138,43,226,0.3);border-radius:12px;color:#fff;font-size:14px;font-family:monospace;outline:none;transition:border-color .2s;margin-bottom:14px}
-    input[type=text]:focus,textarea:focus{border-color:var(--accent)}
-    textarea{height:80px;resize:vertical;line-height:1.5}
-    .btn{width:100%;padding:16px;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;transition:all .3s;letter-spacing:.3px}
-    .btn-primary{background:var(--primary);color:#fff;box-shadow:0 0 30px var(--glow)}
-    .btn-primary:hover{background:var(--accent);color:#000;transform:translateY(-2px)}
-    .btn-primary:disabled{background:#333;color:#666;cursor:not-allowed;box-shadow:none;transform:none}
-    .btn-outline{background:transparent;border:1px solid rgba(138,43,226,0.4);color:#888;padding:12px;font-size:13px;font-weight:600;border-radius:10px;cursor:pointer;transition:all .2s;width:100%;margin-top:8px}
-    .btn-outline:hover{border-color:var(--accent);color:var(--accent)}
-    .btn-teal{background:rgba(0,255,234,0.08);border:1px solid rgba(0,255,234,0.3);color:var(--accent);padding:12px;font-size:13px;font-weight:700;border-radius:10px;cursor:pointer;transition:all .2s;width:100%}
-    .btn-teal:hover{background:rgba(0,255,234,0.16)}
-    .info-box{background:rgba(138,43,226,0.06);border:1px solid rgba(138,43,226,0.2);border-radius:12px;padding:14px 16px;font-size:13px;color:#aaa;line-height:1.75;margin-bottom:20px}
-    .info-box strong{color:#B57AFF}
-    .status{padding:14px 16px;border-radius:12px;font-size:13px;line-height:1.6;font-family:monospace;margin-top:8px;display:none;white-space:pre-wrap}
-    .status.success{background:rgba(0,255,100,0.07);border:1px solid rgba(0,255,100,0.2);color:#00e664;display:block;white-space:pre-line}
-    .status.error{background:rgba(255,50,50,0.07);border:1px solid rgba(255,50,50,0.2);color:#ff6666;display:block;white-space:pre-line}
-    .status.pending{background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);color:#B57AFF;display:block}
-    .status.warning{background:rgba(255,180,0,0.07);border:1px solid rgba(255,180,0,0.25);color:#ffb400;display:block;white-space:pre-line}
-    /* Wallet row */
-    .wallet-row{display:flex;gap:10px;align-items:center;margin-bottom:14px}
-    .wallet-btn{padding:10px 16px;border:1px solid rgba(138,43,226,0.4);border-radius:10px;background:rgba(138,43,226,0.08);color:#aaa;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
-    .wallet-btn:hover{border-color:var(--primary);color:#fff}
-    .wallet-btn.connected{border-color:rgba(0,255,100,0.4);color:#00e664;background:rgba(0,255,100,0.05)}
-    .wallet-addr{font-family:monospace;font-size:12px;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    /* Token grid */
-    .token-grid{display:flex;gap:10px;margin-bottom:16px}
-    .token-card{flex:1;padding:12px 8px;border:2px solid rgba(255,255,255,0.1);border-radius:12px;background:rgba(20,20,20,0.6);cursor:pointer;text-align:center;transition:all .3s}
-    .token-card:hover{border-color:var(--primary)}
-    .token-card.active{border-color:var(--accent);background:rgba(0,255,234,0.07);box-shadow:0 0 20px rgba(0,255,234,0.15)}
-    .tc-name{font-weight:800;font-size:15px;color:#fff;margin-bottom:2px}
-    .tc-sub{font-size:10px;color:#555}
-    /* Denomination grid — $1 $5 $10 $20 $50 $100 */
-    .denom-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
-    .denom-card{padding:14px 8px;border:2px solid rgba(255,255,255,0.1);border-radius:12px;background:rgba(20,20,20,0.6);cursor:pointer;text-align:center;transition:all .3s}
-    .denom-card:hover{border-color:var(--primary);transform:translateY(-2px)}
-    .denom-card.active{border-color:var(--accent);background:rgba(0,255,234,0.07);box-shadow:0 0 20px rgba(0,255,234,0.15);transform:scale(1.03)}
-    .denom-amount{font-size:22px;font-weight:900;color:#fff}
-    .denom-label{font-size:11px;color:#888;margin-top:3px}
-    .denom-fee{font-size:10px;color:#555;margin-top:4px}
-    /* Note display */
-    .note-display{background:#111;border:2px solid var(--primary);border-radius:14px;padding:20px;margin-top:16px;display:none}
-    .note-warn{font-size:12px;font-weight:700;color:#ffb400;margin-bottom:12px;line-height:1.5}
-    .note-text{font-family:monospace;font-size:11px;color:var(--accent);word-break:break-all;line-height:1.6;margin-bottom:14px}
-    .note-actions{display:flex;gap:8px}
-    .note-actions button{flex:1;padding:10px;border-radius:8px;border:1px solid rgba(0,255,234,0.3);background:rgba(0,255,234,0.07);color:var(--accent);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
-    .note-actions button:hover{background:rgba(0,255,234,0.14)}
-    /* QR display */
-    .qr-wrap{text-align:center;margin:12px 0}
-    .qr-wrap canvas{border-radius:10px;border:2px solid rgba(138,43,226,0.3);display:inline-block}
-    .qr-note-text{font-family:monospace;font-size:10px;color:#555;word-break:break-all;text-align:center;margin-top:8px;line-height:1.5;padding:0 4px}
-    /* Saved notes list */
-    .saved-notes{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
-    .saved-note-card{background:#111;border:1px solid rgba(138,43,226,0.2);border-radius:10px;padding:12px 14px;cursor:pointer;transition:all .2s;display:flex;justify-content:space-between;align-items:center}
-    .saved-note-card:hover{border-color:rgba(138,43,226,0.5)}
-    .saved-note-card.active{border-color:var(--accent);background:rgba(0,255,234,0.05)}
-    .snc-info{display:flex;flex-direction:column;gap:3px}
-    .snc-denom{font-weight:800;font-size:15px}
-    .snc-token{font-size:11px;color:#888}
-    .snc-date{font-size:10px;color:#555;font-family:monospace}
-    .snc-actions{display:flex;gap:6px}
-    .snc-btn{padding:6px 10px;border:1px solid rgba(255,255,255,0.1);border-radius:6px;background:transparent;color:#666;font-size:11px;cursor:pointer;transition:all .2s}
-    .snc-btn:hover{border-color:rgba(255,50,50,0.4);color:#ff6666}
-    .divider{height:1px;background:rgba(255,255,255,0.06);margin:16px 0}
-    /* Fund Rewards box */
-    .fund-box{width:100%;max-width:640px;position:relative;z-index:10;margin-top:18px}
-    .fund-inner{background:rgba(10,10,10,0.7);backdrop-filter:blur(20px);border-radius:18px;padding:20px 22px;border:1px solid rgba(138,43,226,0.3);box-shadow:0 0 40px rgba(138,43,226,0.15)}
-    .fund-title{font-size:13px;font-weight:800;color:#B57AFF;letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px}
-    .fund-row{display:flex;gap:10px;align-items:center;margin-bottom:10px}
-    .fund-addr{font-family:monospace;font-size:11px;color:#555;word-break:break-all;flex:1;line-height:1.5}
-    .fund-bal{font-size:12px;color:#888;margin-bottom:12px}
-    .fund-bal span{color:var(--accent);font-weight:700}
-    .fund-input-row{display:flex;gap:8px;align-items:center}
-    .fund-input-row input{flex:1;margin-bottom:0;padding:10px 14px;font-size:14px}
-    .fund-input-row button{white-space:nowrap;padding:10px 18px;border:none;border-radius:10px;background:var(--primary);color:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
-    .fund-input-row button:hover{background:var(--accent);color:#000}
-    /* Stats panel */
-    .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-    .stat-card{background:rgba(20,20,20,0.8);border:1px solid rgba(138,43,226,0.2);border-radius:12px;padding:12px 14px}
-    .stat-label{font-size:10px;color:#555;font-weight:700;letter-spacing:.6px;text-transform:uppercase;margin-bottom:4px}
-    .stat-value{font-size:15px;font-weight:800;color:#fff;font-family:monospace}
-    .stat-sub{font-size:10px;color:#555;margin-top:2px}
-    .stat-accent{color:var(--accent)}
-    .stat-green{color:#00e664}
-    .stats-divider{grid-column:1/-1;height:1px;background:rgba(255,255,255,0.05);margin:2px 0}
-    /* ── POS Terminal ── */
-    .pos-terminal{background:#050505;border:1px solid rgba(0,255,234,0.18);border-radius:16px;padding:18px;margin-bottom:18px}
-    .pos-screen{background:#000;border:1px solid rgba(0,255,234,0.08);border-radius:10px;padding:18px 16px;margin-bottom:14px;text-align:center;min-height:88px;display:flex;flex-direction:column;align-items:center;justify-content:center}
-    .pos-lbl{font-size:9px;color:#444;letter-spacing:2.5px;text-transform:uppercase;font-weight:700;margin-bottom:8px}
-    .pos-amt{font-size:52px;font-weight:900;color:var(--accent);letter-spacing:-2px;line-height:1;font-family:monospace}
-    .pos-tok{font-size:12px;color:#555;margin-top:4px;letter-spacing:1px;font-weight:700}
-    .pos-keys{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-    .pos-key{padding:12px 6px;border:1px solid rgba(255,255,255,0.07);border-radius:10px;background:rgba(12,12,12,0.9);color:#777;font-size:14px;font-weight:800;cursor:pointer;transition:all .15s;text-align:center;user-select:none}
-    .pos-key:hover{border-color:rgba(0,255,234,0.3);color:var(--accent)}
-    .pos-key.selected{border-color:rgba(0,255,234,0.55);background:rgba(0,255,234,0.06);color:var(--accent);box-shadow:0 0 14px rgba(0,255,234,0.08)}
-    .pos-clr{color:#555;font-size:12px;border-color:rgba(255,255,255,0.05)}
-    .pos-clr:hover{border-color:rgba(255,80,80,0.35);color:#ff7070}
-    .pos-match{padding:10px 14px;border-radius:8px;font-size:12px;font-weight:700;margin-bottom:12px;text-align:center;display:none;line-height:1.5}
-    .pos-match.ok{background:rgba(0,255,100,0.05);border:1px solid rgba(0,255,100,0.18);color:#00e664;display:block}
-    .pos-match.warn{background:rgba(255,180,0,0.05);border:1px solid rgba(255,180,0,0.2);color:#ffb400;display:block}
-    .scan-row{display:flex;gap:8px;align-items:flex-start;margin-bottom:14px}
-    .scan-row textarea{margin-bottom:0;flex:1}
-    .scan-btn{padding:14px 14px;border:1px solid rgba(0,255,234,0.25);border-radius:10px;background:rgba(0,255,234,0.05);color:var(--accent);font-size:20px;cursor:pointer;transition:all .2s;flex-shrink:0;margin-top:0;line-height:1}
-    .scan-btn:hover{background:rgba(0,255,234,0.12);border-color:rgba(0,255,234,0.5)}
-    @media(max-width:600px){
-      .page-wrap{margin-top:70px}
-      .container{padding:22px 14px}
-      .top-nav{top:10px;left:10px}
-      .nav-link{padding:7px 10px;font-size:11px}
-      .tabs{gap:6px}
-      .tab{font-size:12px;padding:11px 4px}
-      .denom-amount{font-size:18px}
-      .fund-box{margin-top:12px}
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
+<meta name="apple-mobile-web-app-title" content="PrivX Pay">
+<link rel="apple-touch-icon" href="./privx-shield.png">
+<link rel="manifest" href="./privx-pay-wallet-manifest.json">
+<title>PrivX Pay</title>
+<style>
+:root{
+  --p:#8A2BE2;--a:#00ffea;--bg:#0a0a0a;
+  --t:#fff;--t2:#999;--t3:#666;--g:#00e664;
+  --r:16px;
+  --safe-top:env(safe-area-inset-top);
+  --safe-bot:env(safe-area-inset-bottom);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+
+/* ── Lock screen ── */
+#lock-scr{
+  position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;background:var(--bg);
+  padding:calc(var(--safe-top) + 24px) 32px calc(var(--safe-bot) + 24px);gap:22px
+}
+#lock-scr.hidden{display:none}
+.ls-logo{text-align:center;margin-bottom:4px}
+.ls-title{font-size:28px;font-weight:900;letter-spacing:-.5px}
+.ls-badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:1.2px;
+  text-transform:uppercase;color:var(--a);background:rgba(0,255,234,.07);
+  border:1px solid rgba(0,255,234,.2);border-radius:20px;padding:4px 10px;margin-top:8px}
+.ls-prompt{font-size:15px;color:var(--t2);font-weight:600;text-align:center;min-height:22px;transition:opacity .2s}
+.pin-dots{display:flex;gap:16px}
+.pd{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.15);transition:all .15s}
+.pd.filled{background:var(--a);border-color:var(--a);box-shadow:0 0 10px rgba(0,255,234,.5)}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-10px)}40%{transform:translateX(10px)}
+  60%{transform:translateX(-7px)}80%{transform:translateX(7px)}
+}
+.pin-dots.shake{animation:shake .55s ease}
+.pin-error{font-size:12px;color:#ff7070;min-height:18px;text-align:center}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;max-width:264px}
+.pp{padding:20px 10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;color:#fff;font-size:22px;font-weight:700;cursor:pointer;
+  transition:all .1s;user-select:none;touch-action:manipulation;-webkit-user-select:none}
+.pp:active{background:rgba(138,43,226,.22);border-color:rgba(138,43,226,.4);transform:scale(.93)}
+.pp-back{font-size:18px;color:var(--t2)}
+.ls-reset{font-size:11px;color:#666;cursor:pointer;text-decoration:underline;
+  margin-top:2px;padding:8px;display:none}
+.ls-reset:active{color:#999}
+.ls-cancel{font-size:13px;font-weight:600;color:var(--t2);cursor:pointer;padding:10px;
+  display:none;touch-action:manipulation}
+.ls-cancel:active{color:#fff}
+.change-pin-link{font-size:11px;color:#666;cursor:pointer;text-decoration:underline;
+  text-align:center;padding:16px 0 4px;touch-action:manipulation}
+.change-pin-link:active{color:#999}
+
+/* ── App ── */
+#app.hidden{display:none}
+#app{display:flex;flex-direction:column;height:100%;padding-top:var(--safe-top)}
+
+/* ── Main scroll area ── */
+#main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:20px 18px calc(24px + var(--safe-bot))}
+@media(min-width:600px){#main{max-width:520px;margin:0 auto}}
+
+/* ── Header ── */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-top:4px}
+.sh-title{font-size:22px;font-weight:800;letter-spacing:-.4px}
+.sh-right{display:flex;align-items:center;gap:8px}
+.sh-badge{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--a);background:rgba(0,255,234,.07);border:1px solid rgba(0,255,234,.2);
+  border-radius:20px;padding:4px 10px}
+.btn-lock{background:none;border:none;padding:6px;color:rgba(255,255,255,.5);
+  cursor:pointer;border-radius:8px;transition:color .2s;display:flex;align-items:center;
+  touch-action:manipulation}
+.btn-lock:active{color:var(--a)}
+
+/* ── Total ── */
+.w-total{text-align:center;padding:14px 0 24px}
+.w-total-lbl{font-size:11px;color:var(--t2);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:6px}
+.w-total-amt{font-size:52px;font-weight:900;letter-spacing:-2px;line-height:1}
+.w-stats{font-size:12px;color:var(--t2);margin-top:8px;letter-spacing:.3px}
+.w-stats .live{color:var(--g)}
+.w-stats .spent-ct{color:#ff6666}
+.web3-chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;
+  color:rgba(255,255,255,.55);background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:4px 10px;
+  cursor:pointer;margin-top:10px;transition:all .2s;touch-action:manipulation;
+  font-family:inherit}
+.web3-chip:active{color:var(--a);border-color:rgba(0,255,234,.2)}
+.web3-chip .dot{width:6px;height:6px;border-radius:50%;background:#2a2a2a;flex-shrink:0}
+.web3-chip .dot.live{background:var(--g);box-shadow:0 0 6px rgba(0,230,100,.5)}
+
+/* ── Deposit button ── */
+.btn-deposit{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;
+  padding:14px;border:1px solid rgba(138,43,226,.35);border-radius:14px;
+  background:rgba(138,43,226,.08);color:var(--p);font-size:14px;font-weight:700;
+  cursor:pointer;transition:all .2s;touch-action:manipulation}
+.btn-deposit:active{background:rgba(138,43,226,.22);border-color:rgba(138,43,226,.6)}
+
+/* ── Deposit sheet ── */
+.dep-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;
+  display:flex;align-items:flex-end;backdrop-filter:blur(6px);
+  opacity:0;pointer-events:none;transition:opacity .25s}
+.dep-overlay.open{opacity:1;pointer-events:auto}
+.dep-sheet{width:100%;background:#111;border-radius:24px 24px 0 0;
+  padding:16px 24px calc(36px + var(--safe-bot));max-height:92vh;overflow-y:auto;
+  transform:translateY(100%);transition:transform .32s cubic-bezier(.32,1,.52,1)}
+.dep-overlay.open .dep-sheet{transform:translateY(0)}
+.dep-handle{width:36px;height:4px;background:#2a2a2a;border-radius:2px;margin:0 auto 22px}
+.dep-title{font-size:20px;font-weight:800;margin-bottom:4px}
+.dep-sub{font-size:13px;color:var(--t2);margin-bottom:24px}
+.dep-lbl{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--t2);margin-bottom:10px}
+.dep-tokens{display:flex;gap:8px;margin-bottom:24px}
+.dep-tok{flex:1;padding:10px 4px;border:1px solid rgba(255,255,255,.08);border-radius:12px;
+  background:rgba(255,255,255,.04);color:var(--t2);font-size:13px;font-weight:700;
+  cursor:pointer;text-align:center;transition:all .15s;touch-action:manipulation;font-family:inherit}
+.dep-tok.sel{border-color:var(--p);background:rgba(138,43,226,.12);color:#fff}
+.dep-tok:active{opacity:.7}
+.dep-denoms{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+.dep-den{padding:15px 6px;border:1px solid rgba(255,255,255,.08);border-radius:12px;
+  background:rgba(255,255,255,.04);color:var(--t2);font-size:18px;font-weight:800;
+  cursor:pointer;text-align:center;transition:all .15s;touch-action:manipulation;font-family:inherit}
+.dep-den.sel{border-color:var(--a);background:rgba(0,255,234,.07);color:var(--a)}
+.dep-den:active{opacity:.7}
+.dep-fee-row{font-size:11px;color:#888;text-align:center;margin-bottom:20px;min-height:16px}
+.dep-fee-row span{color:#bbb}
+.btn-shield{width:100%;padding:17px;background:linear-gradient(135deg,#6b1eb8,var(--p));
+  border:none;border-radius:14px;color:#fff;font-size:16px;font-weight:800;cursor:pointer;
+  transition:all .2s;touch-action:manipulation;font-family:inherit;letter-spacing:-.2px}
+.btn-shield:active{filter:brightness(.85)}
+.btn-shield:disabled{opacity:.35;cursor:not-allowed}
+.dep-status{min-height:38px;margin-top:14px;text-align:center;font-size:13px;
+  font-weight:600;color:var(--t2);line-height:1.4;word-break:break-all}
+.dep-status.err{color:#ff7070}
+.dep-status.ok{color:var(--g)}
+
+/* ── Wallet picker ── */
+.wallet-opt{display:flex;align-items:center;gap:14px;width:100%;padding:15px 16px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;color:#fff;cursor:pointer;margin-bottom:10px;
+  transition:all .15s;touch-action:manipulation;text-align:left;font-family:inherit}
+.wallet-opt:active{background:rgba(255,255,255,.09)}
+.wallet-opt-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;
+  justify-content:center;font-size:16px;font-weight:900;flex-shrink:0;letter-spacing:0}
+.wallet-opt-name{font-size:14px;font-weight:700;line-height:1.2}
+.wallet-opt-desc{font-size:11px;color:var(--t2);margin-top:2px}
+.wallet-opt svg{margin-left:auto;color:#333;flex-shrink:0}
+.wallet-copy-wrap{border-top:1px solid #1c1c1c;margin-top:8px;padding-top:18px}
+.wallet-copy-lbl{font-size:11px;color:#888;text-align:center;margin-bottom:10px}
+.wallet-copy-btn{width:100%;padding:13px;background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);border-radius:12px;color:var(--t2);
+  font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
+.wallet-copy-btn:active{color:#fff;border-color:rgba(255,255,255,.2)}
+
+/* ── Actions ── */
+.wallet-actions{display:flex;gap:10px;margin-bottom:22px}
+.btn-scan{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:14px;border:1px solid rgba(255,255,255,.18);border-radius:14px;
+  background:rgba(255,255,255,.06);color:#ddd;font-size:14px;font-weight:700;
+  cursor:pointer;transition:all .2s;touch-action:manipulation}
+.btn-scan:active{border-color:rgba(0,255,234,.4);color:var(--a)}
+.btn-clear{flex:1;padding:14px;border:1px solid rgba(255,80,80,.2);border-radius:14px;
+  background:rgba(255,80,80,.04);color:#ff7070;font-size:14px;font-weight:700;
+  cursor:pointer;transition:all .2s;text-align:center;display:none;touch-action:manipulation}
+.btn-clear:active{background:rgba(255,80,80,.12)}
+
+/* ── Bills ── */
+.bills-list{display:flex;flex-direction:column;gap:10px}
+.bill{background:linear-gradient(145deg,#141414,#1c1c1c);border:1px solid rgba(138,43,226,.18);
+  border-radius:var(--r);padding:18px 20px;cursor:pointer;position:relative;overflow:hidden;
+  transition:transform .13s ease,box-shadow .13s ease,border-color .13s ease;
+  display:flex;flex-direction:column;gap:14px;touch-action:manipulation}
+.bill::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--p),var(--a));opacity:.5}
+.bill:active{transform:scale(.98);box-shadow:0 0 28px rgba(138,43,226,.25);border-color:rgba(138,43,226,.45)}
+.bill.spent{background:#0d0d0d;border-color:rgba(255,255,255,.06);cursor:default;opacity:.6}
+.bill.spent::before{display:none}
+.bill.spent:active{transform:none;box-shadow:none}
+.bill-top{display:flex;justify-content:space-between;align-items:flex-start}
+.bill-amount{font-size:38px;font-weight:900;letter-spacing:-1.5px;line-height:1}
+.bill.spent .bill-amount{color:#555;font-size:28px}
+.bill-token{font-size:12px;font-weight:800;color:var(--a);letter-spacing:.6px;margin-top:3px;text-transform:uppercase}
+.bill.spent .bill-token{color:#444}
+.bill-arrow{color:rgba(255,255,255,.25);font-size:18px;margin-top:4px;flex-shrink:0}
+.bill-bottom{display:flex;justify-content:space-between;align-items:center}
+.bill-brand{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:2px;font-weight:700}
+.bill-date{font-size:9px;color:var(--t3);font-family:monospace}
+.bill-spent-badge{font-size:9px;font-weight:800;color:#ff5555;text-transform:uppercase;
+  letter-spacing:1px;background:rgba(255,85,85,.1);border:1px solid rgba(255,85,85,.2);
+  border-radius:4px;padding:2px 6px}
+.bill-del{padding:6px 12px;border:1px solid rgba(255,80,80,.2);border-radius:8px;
+  background:transparent;color:#ff7070;font-size:11px;font-weight:700;cursor:pointer;
+  transition:all .2s;touch-action:manipulation}
+.bill-del:active{background:rgba(255,80,80,.15)}
+.section-sep{display:flex;align-items:center;gap:10px;margin:18px 0 12px}
+.section-sep::before,.section-sep::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.12)}
+.section-sep-lbl{font-size:9px;color:#888;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;white-space:nowrap}
+
+/* ── Note status dot ── */
+.note-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.note-dot.live{background:var(--g);box-shadow:0 0 5px rgba(0,230,100,.5)}
+
+/* ── Seed section ── */
+.seed-section{margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,.05);display:none}
+.seed-lbl{font-size:10px;color:#999;font-weight:700;letter-spacing:.7px;text-transform:uppercase;margin-bottom:8px}
+.seed-display{background:#0f0f0f;border:1px solid rgba(138,43,226,.25);border-radius:10px;
+  padding:12px 14px;font-family:monospace;font-size:11px;color:#bbb;letter-spacing:.8px;
+  word-break:break-all;cursor:pointer;transition:border-color .2s,color .2s;margin-bottom:8px;user-select:all}
+.seed-display:hover{border-color:rgba(138,43,226,.5);color:#fff}
+.seed-note{font-size:11px;color:#888;line-height:1.6;margin-bottom:12px}
+.seed-actions{display:flex;gap:8px}
+.seed-action-btn{flex:1;padding:10px 8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+  border-radius:10px;color:#ccc;font-size:12px;font-weight:700;cursor:pointer;
+  font-family:inherit;transition:all .15s;text-align:center}
+.seed-action-btn:active{color:#fff;border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.1)}
+
+/* ── Empty ── */
+.empty{display:flex;flex-direction:column;align-items:center;padding:48px 24px;gap:16px}
+.empty-icon{font-size:52px;opacity:.3}
+.empty-title{font-size:18px;font-weight:700;color:var(--t2);text-align:center}
+.empty-sub{font-size:13px;color:var(--t3);text-align:center;line-height:1.7;max-width:280px}
+
+/* ── Paste ── */
+.paste-wrap{margin-top:20px}
+.paste-lbl{font-size:10px;color:#888;font-weight:700;letter-spacing:.7px;text-transform:uppercase;margin-bottom:6px}
+input[type=text]{width:100%;padding:12px 14px;background:#0f0f0f;border:1px solid rgba(138,43,226,.2);
+  border-radius:12px;color:#fff;font-size:13px;font-family:monospace;outline:none;transition:border-color .2s}
+input[type=text]:focus{border-color:var(--a)}
+
+/* ── QR modal ── */
+.modal{position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;
+  background:var(--bg);transition:opacity .2s ease;
+  padding-top:var(--safe-top);padding-bottom:var(--safe-bot)}
+.modal.hidden{opacity:0;pointer-events:none}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;flex-shrink:0}
+.modal-back{background:none;border:none;color:var(--t2);font-size:14px;font-weight:700;
+  cursor:pointer;display:flex;align-items:center;gap:6px;padding:8px 0;touch-action:manipulation}
+.modal-back:active{color:#fff}
+.modal-htitle{font-size:16px;font-weight:800}
+#modal-qr{background:#000;justify-content:space-between}
+.qr-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:0 24px}
+.qr-denom{font-size:42px;font-weight:900;letter-spacing:-1.5px}
+.qr-token{font-size:14px;font-weight:700;color:var(--a);margin-top:2px;letter-spacing:.6px}
+.qr-canvas-wrap{background:#fff;border-radius:16px;padding:16px;box-shadow:0 0 60px rgba(255,255,255,.08)}
+#qr-canvas{display:block;border-radius:4px}
+.qr-hint{font-size:11px;color:#888;text-align:center;max-width:240px;line-height:1.6}
+.qr-footer{display:flex;gap:10px;padding:16px 20px;flex-shrink:0}
+.btn-spent{flex:1;padding:14px;border:1px solid rgba(255,85,85,.25);border-radius:12px;
+  background:rgba(255,85,85,.06);color:#ff7070;font-size:14px;font-weight:700;cursor:pointer;
+  touch-action:manipulation}
+.btn-done{flex:1;padding:14px;border:1px solid rgba(138,43,226,.3);border-radius:12px;
+  background:rgba(138,43,226,.15);color:#B57AFF;font-size:14px;font-weight:700;cursor:pointer;
+  touch-action:manipulation}
+
+/* ── Camera modal ── */
+#modal-camera{background:#000}
+.camera-wrap{flex:1;position:relative;overflow:hidden}
+#cam-video{width:100%;height:100%;object-fit:cover}
+#cam-canvas{display:none}
+.cam-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.viewfinder{width:240px;height:240px;position:relative}
+.vf-corner{position:absolute;width:28px;height:28px;border-color:var(--a);border-style:solid;border-width:0}
+.vf-tl{top:0;left:0;border-top-width:3px;border-left-width:3px;border-radius:4px 0 0 0}
+.vf-tr{top:0;right:0;border-top-width:3px;border-right-width:3px;border-radius:0 4px 0 0}
+.vf-bl{bottom:0;left:0;border-bottom-width:3px;border-left-width:3px;border-radius:0 0 0 4px}
+.vf-br{bottom:0;right:0;border-bottom-width:3px;border-right-width:3px;border-radius:0 0 4px 0}
+.cam-status{position:absolute;bottom:0;left:0;right:0;text-align:center;
+  padding:16px;font-size:13px;color:rgba(255,255,255,.7);
+  background:linear-gradient(transparent,rgba(0,0,0,.7))}
+
+@media(max-width:380px){.bill-amount{font-size:32px}.w-total-amt{font-size:44px}}
+
+/* ── Spent toast ── */
+#spend-toast{
+  position:fixed;bottom:calc(40px + var(--safe-bot));left:50%;transform:translateX(-50%);
+  background:var(--g);color:#000;font-size:13px;font-weight:800;letter-spacing:.3px;
+  padding:11px 22px;border-radius:24px;white-space:nowrap;pointer-events:none;
+  opacity:0;transition:opacity .3s;z-index:5000
+}
+#spend-toast.show{opacity:1}
+</style>
 </head>
 <body>
-<canvas id="matrix-bg"></canvas>
 
-<div class="top-nav">
-  <a href="https://elitev5.github.io/PrivX_Hurricane/privx.html" class="nav-link">← PrivX</a>
-  <a href="https://elitev5.github.io/PrivX_Hurricane/privx-pay-wallet.html" target="_blank" class="nav-link">Wallet →</a>
+<!-- ── LOCK SCREEN ── -->
+<div id="lock-scr">
+  <div class="ls-logo">
+    <img src="./privx-shield.png" style="width:56px;height:56px;border-radius:14px;margin-bottom:10px;filter:drop-shadow(0 0 18px rgba(138,43,226,.6))" alt="">
+    <div class="ls-title">PrivX Pay</div>
+    <div class="ls-badge">WALLET</div>
+  </div>
+  <div class="ls-prompt" id="ls-prompt">Enter your PIN</div>
+  <div class="pin-dots" id="pin-dots">
+    <div class="pd" id="pd0"></div>
+    <div class="pd" id="pd1"></div>
+    <div class="pd" id="pd2"></div>
+    <div class="pd" id="pd3"></div>
+    <div class="pd" id="pd4"></div>
+    <div class="pd" id="pd5"></div>
+  </div>
+  <div class="pin-error" id="pin-error"></div>
+  <div class="pin-pad">
+    <button class="pp" onclick="pinKey('1')">1</button>
+    <button class="pp" onclick="pinKey('2')">2</button>
+    <button class="pp" onclick="pinKey('3')">3</button>
+    <button class="pp" onclick="pinKey('4')">4</button>
+    <button class="pp" onclick="pinKey('5')">5</button>
+    <button class="pp" onclick="pinKey('6')">6</button>
+    <button class="pp" onclick="pinKey('7')">7</button>
+    <button class="pp" onclick="pinKey('8')">8</button>
+    <button class="pp" onclick="pinKey('9')">9</button>
+    <button class="pp pp-back" onclick="pinBack()">⌫</button>
+    <button class="pp" onclick="pinKey('0')">0</button>
+    <div></div>
+  </div>
+  <div class="ls-reset" id="ls-reset" onclick="confirmReset()">Reset wallet</div>
+  <div class="ls-cancel" id="ls-cancel" onclick="cancelChangePin()">← Cancel</div>
 </div>
 
-<div class="page-wrap">
-<div class="container">
+<!-- ── MAIN APP (hidden until unlocked) ── -->
+<div id="app" class="hidden">
 
-  <div class="logo-header">
-    <img src="privx-shield.png" style="width:54px;border-radius:14px;margin-bottom:10px;filter:drop-shadow(0 0 20px var(--glow))">
-    <h1>PrivX Pay</h1>
-    <div class="tagline">Private Stablecoin Cash</div>
-    <div class="cash-badge">PRIVATE DIGITAL CASH</div>
-  </div>
+<div id="main">
 
-  <div class="info-box" style="margin-bottom:20px">
-    <strong>This is your PrivX ATM.</strong><br>
-    Deposit stablecoins into a private shield vault and receive an encrypted denomination note — exactly like withdrawing $20 bills from a cash machine. Scan the note QR into the PrivX Pay mobile wallet on your phone. Your notes are private digital cash, held in your pocket.
-    <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
-      <span style="background:rgba(0,255,234,0.07);border:1px solid rgba(0,255,234,0.2);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--accent)">Zero-knowledge proofs</span>
-      <span style="background:rgba(0,255,234,0.07);border:1px solid rgba(0,255,234,0.2);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--accent)">No on-chain identity</span>
-      <span style="background:rgba(0,255,234,0.07);border:1px solid rgba(0,255,234,0.2);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--accent)">Bearer notes</span>
-      <span style="background:rgba(0,255,234,0.07);border:1px solid rgba(0,255,234,0.2);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--accent)">0.5% deposit fee</span>
+  <div class="sh">
+    <div class="sh-title" style="display:flex;align-items:center;gap:8px">
+      <img src="./privx-shield.png" style="width:28px;height:28px;border-radius:7px" alt="">
+      PrivX Pay
+    </div>
+    <div class="sh-right">
+      <div class="sh-badge">WALLET</div>
+      <button class="btn-lock" id="btn-refresh" onclick="_checkAllLiveNotes()" title="Check spend status">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+          <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+        </svg>
+      </button>
+      <button class="btn-lock" onclick="lock()" title="Lock wallet">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2"/>
+          <path d="M7 11V7a5 5 0 0110 0v4"/>
+        </svg>
+      </button>
     </div>
   </div>
 
-  <!-- How it Works -->
-  <div style="margin-bottom:22px">
-    <div class="section-label" style="margin-bottom:12px">How it works</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div style="background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);border-radius:14px;padding:14px 12px;text-align:center">
-        <div style="font-size:22px;margin-bottom:6px">🏧</div>
-        <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">1. Shield Stablecoins</div>
-        <div style="font-size:11px;color:#666;line-height:1.5">Deposit DAI, pSunDAI or USDC here on desktop. Choose a denomination and confirm — funds enter the private shield vault.</div>
-      </div>
-      <div style="background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);border-radius:14px;padding:14px 12px;text-align:center">
-        <div style="font-size:22px;margin-bottom:6px">🧾</div>
-        <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">2. Receive a Note</div>
-        <div style="font-size:11px;color:#666;line-height:1.5">You receive an encrypted bearer note — a secret string representing that denomination, like a $20 bill in digital form.</div>
-      </div>
-      <div style="background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);border-radius:14px;padding:14px 12px;text-align:center">
-        <div style="font-size:22px;margin-bottom:6px">📱</div>
-        <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">3. Scan to Phone</div>
-        <div style="font-size:11px;color:#666;line-height:1.5">Open the PrivX Pay mobile wallet, tap Scan Note, and point it at the QR on this screen to load the note into your phone.</div>
-      </div>
-      <div style="background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);border-radius:14px;padding:14px 12px;text-align:center">
-        <div style="font-size:22px;margin-bottom:6px">💵</div>
-        <div style="font-size:12px;font-weight:800;color:#B57AFF;margin-bottom:4px">4. Private Digital Cash</div>
-        <div style="font-size:11px;color:#666;line-height:1.5">Your phone holds your notes as private, spendable cash. No on-chain link between your deposit and any future redemption.</div>
-      </div>
+  <div class="w-total">
+    <div class="w-total-lbl">Available Cash</div>
+    <div class="w-total-amt" id="total-amount">$0</div>
+    <div class="w-stats" id="w-stats"></div>
+    <button class="web3-chip" id="web3-chip" onclick="_web3ChipTap()">
+      <span class="dot" id="web3-dot"></span>
+      <span id="web3-label">Open in Wallet</span>
+    </button>
+  </div>
+
+  <div class="wallet-actions">
+    <button class="btn-scan" onclick="openCamera()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:18px;height:18px">
+        <polyline points="23 7 23 1 17 1"/><line x1="16" y1="8" x2="23" y2="1"/>
+        <polyline points="1 17 1 23 7 23"/><line x1="8" y1="16" x2="1" y2="23"/>
+        <rect x="3" y="3" width="18" height="18" rx="3"/>
+      </svg>
+      Scan Note
+    </button>
+    <button class="btn-deposit" onclick="openDeposit()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:18px;height:18px">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Deposit
+    </button>
+    <button class="btn-clear" id="btn-clear-spent" onclick="clearAllSpent()">Clear Spent</button>
+  </div>
+
+  <div class="bills-list" id="bills-list"></div>
+
+  <div class="paste-wrap">
+    <div class="paste-lbl">Or paste a note</div>
+    <input type="text" id="paste-note-input" placeholder="hp-dai-20-abc123…"
+      autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+      oninput="onPasteNote(this.value)">
+  </div>
+
+  <div class="seed-section" id="seed-section">
+    <div class="seed-lbl">Recovery Seed <span style="font-weight:400;opacity:.6;text-transform:none;letter-spacing:0">· tap to reveal</span></div>
+    <div class="seed-display" id="seed-display" onclick="_toggleSeedReveal()" title="Tap to reveal / hide">•••••••• •••••••• •••••••• ••••••••</div>
+    <div class="seed-note">Tap the seed to reveal it — it hides automatically after 30 seconds. Write it down offline, never in a photo or cloud note. Anyone who has this seed can recover your notes.<br><br>Notes deposited using this wallet's <strong style="color:#888">Deposit</strong> button are derived from this seed and are fully recoverable via scan. Notes scanned in from outside (e.g. generated on the ATM) are random and cannot be recovered by seed — keep your encrypted wallet backup for those.</div>
+    <div class="seed-actions">
+      <button class="seed-action-btn" onclick="_copySeed()">Copy Seed</button>
+      <button class="seed-action-btn" onclick="openRecovery()">Recover Notes</button>
     </div>
   </div>
 
-  <div class="tabs">
-    <div class="tab active" id="tab-buy"    onclick="switchTab('buy')">Deposit</div>
-    <div class="tab"        id="tab-spend"  onclick="switchTab('spend')">Wallet</div>
-    <div class="tab"        id="tab-accept" onclick="switchTab('accept')">Redeem</div>
+  <div class="change-pin-link" onclick="startChangePin()">· change PIN ·</div>
+
+</div><!-- /main -->
+
+<!-- ── QR modal ── -->
+<div class="modal hidden" id="modal-qr">
+  <div class="modal-head">
+    <button class="modal-back" onclick="closeModal('qr')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Back
+    </button>
+    <div class="modal-htitle">Show to Merchant</div>
+    <div style="width:60px"></div>
   </div>
-
-  <!-- ─── BUY CASH TAB ───────────────────────────────────────────────────── -->
-  <div id="buyTab">
-    <div class="info-box">
-      <strong>You're at the ATM.</strong> Shield stablecoins into a private vault and receive an encrypted denomination note — a bearer instrument, like a $20 bill in digital form.<br>
-      <div style="margin-top:10px">
-        <span style="color:#888">1.</span> Choose currency &amp; denomination below.<br>
-        <span style="color:#888">2.</span> Connect wallet → approve → confirm deposit.<br>
-        <span style="color:#888">3.</span> <strong style="color:#00ffea">Scan the note QR into your phone</strong> using the PrivX Pay mobile wallet.<br>
-        <span style="color:#888">4.</span> Your note is now in your pocket — private digital cash.
-      </div>
-      <div style="margin-top:8px;font-size:11px;color:#555">Do this at home on desktop. A 0.5% fee is charged at deposit.</div>
+  <div class="qr-body">
+    <div style="text-align:center">
+      <div class="qr-denom" id="qr-denom">$20</div>
+      <div class="qr-token" id="qr-token">DAI</div>
     </div>
-
-    <div class="section-label">Choose Currency</div>
-    <div class="token-grid">
-      <div class="token-card active" id="buy-tok-dai"     onclick="selectBuyToken('dai')">    <div class="tc-name">DAI</div>    <div class="tc-sub">Stablecoin</div></div>
-      <div class="token-card"        id="buy-tok-psundai" onclick="selectBuyToken('psundai')"><div class="tc-name">pSunDAI</div><div class="tc-sub">Autonomous</div></div>
-      <div class="token-card"        id="buy-tok-usdc"    onclick="selectBuyToken('usdc')">   <div class="tc-name">USDC</div>   <div class="tc-sub">USD Coin</div></div>
+    <div class="qr-canvas-wrap">
+      <canvas id="qr-canvas"></canvas>
     </div>
-
-    <div class="section-label">Choose Denomination</div>
-    <div class="denom-grid" id="buyDenomGrid">
-      <!-- built by JS -->
-    </div>
-
-    <div class="wallet-row">
-      <button class="wallet-btn" id="buyWalletBtn" onclick="connectBuy()">Connect Wallet</button>
-      <span class="wallet-addr" id="buyWalletAddr">Not connected</span>
-    </div>
-
-    <button class="btn btn-primary" id="buyBtn" onclick="buyNote()" disabled>Select Denomination</button>
-
-    <div class="note-display" id="noteDisplay">
-      <div class="note-warn">Note shielded — scan this QR with the PrivX Pay mobile wallet to load it onto your phone, or copy the note text as a backup.</div>
-      <div class="qr-wrap" style="margin:0 0 14px">
-        <canvas id="buyNoteQR"></canvas>
-      </div>
-      <div class="note-text" id="noteText"></div>
-      <div class="note-actions">
-        <button onclick="copyNote()">Copy Note</button>
-        <button onclick="switchToWallet()" style="background:rgba(0,255,234,0.12);border-color:rgba(0,255,234,0.4);color:var(--accent)">Wallet →</button>
-      </div>
-    </div>
-
-    <div class="status" id="buyStatus"></div>
+    <div class="qr-hint">Show this to the merchant — they scan it on their Register tab to accept payment</div>
   </div>
-
-  <!-- ─── WALLET TAB ──────────────────────────────────────────────────────── -->
-  <div id="spendTab" class="hidden">
-    <div class="info-box">
-      <strong>Notes saved on this device:</strong><br>
-      These are your shielded notes — saved in this browser after each deposit. Tap any note to show its QR, then scan it into the PrivX Pay mobile wallet on your phone. Once a note is on your phone, it's in your pocket.<br>
-      <div style="margin-top:8px;background:rgba(255,180,0,0.07);border:1px solid rgba(255,180,0,0.2);border-radius:8px;padding:8px 12px;font-size:11px;color:#ffb400">
-        <strong>Notes are bearer instruments.</strong> Whoever holds the note string can redeem it. Scan to your phone wallet and remove it from this device once transferred.
-      </div>
-      <div style="margin-top:8px;background:rgba(0,255,234,0.05);border:1px solid rgba(0,255,234,0.15);border-radius:8px;padding:8px 12px;font-size:11px;color:#00c8b8;line-height:1.6">
-        <strong>Seed recovery:</strong> Notes stored here are not seed-recoverable. For encrypted, PIN-protected storage where your entire note history can be restored from a single seed phrase — even after device loss — use the <strong>PrivX Pay Wallet</strong> app. Every note deposited through that wallet is cryptographically derived from your seed and can be scanned back from the blockchain at any time.
-      </div>
-    </div>
-
-    <div id="savedNotesSection">
-      <div class="section-label">Your Cash</div>
-      <div class="saved-notes" id="savedNotesList">
-        <div style="color:#555;font-size:13px;font-family:monospace">No notes yet. Go to <strong style="color:#B57AFF">Deposit</strong> to shield stablecoins and receive your first note.</div>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="section-label">Or paste a note to display</div>
-    <input type="text" id="spendNoteInput" placeholder="hp-dai-10-abc123…" oninput="renderSpendQR()">
-
-    <div class="qr-wrap" id="spendQrWrap" style="display:none">
-      <canvas id="spendQrCanvas"></canvas>
-      <div class="qr-note-text" id="spendQrText"></div>
-    </div>
-
-    <div class="status" id="spendStatus"></div>
+  <div class="qr-footer">
+    <button class="btn-spent" onclick="markCurrentNoteSpent()">Mark Spent</button>
+    <button class="btn-done" onclick="closeModal('qr')">Done</button>
   </div>
-
-  <!-- ─── REGISTER TAB ────────────────────────────────────────────────────── -->
-  <div id="acceptTab" class="hidden">
-
-    <!-- POS Terminal Display -->
-    <div class="pos-terminal">
-      <div class="pos-screen">
-        <div class="pos-lbl">SALE AMOUNT</div>
-        <div class="pos-amt" id="pos-amt">—</div>
-        <div class="pos-tok" id="pos-tok">select denomination</div>
-      </div>
-      <div class="pos-keys">
-        <div class="pos-key" id="pk-1"   onclick="setSaleDenom('1')">$1</div>
-        <div class="pos-key" id="pk-5"   onclick="setSaleDenom('5')">$5</div>
-        <div class="pos-key" id="pk-10"  onclick="setSaleDenom('10')">$10</div>
-        <div class="pos-key" id="pk-20"  onclick="setSaleDenom('20')">$20</div>
-        <div class="pos-key" id="pk-50"  onclick="setSaleDenom('50')">$50</div>
-        <div class="pos-key" id="pk-100" onclick="setSaleDenom('100')">$100</div>
-        <div class="pos-key pos-clr" style="grid-column:span 2" onclick="clearSale()">✕ Clear</div>
-      </div>
-    </div>
-
-    <div class="pos-match" id="pos-match"></div>
-
-    <div class="section-label">Customer Note</div>
-    <div class="scan-row">
-      <textarea id="acceptNote" placeholder="hp-dai-20-abc123… — paste or scan QR" oninput="detectAcceptNote()"></textarea>
-      <button class="scan-btn" onclick="openAcceptCamera()" title="Scan QR">📷</button>
-    </div>
-
-    <div id="acceptDetected" style="background:#111;border:1px solid rgba(0,255,234,0.2);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;font-family:monospace;line-height:1.8;display:none">
-      <div style="display:flex;gap:8px"><span style="color:#555;min-width:80px;font-size:10px;text-transform:uppercase;letter-spacing:.5px">Token</span><span style="color:var(--accent)" id="acc-token">—</span></div>
-      <div style="display:flex;gap:8px"><span style="color:#555;min-width:80px;font-size:10px;text-transform:uppercase;letter-spacing:.5px">Amount</span><span style="color:var(--accent)" id="acc-amount">—</span></div>
-      <div style="display:flex;gap:8px"><span style="color:#555;min-width:80px;font-size:10px;text-transform:uppercase;letter-spacing:.5px">Shield</span><span style="color:var(--accent)" id="acc-shield">—</span></div>
-    </div>
-
-    <div class="section-label">Your Wallet (recipient)</div>
-    <input type="text" id="acceptRecipient" placeholder="0x — payment arrives here">
-
-    <div class="wallet-row">
-      <button class="wallet-btn" id="acceptWalletBtn" onclick="connectAccept()">Connect Wallet</button>
-      <span class="wallet-addr" id="acceptWalletAddr">Not connected</span>
-    </div>
-
-    <button class="btn btn-primary" id="acceptBtn" onclick="acceptNote()">Connect Wallet</button>
-
-    <div style="margin-top:10px;font-size:11px;color:#444;text-align:center;line-height:1.7">
-      Note status is verified on-chain automatically — spent notes are caught before proof generation starts.<br>
-      Proof generation takes 30–90 sec — keep this tab open.<br>
-      Exact denominations only. No change given. You earn PRIVX rewards on each redemption.
-    </div>
-
-    <div class="status" id="acceptStatus"></div>
-  </div>
-
-</div>
 </div>
 
-<!-- Protocol Stats -->
-<div class="fund-box" style="margin-top:18px">
-  <div class="fund-inner">
-    <div class="fund-title">Protocol Stats</div>
-
-    <div style="font-size:10px;color:#444;margin-bottom:12px;text-transform:uppercase;letter-spacing:.6px;font-weight:700">PrivX Pay Mining Vault</div>
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">PRIVX Balance</div>
-        <div class="stat-value stat-accent" id="stat-vault-bal">—</div>
-        <div class="stat-sub">available for rewards</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Reward Rate</div>
-        <div class="stat-value stat-green" id="stat-rate">—</div>
-        <div class="stat-sub" id="stat-rate-sub">of mRA per withdrawal</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Total PRIVX Paid Out</div>
-        <div class="stat-value" id="stat-total-mined">—</div>
-        <div class="stat-sub">since launch</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Vault Status</div>
-        <div class="stat-value" id="stat-sealed">—</div>
-        <div class="stat-sub">18 shields registered</div>
+<!-- ── Camera modal ── -->
+<div class="modal hidden" id="modal-camera">
+  <div class="modal-head">
+    <button class="modal-back" onclick="closeCamera()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Cancel
+    </button>
+    <div class="modal-htitle">Scan Note</div>
+    <div style="width:60px"></div>
+  </div>
+  <div class="camera-wrap">
+    <video id="cam-video" autoplay playsinline muted></video>
+    <canvas id="cam-canvas"></canvas>
+    <div class="cam-overlay">
+      <div class="viewfinder">
+        <div class="vf-corner vf-tl"></div>
+        <div class="vf-corner vf-tr"></div>
+        <div class="vf-corner vf-bl"></div>
+        <div class="vf-corner vf-br"></div>
       </div>
     </div>
+    <div class="cam-status" id="cam-status">Point at a PrivX Pay note QR code</div>
+  </div>
+</div>
 
-    <div style="font-size:10px;color:#444;margin:4px 0 12px;text-transform:uppercase;letter-spacing:.6px;font-weight:700">Fee Vault — Accumulated Fees</div>
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">DAI Fees</div>
-        <div class="stat-value stat-accent" id="stat-fee-dai">—</div>
-        <div class="stat-sub">pending conversion</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">pSunDAI Fees</div>
-        <div class="stat-value stat-accent" id="stat-fee-psundai">—</div>
-        <div class="stat-sub">pending conversion</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">USDC Fees</div>
-        <div class="stat-value stat-accent" id="stat-fee-usdc">—</div>
-        <div class="stat-sub">pending conversion</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">PRIVX Burned</div>
-        <div class="stat-value stat-green" id="stat-burned">—</div>
-        <div class="stat-sub">total all-time</div>
-      </div>
+<div id="spend-toast"></div>
+
+</div><!-- /app -->
+
+<!-- ── DEPOSIT SHEET ── -->
+<div class="dep-overlay" id="dep-overlay" onclick="if(event.target===this)closeDeposit()">
+  <div class="dep-sheet">
+    <div class="dep-handle"></div>
+    <div class="dep-title">Deposit Cash</div>
+    <div class="dep-sub">Shield stablecoins → save an encrypted note</div>
+
+    <div class="dep-lbl">Token</div>
+    <div class="dep-tokens">
+      <button class="dep-tok sel" id="dep-tok-dai"     onclick="_setDepToken('dai')">DAI</button>
+      <button class="dep-tok"     id="dep-tok-psundai" onclick="_setDepToken('psundai')">pSunDAI</button>
+      <button class="dep-tok"     id="dep-tok-usdc"    onclick="_setDepToken('usdc')">USDC</button>
     </div>
 
-    <div style="text-align:right;margin-top:4px">
-      <button class="btn-outline" style="width:auto;padding:6px 16px;font-size:11px" onclick="loadStats()">Refresh Stats</button>
+    <div class="dep-lbl">Amount</div>
+    <div class="dep-denoms">
+      <button class="dep-den" onclick="_setDepDenom('1')">$1</button>
+      <button class="dep-den" onclick="_setDepDenom('5')">$5</button>
+      <button class="dep-den" onclick="_setDepDenom('10')">$10</button>
+      <button class="dep-den" onclick="_setDepDenom('20')">$20</button>
+      <button class="dep-den" onclick="_setDepDenom('50')">$50</button>
+      <button class="dep-den" onclick="_setDepDenom('100')">$100</button>
+    </div>
+
+    <div class="dep-fee-row">0.5% protocol fee · <span id="dep-fee-lbl">select amount</span></div>
+    <button class="btn-shield" id="btn-shield" onclick="_doDeposit()" disabled>Shield &amp; Save Note</button>
+    <div class="dep-status" id="dep-status"></div>
+  </div>
+</div>
+
+<!-- ── WALLET PICKER ── -->
+<div class="dep-overlay" id="wallet-picker" onclick="if(event.target===this)closeWalletPicker()">
+  <div class="dep-sheet">
+    <div class="dep-handle"></div>
+    <div class="dep-title">Open in Wallet</div>
+    <div class="dep-sub">PrivX Pay works inside your wallet's browser</div>
+
+    <button class="wallet-opt" onclick="_openInWallet('metamask')">
+      <div class="wallet-opt-icon" style="background:#E8831A22;color:#E8831A">MM</div>
+      <div><div class="wallet-opt-name">MetaMask</div><div class="wallet-opt-desc">Popular Ethereum &amp; PulseChain wallet</div></div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+
+    <button class="wallet-opt" onclick="_openInWallet('trust')">
+      <div class="wallet-opt-icon" style="background:#3375BB22;color:#3375BB">TW</div>
+      <div><div class="wallet-opt-name">Trust Wallet</div><div class="wallet-opt-desc">Multi-chain mobile wallet</div></div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+
+    <button class="wallet-opt" onclick="_openInWallet('coinbase')">
+      <div class="wallet-opt-icon" style="background:#0052FF22;color:#0052FF">CB</div>
+      <div><div class="wallet-opt-name">Coinbase Wallet</div><div class="wallet-opt-desc">Self-custody wallet</div></div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+
+    <div class="wallet-copy-wrap">
+      <div class="wallet-copy-lbl">Or copy the URL and paste it in your wallet's browser</div>
+      <button class="wallet-copy-btn" onclick="_copyWalletUrl()">Copy Page URL</button>
     </div>
   </div>
 </div>
 
-<!-- Fund Mining Rewards -->
-<div class="fund-box">
-  <div class="fund-inner">
-    <div class="fund-title">Fund Mining Rewards</div>
-    <div class="fund-bal">HP Vault Balance: <span id="vaultPrivxBal">—</span> PRIVX</div>
-    <div class="fund-addr" id="vaultAddrDisplay">0xf7Abeb9a3ccea1B8c30ca8a6d359c609B0751650</div>
-    <div style="font-size:10px;color:#444;margin:6px 0 12px">Anyone can top up the vault — rewards are paid to merchants who accept PrivX Pay notes.</div>
-    <div class="fund-input-row">
-      <input type="text" id="fundAmount" placeholder="PRIVX amount (e.g. 10000)">
-      <button onclick="fundVault()">Fund Vault</button>
-    </div>
-    <div class="status" id="fundStatus"></div>
-  </div>
-</div>
+<!-- ── RECOVERY SHEET ── -->
+<div class="dep-overlay" id="recover-overlay" onclick="if(event.target===this)closeRecovery()">
+  <div class="dep-sheet">
+    <div class="dep-handle"></div>
+    <div class="dep-title">Recover from Seed</div>
+    <div class="dep-sub">Scans all shields on-chain to find your deposited notes</div>
 
-<!-- Camera Modal -->
-<div id="acceptCameraModal" style="display:none;position:fixed;inset:0;z-index:9999;background:#000;flex-direction:column">
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,0.06)">
-    <button onclick="closeAcceptCamera()" style="background:none;border:none;color:#aaa;font-size:14px;font-weight:700;cursor:pointer;padding:4px 8px">✕ Cancel</button>
-    <div style="font-size:15px;font-weight:800;color:#fff">Scan Customer QR</div>
-    <div style="width:80px"></div>
-  </div>
-  <div style="flex:1;position:relative;overflow:hidden">
-    <video id="acc-cam-video" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover"></video>
-    <canvas id="acc-cam-canvas" style="display:none"></canvas>
-    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
-      <div style="width:240px;height:240px;position:relative">
-        <div style="position:absolute;top:0;left:0;width:28px;height:28px;border-top:3px solid #00ffea;border-left:3px solid #00ffea;border-radius:4px 0 0 0"></div>
-        <div style="position:absolute;top:0;right:0;width:28px;height:28px;border-top:3px solid #00ffea;border-right:3px solid #00ffea;border-radius:0 4px 0 0"></div>
-        <div style="position:absolute;bottom:0;left:0;width:28px;height:28px;border-bottom:3px solid #00ffea;border-left:3px solid #00ffea;border-radius:0 0 0 4px"></div>
-        <div style="position:absolute;bottom:0;right:0;width:28px;height:28px;border-bottom:3px solid #00ffea;border-right:3px solid #00ffea;border-radius:0 0 4px 0"></div>
-      </div>
+    <div class="dep-lbl">Seed (32 hex chars, spaces OK)</div>
+    <input type="text" id="recover-seed-input" placeholder="a1b2c3d4 e5f6a7b8 c9d0e1f2 a3b4c5d6"
+      style="font-family:monospace;margin-bottom:16px;font-size:12px"
+      autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+
+    <div class="dep-lbl">Scan depth</div>
+    <div class="dep-denoms" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
+      <button class="dep-den rec-den" id="rd-25" onclick="_setRecoverDepth(25)">25</button>
+      <button class="dep-den rec-den sel" id="rd-50" onclick="_setRecoverDepth(50)">50</button>
+      <button class="dep-den rec-den" id="rd-100" onclick="_setRecoverDepth(100)">100</button>
     </div>
-    <div id="acc-cam-status" style="position:absolute;bottom:0;left:0;right:0;text-align:center;padding:16px;font-size:13px;color:rgba(255,255,255,.7);background:linear-gradient(transparent,rgba(0,0,0,.8))">Point at the customer's PrivX Pay QR code</div>
+
+    <button class="btn-shield" id="btn-recover" onclick="_doRecover()">Scan for Notes</button>
+    <div class="dep-status" id="recover-status"></div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
-<!-- Privacy & FAQ -->
-<div class="fund-box" style="margin-top:14px">
-  <div class="fund-inner">
-    <div class="fund-title">Privacy &amp; Security</div>
-    <div style="display:flex;flex-direction:column;gap:10px;font-size:12px;color:#888;line-height:1.7">
-      <div><strong style="color:#B57AFF">How is my privacy protected?</strong><br>
-        When you deposit, a cryptographic commitment is stored on-chain — not your address or amount. When the note is redeemed, a zero-knowledge proof confirms the note is valid without revealing which deposit it came from. No on-chain link between sender and receiver exists.
-      </div>
-      <div class="divider"></div>
-      <div><strong style="color:#B57AFF">What if I lose my note?</strong><br>
-        The note is your only key. If lost, the funds in that shield slot cannot be recovered by anyone — including the protocol. Scan notes to your phone wallet immediately after shielding, and keep a text backup in encrypted storage.
-      </div>
-      <div class="divider"></div>
-      <div><strong style="color:#B57AFF">Can a note be used twice?</strong><br>
-        No. Each note has a unique nullifier that is recorded on-chain the moment it's redeemed. Any second attempt with the same note will revert. This is enforced by the smart contract, not the UI.
-      </div>
-      <div class="divider"></div>
-      <div><strong style="color:#B57AFF">What are PRIVX mining rewards?</strong><br>
-        Merchants who redeem notes earn PRIVX tokens from the PrivX Pay Mining Vault. Rewards scale with denomination — larger bills earn more PRIVX per redemption. Rewards reduce proportionally as the vault empties and refill when the community tops it up.
-      </div>
-      <div class="divider"></div>
-      <div><strong style="color:#B57AFF">Who controls the contracts?</strong><br>
-        The PrivX Pay shields are fully immutable after deployment — no admin can pause, upgrade, or confiscate funds. The protocol fee (0.5%) and mining rewards are set at construction and cannot be changed.
-      </div>
-    </div>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/snarkjs@0.7.4/build/snarkjs.min.js"></script>
-<script type="module">
-  try {
-    const { buildPoseidon } = await import('https://esm.sh/circomlibjs@0.1.7');
-    window._buildPoseidon = buildPoseidon;
-  } catch(e) {
-    console.error('circomlibjs load failed:', e);
-  }
-</script>
 <script>
 
-// ─── PrivX Pay Token Config ───────────────────────────────────────────────
-// Contracts are DEPLOY_FIRST until PrivX Pay shields are deployed.
-// Denominations: $1 $5 $10 $20 $50 $100
+const TOKEN_LABELS = { dai:'DAI', psundai:'pSunDAI', usdc:'USDC' };
+const SALT_KEY     = 'privxpay_salt_v2';
+const STORE        = 'privxpay_notes_v1';
+const PIN_LEN      = 6;
+const LOCK_MS      = 5 * 60 * 1000; // 5 min idle
 
-const HP_TOKENS = {
+const RPC           = 'https://rpc.pulsechain.com';
+const NULL_HASH_SEL = '0x17cc915c'; // nullifierHashes(bytes32)
+
+const SHIELDS = {
   dai: {
-    label: "DAI", sublabel: "Stablecoin",
-    addr:  "0xefD766cCb38EaF1dfd701853BFCe31359239F305",
-    decimals: 18, feeBP: 50,
-    shields: {
-      "1":   "0x9ABb21e92f4f589515A65aEa79dc920b40A799D4",
-      "5":   "0x0840430d8870933614EFE7f3F45119CcA738B6E2",
-      "10":  "0x19a9Db059A2C1777Ea4d09dC8d234aD79b21F406",
-      "20":  "0x1eeB506568054d0bb7e6977c8030B0ffd05Ef0D2",
-      "50":  "0xc88c22f57a24A2559a3dd3780cE160241aec709F",
-      "100": "0x9e85fDdD5d231265b247d3cBC4dB80505582486b"
-    },
-    denomWei: {
-      "1":   1000000000000000000n,
-      "5":   5000000000000000000n,
-      "10":  10000000000000000000n,
-      "20":  20000000000000000000n,
-      "50":  50000000000000000000n,
-      "100": 100000000000000000000n
-    }
+    contracts: {"1":"0x9ABb21e92f4f589515A65aEa79dc920b40A799D4","5":"0x0840430d8870933614EFE7f3F45119CcA738B6E2","10":"0x19a9Db059A2C1777Ea4d09dC8d234aD79b21F406","20":"0x1eeB506568054d0bb7e6977c8030B0ffd05Ef0D2","50":"0xc88c22f57a24A2559a3dd3780cE160241aec709F","100":"0x9e85fDdD5d231265b247d3cBC4dB80505582486b"},
+    wei:       {"1":1000000000000000000n,"5":5000000000000000000n,"10":10000000000000000000n,"20":20000000000000000000n,"50":50000000000000000000n,"100":100000000000000000000n}
   },
   psundai: {
-    label: "pSunDAI", sublabel: "Autonomous Stable",
-    addr:  "0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f",
-    decimals: 18, feeBP: 50,
-    shields: {
-      "1":   "0x38e1D3fd69F7A978e6fe5e4de787Cf96b71Fa688",
-      "5":   "0xfd2d44332a54eB89016f95705fBb7C84f917a9B3",
-      "10":  "0x3007cFf2B4b79998905146bF41a6730f4f22c629",
-      "20":  "0x7c3CAC0556F00e48fB0E5400EF1877f966609952",
-      "50":  "0x91EF673aECE26703D9B72E8eB591253F7b26F6B6",
-      "100": "0xcDff42f6803Df9B9D76723263E73F017c97F68F7"
-    },
-    denomWei: {
-      "1":   1000000000000000000n,
-      "5":   5000000000000000000n,
-      "10":  10000000000000000000n,
-      "20":  20000000000000000000n,
-      "50":  50000000000000000000n,
-      "100": 100000000000000000000n
-    }
+    contracts: {"1":"0x38e1D3fd69F7A978e6fe5e4de787Cf96b71Fa688","5":"0xfd2d44332a54eB89016f95705fBb7C84f917a9B3","10":"0x3007cFf2B4b79998905146bF41a6730f4f22c629","20":"0x7c3CAC0556F00e48fB0E5400EF1877f966609952","50":"0x91EF673aECE26703D9B72E8eB591253F7b26F6B6","100":"0xcDff42f6803Df9B9D76723263E73F017c97F68F7"},
+    wei:       {"1":1000000000000000000n,"5":5000000000000000000n,"10":10000000000000000000n,"20":20000000000000000000n,"50":50000000000000000000n,"100":100000000000000000000n}
   },
   usdc: {
-    label: "USDC", sublabel: "USD Coin",
-    addr:  "0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07",
-    decimals: 6, feeBP: 50,
-    shields: {
-      "1":   "0x2856661A94483486e25dE8F37DCf867938a13778",
-      "5":   "0x53B91dB1485f687D8d162f1268D8485EBB85dF13",
-      "10":  "0x59f40474834C6Cb3Bf3A5189f6B6f525d22f80A4",
-      "20":  "0x5965FEa1E24472d64F3a24Edb9e663Bc728Caee6",
-      "50":  "0x124A85fDB4ec3F11Ab257F6d4fC2eD8A4A6661fe",
-      "100": "0x883c74eFC878105cbDd15FB546A1a32F4fA45d5b"
-    },
-    denomWei: {
-      "1":   1000000n,
-      "5":   5000000n,
-      "10":  10000000n,
-      "20":  20000000n,
-      "50":  50000000n,
-      "100": 100000000n
-    }
+    contracts: {"1":"0x2856661A94483486e25dE8F37DCf867938a13778","5":"0x53B91dB1485f687D8d162f1268D8485EBB85dF13","10":"0x59f40474834C6Cb3Bf3A5189f6B6f525d22f80A4","20":"0x5965FEa1E24472d64F3a24Edb9e663Bc728Caee6","50":"0x124A85fDB4ec3F11Ab257F6d4fC2eD8A4A6661fe","100":"0x883c74eFC878105cbDd15FB546A1a32F4fA45d5b"},
+    wei:       {"1":1000000n,"5":5000000n,"10":10000000n,"20":20000000n,"50":50000000n,"100":100000000n}
   }
 };
 
-const DENOMS    = ["1","5","10","20","50","100"];
-const TREE_LEVELS = 14;
-const WASM_URL  = "./PrivXMixer14.wasm";
-const ZKEY_CID  = "bafybeiahcycu5sbkgdxfxt4py3qagjrce2nxrbxenwv7oxkg67xoy4qwmu";
-const ZKEY_URLS = [
-  `https://amaranth-rear-platypus-218.mypinata.cloud/ipfs/${ZKEY_CID}`,
-  `https://gateway.pinata.cloud/ipfs/${ZKEY_CID}`,
-  `https://ipfs.io/ipfs/${ZKEY_CID}`,
-  `https://${ZKEY_CID}.ipfs.dweb.link`
-];
-const PULSECHAIN = {
-  chainId:"0x171", chainName:"PulseChain",
-  rpcUrls:["https://rpc.pulsechain.com"],
-  nativeCurrency:{name:"PLS",symbol:"PLS",decimals:18},
-  blockExplorerUrls:["https://scan.pulsechain.com"]
+const TOKEN_ADDRS = {
+  dai:     '0xefD766cCb38EaF1dfd701853BFCe31359239F305',
+  psundai: '0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f',
+  usdc:    '0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07'
 };
+const TOKEN_DECIMALS = { dai: 18, psundai: 18, usdc: 6 };
+const FEE_BP = 50n; // 0.5% (50 / 10000)
+const PULSECHAIN_ID = '0x171';
 
-// ─── Raw RPC helpers (no Web3 ABI coder — avoids abi/5.7.0 CDN bug) ──────────
+const DEPOSIT_TOPIC = '0xa945e51eec50ab98c161376f0db4cf2aeba3ec92755fe2fcd388bdbbb80ff196';
 
-const RPC = "https://rpc.pulsechain.com";
+// Runtime state — null means locked
+let _notes        = null;
+let _key          = null;
+let _seed            = null;   // 32-char hex master seed
+let _seedIdx         = 0;      // next index to use for derivation
+let _seedRevealTimer = null;   // auto-hide timer
+let _lockTimer    = null;
+let _changingPin  = false;
+let _poseidon     = null;   // lazy loaded
+let _spendWatchId = null;
+let _spendWatchNoteId = null;
+let _bgPollId     = null;
+let _checking     = false;
+let _recoverDepth = 50;
 
-async function ethCall(to, selector, argPadded) {
-  const data = argPadded ? selector + argPadded : selector;
-  const body = JSON.stringify({ jsonrpc:"2.0", id:1, method:"eth_call", params:[{to, data}, "latest"] });
-  const j = await (await fetch(RPC, { method:"POST", headers:{"Content-Type":"application/json"}, body })).json();
+// PIN state
+let _pin      = '';
+let _pinMode  = 'enter';  // 'set' | 'confirm' | 'enter' | 'change-new' | 'change-confirm'
+let _pinFirst = '';
+
+// ─── Crypto ──────────────────────────────────────────────────────────────────
+
+async function _deriveKey(pin, saltBytes) {
+  const km = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode(pin), 'PBKDF2', false, ['deriveKey']
+  );
+  return crypto.subtle.deriveKey(
+    { name:'PBKDF2', salt:saltBytes, iterations:250000, hash:'SHA-256' },
+    km, { name:'AES-GCM', length:256 }, false, ['encrypt','decrypt']
+  );
+}
+
+async function _encrypt(notes, key) {
+  const iv  = crypto.getRandomValues(new Uint8Array(12));
+  const ct  = await crypto.subtle.encrypt(
+    {name:'AES-GCM', iv}, key, new TextEncoder().encode(JSON.stringify(notes))
+  );
+  const buf = new Uint8Array(12 + ct.byteLength);
+  buf.set(iv); buf.set(new Uint8Array(ct), 12);
+  return btoa(String.fromCharCode(...buf));
+}
+
+async function _decrypt(b64, key) {
+  const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+  const pt    = await crypto.subtle.decrypt(
+    {name:'AES-GCM', iv:bytes.slice(0,12)}, key, bytes.slice(12)
+  );
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+
+// ─── PIN pad ─────────────────────────────────────────────────────────────────
+
+function pinKey(d) {
+  if (_pin.length >= PIN_LEN) return;
+  _pin += d; _drawDots();
+  if (_pin.length === PIN_LEN) setTimeout(_submitPin, 120);
+}
+function pinBack() { _pin = _pin.slice(0,-1); _drawDots(); _pinErr(''); }
+function _drawDots() {
+  for (let i=0;i<PIN_LEN;i++)
+    document.getElementById('pd'+i).classList.toggle('filled', i<_pin.length);
+}
+function _pinErr(msg) {
+  document.getElementById('pin-error').textContent = msg;
+  if (msg) {
+    const d = document.getElementById('pin-dots');
+    d.classList.remove('shake'); void d.offsetWidth; d.classList.add('shake');
+    setTimeout(()=>d.classList.remove('shake'), 600);
+    _pin = ''; _drawDots();
+  }
+}
+function _setPrompt(t) { document.getElementById('ls-prompt').textContent = t; }
+
+async function _submitPin() {
+  const entered = _pin; _pin = ''; _drawDots();
+
+  if (_pinMode === 'set') {
+    _pinFirst = entered; _pinMode = 'confirm';
+    _setPrompt('Confirm your PIN');
+    return;
+  }
+  if (_pinMode === 'confirm') {
+    if (entered !== _pinFirst) {
+      _pinMode = 'set'; _pinFirst = '';
+      _setPrompt('Create a 6-digit PIN');
+      _pinErr("PINs don't match — try again");
+    } else {
+      await _createWallet(_pinFirst);
+    }
+    return;
+  }
+  if (_pinMode === 'change-new') {
+    _pinFirst = entered; _pinMode = 'change-confirm';
+    _setPrompt('Confirm new PIN');
+    return;
+  }
+  if (_pinMode === 'change-confirm') {
+    if (entered !== _pinFirst) {
+      _pinMode = 'change-new'; _pinFirst = '';
+      _setPrompt('Enter new PIN');
+      _pinErr("PINs don't match — try again");
+    } else {
+      await _applyNewPin(_pinFirst);
+    }
+    return;
+  }
+  // 'enter' mode
+  _setPrompt('Unlocking…');
+  await _tryUnlock(entered);
+}
+
+// ─── Wallet create / unlock ───────────────────────────────────────────────────
+
+async function _createWallet(pin) {
+  _setPrompt('Setting up…');
+  const saltBytes = crypto.getRandomValues(new Uint8Array(16));
+  localStorage.setItem(SALT_KEY, [...saltBytes].map(b=>b.toString(16).padStart(2,'0')).join(''));
+  const key = await _deriveKey(pin, saltBytes);
+  const raw = localStorage.getItem(STORE);
+  let notes = [];
+  if (raw && raw.startsWith('[')) { try { notes = JSON.parse(raw); } catch {} }
+  // Generate master seed for note derivation
+  const seedBytes = crypto.getRandomValues(new Uint8Array(16));
+  _seed    = [...seedBytes].map(b=>b.toString(16).padStart(2,'0')).join('');
+  _seedIdx = 0;
+  localStorage.setItem(STORE, await _encrypt({ notes, seed: _seed, seedIdx: _seedIdx }, key));
+  _key = key; _notes = notes;
+  _unlock();
+}
+
+async function _tryUnlock(pin) {
+  const saltHex = localStorage.getItem(SALT_KEY);
+  if (!saltHex) { _setPrompt('Enter your PIN'); _pinErr('Wallet not found — reset and start over'); return; }
+  const saltBytes = Uint8Array.from(saltHex.match(/.{2}/g), h=>parseInt(h,16));
+  try {
+    const key = await _deriveKey(pin, saltBytes);
+    const raw = localStorage.getItem(STORE);
+    let notes = [], seed = null, seedIdx = 0;
+    if (raw) {
+      let blob;
+      if (raw.startsWith('[')) {
+        blob = JSON.parse(raw);           // legacy plain-JSON array
+      } else {
+        blob = await _decrypt(raw, key);  // encrypted — could be array or {notes,seed,seedIdx}
+      }
+      if (Array.isArray(blob)) {
+        // Old format: just a notes array. Migrate: generate a seed.
+        notes = blob;
+        const seedBytes = crypto.getRandomValues(new Uint8Array(16));
+        seed    = [...seedBytes].map(b=>b.toString(16).padStart(2,'0')).join('');
+        seedIdx = 0;
+        localStorage.setItem(STORE, await _encrypt({ notes, seed, seedIdx }, key));
+      } else {
+        notes   = blob.notes   || [];
+        seed    = blob.seed    || null;
+        seedIdx = blob.seedIdx || 0;
+      }
+    }
+    _key = key; _notes = notes; _seed = seed; _seedIdx = seedIdx;
+    _unlock();
+  } catch {
+    _setPrompt('Enter your PIN');
+    _pinErr('Wrong PIN');
+  }
+}
+
+function _unlock() {
+  document.getElementById('lock-scr').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  _pin = ''; _pinFirst = ''; _drawDots();
+  renderWallet();
+  _resetTimer();
+  _startBgPoll();
+  _showSeedSection();
+}
+
+function _showSeedSection() {
+  if (!_seed) return;
+  const sec  = document.getElementById('seed-section');
+  const disp = document.getElementById('seed-display');
+  if (sec)  sec.style.display = 'block';
+  if (disp) { disp.textContent = '•••••••• •••••••• •••••••• ••••••••'; disp.dataset.revealed = 'false'; }
+}
+
+function _toggleSeedReveal() {
+  const disp = document.getElementById('seed-display');
+  if (!disp || !_seed) return;
+  if (disp.dataset.revealed === 'true') {
+    disp.textContent = '•••••••• •••••••• •••••••• ••••••••';
+    disp.dataset.revealed = 'false';
+    if (_seedRevealTimer) { clearTimeout(_seedRevealTimer); _seedRevealTimer = null; }
+  } else {
+    disp.textContent = _seed.slice(0,8)+' '+_seed.slice(8,16)+' '+_seed.slice(16,24)+' '+_seed.slice(24,32);
+    disp.dataset.revealed = 'true';
+    if (_seedRevealTimer) clearTimeout(_seedRevealTimer);
+    _seedRevealTimer = setTimeout(() => {
+      disp.textContent = '•••••••• •••••••• •••••••• ••••••••';
+      disp.dataset.revealed = 'false';
+      _seedRevealTimer = null;
+    }, 30000);
+  }
+}
+
+function lock() {
+  _stopSpendWatch();
+  _stopBgPoll();
+  _notes = null; _key = null; _seed = null; _seedIdx = 0;
+  if (_seedRevealTimer) { clearTimeout(_seedRevealTimer); _seedRevealTimer = null; }
+  const sec = document.getElementById('seed-section');
+  if (sec) sec.style.display = 'none';
+  _pin = ''; _pinFirst = '';
+  _pinMode = localStorage.getItem(SALT_KEY) ? 'enter' : 'set';
+  _drawDots(); _pinErr('');
+  _setPrompt(_pinMode === 'set' ? 'Create a 6-digit PIN' : 'Enter your PIN');
+  document.getElementById('lock-scr').classList.remove('hidden');
+  document.getElementById('app').classList.add('hidden');
+  if (_lockTimer) { clearTimeout(_lockTimer); _lockTimer = null; }
+  try { closeModal('qr'); } catch {}
+  try { closeCamera(); } catch {}
+}
+
+function _resetTimer() {
+  if (_lockTimer) clearTimeout(_lockTimer);
+  if (_key) _lockTimer = setTimeout(lock, LOCK_MS);
+}
+
+// Auto-lock when tab goes to background
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden' && _key) lock();
+});
+
+// Reset idle timer on any interaction
+['touchstart','click','keydown'].forEach(ev =>
+  document.addEventListener(ev, () => { if (_key) _resetTimer(); }, {passive:true})
+);
+
+// ─── Spend detection ──────────────────────────────────────────────────────────
+
+async function _loadPoseidon() {
+  if (_poseidon) return;
+  try {
+    if (window._buildPoseidon) {            // IPFS: local circomlibjs.js
+      const p = await window._buildPoseidon();
+      _poseidon = (a,b) => p.F.toObject(p([BigInt(a), BigInt(b)]));
+      return;
+    }
+    const { buildPoseidon } = await import('https://esm.sh/circomlibjs@0.1.7');
+    const p = await buildPoseidon();
+    _poseidon = (a,b) => p.F.toObject(p([BigInt(a), BigInt(b)]));
+  } catch { /* spend check unavailable offline */ }
+}
+
+async function _rpc(method, params) {
+  const r = await fetch(RPC, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({jsonrpc:'2.0',id:1,method,params})
+  });
+  const j = await r.json();
   if (j.error) throw new Error(j.error.message);
   return j.result;
 }
 
-async function ethSend(from, to, data) {
-  return window.ethereum.request({ method:"eth_sendTransaction", params:[{ from, to, data }] });
+async function _isNoteSpentOnChain(noteObj) {
+  await _loadPoseidon();
+  if (!_poseidon) return false;
+  const cfg = SHIELDS[noteObj.token];
+  if (!cfg) return false;
+  const addr   = cfg.contracts[noteObj.denom];
+  const denomW = cfg.wei[noteObj.denom];
+  if (!addr || !denomW) return false;
+  const parts      = noteObj.note.split('-');
+  const nullifier  = BigInt('0x' + parts[3]);
+  const nullHash   = _poseidon(nullifier, denomW);
+  const hashHex    = nullHash.toString(16).padStart(64, '0');
+  const result     = await _rpc('eth_call', [{to:addr, data:NULL_HASH_SEL+hashHex}, 'latest']);
+  return result === '0x0000000000000000000000000000000000000000000000000000000000000001';
 }
 
-async function waitForReceipt(txHash, timeoutMs=360000) {
-  const start = Date.now();
-  while (Date.now() - start < timeoutMs) {
-    await new Promise(r => setTimeout(r, 3000));
-    const j = await (await fetch(RPC, { method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({ jsonrpc:"2.0", id:1, method:"eth_getTransactionReceipt", params:[txHash] }) })).json();
-    if (j.result) {
-      if (j.result.status === "0x0") throw new Error("Transaction reverted. TX: " + txHash);
-      return j.result;
-    }
-  }
-  throw new Error("Transaction not confirmed after 6 minutes. TX: " + txHash);
-}
-
-function addrArg(addr)    { return addr.toLowerCase().replace("0x","").padStart(64,"0"); }
-function uint256Arg(val)  { return BigInt(val).toString(16).padStart(64,"0"); }
-function hexToUint(hex)   { return hex === "0x" ? 0n : BigInt(hex); }
-function hexToBool(hex)   { return hex !== "0x" && BigInt(hex) !== 0n; }
-
-const HP_MINING_VAULT = "0xf7Abeb9a3ccea1B8c30ca8a6d359c609B0751650";
-const FEE_VAULT       = "0x54818356b47b5F7b52DceAbf2B6eF52Cf8b072Fd";
-const PRIVX_TOKEN     = "0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986";
-
-// ─── State ────────────────────────────────────────────────────────────────────
-
-let buyAccount;
-let acceptAccount;
-let poseidonFn   = null;
-let _zkeyBlobUrl = null;
-let selectedBuyToken = 'dai';
-let selectedDenom    = null;
-let _currentNote     = null;
-
-// ─── Tab switching ────────────────────────────────────────────────────────────
-
-function switchTab(t) {
-  ['buy','spend','accept'].forEach(id => {
-    document.getElementById(id+'Tab').classList.toggle('hidden', id !== t);
-    document.getElementById('tab-'+id).classList.toggle('active', id === t);
-  });
-  if (t === 'spend') renderSavedNotes();
-  if (t === 'accept' && !_zkeyBlobUrl) getZkeyUrl(() => {}).catch(() => {});
-}
-
-function switchToWallet() { switchTab('spend'); }
-
-// ─── Poseidon ─────────────────────────────────────────────────────────────────
-
-async function initPoseidon() {
-  for (let i = 0; i < 100; i++) { if (window._buildPoseidon) break; await new Promise(r=>setTimeout(r,100)); }
-  if (!window._buildPoseidon) throw new Error("circomlibjs failed to load");
-  const lib = await window._buildPoseidon();
-  poseidonFn = (...inputs) => lib.F.toObject(lib(inputs.map(x => BigInt(x))));
-}
-
-async function getZkeyUrl(setStatus) {
-  if (_zkeyBlobUrl) return _zkeyBlobUrl;
-  for (let i = 0; i < ZKEY_URLS.length; i++) {
-    try {
-      setStatus(`Downloading proving key… (${i+1}/${ZKEY_URLS.length})`);
-      const resp = await fetch(ZKEY_URLS[i]);
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      _zkeyBlobUrl = URL.createObjectURL(await resp.blob());
-      return _zkeyBlobUrl;
-    } catch(e) { console.warn(`zkey source ${i+1} failed:`, e.message); }
-  }
-  throw new Error("Could not download proving key from any source.");
-}
-
-// ─── Merkle tree ──────────────────────────────────────────────────────────────
-
-function buildFullTree(leaves) {
-  const size = 1 << TREE_LEVELS, padded = [...leaves];
-  while (padded.length < size) padded.push(0n);
-  const tree = [padded];
-  for (let lvl = 0; lvl < TREE_LEVELS; lvl++) {
-    const prev = tree[lvl], next = [];
-    for (let i = 0; i < prev.length; i += 2) next.push(poseidonFn(prev[i], prev[i+1]));
-    tree.push(next);
-  }
-  return { tree, root: tree[TREE_LEVELS][0] };
-}
-
-async function getMerkleProof(shieldAddr, targetCommitment) {
-  // Fetch Deposit events via eth_getLogs (avoids Web3 ABI processing of uint32/uint256[24])
-  const DEPOSIT_TOPIC = "0xa945e51eec50ab98c161376f0db4cf2aeba3ec92755fe2fcd388bdbbb80ff196";
-  const logsBody = JSON.stringify({ jsonrpc:"2.0", id:1, method:"eth_getLogs",
-    params:[{ address: shieldAddr, topics:[DEPOSIT_TOPIC], fromBlock:"0x0", toBlock:"latest" }] });
-  const logsRes = await fetch("https://rpc.pulsechain.com", { method:"POST", headers:{"Content-Type":"application/json"}, body:logsBody });
-  const logsJson = await logsRes.json();
-  if (logsJson.error) throw new Error(logsJson.error.message);
-  const logs = logsJson.result;
-  if (!logs.length) throw new Error("No deposits in this shield");
-
-  // Parse: topics[1]=commitment(bytes32), data=leafIndex(uint32)+timestamp(uint256) both padded to 32 bytes
-  const events = logs.map(log => ({
-    commitment: BigInt(log.topics[1]),
-    leafIndex:  Number(BigInt("0x" + log.data.slice(2, 66))),
-  }));
-  events.sort((a,b) => a.leafIndex - b.leafIndex);
-
-  const leaves    = events.map(e => e.commitment);
-  const leafIndex = leaves.findIndex(l => l === targetCommitment);
-  if (leafIndex === -1) throw new Error("Commitment not found — is this the correct note?");
-
-  const { tree, root } = buildFullTree(leaves);
-  const siblings = [], pathIndices = [];
-  let idx = leafIndex;
-  for (let lvl = 0; lvl < TREE_LEVELS; lvl++) {
-    siblings.push(tree[lvl][idx^1].toString());
-    pathIndices.push(idx & 1);
-    idx >>= 1;
-  }
-
-  const onChainRoot = await ethCall(shieldAddr, "0xba70f757");
-  const localRoot   = "0x" + root.toString(16).padStart(64,"0");
-  if (localRoot.toLowerCase() !== onChainRoot.toLowerCase())
-    throw new Error("Merkle root mismatch — a deposit may have just occurred, please try again.");
-
-  return { pathIndices, siblings, proofRoot: root };
-}
-
-// ─── Wallet ───────────────────────────────────────────────────────────────────
-
-async function connectWallet() {
-  if (!window.ethereum) throw new Error("No wallet detected — install MetaMask or any EIP-1193 wallet.");
-  const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+async function _checkAllLiveNotes() {
+  if (_checking) return;
+  _checking = true;
+  _setRefreshSpin(true);
   try {
-    await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0x171" }] });
-  } catch(e) {
-    if (e.code === 4902) await window.ethereum.request({ method: "wallet_addEthereumChain", params: [PULSECHAIN] });
-  }
-  return accounts[0];
-}
-
-// ─── BUY CASH TAB ────────────────────────────────────────────────────────────
-
-function selectBuyToken(tok) {
-  selectedBuyToken = tok;
-  selectedDenom    = null;
-  document.querySelectorAll('.token-card').forEach(c => c.classList.remove('active'));
-  document.getElementById('buy-tok-'+tok).classList.add('active');
-  document.getElementById('noteDisplay').style.display = 'none';
-  renderDenomGrid();
-  updateBuyBtn();
-}
-
-function renderDenomGrid() {
-  const token = HP_TOKENS[selectedBuyToken];
-  const grid  = document.getElementById('buyDenomGrid');
-  grid.innerHTML = '';
-  DENOMS.forEach(d => {
-    const feeAmt = (Number(d) * token.feeBP / 10000).toFixed(4).replace(/\.?0+$/,'');
-    const div = document.createElement('div');
-    div.className = 'denom-card';
-    div.id = 'denom-'+d;
-    div.innerHTML = `<div class="denom-amount">$${d}</div><div class="denom-label">${token.label}</div><div class="denom-fee">Fee: $${feeAmt}</div>`;
-    div.onclick = () => selectDenom(d);
-    grid.appendChild(div);
-  });
-}
-
-function selectDenom(d) {
-  selectedDenom = d;
-  document.querySelectorAll('.denom-card').forEach(c => c.classList.remove('active'));
-  const el = document.getElementById('denom-'+d);
-  if (el) el.classList.add('active');
-  document.getElementById('noteDisplay').style.display = 'none';
-  updateBuyBtn();
-}
-
-function updateBuyBtn() {
-  const btn = document.getElementById('buyBtn');
-  if (!buyAccount) { btn.disabled = false; btn.textContent = 'Connect Wallet'; return; }
-  if (!selectedDenom) { btn.disabled = true; btn.textContent = 'Select Denomination'; return; }
-  btn.disabled = false;
-  btn.textContent = `Deposit $${selectedDenom} ${HP_TOKENS[selectedBuyToken].label}`;
-}
-
-async function connectBuy() {
-  try {
-    const account = await connectWallet();
-    buyAccount = account;
-    document.getElementById('buyWalletBtn').textContent = account.slice(0,6)+'…'+account.slice(-4);
-    document.getElementById('buyWalletBtn').className   = 'wallet-btn connected';
-    document.getElementById('buyWalletAddr').textContent = account;
-    updateBuyBtn();
-  } catch(e) { setStatus('buyStatus', 'error', e.message); }
-}
-
-async function buyNote() {
-  if (!buyAccount) return connectBuy();
-  if (!selectedDenom) return;
-  if (!poseidonFn) return setStatus('buyStatus', 'error', 'Poseidon not ready — wait a moment.');
-  const token      = HP_TOKENS[selectedBuyToken];
-  const shieldAddr = token.shields[selectedDenom];
-  if (!shieldAddr || shieldAddr === "DEPLOY_FIRST")
-    return setStatus('buyStatus', 'error', `PrivX Pay $${selectedDenom} ${token.label} shield is not yet deployed. Coming soon.`);
-
-  const btn = document.getElementById('buyBtn');
-  btn.disabled = true;
-  setStatus('buyStatus', 'pending', 'Generating note…');
-
-  try {
-    const nBytes = crypto.getRandomValues(new Uint8Array(31));
-    const sBytes = crypto.getRandomValues(new Uint8Array(31));
-    const nHex   = [...nBytes].map(b=>b.toString(16).padStart(2,"0")).join("");
-    const sHex   = [...sBytes].map(b=>b.toString(16).padStart(2,"0")).join("");
-    const nullifier  = BigInt("0x"+nHex);
-    const secret     = BigInt("0x"+sHex);
-    const commitment = poseidonFn(nullifier, secret);
-    const commitHex  = "0x" + commitment.toString(16).padStart(64,"0");
-
-    const note = `hp-${selectedBuyToken}-${selectedDenom}-${nHex}-${sHex}`;
-    _currentNote = { note, token: selectedBuyToken, denom: selectedDenom, ts: Date.now() };
-
-    document.getElementById('noteText').textContent = note;
-    document.getElementById('noteDisplay').style.display = 'block';
-    QRCode.toCanvas(document.getElementById('buyNoteQR'), note,
-      { width:220, margin:2, color:{dark:'#000000',light:'#ffffff'} },
-      err => { if (err) console.error('QR error:', err); });
-
-    const denomWei  = token.denomWei[selectedDenom];
-    const feeWei    = (denomWei * BigInt(token.feeBP)) / 10000n;
-    const totalWei  = denomWei + feeWei;
-
-    // Raw calls — no Web3 ABI coder
-    setStatus('buyStatus', 'pending', `Checking ${token.label} allowance…`);
-    const allowHex = await ethCall(token.addr, "0xdd62ed3e", addrArg(buyAccount) + addrArg(shieldAddr));
-    if (hexToUint(allowHex) < totalWei) {
-      setStatus('buyStatus', 'pending', `Approving ${token.label}…`);
-      const approveTx = await ethSend(buyAccount, token.addr,
-        "0x095ea7b3" + addrArg(shieldAddr) + uint256Arg(totalWei));
-      await waitForReceipt(approveTx);
+    const notes = getNotes();
+    const live  = notes.filter(n => !n.spent);
+    if (!live.length) return;
+    let anySpent = false;
+    for (const note of live) {
+      try {
+        if (await _isNoteSpentOnChain(note)) {
+          const n = notes.find(x => x.id === note.id);
+          if (n && !n.spent) { n.spent = true; anySpent = true; }
+        }
+      } catch { /* silent per-note */ }
     }
-
-    setStatus('buyStatus', 'pending', 'Depositing into PrivX Pay shield…');
-    const depositTx = await ethSend(buyAccount, shieldAddr,
-      "0xb214faa5" + commitHex.slice(2));
-    const receipt = await waitForReceipt(depositTx);
-
-    // Auto-save to wallet
-    const saved = getSavedNotes();
-    if (!saved.find(n => n.note === _currentNote.note)) {
-      saved.push(_currentNote);
-      localStorage.setItem('privxpay_atm_notes_v1', JSON.stringify(saved));
-    }
-
-    setStatus('buyStatus', 'success',
-      `$${selectedDenom} ${token.label} note minted and saved to your Wallet!\n\nTX: ${depositTx}`
-    );
-  } catch(e) {
-    console.error(e);
-    const isTimeout = e.message && (
-      e.message.includes('50 blocks') || e.message.includes('not mined') || e.message.includes('not confirmed')
-    );
-    if (isTimeout) {
-      const txMatch = e.message.match(/TX: (0x[0-9a-fA-F]+)/i);
-      const txHash  = txMatch ? txMatch[1] : '';
-      setStatus('buyStatus', 'warning',
-        '⚠️ Timed out waiting — but the deposit may have gone through.\n\n' +
-        'Your note is shown above — copy it now if you haven\'t already.\n\n' +
-        (txHash ? 'Check the scanner before creating a new note:\nhttps://scan.pulsechain.com/tx/' + txHash : 'Check scan.pulsechain.com before creating a new note.')
-      );
-    } else {
-      setStatus('buyStatus', 'error', 'Deposit failed: ' + (e.message || 'check console'));
+    if (anySpent) {
+      await putNotes(notes);
+      renderWallet();
+      _showToast('Spent note detected and updated');
     }
   } finally {
-    btn.disabled = false;
-    updateBuyBtn();
+    _checking = false;
+    _setRefreshSpin(false);
   }
 }
 
-function copyNote() {
-  if (!_currentNote) return;
-  navigator.clipboard.writeText(_currentNote.note).then(() => alert('Note copied to clipboard.'));
+function _startBgPoll() {
+  _stopBgPoll();
+  // First check after 4s (give Poseidon time to load), then every 90s
+  setTimeout(() => { _checkAllLiveNotes(); _bgPollId = setInterval(_checkAllLiveNotes, 90000); }, 4000);
 }
 
-function saveNote() {
-  if (!_currentNote) return;
-  const saved = getSavedNotes();
-  if (saved.find(n => n.note === _currentNote.note)) return;
-  saved.push(_currentNote);
-  localStorage.setItem('privxpay_atm_notes_v1', JSON.stringify(saved));
+function _stopBgPoll() {
+  if (_bgPollId) { clearInterval(_bgPollId); _bgPollId = null; }
 }
 
-// ─── SPEND TAB ────────────────────────────────────────────────────────────────
-
-function getSavedNotes() {
-  try { return JSON.parse(localStorage.getItem('privxpay_atm_notes_v1') || '[]'); } catch { return []; }
+function _setRefreshSpin(on) {
+  const btn = document.getElementById('btn-refresh');
+  if (btn) btn.style.opacity = on ? '1' : '';
 }
 
-function renderSavedNotes() {
-  const list  = document.getElementById('savedNotesList');
-  const notes = getSavedNotes();
-  if (!notes.length) {
-    list.innerHTML = '<div style="color:#555;font-size:13px;font-family:monospace">No saved notes. Buy cash first, then tap "Save to Wallet".</div>';
+function _startSpendWatch(noteId) {
+  _stopSpendWatch();
+  _spendWatchNoteId = noteId;
+  _spendWatchId = setInterval(async () => {
+    const note = getNotes().find(n => n.id === _spendWatchNoteId);
+    if (!note || note.spent) { _stopSpendWatch(); return; }
+    try {
+      if (await _isNoteSpentOnChain(note)) {
+        _stopSpendWatch();
+        await markSpentById(note.id);
+        document.getElementById('modal-qr').classList.add('hidden');
+        _showToast('Note spent — removed from active wallet');
+      }
+    } catch { /* silent — network may be unavailable */ }
+  }, 8000);
+}
+
+function _stopSpendWatch() {
+  if (_spendWatchId) { clearInterval(_spendWatchId); _spendWatchId = null; }
+  _spendWatchNoteId = null;
+}
+
+function _showToast(msg) {
+  const t = document.getElementById('spend-toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ─── Change PIN (while unlocked) ──────────────────────────────────────────────
+
+function startChangePin() {
+  _changingPin = true;
+  _pin = ''; _pinFirst = ''; _pinMode = 'change-new';
+  _drawDots(); _pinErr('');
+  _setPrompt('Enter new PIN');
+  document.getElementById('ls-cancel').style.display = 'block';
+  document.getElementById('ls-reset').style.display  = 'none';
+  document.getElementById('lock-scr').classList.remove('hidden');
+  document.getElementById('app').classList.add('hidden');
+}
+
+function cancelChangePin() {
+  _changingPin = false;
+  _pin = ''; _pinFirst = ''; _drawDots(); _pinErr('');
+  document.getElementById('ls-cancel').style.display = 'none';
+  document.getElementById('ls-reset').style.display  = 'block';
+  document.getElementById('lock-scr').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+}
+
+async function _applyNewPin(pin) {
+  _setPrompt('Saving…');
+  const saltBytes = crypto.getRandomValues(new Uint8Array(16));
+  localStorage.setItem(SALT_KEY, [...saltBytes].map(b=>b.toString(16).padStart(2,'0')).join(''));
+  const newKey = await _deriveKey(pin, saltBytes);
+  localStorage.setItem(STORE, await _encrypt({ notes: _notes, seed: _seed, seedIdx: _seedIdx }, newKey));
+  _key = newKey; _changingPin = false;
+  _pin = ''; _pinFirst = ''; _drawDots();
+  document.getElementById('ls-cancel').style.display = 'none';
+  document.getElementById('ls-reset').style.display  = 'block';
+  document.getElementById('lock-scr').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  _resetTimer();
+}
+
+// ─── Reset wallet ─────────────────────────────────────────────────────────────
+
+function confirmReset() {
+  if (!confirm(
+    'This permanently deletes all notes and your PIN.\nNotes cannot be recovered.\n\nContinue?'
+  )) return;
+  localStorage.removeItem(STORE);
+  localStorage.removeItem(SALT_KEY);
+  _pinMode = 'set'; _pin = ''; _pinFirst = '';
+  _drawDots(); _pinErr('');
+  _setPrompt('Create a 6-digit PIN');
+  document.getElementById('ls-reset').style.display = 'none';
+}
+
+// ─── Note storage (encrypted at rest, in-memory when unlocked) ────────────────
+
+function getNotes() { return _notes || []; }
+
+async function putNotes(notes) {
+  _notes = notes;
+  if (!_key) return;
+  localStorage.setItem(STORE, await _encrypt({ notes, seed: _seed, seedIdx: _seedIdx }, _key));
+}
+
+async function _putSeedState() {
+  if (!_key) return;
+  localStorage.setItem(STORE, await _encrypt({ notes: _notes, seed: _seed, seedIdx: _seedIdx }, _key));
+}
+
+function parseNote(str) {
+  str = str.trim();
+  const m = str.match(/^hp-([a-z]+)-(\d+)-([0-9a-f]{60,})-([0-9a-f]{60,})$/i);
+  if (m) return { token:m[1].toLowerCase(), denom:m[2], note:str };
+  return null;
+}
+
+async function saveNote(note, token, denom, si = null) {
+  const notes = getNotes();
+  if (notes.find(n=>n.note===note)) return;
+  const entry = { id:crypto.randomUUID(), note, token, denom, ts:Date.now(), spent:false };
+  if (si !== null) entry.si = si;
+  notes.unshift(entry);
+  await putNotes(notes);
+}
+async function deleteNoteById(id) { await putNotes(getNotes().filter(n=>n.id!==id)); renderWallet(); }
+async function markSpentById(id) {
+  const notes = getNotes(), n = notes.find(n=>n.id===id);
+  if (n) n.spent = true;
+  await putNotes(notes); renderWallet();
+}
+async function clearAllSpent() { await putNotes(getNotes().filter(n=>!n.spent)); renderWallet(); }
+
+// ─── Wallet render ────────────────────────────────────────────────────────────
+
+let _currentQRNoteId = null;
+
+function renderWallet() {
+  const all   = getNotes();
+  const live  = all.filter(n=>!n.spent);
+  const spent = all.filter(n=>n.spent);
+  const list  = document.getElementById('bills-list');
+
+  const total = live.reduce((s,n)=>s+Number(n.denom),0);
+  document.getElementById('total-amount').textContent = total ? '$'+total : '$0';
+
+  const statsEl = document.getElementById('w-stats');
+  statsEl.innerHTML = all.length
+    ? `<span class="live">${live.length} live</span>${spent.length ? ` &nbsp;·&nbsp; <span class="spent-ct">${spent.length} spent</span>` : ''}`
+    : '';
+
+  document.getElementById('btn-clear-spent').style.display = spent.length ? 'block' : 'none';
+
+  if (!all.length) {
+    list.innerHTML = `<div class="empty">
+      <div class="empty-icon">💸</div>
+      <div class="empty-title">Wallet is empty</div>
+      <div class="empty-sub">At the PrivX Pay ATM on desktop, deposit stablecoins and scan the note QR into this wallet.</div>
+    </div>`;
     return;
   }
+
   list.innerHTML = '';
-  notes.forEach((n, i) => {
-    const tok  = HP_TOKENS[n.token];
-    const date = new Date(n.ts).toLocaleDateString();
-    const div  = document.createElement('div');
-    div.className = 'saved-note-card';
-    div.id = 'snc-'+i;
-    div.innerHTML = `
-      <div class="snc-info">
-        <span class="snc-denom">$${n.denom} <span style="color:var(--accent)">${tok ? tok.label : n.token}</span></span>
-        <span class="snc-date">${date}</span>
+  live.forEach(n  => list.appendChild(_makeBill(n, false)));
+  if (spent.length) {
+    const sep = document.createElement('div');
+    sep.className = 'section-sep';
+    sep.innerHTML = '<div class="section-sep-lbl">Spent</div>';
+    list.appendChild(sep);
+    spent.forEach(n => list.appendChild(_makeBill(n, true)));
+  }
+}
+
+function _makeBill(n, isSpent) {
+  const label = TOKEN_LABELS[n.token] || n.token.toUpperCase();
+  const date  = new Date(n.ts).toLocaleDateString(undefined,{month:'short',day:'numeric'});
+  const div   = document.createElement('div');
+  div.className = 'bill' + (isSpent ? ' spent' : '');
+  div.innerHTML = `
+    <div class="bill-top">
+      <div>
+        <div class="bill-amount">$${n.denom}</div>
+        <div class="bill-token">${label}</div>
       </div>
-      <div class="snc-actions">
-        <button class="snc-btn" onclick="deleteNote(${i})" title="Delete">✕</button>
+      ${isSpent
+        ? `<button class="bill-del" onclick="event.stopPropagation();deleteNoteById('${n.id}')">Remove</button>`
+        : `<div class="bill-arrow">›</div>`}
+    </div>
+    <div class="bill-bottom">
+      <div class="bill-brand">PrivX Pay</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        ${isSpent ? '<div class="bill-spent-badge">Spent</div>' : '<div class="note-dot live" title="Unspent"></div>'}
+        <div class="bill-date">${date}</div>
       </div>
-    `;
-    div.onclick = e => { if (!e.target.closest('.snc-actions')) showNoteQR(n.note, i); };
-    list.appendChild(div);
+    </div>`;
+  if (!isSpent) div.onclick = () => showQRModal(n);
+  return div;
+}
+
+// ─── QR modal ────────────────────────────────────────────────────────────────
+
+function showQRModal(noteObj) {
+  _currentQRNoteId = noteObj.id;
+  const label = TOKEN_LABELS[noteObj.token] || noteObj.token.toUpperCase();
+  document.getElementById('qr-denom').textContent = '$'+noteObj.denom;
+  document.getElementById('qr-token').textContent = label;
+  const canvas = document.getElementById('qr-canvas');
+  const size   = Math.min(window.innerWidth - 96, 280);
+  QRCode.toCanvas(canvas, noteObj.note, {width:size,margin:1,color:{dark:'#000',light:'#fff'}}, err => {
+    if (err) console.error('QR error:', err);
   });
+  openModal('qr');
+  _startSpendWatch(noteObj.id);
 }
 
-function deleteNote(i) {
-  if (!confirm('Delete this note? Make sure you have a copy if it has not been spent.')) return;
-  const saved = getSavedNotes();
-  saved.splice(i, 1);
-  localStorage.setItem('privxpay_atm_notes_v1', JSON.stringify(saved));
-  renderSavedNotes();
-  document.getElementById('spendQrWrap').style.display = 'none';
+function markCurrentNoteSpent() {
+  if (!_currentQRNoteId) return;
+  markSpentById(_currentQRNoteId);
+  closeModal('qr');
 }
 
-function showNoteQR(note, i) {
-  document.querySelectorAll('.saved-note-card').forEach(c => c.classList.remove('active'));
-  const el = document.getElementById('snc-'+i);
-  if (el) el.classList.add('active');
-  document.getElementById('spendNoteInput').value = note;
-  renderSpendQR();
+async function onPasteNote(val) {
+  const parsed = parseNote(val);
+  if (!parsed) return;
+  await saveNote(parsed.note, parsed.token, parsed.denom);
+  document.getElementById('paste-note-input').value = '';
+  renderWallet();
+  const saved = getNotes().find(n=>n.note===parsed.note);
+  if (saved) showQRModal(saved);
 }
 
-function renderSpendQR() {
-  const note = document.getElementById('spendNoteInput').value.trim();
-  const wrap = document.getElementById('spendQrWrap');
-  if (!note) { wrap.style.display = 'none'; return; }
-  if (typeof QRCode === 'undefined') { console.error('QRCode library not loaded'); return; }
-  wrap.style.display = 'block';
-  QRCode.toCanvas(document.getElementById('spendQrCanvas'), note, {
-    width: 240, margin: 2,
-    color: { dark:'#000000', light:'#ffffff' }
-  }, err => { if (err) console.error(err); });
-  const short = note.length > 50 ? note.slice(0,28)+'…'+note.slice(-20) : note;
-  document.getElementById('spendQrText').textContent = short;
+function openModal(id)  { document.getElementById('modal-'+id).classList.remove('hidden'); }
+function closeModal(id) {
+  if (id === 'qr') _stopSpendWatch();
+  document.getElementById('modal-'+id).classList.add('hidden');
 }
 
-// ─── ACCEPT TAB ──────────────────────────────────────────────────────────────
+// ─── Camera ──────────────────────────────────────────────────────────────────
 
-// Note format: hp-<token>-<denom>-<nullifierHex>-<secretHex>
-const HP_NOTE_RE     = /^hp-(dai|psundai|usdc)-(\d+)-([a-fA-F0-9]{62,64})-([a-fA-F0-9]{62,64})$/i;
+let _camStream = null, _camFrameId = null;
 
-function detectAcceptNote() {
-  const raw = document.getElementById('acceptNote').value.trim();
-  const el  = document.getElementById('acceptDetected');
-  const match = raw.match(HP_NOTE_RE);
-  if (!match) { el.style.display = 'none'; return; }
-  const [, tokenKey, denomStr] = match;
-  const token = HP_TOKENS[tokenKey.toLowerCase()];
-  if (!token) { el.style.display = 'none'; return; }
-  const shieldAddr = token.shields[denomStr];
-  document.getElementById('acc-token').textContent  = `${token.label}`;
-  document.getElementById('acc-amount').textContent = `$${denomStr} (${denomStr} ${token.label})`;
-  document.getElementById('acc-shield').textContent = shieldAddr && shieldAddr !== 'DEPLOY_FIRST'
-    ? shieldAddr.slice(0,12)+'…'+shieldAddr.slice(-8) : 'Not yet deployed';
-  el.style.display = 'block';
-  updatePosMatch();
-}
-
-async function connectAccept() {
-  try {
-    const account = await connectWallet();
-    acceptAccount = account;
-    document.getElementById('acceptWalletBtn').textContent = account.slice(0,6)+'…'+account.slice(-4);
-    document.getElementById('acceptWalletBtn').className  = 'wallet-btn connected';
-    document.getElementById('acceptWalletAddr').textContent = account;
-    const recip = document.getElementById('acceptRecipient');
-    if (!recip.value) recip.value = account;
-    document.getElementById('acceptBtn').disabled  = false;
-    document.getElementById('acceptBtn').textContent = 'Accept Payment';
-  } catch(e) { setStatus('acceptStatus', 'error', e.message); }
-}
-
-async function acceptNote() {
-  const raw       = document.getElementById('acceptNote').value.trim();
-  const recipient = document.getElementById('acceptRecipient').value.trim();
-  if (!raw)       return setStatus('acceptStatus', 'error', 'Paste the customer note first.');
-  if (!recipient) return setStatus('acceptStatus', 'error', 'Enter your wallet address (recipient).');
-  if (!acceptAccount) return connectAccept();
-  if (!poseidonFn)    return setStatus('acceptStatus', 'error', 'Poseidon not ready — wait a moment.');
-
-  const match = raw.match(HP_NOTE_RE);
-  if (!match) return setStatus('acceptStatus', 'error', 'Invalid note format. Expected: hp-dai-10-… or privx-pay-dai-10-…');
-  const [, tokenKey, denomStr, nHex, sHex] = match;
-  const token = HP_TOKENS[tokenKey.toLowerCase()];
-  if (!token) return setStatus('acceptStatus', 'error', 'Unknown token: ' + tokenKey);
-
-  const shieldAddr = token.shields[denomStr];
-  if (!shieldAddr || shieldAddr === "DEPLOY_FIRST")
-    return setStatus('acceptStatus', 'error', `PrivX Pay $${denomStr} ${token.label} shield is not yet deployed.`);
-
-  const denomWei      = token.denomWei[denomStr];
-  const nullifier     = BigInt("0x"+nHex);
-  const secret        = BigInt("0x"+sHex);
-  const commitment    = poseidonFn(nullifier, secret);
-  const nullifierHash = poseidonFn(nullifier, denomWei);
-
-  const btn = document.getElementById('acceptBtn');
-  btn.disabled = true;
-
-  try {
-    // Fast spent check before the slow Merkle + proof work
-    setStatus('acceptStatus', 'pending', 'Checking note status…');
-    const nhHex   = nullifierHash.toString(16).padStart(64, '0');
-    const spentRes = await ethCall(shieldAddr, '0x17cc915c', nhHex);
-    if (BigInt(spentRes) === 1n)
-      return setStatus('acceptStatus', 'error', 'This note has already been spent — it cannot be redeemed again.');
-
-    setStatus('acceptStatus', 'pending', 'Fetching deposit events from shield…');
-    const { pathIndices, siblings, proofRoot } = await getMerkleProof(shieldAddr, commitment);
-
-    const circuitInput = {
-      nullifier:     nullifier.toString(),
-      secret:        secret.toString(),
-      pathIndices:   pathIndices.map(String),
-      siblings,
-      root:          proofRoot.toString(),
-      denomination:  denomWei.toString(),
-      nullifierHash: nullifierHash.toString(),
-      recipient:     BigInt(recipient).toString()
-    };
-
-    const zkeyUrl = await getZkeyUrl(msg => setStatus('acceptStatus', 'pending', msg));
-    setStatus('acceptStatus', 'pending', 'Generating ZK proof… (10–30s on desktop)');
-    const { proof: zkProof, publicSignals } = await snarkjs.plonk.fullProve(circuitInput, WASM_URL, zkeyUrl);
-    const calldata = await snarkjs.plonk.exportSolidityCallData(zkProof, publicSignals);
-    const argv     = calldata.replace(/\]\s*\[/g,",").replace(/["[\]\s]/g,"").split(",").filter(Boolean);
-
-    // Encode withdraw(uint256[24],uint256[4],address) manually — avoids web3 CDN ABI bug with uint256[N]
-    // All three params are static types: encode inline (no dynamic offsets)
-    const pad = v => BigInt(v).toString(16).padStart(64,"0");
-    const withdrawData = "0x8172d2d0"                   // selector
-      + argv.slice(0,24).map(pad).join("")               // uint256[24] proof
-      + argv.slice(24,28).map(pad).join("")              // uint256[4] pubSignals
-      + recipient.toLowerCase().replace("0x","").padStart(64,"0"); // address
-
-    setStatus('acceptStatus', 'pending', 'Submitting withdrawal…');
-    const txHash = await window.ethereum.request({
-      method: "eth_sendTransaction",
-      params: [{ from: acceptAccount, to: shieldAddr, data: withdrawData }]
-    });
-
-    // Poll for receipt
-    let receipt = null;
-    setStatus('acceptStatus', 'pending', 'Waiting for confirmation…');
-    for (let i = 0; i < 120; i++) {
-      await new Promise(r => setTimeout(r, 3000));
-      const r = await fetch("https://rpc.pulsechain.com", { method:"POST", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({ jsonrpc:"2.0", id:1, method:"eth_getTransactionReceipt", params:[txHash] }) });
-      const j = await r.json();
-      if (j.result) { receipt = j.result; break; }
-    }
-    if (!receipt) throw new Error("Transaction not confirmed after 6 minutes. TX: " + txHash);
-    if (receipt.status === "0x0") throw new Error("Transaction reverted. TX: " + txHash);
-
-    setStatus('acceptStatus', 'success',
-      `Payment received!\n\nTX: ${txHash}\n\n$${denomStr} ${token.label} sent to:\n${recipient}\n\nView: https://scan.pulsechain.com/tx/${txHash}`
-    );
-  } catch(e) {
-    console.error(e);
-    const msg = e.message || 'Unknown error';
-    const isTimeout = msg.includes('not confirmed') || msg.includes('6 minutes');
-    const txMatch   = msg.match(/TX: (0x[0-9a-fA-F]+)/i);
-    const txHash    = txMatch ? txMatch[1] : '';
-    let userMsg, statusType;
-    if (isTimeout) {
-      statusType = 'warning';
-      userMsg =
-        '⚠️ Timed out — but the redemption may have succeeded.\n\n' +
-        'Do NOT delete or re-use this note without checking the scanner first.\n\n' +
-        (txHash ? 'https://scan.pulsechain.com/tx/' + txHash : 'Check scan.pulsechain.com for your recent transactions.');
-    } else if (msg.includes('already spent') || msg.includes('nullifier')) {
-      statusType = 'error';
-      userMsg = 'This note has already been spent — it cannot be redeemed again.';
-    } else if (msg.includes('root') || msg.includes('mismatch')) {
-      statusType = 'error';
-      userMsg = 'Merkle root mismatch — a deposit may have just occurred. Please try again.';
-    } else {
-      statusType = 'error';
-      userMsg = 'Redemption failed: ' + msg;
-    }
-    setStatus('acceptStatus', statusType, userMsg);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Accept Payment';
-  }
-}
-
-// ─── POS Terminal ─────────────────────────────────────────────────────────────
-
-let selectedSaleDenom = null;
-
-function setSaleDenom(d) {
-  selectedSaleDenom = d;
-  document.querySelectorAll('.pos-key').forEach(k => k.classList.remove('selected'));
-  const key = document.getElementById('pk-'+d);
-  if (key) key.classList.add('selected');
-  document.getElementById('pos-amt').textContent = '$'+d;
-  document.getElementById('pos-tok').textContent = '';
-  updatePosMatch();
-}
-
-function clearSale() {
-  selectedSaleDenom = null;
-  document.querySelectorAll('.pos-key').forEach(k => k.classList.remove('selected'));
-  document.getElementById('pos-amt').textContent = '—';
-  document.getElementById('pos-tok').textContent = 'select denomination';
-  document.getElementById('pos-match').className = 'pos-match';
-}
-
-function updatePosMatch() {
-  const matchEl = document.getElementById('pos-match');
-  if (!selectedSaleDenom) { matchEl.className = 'pos-match'; return; }
-  const raw = document.getElementById('acceptNote').value.trim();
-  const match = raw.match(HP_NOTE_RE);
-  if (!match) { matchEl.className = 'pos-match'; return; }
-  const denom = match[2], tokenKey = match[1].toLowerCase();
-  const label = (HP_TOKENS[tokenKey] || {}).label || tokenKey.toUpperCase();
-  if (denom === selectedSaleDenom) {
-    document.getElementById('pos-tok').textContent = label;
-    matchEl.className = 'pos-match ok';
-    matchEl.textContent = `✓ Payment confirmed — $${denom} ${label}`;
-  } else {
-    matchEl.className = 'pos-match warn';
-    matchEl.textContent = `Note is $${denom} — sale is $${selectedSaleDenom}. Exact denomination required, no change given.`;
-  }
-}
-
-// ─── Accept Camera ────────────────────────────────────────────────────────────
-
-let _accCamStream = null, _accCamFrameId = null;
-
-async function loadJsQR() {
+async function _loadJsQR() {
   if (window.jsQR) return;
-  return new Promise((res, rej) => {
+  return new Promise((res,rej) => {
     const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
+    s.src   = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
     s.onload = res; s.onerror = rej;
     document.head.appendChild(s);
   });
 }
 
-async function openAcceptCamera() {
+async function openCamera() {
   try {
-    await loadJsQR();
-    _accCamStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+    await _loadJsQR();
+    _camStream = await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}
     });
-    const vid = document.getElementById('acc-cam-video');
-    vid.srcObject = _accCamStream;
-    document.getElementById('acceptCameraModal').style.display = 'flex';
-    vid.onloadedmetadata = () => { vid.play(); _accCamFrameId = requestAnimationFrame(accScanFrame); };
+    const vid = document.getElementById('cam-video');
+    vid.srcObject = _camStream;
+    openModal('camera');
+    vid.onloadedmetadata = () => { vid.play(); _camFrameId = requestAnimationFrame(_scanFrame); };
   } catch(e) {
-    alert(e.name === 'NotAllowedError' ? 'Camera permission denied — allow camera access and try again.' : 'Camera unavailable: ' + e.message);
+    alert(e.name==='NotAllowedError'
+      ? 'Camera permission denied — allow camera access and try again.'
+      : 'Camera unavailable: '+e.message);
   }
 }
 
-function closeAcceptCamera() {
-  if (_accCamFrameId) { cancelAnimationFrame(_accCamFrameId); _accCamFrameId = null; }
-  if (_accCamStream)  { _accCamStream.getTracks().forEach(t => t.stop()); _accCamStream = null; }
-  document.getElementById('acc-cam-video').srcObject = null;
-  document.getElementById('acceptCameraModal').style.display = 'none';
+function closeCamera() {
+  if (_camFrameId) { cancelAnimationFrame(_camFrameId); _camFrameId = null; }
+  if (_camStream)  { _camStream.getTracks().forEach(t=>t.stop()); _camStream = null; }
+  const vid = document.getElementById('cam-video');
+  if (vid) vid.srcObject = null;
+  closeModal('camera');
 }
 
-function accScanFrame() {
-  const vid = document.getElementById('acc-cam-video');
-  const canvas = document.getElementById('acc-cam-canvas');
-  if (!vid.videoWidth) { _accCamFrameId = requestAnimationFrame(accScanFrame); return; }
+function _scanFrame() {
+  const vid    = document.getElementById('cam-video');
+  const canvas = document.getElementById('cam-canvas');
+  if (!vid.videoWidth) { _camFrameId = requestAnimationFrame(_scanFrame); return; }
   canvas.width = vid.videoWidth; canvas.height = vid.videoHeight;
-  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  const ctx    = canvas.getContext('2d', {willReadFrequently:true});
   ctx.drawImage(vid, 0, 0);
-  const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const result = jsQR(img.data, img.width, img.height, { inversionAttempts: 'attemptBoth' });
-  if (result && result.data.match(HP_NOTE_RE)) {
-    closeAcceptCamera();
-    document.getElementById('acceptNote').value = result.data;
-    detectAcceptNote();
+  const img    = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const result = jsQR(img.data, img.width, img.height, {inversionAttempts:'attemptBoth'});
+  if (result) {
+    const parsed = parseNote(result.data);
+    if (parsed) {
+      closeCamera();
+      saveNote(parsed.note, parsed.token, parsed.denom).then(() => {
+        renderWallet();
+        const saved = getNotes().find(n=>n.note===parsed.note);
+        if (saved) showQRModal(saved);
+      });
+      return;
+    }
+    const st = document.getElementById('cam-status');
+    if (st) st.textContent = 'Not a PrivX Pay note — keep scanning…';
+    setTimeout(()=>{ const el=document.getElementById('cam-status'); if(el) el.textContent='Point at a PrivX Pay note QR code'; },2000);
+  }
+  _camFrameId = requestAnimationFrame(_scanFrame);
+}
+
+// ─── Deposit ──────────────────────────────────────────────────────────────────
+
+let _depToken = 'dai';
+let _depDenom = null;
+let _depAcct  = null;
+
+function _addrArg(a)    { return a.toLowerCase().replace('0x','').padStart(64,'0'); }
+function _uint256Arg(n) { return n.toString(16).padStart(64,'0'); }
+function _hexToUint(h)  { return (h && h !== '0x') ? BigInt(h) : 0n; }
+
+async function _ethSend(from, to, data) {
+  return window.ethereum.request({ method: 'eth_sendTransaction', params: [{ from, to, data }] });
+}
+
+async function _waitReceipt(tx) {
+  for (let i = 0; i < 60; i++) {
+    await new Promise(r => setTimeout(r, 3000));
+    const rec = await _rpc('eth_getTransactionReceipt', [tx]);
+    if (rec) {
+      if (rec.status === '0x0') throw new Error('Transaction reverted');
+      return rec;
+    }
+  }
+  throw new Error('timeout:' + tx);
+}
+
+function openDeposit() {
+  document.getElementById('dep-overlay').classList.add('open');
+  _resetLockTimer();
+}
+
+function closeDeposit() {
+  document.getElementById('dep-overlay').classList.remove('open');
+  _setDepStatus('', '');
+}
+
+function _setDepToken(tok) {
+  _depToken = tok;
+  ['dai','psundai','usdc'].forEach(t =>
+    document.getElementById('dep-tok-'+t)?.classList.toggle('sel', t === tok)
+  );
+  if (_depDenom) _setDepDenom(_depDenom);
+}
+
+function _setDepDenom(d) {
+  _depDenom = d;
+  document.querySelectorAll('.dep-den:not(.rec-den)').forEach(el =>
+    el.classList.toggle('sel', el.textContent === '$'+d)
+  );
+  const dw  = SHIELDS[_depToken].wei[d];
+  const fee = (dw * FEE_BP) / 10000n;
+  const dec = TOKEN_DECIMALS[_depToken];
+  const total = Number(dw + fee) / (10 ** dec);
+  document.getElementById('dep-fee-lbl').textContent =
+    `total ${total % 1 === 0 ? total : total.toFixed(dec === 6 ? 2 : 4)} ${TOKEN_LABELS[_depToken]}`;
+  document.getElementById('btn-shield').disabled = false;
+  _setDepStatus('', '');
+}
+
+function _depBtnDisable(v) { document.getElementById('btn-shield').disabled = v; }
+
+function _setDepStatus(type, msg) {
+  const el = document.getElementById('dep-status');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'dep-status' + (type === 'error' ? ' err' : type === 'ok' ? ' ok' : '');
+}
+
+async function _doDeposit() {
+  if (!_depDenom) return;
+  if (!window.ethereum) {
+    closeDeposit();
+    openWalletPicker();
     return;
   }
-  if (result) {
-    document.getElementById('acc-cam-status').textContent = 'Not a PrivX Pay note — keep scanning…';
-    setTimeout(() => {
-      const el = document.getElementById('acc-cam-status');
-      if (el) el.textContent = 'Point at the customer\'s PrivX Pay QR code';
-    }, 2000);
+  _depBtnDisable(true);
+  try {
+    _setDepStatus('', 'Connecting wallet…');
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    _depAcct = accounts[0];
+    _showWeb3Addr(_depAcct);
+
+    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+    if (chainId !== PULSECHAIN_ID) {
+      _setDepStatus('', 'Switching to PulseChain…');
+      try {
+        await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: PULSECHAIN_ID }] });
+      } catch (sw) {
+        if (sw.code === 4902) {
+          await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{
+            chainId: PULSECHAIN_ID, chainName: 'PulseChain',
+            nativeCurrency: { name: 'Pulse', symbol: 'PLS', decimals: 18 },
+            rpcUrls: ['https://rpc.pulsechain.com'],
+            blockExplorerUrls: ['https://scan.pulsechain.com']
+          }]});
+        } else throw sw;
+      }
+    }
+
+    _setDepStatus('', 'Generating note…');
+    await _loadPoseidon();
+
+    // Derive note from seed if available, otherwise fall back to random
+    let nHex, sHex, usedSeedIdx = null;
+    if (_seed !== null) {
+      usedSeedIdx = _seedIdx;
+      const nHash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(_seed+':n:'+usedSeedIdx));
+      const sHash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(_seed+':s:'+usedSeedIdx));
+      nHex = [...new Uint8Array(nHash)].slice(0,31).map(b=>b.toString(16).padStart(2,'0')).join('');
+      sHex = [...new Uint8Array(sHash)].slice(0,31).map(b=>b.toString(16).padStart(2,'0')).join('');
+    } else {
+      nHex = [...crypto.getRandomValues(new Uint8Array(31))].map(b=>b.toString(16).padStart(2,'0')).join('');
+      sHex = [...crypto.getRandomValues(new Uint8Array(31))].map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
+    const commitment = _poseidon(BigInt('0x'+nHex), BigInt('0x'+sHex));
+    const commitHex  = '0x' + commitment.toString(16).padStart(64,'0');
+
+    const shieldAddr = SHIELDS[_depToken].contracts[_depDenom];
+    const denomWei   = SHIELDS[_depToken].wei[_depDenom];
+    const totalWei   = denomWei + (denomWei * FEE_BP) / 10000n;
+    const tokenAddr  = TOKEN_ADDRS[_depToken];
+
+    _setDepStatus('', `Checking ${TOKEN_LABELS[_depToken]} allowance…`);
+    const allowHex = await _rpc('eth_call', [{ to: tokenAddr, data: '0xdd62ed3e' + _addrArg(_depAcct) + _addrArg(shieldAddr) }, 'latest']);
+    if (_hexToUint(allowHex) < totalWei) {
+      _setDepStatus('', `Approve ${TOKEN_LABELS[_depToken]} in your wallet…`);
+      const approveTx = await _ethSend(_depAcct, tokenAddr, '0x095ea7b3' + _addrArg(shieldAddr) + _uint256Arg(totalWei));
+      _setDepStatus('', 'Waiting for approval…');
+      await _waitReceipt(approveTx);
+    }
+
+    // Save note BEFORE sending deposit tx — if receipt times out, note is already safe
+    const noteStr = `hp-${_depToken}-${_depDenom}-${nHex}-${sHex}`;
+    await saveNote(noteStr, _depToken, _depDenom, usedSeedIdx);
+    // Advance seed index immediately so a retry generates a fresh note
+    if (usedSeedIdx !== null) { _seedIdx++; await _putSeedState(); }
+    renderWallet();
+
+    _setDepStatus('', 'Confirm deposit in your wallet…');
+    const depositTx = await _ethSend(_depAcct, shieldAddr, '0xb214faa5' + commitHex.slice(2));
+    _setDepStatus('', 'Waiting for confirmation…');
+    await _waitReceipt(depositTx);
+
+    _setDepStatus('ok', `$${_depDenom} ${TOKEN_LABELS[_depToken]} note deposited ✓`);
+    setTimeout(closeDeposit, 1800);
+  } catch(e) {
+    if (e.message && e.message.startsWith('timeout:')) {
+      const tx = e.message.slice(8);
+      _setDepStatus('error',
+        'Timed out — your note is already saved in this wallet.\n\n' +
+        'Check the scanner to confirm the deposit went through before using the note:\n' +
+        'scan.pulsechain.com/tx/' + tx
+      );
+    } else {
+      const msg = e.code === 4001 ? 'Cancelled' : (e.message || 'Unknown error');
+      _setDepStatus('error', msg);
+    }
+    _depBtnDisable(false);
   }
-  _accCamFrameId = requestAnimationFrame(accScanFrame);
 }
 
-// ─── Shared helpers ───────────────────────────────────────────────────────────
+// ─── Web3 Wallet ──────────────────────────────────────────────────────────────
 
-function setStatus(id, type, msg) {
-  const el = document.getElementById(id);
-  el.className = 'status ' + type;
+async function _detectWeb3() {
+  if (!window.ethereum) return; // chip stays as "Open in Wallet"
+  try {
+    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+    if (accounts.length) _showWeb3Addr(accounts[0]);
+    window.ethereum.on('accountsChanged', accs =>
+      accs.length ? _showWeb3Addr(accs[0]) : _hideWeb3Addr()
+    );
+  } catch { /* no-op */ }
+}
+
+async function _web3ChipTap() {
+  if (window.ethereum) {
+    try {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      if (accounts.length) _showWeb3Addr(accounts[0]);
+    } catch { /* user rejected */ }
+  } else {
+    openWalletPicker();
+  }
+}
+
+function _showWeb3Addr(addr) {
+  const el = document.getElementById('web3-label');
+  const dot = document.getElementById('web3-dot');
+  if (el) el.textContent = addr.slice(0,6) + '…' + addr.slice(-4);
+  if (dot) dot.classList.add('live');
+}
+
+function _hideWeb3Addr() {
+  const el = document.getElementById('web3-label');
+  const dot = document.getElementById('web3-dot');
+  if (el) el.textContent = 'Open in Wallet';
+  if (dot) dot.classList.remove('live');
+}
+
+// ─── Wallet picker ────────────────────────────────────────────────────────────
+
+function openWalletPicker() {
+  document.getElementById('wallet-picker').classList.add('open');
+  _resetLockTimer();
+}
+
+function closeWalletPicker() {
+  document.getElementById('wallet-picker').classList.remove('open');
+}
+
+function _openInWallet(wallet) {
+  const url  = window.location.href;
+  const enc  = encodeURIComponent(url);
+  const host = url.replace(/^https?:\/\//, '');
+  const links = {
+    metamask: `https://metamask.app.link/dapp/${host}`,
+    trust:    `https://link.trustwallet.com/open_url?coin_id=60&url=${enc}`,
+    coinbase: `https://go.cb-wallet.io/dapp?url=${enc}`
+  };
+  window.open(links[wallet], '_blank');
+}
+
+async function _copyWalletUrl() {
+  try {
+    await navigator.clipboard.writeText(window.location.href);
+    _showToast('URL copied!');
+  } catch { _showToast('Copy failed'); }
+}
+
+// ─── Seed & Recovery ──────────────────────────────────────────────────────────
+
+async function _copySeed() {
+  if (!_seed) return;
+  const fmt = _seed.slice(0,8)+' '+_seed.slice(8,16)+' '+_seed.slice(16,24)+' '+_seed.slice(24,32);
+  try { await navigator.clipboard.writeText(fmt); _showToast('Seed copied!'); }
+  catch { _showToast('Copy failed'); }
+}
+
+function openRecovery() {
+  // Pre-fill with current seed
+  const inp = document.getElementById('recover-seed-input');
+  if (inp && _seed) inp.value = _seed.slice(0,8)+' '+_seed.slice(8,16)+' '+_seed.slice(16,24)+' '+_seed.slice(24,32);
+  document.getElementById('recover-overlay').classList.add('open');
+  _resetLockTimer();
+}
+
+function closeRecovery() {
+  document.getElementById('recover-overlay').classList.remove('open');
+  _setRecoverStatus('', '');
+}
+
+function _setRecoverDepth(n) {
+  _recoverDepth = n;
+  [25, 50, 100].forEach(d => {
+    const el = document.getElementById('rd-'+d);
+    if (el) el.classList.toggle('sel', d === n);
+  });
+}
+
+function _setRecoverStatus(type, msg) {
+  const el = document.getElementById('recover-status');
+  if (!el) return;
   el.textContent = msg;
+  el.className = 'dep-status' + (type === 'err' ? ' err' : type === 'ok' ? ' ok' : '');
 }
 
-// ─── Protocol Stats ───────────────────────────────────────────────────────────
+async function _doRecover() {
+  const rawSeed = document.getElementById('recover-seed-input').value.replace(/\s/g,'').toLowerCase();
+  if (!/^[0-9a-f]{32}$/.test(rawSeed)) {
+    _setRecoverStatus('err', 'Seed must be 32 hex characters (spaces ignored)');
+    return;
+  }
 
-function fmt18(raw, dec=2) {
-  const n = parseFloat((BigInt(raw) * BigInt(10**dec) / BigInt(1e18)).toString()) / 10**dec;
-  return n.toLocaleString(undefined, {maximumFractionDigits: dec});
-}
-function fmt6(raw, dec=2) {
-  const n = parseFloat((BigInt(raw) * BigInt(10**dec) / BigInt(1e6)).toString()) / 10**dec;
-  return n.toLocaleString(undefined, {maximumFractionDigits: dec});
-}
+  await _loadPoseidon();
+  if (!_poseidon) { _setRecoverStatus('err', 'Poseidon not loaded — wait a moment and retry'); return; }
 
-async function loadStats() {
+  const btn = document.getElementById('btn-recover');
+  btn.disabled = true;
+
   try {
-    const [
-      vaultBal, rateBp, totalMined, peakBal, sealedHex,
-      feeDai, feePsundai, feeUsdc, burned
-    ] = await Promise.all([
-      ethCall(HP_MINING_VAULT, "0x0bf6cc08"),
-      ethCall(HP_MINING_VAULT, "0x8542dff7"),
-      ethCall(HP_MINING_VAULT, "0x5556db65"),
-      ethCall(HP_MINING_VAULT, "0xf91510ce"),
-      ethCall(HP_MINING_VAULT, "0x631f9852"),
-      ethCall(FEE_VAULT,       "0xcc2153d1", addrArg(HP_TOKENS.dai.addr)),
-      ethCall(FEE_VAULT,       "0xcc2153d1", addrArg(HP_TOKENS.psundai.addr)),
-      ethCall(FEE_VAULT,       "0xcc2153d1", addrArg(HP_TOKENS.usdc.addr)),
-      ethCall(FEE_VAULT,       "0x828fc637"),
-    ]);
+    // Fetch all deposit events from all 18 shields
+    const shields = [];
+    for (const [token, cfg] of Object.entries(SHIELDS))
+      for (const [denom, addr] of Object.entries(cfg.contracts))
+        shields.push({ token, denom, addr });
 
-    const vB = hexToUint(vaultBal);
-    const pB = hexToUint(peakBal);
+    const commitMap = {};
+    for (let i = 0; i < shields.length; i++) {
+      _setRecoverStatus('', `Scanning shield ${i+1} of ${shields.length}…`);
+      try {
+        const logs = await _rpc('eth_getLogs', [{
+          address: shields[i].addr, topics: [DEPOSIT_TOPIC], fromBlock: '0x0', toBlock: 'latest'
+        }]);
+        for (const log of logs) {
+          const c = BigInt(log.topics[1]).toString(16).padStart(64,'0');
+          commitMap[c] = { token: shields[i].token, denom: shields[i].denom };
+        }
+      } catch { /* skip unavailable shield */ }
+    }
 
-    document.getElementById('stat-vault-bal').textContent   = fmt18(vB) + ' PRIVX';
-    document.getElementById('stat-total-mined').textContent = fmt18(hexToUint(totalMined)) + ' PRIVX';
-    document.getElementById('stat-sealed').textContent      = hexToBool(sealedHex) ? 'Sealed ✓' : 'Open';
+    // Derive notes at each index and check against commitments
+    _setRecoverStatus('', `Checking ${_recoverDepth} indices…`);
+    const found = [];
+    for (let idx = 0; idx < _recoverDepth; idx++) {
+      const nHash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(rawSeed+':n:'+idx));
+      const sHash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(rawSeed+':s:'+idx));
+      const nHex  = [...new Uint8Array(nHash)].slice(0,31).map(b=>b.toString(16).padStart(2,'0')).join('');
+      const sHex  = [...new Uint8Array(sHash)].slice(0,31).map(b=>b.toString(16).padStart(2,'0')).join('');
+      const commit = _poseidon(BigInt('0x'+nHex), BigInt('0x'+sHex)).toString(16).padStart(64,'0');
+      if (commitMap[commit]) {
+        const { token, denom } = commitMap[commit];
+        found.push({ note: `hp-${token}-${denom}-${nHex}-${sHex}`, token, denom, si: idx });
+      }
+    }
 
-    const ratePct = pB > 0n ? (Number(hexToUint(rateBp)) / 100).toFixed(2) : '0.00';
-    document.getElementById('stat-rate').textContent     = ratePct + '%';
-    document.getElementById('stat-rate-sub').textContent = pB > 0n
-      ? `vault at ${(Number(vB * 100n / pB)).toFixed(0)}% capacity`
-      : 'vault empty — fund to activate rewards';
+    if (!found.length) {
+      _setRecoverStatus('err', `No notes found in ${_recoverDepth} indices. Try a larger scan depth.`);
+      return;
+    }
 
-    document.getElementById('stat-fee-dai').textContent     = fmt18(hexToUint(feeDai)) + ' DAI';
-    document.getElementById('stat-fee-psundai').textContent = fmt18(hexToUint(feePsundai)) + ' pSunDAI';
-    document.getElementById('stat-fee-usdc').textContent    = fmt6(hexToUint(feeUsdc)) + ' USDC';
-    document.getElementById('stat-burned').textContent      = fmt18(hexToUint(burned)) + ' PRIVX';
+    let added = 0;
+    for (const n of found) {
+      if (!getNotes().find(x => x.note === n.note)) {
+        await saveNote(n.note, n.token, n.denom, n.si);
+        added++;
+      }
+    }
+    renderWallet();
 
-    document.getElementById('vaultPrivxBal').textContent = fmt18(vB);
+    // Adopt this seed if it's different from the current one
+    if (rawSeed !== _seed) {
+      _seed    = rawSeed;
+      _seedIdx = Math.max(...found.map(n=>n.si)) + 1;
+      await _putSeedState();
+      _showSeedSection();
+    }
+
+    _setRecoverStatus('ok',
+      `Found ${found.length} note${found.length!==1?'s':''} — ` +
+      (added > 0 ? `${added} added to wallet.` : 'all already in wallet.')
+    );
   } catch(e) {
-    console.error('loadStats:', e.message);
+    _setRecoverStatus('err', 'Recovery failed: ' + e.message);
+  } finally {
+    btn.disabled = false;
   }
 }
 
-// ─── Fund Mining Vault ────────────────────────────────────────────────────────
-
-async function loadVaultBalance() {
-  await loadStats();
-}
-
-async function fundVault() {
-  const amtStr = document.getElementById('fundAmount').value.trim();
-  if (!amtStr || isNaN(Number(amtStr)) || Number(amtStr) <= 0)
-    return setStatus('fundStatus','error','Enter a valid PRIVX amount.');
-
-  if (!buyAccount) return setStatus('fundStatus','error','Connect your wallet first (use the Buy Cash tab).');
-
-  setStatus('fundStatus','pending','Approving PRIVX…');
-  try {
-    const amtWei = (BigInt(Math.round(Number(amtStr) * 1e6)) * BigInt(1e12)).toString();
-    const approveTx = await ethSend(buyAccount, PRIVX_TOKEN,
-      "0x095ea7b3" + addrArg(HP_MINING_VAULT) + uint256Arg(amtWei));
-    await waitForReceipt(approveTx);
-    setStatus('fundStatus','pending','Sending PRIVX to vault…');
-    const topUpTx = await ethSend(buyAccount, HP_MINING_VAULT,
-      "0x50017f3e" + uint256Arg(amtWei));
-    await waitForReceipt(topUpTx);
-    setStatus('fundStatus','success',`Funded! ${amtStr} PRIVX sent to the HP Mining Vault.`);
-    document.getElementById('fundAmount').value = '';
-    await loadVaultBalance();
-  } catch(e) {
-    setStatus('fundStatus','error', e.message || 'Transaction failed.');
-  }
-}
+function _resetLockTimer() { if (_key) _resetTimer(); }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
-window.addEventListener('load', async () => {
-  selectBuyToken('dai');
-  renderSavedNotes();
-  loadVaultBalance();
-  try { await initPoseidon(); }
-  catch(e) { console.error("Poseidon init failed:", e.message); }
-});
-
-// ─── Matrix bg ────────────────────────────────────────────────────────────────
-
-const canvas = document.getElementById('matrix-bg'), ctx = canvas.getContext('2d');
-canvas.width = innerWidth; canvas.height = innerHeight;
-let fontSize = innerWidth < 600 ? 10 : 14;
-const chars  = '01PRIVXPAY$$$';
-let columns  = Math.floor(canvas.width / fontSize);
-let drops    = Array(columns).fill(1);
-function draw() {
-  ctx.fillStyle = 'rgba(0,0,0,0.05)'; ctx.fillRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle = '#8A2BE2'; ctx.font = fontSize+'px monospace';
-  drops.forEach((y,i) => {
-    ctx.fillText(chars[Math.floor(Math.random()*chars.length)], i*fontSize, y*fontSize);
-    if (y*fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-    drops[i]++;
-  });
-}
-(function loop(){ draw(); requestAnimationFrame(loop); })();
-addEventListener('resize', () => {
-  canvas.width = innerWidth; canvas.height = innerHeight;
-  fontSize = innerWidth < 600 ? 10 : 14;
-  columns  = Math.floor(canvas.width / fontSize);
-  drops    = Array(columns).fill(1);
+window.addEventListener('load', () => {
+  const hasSalt = !!localStorage.getItem(SALT_KEY);
+  _pinMode = hasSalt ? 'enter' : 'set';
+  _setPrompt(hasSalt ? 'Enter your PIN' : 'Create a 6-digit PIN');
+  document.getElementById('ls-reset').style.display = hasSalt ? 'block' : 'none';
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('./privx-pay-wallet-sw.js').catch(()=>{});
+  _detectWeb3();
 });
 
 </script>
