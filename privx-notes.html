@@ -444,7 +444,7 @@ function onNoteInput(val) {
     qrFrame.innerHTML = '';
     const canvas = document.createElement('canvas');
     QRCode.toCanvas(canvas, parsed.note, {
-      width: 100, margin: 1, color: { dark:'#000', light:'#fff' }
+      width: 400, margin: 2, color: { dark:'#000', light:'#fff' }
     }, err => { if (!err) qrFrame.appendChild(canvas); });
   }
 
