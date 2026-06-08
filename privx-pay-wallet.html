@@ -397,7 +397,7 @@ input[type=text]:focus{border-color:var(--a)}
   <div class="seed-section" id="seed-section">
     <div class="seed-lbl">Recovery Seed <span style="font-weight:400;opacity:.6;text-transform:none;letter-spacing:0">· tap to reveal</span></div>
     <div class="seed-display" id="seed-display" onclick="_toggleSeedReveal()" title="Tap to reveal / hide">•••••••• •••••••• •••••••• ••••••••</div>
-    <div class="seed-note">Tap the seed to reveal it — it hides automatically after 30 seconds. Write it down offline, never in a photo or cloud note. Anyone who has this seed can recover your notes.<br><br>Every note you deposit is derived from this seed, so a recovery scan can restore your full history from the blockchain alone, even after total device loss. Notes deposited before this wallet was set up won't appear in a recovery scan but still spend normally.</div>
+    <div class="seed-note">Tap the seed to reveal it — it hides automatically after 30 seconds. Write it down offline, never in a photo or cloud note. Anyone who has this seed can recover your notes.<br><br>Notes deposited using this wallet's <strong style="color:#888">Deposit</strong> button are derived from this seed and are fully recoverable via scan. Notes scanned in from outside (e.g. generated on the ATM) are random and cannot be recovered by seed — keep your encrypted wallet backup for those.</div>
     <div class="seed-actions">
       <button class="seed-action-btn" onclick="_copySeed()">Copy Seed</button>
       <button class="seed-action-btn" onclick="openRecovery()">Recover Notes</button>
