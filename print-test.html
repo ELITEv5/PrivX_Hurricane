@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PrivX Pay — Print Note Test</title>
+<style>
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #0a0a0a;
+  color: #fff;
+  min-height: 100vh;
+  padding: 32px 20px 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+.header img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+.header h1 {
+  font-size: 22px;
+  font-weight: 900;
+  background: linear-gradient(90deg, #00ffea, #8A2BE2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.3px;
+}
+
+.sub {
+  font-size: 12px;
+  color: #444;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+
+/* ── Section title ── */
+.section-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #555;
+  width: 100%;
+  max-width: 560px;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+/* ── Note cards ── */
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 560px;
+  margin-bottom: 32px;
+}
+
+.note-card {
+  background: #141414;
+  border: 1px solid rgba(138,43,226,0.2);
+  border-radius: 14px;
+  padding: 16px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  transition: border-color 0.15s;
+}
+.note-card:hover { border-color: rgba(138,43,226,0.45); }
+.note-card.spent { opacity: 0.4; }
+
+.note-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--line-color, #8A2BE2), transparent);
+  border-radius: 14px 14px 0 0;
+}
+.note-card { position: relative; overflow: hidden; }
+
+.nc-left { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; }
+
+.nc-denom {
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.nc-token {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #00ffea;
+}
+
+.nc-note {
+  font-family: monospace;
+  font-size: 10px;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 280px;
+  margin-top: 4px;
+}
+
+.nc-date {
+  font-family: monospace;
+  font-size: 10px;
+  color: #333;
+  margin-top: 2px;
+}
+
+.nc-right { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; flex-shrink: 0; }
+
+.btn-print {
+  padding: 10px 18px;
+  background: rgba(138,43,226,0.12);
+  border: 1px solid rgba(138,43,226,0.4);
+  border-radius: 10px;
+  color: #B57AFF;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.btn-print:hover {
+  background: rgba(138,43,226,0.25);
+  border-color: #8A2BE2;
+  color: #fff;
+}
+.btn-print svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+.btn-show-qr {
+  padding: 7px 14px;
+  background: rgba(0,255,234,0.05);
+  border: 1px solid rgba(0,255,234,0.2);
+  border-radius: 8px;
+  color: rgba(0,255,234,0.6);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-show-qr:hover { color: #00ffea; border-color: rgba(0,255,234,0.5); }
+
+.spent-badge {
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #ff5555;
+  background: rgba(255,85,85,0.1);
+  border: 1px solid rgba(255,85,85,0.2);
+  border-radius: 4px;
+  padding: 3px 7px;
+}
+
+/* ── QR preview popover ── */
+.qr-pop {
+  display: none;
+  margin-top: 12px;
+  padding: 12px;
+  background: #fff;
+  border-radius: 10px;
+  text-align: center;
+  width: 100%;
+}
+.qr-pop.visible { display: block; }
+.qr-pop canvas { display: inline-block; border-radius: 4px; }
+.qr-pop .qr-str {
+  font-family: monospace;
+  font-size: 9px;
+  color: #444;
+  word-break: break-all;
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+/* ── Paste / import area ── */
+.import-box {
+  width: 100%;
+  max-width: 560px;
+  background: #111;
+  border: 1px solid rgba(138,43,226,0.2);
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 32px;
+}
+.import-box label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #555;
+  display: block;
+  margin-bottom: 8px;
+}
+.import-box input {
+  width: 100%;
+  padding: 12px 14px;
+  background: #0a0a0a;
+  border: 1px solid rgba(138,43,226,0.25);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 13px;
+  font-family: monospace;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 10px;
+}
+.import-box input:focus { border-color: #00ffea; }
+.btn-import {
+  padding: 11px 22px;
+  background: #8A2BE2;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-import:hover { background: #00ffea; color: #000; }
+
+/* ── Info box ── */
+.info-box {
+  width: 100%;
+  max-width: 560px;
+  background: rgba(138,43,226,0.05);
+  border: 1px solid rgba(138,43,226,0.15);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.7;
+  margin-bottom: 28px;
+}
+.info-box strong { color: #B57AFF; }
+.info-box code {
+  background: rgba(255,255,255,0.06);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #00ffea;
+}
+
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img src="./privx-shield.png" alt="PrivX">
+  <h1>PrivX Pay — Print Test</h1>
+</div>
+<p class="sub">Note printing · QR verification · privx-notes.html integration</p>
+
+<div class="info-box">
+  <strong>What this tests:</strong> Each note card below has a <strong>Print Note</strong> button
+  that opens <code>privx-notes.html</code> in a new tab — showing only that denomination
+  with the real QR code embedded, ready to print and cut to 6.14 × 2.61 in.
+  You can also paste any real note string into the import field below.
+</div>
+
+<!-- ── Test notes (fake but correctly formatted) ── -->
+<div class="section-title">Test Notes</div>
+<div class="notes-list" id="notes-list"></div>
+
+<!-- ── Paste a real note ── -->
+<div class="section-title">Import Real Note</div>
+<div class="import-box">
+  <label>Paste a PrivX Pay note string</label>
+  <input type="text" id="paste-input" placeholder="hp-dai-20-abc123… (paste real note from wallet)">
+  <button class="btn-import" onclick="importNote()">Open Print View</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+<script>
+
+/* ── Test note data (fake but valid format) ── */
+const TEST_NOTES = [
+  {
+    id: 'test-1',
+    denom: '1',
+    token: 'dai',
+    note: 'hp-dai-1-a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2-b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1',
+    ts: Date.now() - 86400000 * 2,
+    spent: false
+  },
+  {
+    id: 'test-5',
+    denom: '5',
+    token: 'psundai',
+    note: 'hp-psundai-5-111222333444555666777888999aaabbbcccdddeeefff000111222333444555-666777888999aaabbbcccdddeeefff000111222333444555666777888999aabb00',
+    ts: Date.now() - 86400000 * 1,
+    spent: false
+  },
+  {
+    id: 'test-10',
+    denom: '10',
+    token: 'usdc',
+    note: 'hp-usdc-10-abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890ab-0987654321fedcba0987654321fedcba0987654321fedcba0987654321fedcba09',
+    ts: Date.now() - 3600000 * 3,
+    spent: false
+  },
+  {
+    id: 'test-20',
+    denom: '20',
+    token: 'dai',
+    note: 'hp-dai-20-deadbeefcafebabe1234567890abcdef1234567890abcdef1234567890abcdef12-cafebabe1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+    ts: Date.now() - 3600000 * 1,
+    spent: false
+  },
+  {
+    id: 'test-50',
+    denom: '50',
+    token: 'dai',
+    note: 'hp-dai-50-aaaaaaaa11111111bbbbbbbb22222222cccccccc33333333dddddddd4444444455-555555556666666677777777888888889999999900000000aaaaaaaa11111111bb',
+    ts: Date.now() - 600000,
+    spent: true   // test the spent state
+  },
+  {
+    id: 'test-100',
+    denom: '100',
+    token: 'psundai',
+    note: 'hp-psundai-100-0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f2021-222324252627282930313233343536373839303132333435363738393031323334',
+    ts: Date.now() - 60000,
+    spent: false
+  }
+];
+
+/* ── Token label ── */
+const TOKEN_LABEL = { dai: 'DAI', psundai: 'pSunDAI', usdc: 'USDC' };
+
+/* ── Denom line colours matching notes ── */
+const DENOM_COLOR = { '1':'#52b788', '5':'#4a8fd9', '10':'#e05c1a', '20':'#c084fc', '50':'#f87171', '100':'#fcd34d' };
+
+/* ── Render test notes ── */
+function renderNotes() {
+  const list = document.getElementById('notes-list');
+  list.innerHTML = '';
+  TEST_NOTES.forEach(n => {
+    const date = new Date(n.ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    const col  = DENOM_COLOR[n.denom] || '#8A2BE2';
+    const card = document.createElement('div');
+    card.className = 'note-card' + (n.spent ? ' spent' : '');
+    card.style.setProperty('--line-color', col);
+    card.innerHTML = `
+      <div class="nc-left">
+        <div class="nc-denom" style="color:${col}">$${n.denom}</div>
+        <div class="nc-token">${TOKEN_LABEL[n.token] || n.token}</div>
+        <div class="nc-note">${n.note}</div>
+        <div class="nc-date">${date}</div>
+        <div class="qr-pop" id="qrpop-${n.id}"></div>
+      </div>
+      <div class="nc-right">
+        ${n.spent
+          ? `<div class="spent-badge">Spent</div>`
+          : `<button class="btn-print" onclick="printNote('${n.note.replace(/'/g,"\\'")}')">
+               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                 <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                 <rect x="6" y="14" width="12" height="8"/>
+               </svg>
+               Print Note
+             </button>
+             <button class="btn-show-qr" onclick="toggleQR('${n.id}', '${n.note.replace(/'/g,"\\'")}')">Preview QR</button>`
+        }
+      </div>`;
+    list.appendChild(card);
+  });
+}
+
+/* ── Open print view — note passes via localStorage key, never in URL ── */
+function printNote(noteStr) {
+  const key = 'privx_note_' + Date.now().toString(36) + Math.random().toString(36).slice(2);
+  try {
+    localStorage.setItem(key, noteStr);
+  } catch(e) {
+    alert('Storage blocked — cannot open print view.\n(Private Browsing strict mode may be preventing localStorage.)');
+    return;
+  }
+  window.open('./privx-notes.html?k=' + key, '_blank');
+  // Safety cleanup: if the tab never loads, remove the key after 30 s
+  setTimeout(() => { try { localStorage.removeItem(key); } catch(e) {} }, 30000);
+}
+
+/* ── Toggle inline QR preview ── */
+let _qrPopState = {};
+function toggleQR(id, noteStr) {
+  const pop = document.getElementById('qrpop-' + id);
+  if (!pop) return;
+  if (_qrPopState[id]) {
+    pop.classList.remove('visible');
+    pop.innerHTML = '';
+    _qrPopState[id] = false;
+    return;
+  }
+  _qrPopState[id] = true;
+  pop.classList.add('visible');
+  pop.innerHTML = '<canvas></canvas><div class="qr-str"></div>';
+  const canvas = pop.querySelector('canvas');
+  QRCode.toCanvas(canvas, noteStr, { width: 180, margin: 1, color: { dark: '#000', light: '#fff' } }, () => {});
+  pop.querySelector('.qr-str').textContent = noteStr;
+}
+
+/* ── Import a real note string ── */
+function importNote() {
+  const val = document.getElementById('paste-input').value.trim();
+  if (!val) { alert('Paste a note string first.'); return; }
+  const m = val.match(/^hp-([a-z]+)-(\d+)-([0-9a-f]{60,})-([0-9a-f]{60,})$/i);
+  if (!m) {
+    alert('Invalid note format.\nExpected: hp-{token}-{denom}-{nullifier}-{secret}');
+    return;
+  }
+  printNote(val);  // uses localStorage key handoff — note never appears in URL
+}
+
+/* ── Init ── */
+renderNotes();
+
+</script>
+</body>
+</html>
