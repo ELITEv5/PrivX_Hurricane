@@ -218,9 +218,10 @@ body {
 
 .top-row { display:flex; align-items:flex-start; gap:6px; flex-shrink:0; }
 
-.denom-left { display:flex; flex-direction:column; width:90px; flex-shrink:0; }
-.big-denom  { font-size:34pt; font-weight:900; line-height:0.92; color:var(--cl); letter-spacing:-1.5px; text-shadow:0 2px 8px rgba(0,0,0,0.7),0 0 24px var(--ca); }
-.denom-word { font-size:4.8pt; font-weight:700; letter-spacing:0.22em; text-transform:uppercase; color:var(--cm); margin-top:2px; }
+.denom-left  { display:flex; flex-direction:column; width:90px; flex-shrink:0; }
+.big-denom   { font-size:34pt; font-weight:900; line-height:0.92; color:var(--cl); letter-spacing:-1.5px; text-shadow:0 2px 8px rgba(0,0,0,0.7),0 0 24px var(--ca); }
+.denom-word  { font-size:4.8pt; font-weight:700; letter-spacing:0.22em; text-transform:uppercase; color:var(--cm); margin-top:2px; }
+.note-token  { font-size:7pt; font-weight:800; letter-spacing:0.18em; text-transform:uppercase; color:var(--ca); margin-top:4px; }
 
 .title-block { flex:1; display:flex; flex-direction:column; align-items:center; padding-top:4px; gap:2px; }
 .brand-name  { font-size:14.5pt; font-weight:800; letter-spacing:0.38em; text-transform:uppercase; color:var(--cl); text-shadow:0 0 28px var(--ca),0 1px 4px rgba(0,0,0,0.6); line-height:1; }
@@ -350,6 +351,7 @@ function buildNotes() {
           <div class="denom-left">
             <div class="big-denom">$${d}</div>
             <div class="denom-word">${word}</div>
+            <div class="note-token" id="tok${d}"></div>
           </div>
           <div class="title-block">
             <div class="brand-name">PRIVX PAY</div>
@@ -403,8 +405,9 @@ function onNoteInput(val) {
   const printRow = document.getElementById('print-row');
   const emptyEl  = document.getElementById('empty-state');
 
-  // Hide all notes
+  // Hide all notes and reset token labels
   document.querySelectorAll('.note').forEach(n => n.style.display = 'none');
+  document.querySelectorAll('.note-token').forEach(el => el.textContent = '');
   printRow.classList.remove('visible');
 
   if (!val) {
@@ -448,11 +451,15 @@ function onNoteInput(val) {
     }, err => { if (!err) qrFrame.appendChild(canvas); });
   }
 
-  // Serial number from first 8 chars of nullifier
+  // Token label + serial from first 8 chars of nullifier
   const s = parsed.nullifier.slice(0, 8).toUpperCase();
   const tokenLabel = parsed.token === 'psundai' ? 'pSunDAI'
                    : parsed.token === 'usdc'    ? 'USDC'
                    : parsed.token.toUpperCase();
+
+  const tokEl = document.getElementById('tok' + parsed.denom);
+  if (tokEl) tokEl.textContent = tokenLabel;
+
   const serialEl = document.getElementById('serial' + parsed.denom);
   if (serialEl) serialEl.textContent = `PX·${s.slice(0,4)}·${s.slice(4,8)} · ${tokenLabel} · ${YEAR}`;
 
