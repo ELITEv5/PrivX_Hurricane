@@ -234,7 +234,7 @@ body {
 .mid-row { flex:1; display:flex; align-items:center; justify-content:center; padding:2px 0 0; }
 .qr-wrap { display:flex; flex-direction:column; align-items:center; gap:3px; }
 .qr-frame {
-  width: 74px; height: 74px;
+  width: 100px; height: 100px;
   background: rgba(255,255,255,0.97);
   border: 1.5px solid rgba(0,0,0,0.15);
   border-radius: 2px;
@@ -444,7 +444,7 @@ function onNoteInput(val) {
     qrFrame.innerHTML = '';
     const canvas = document.createElement('canvas');
     QRCode.toCanvas(canvas, parsed.note, {
-      width: 74, margin: 1, color: { dark:'#000', light:'#fff' }
+      width: 100, margin: 1, color: { dark:'#000', light:'#fff' }
     }, err => { if (!err) qrFrame.appendChild(canvas); });
   }
 
