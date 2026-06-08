@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PrivX Pay — Note Printer</title>
+<title>PrivX Pay — Cash Note Printer</title>
 <style>
 
 /* ── Reset ── */
@@ -59,6 +59,69 @@ body {
   margin-top: 2px;
 }
 
+/* ── Explainer ── */
+.c-explainer {
+  background: rgba(138,43,226,0.06);
+  border: 1px solid rgba(138,43,226,0.2);
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.c-explainer-title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: #c084fc;
+  text-transform: uppercase;
+}
+.c-explainer-body {
+  font-size: 13px;
+  color: #888;
+  line-height: 1.6;
+}
+.c-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.c-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+  color: #777;
+  line-height: 1.5;
+}
+.c-step-n {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: rgba(138,43,226,0.25);
+  border: 1px solid rgba(138,43,226,0.4);
+  color: #c084fc;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.c-warn {
+  font-size: 11px;
+  color: #ffb400;
+  background: rgba(255,180,0,0.07);
+  border: 1px solid rgba(255,180,0,0.2);
+  border-radius: 8px;
+  padding: 8px 12px;
+  line-height: 1.6;
+}
+.c-divider {
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
 .c-input-wrap {
   display: flex;
   flex-direction: column;
@@ -83,7 +146,7 @@ body {
   outline: none;
   transition: border-color 0.2s;
 }
-.c-input:focus { border-color: #00ffea; }
+.c-input:focus  { border-color: #00ffea; }
 .c-input.valid  { border-color: rgba(0,230,100,0.5); }
 .c-input.invalid{ border-color: rgba(255,80,80,0.4); }
 
@@ -266,7 +329,7 @@ body {
   background: rgba(0,0,0,0.55); border-top: 0.5px solid rgba(255,255,255,0.06);
   display:flex; align-items:center; justify-content:space-between; padding:0 9px 0 20px;
 }
-.bot-left  { font-size:4pt; letter-spacing:0.14em; color:var(--cm); text-transform:uppercase; opacity:0.75; }
+.bot-left  { font-size:4pt; letter-spacing:0.12em; color:var(--cm); text-transform:uppercase; opacity:0.75; }
 .bot-right { font-size:4.5pt; font-weight:700; letter-spacing:0.22em; color:var(--ca); text-transform:uppercase; }
 
 /* ── Print ── */
@@ -285,23 +348,50 @@ body {
   <div class="c-header">
     <img src="./privx-shield.png" class="c-logo" alt="PrivX">
     <div>
-      <div class="c-title">Note Printer</div>
+      <div class="c-title">Cash Note Printer</div>
       <div class="c-sub">PrivX Pay · Physical Bearer Notes</div>
     </div>
   </div>
+
+  <div class="c-explainer">
+    <div class="c-explainer-title">What is a Cash Note?</div>
+    <div class="c-explainer-body">
+      A PrivX Pay Cash Note is a printed bearer instrument — private digital cash you can fold in your wallet and hand to anyone, <strong style="color:#bbb">no phone needed</strong> on either side of the exchange. Each note encodes a shielded stablecoin denomination. Whoever scans the QR first redeems the value — exactly like physical cash.
+    </div>
+    <div class="c-steps">
+      <div class="c-step">
+        <span class="c-step-n">1</span>
+        <span>Deposit stablecoins on the PrivX Pay ATM — you receive a private note string (hp-dai-20-…)</span>
+      </div>
+      <div class="c-step">
+        <span class="c-step-n">2</span>
+        <span>Paste the note string below and click <strong style="color:#c084fc">Print Note</strong> — a US dollar-sized bearer note is generated in your browser</span>
+      </div>
+      <div class="c-step">
+        <span class="c-step-n">3</span>
+        <span>Hand the printed note to anyone — they open PrivX Pay, go to the <strong style="color:#00ffea">Redeem</strong> tab, and scan the QR to receive the funds on-chain</span>
+      </div>
+    </div>
+    <div class="c-warn">
+      ⚠ Bearer instrument — treat exactly like a physical banknote. Anyone with access to the QR code or note string can redeem it. Keep face-down until handoff. Once handed over, it cannot be cancelled.
+    </div>
+  </div>
+
+  <hr class="c-divider">
+
   <div class="c-input-wrap">
     <label class="c-label" for="note-input">Paste your note string</label>
     <input type="text" id="note-input" class="c-input"
       placeholder="hp-dai-20-abc123…"
       autocomplete="off" autocorrect="off" spellcheck="false">
-    <div class="c-hint">Format: hp-{token}-{denom}-{nullifier}-{secret} · copy from your PrivX Pay wallet</div>
+    <div class="c-hint">Format: hp-{token}-{denom}-{nullifier}-{secret} · copy from PrivX Pay ATM or Wallet tab</div>
     <div class="c-error" id="c-error"></div>
   </div>
 </div>
 
 <!-- ── Print button (appears once note is valid) ── -->
 <div class="print-row" id="print-row">
-  <button class="btn-print" onclick="window.print()">Print Note</button>
+  <button class="btn-print" onclick="window.print()">🖨 Print Note</button>
   <button class="btn-clear" onclick="clearNote()">Clear</button>
 </div>
 
@@ -315,7 +405,7 @@ body {
 <!-- ── Note templates injected here by JS ── -->
 <div id="notes-container"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+<script src="./qrcode.min.js"></script>
 <script>
 
 /* ── Denomination config ── */
@@ -328,7 +418,7 @@ const DENOMS = [
   { d:'100', cls:'n100', word:'One Hundred',    serial:'F00000100' },
 ];
 
-const GUILLOCHE_SEEDS = { '1':1001, '5':2003, '10':3007, '20':4013, '50':5021, '100':6031 };
+const GUILLOCHE_SEEDS   = { '1':1001, '5':2003, '10':3007, '20':4013, '50':5021, '100':6031 };
 const MICROPRINT_COLORS = { '1':'#52b788','5':'#4a8fd9','10':'#e05c1a','20':'#c084fc','50':'#f87171','100':'#fcd34d' };
 const YEAR = new Date().getFullYear();
 
@@ -379,7 +469,7 @@ function buildNotes() {
         <span class="bearer-right">$${d} · ${word}</span>
       </div>
       <div class="bot">
-        <span class="bot-left">Redeemable on PulseChain</span>
+        <span class="bot-left">Redeem: PrivX Pay → Redeem tab · Scan QR or paste note string</span>
         <span class="bot-right">PRIVX · PAY</span>
       </div>`;
     container.appendChild(el);
@@ -388,7 +478,7 @@ function buildNotes() {
 
 /* ── Parse note string ── */
 function parseNote(str) {
-  const m = str.trim().match(/^hp-([a-z]+)-(\d+)-([0-9a-f]{60,})-([0-9a-f]{60,})$/i);
+  const m = str.trim().match(/^hp-([a-z]+)-(\d+)-([0-9a-f]{62})-([0-9a-f]{62})$/i);
   if (!m) return null;
   return { token: m[1].toLowerCase(), denom: m[2], nullifier: m[3], note: str.trim() };
 }
@@ -405,7 +495,6 @@ function onNoteInput(val) {
   const printRow = document.getElementById('print-row');
   const emptyEl  = document.getElementById('empty-state');
 
-  // Hide all notes and reset token labels
   document.querySelectorAll('.note').forEach(n => n.style.display = 'none');
   document.querySelectorAll('.note-token').forEach(el => el.textContent = '');
   printRow.classList.remove('visible');
@@ -438,7 +527,6 @@ function onNoteInput(val) {
   inputEl.className = 'c-input valid';
   emptyEl.style.display = 'none';
 
-  // Show note
   noteEl.style.display = '';
 
   // Real QR code
@@ -451,7 +539,7 @@ function onNoteInput(val) {
     }, err => { if (!err) qrFrame.appendChild(canvas); });
   }
 
-  // Token label + serial from first 8 chars of nullifier
+  // Token label + unique serial from nullifier
   const s = parsed.nullifier.slice(0, 8).toUpperCase();
   const tokenLabel = parsed.token === 'psundai' ? 'pSunDAI'
                    : parsed.token === 'usdc'    ? 'USDC'
@@ -463,11 +551,9 @@ function onNoteInput(val) {
   const serialEl = document.getElementById('serial' + parsed.denom);
   if (serialEl) serialEl.textContent = `PX·${s.slice(0,4)}·${s.slice(4,8)} · ${tokenLabel} · ${YEAR}`;
 
-  // QR tip
   const tipEl = document.getElementById('qrtip' + parsed.denom);
   if (tipEl) tipEl.textContent = 'Scan to redeem on PulseChain';
 
-  // Print button
   printRow.classList.add('visible');
 }
 
@@ -555,11 +641,18 @@ function mulberry32(seed) {
 
 /* ── Init ── */
 buildNotes();
-
 for (const { d } of DENOMS) {
   buildGuilloche('g' + d, GUILLOCHE_SEEDS[d]);
   buildMicroprint('mp' + d, MICROPRINT_COLORS[d]);
   buildQRData('qrd' + d, Number(d));
+}
+
+// Auto-fill from URL param ?note=hp-dai-20-...
+const urlNote = new URLSearchParams(window.location.search).get('note');
+if (urlNote) {
+  const input = document.getElementById('note-input');
+  input.value = urlNote;
+  onNoteInput(urlNote);
 }
 
 </script>
