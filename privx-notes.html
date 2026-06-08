@@ -3,41 +3,157 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PrivX Pay — Physical Notes</title>
+<title>PrivX Pay — Note Printer</title>
 <style>
 
 /* ── Reset ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 @page { size: 8.5in 11in; margin: 0.35in; }
 
-/* ── Body ── */
 body {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  background: #08080f;
-  padding: 0.3in;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #0a0a0a;
+  color: #fff;
+  padding: 0.3in 0.3in 0.5in;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25in;
+  min-height: 100vh;
+}
+
+/* ── Creator UI (hidden on print) ── */
+.creator {
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.c-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.c-logo {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  border-radius: 10px;
+  filter: drop-shadow(0 0 14px rgba(138,43,226,0.5));
+}
+.c-title {
+  font-size: 20px;
+  font-weight: 900;
+  background: linear-gradient(90deg, #00ffea, #8A2BE2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.3px;
+}
+.c-sub {
+  font-size: 11px;
+  color: #555;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.c-input-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.c-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #555;
+}
+.c-input {
+  width: 100%;
+  padding: 13px 15px;
+  background: #111;
+  border: 1px solid rgba(138,43,226,0.3);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 14px;
+  font-family: monospace;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.c-input:focus { border-color: #00ffea; }
+.c-input.valid  { border-color: rgba(0,230,100,0.5); }
+.c-input.invalid{ border-color: rgba(255,80,80,0.4); }
+
+.c-hint {
+  font-size: 11px;
+  color: #333;
+  line-height: 1.5;
+}
+.c-error {
+  font-size: 11px;
+  color: #ff6666;
+  min-height: 16px;
+  font-family: monospace;
+}
+
+/* ── Empty state ── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 48px 24px;
+  color: #2a2a2a;
+}
+.es-icon { font-size: 48px; }
+.es-text  { font-size: 14px; color: #333; text-align: center; max-width: 300px; line-height: 1.6; }
+.es-denoms{ font-size: 11px; color: #222; letter-spacing: 0.15em; }
+
+/* ── Print button row ── */
+.print-row {
+  display: none;
+  gap: 10px;
+  align-items: center;
+}
+.print-row.visible { display: flex; }
+.btn-print {
+  padding: 11px 26px;
+  background: #8A2BE2;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.05em;
+  box-shadow: 0 0 24px rgba(138,43,226,0.4);
+}
+.btn-print:hover { background: #00ffea; color: #000; }
+.btn-clear {
+  padding: 11px 18px;
+  background: transparent;
+  color: #444;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-clear:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+
+/* ── Note container ── */
+#notes-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.22in;
+  width: 100%;
 }
-
-@media print {
-  body { background: #fff; padding: 0.1in; gap: 0.15in; }
-  .screen-label { display: none; }
-  .page-break { page-break-before: always; height: 0.15in; }
-}
-
-.screen-label {
-  color: rgba(255,255,255,0.25);
-  font-size: 7.5pt;
-  letter-spacing: 0.4em;
-  text-transform: uppercase;
-  margin-bottom: 0.05in;
-  text-align: center;
-}
-
-.page-break { height: 0; }
 
 /* ── Note shell ── */
 .note {
@@ -47,59 +163,31 @@ body {
   border-radius: 4px;
   overflow: hidden;
   flex-shrink: 0;
-  box-shadow:
-    0 10px 50px rgba(0,0,0,0.8),
-    inset 0 0 0 1px rgba(255,255,255,0.07);
+  box-shadow: 0 10px 50px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.07);
 }
 
 /* ── Denomination colour themes ── */
-/* forest green */
-.n1   { --c0:#081408; --c1:#0f2a14; --c2:#1a4a2e; --ca:#52b788; --cl:#d8f3dc; --cm:#95d5b2; --cs:#52b788; }
-/* deep blue */
-.n5   { --c0:#04091a; --c1:#0a1c3d; --c2:#15316b; --ca:#4a8fd9; --cl:#dbeafe; --cm:#93c5fd; --cs:#4a8fd9; }
-/* burnt orange */
-.n10  { --c0:#1a0700; --c1:#3d1200; --c2:#6b2200; --ca:#e05c1a; --cl:#fdf0e8; --cm:#f4a261; --cs:#e05c1a; }
-/* deep purple */
-.n20  { --c0:#0e0118; --c1:#200440; --c2:#360a6a; --ca:#9b3ddd; --cl:#ede0ff; --cm:#c084fc; --cs:#9b3ddd; }
-/* crimson red */
-.n50  { --c0:#140000; --c1:#3a0505; --c2:#680c0c; --ca:#dd2020; --cl:#ffe8e8; --cm:#f87171; --cs:#dd2020; }
-/* antique gold */
-.n100 { --c0:#0f0b00; --c1:#2e2200; --c2:#544000; --ca:#c8970a; --cl:#fff8e1; --cm:#fcd34d; --cs:#c8970a; }
+.n1   { --c0:#081408; --c1:#0f2a14; --c2:#1a4a2e; --ca:#52b788; --cl:#d8f3dc; --cm:#95d5b2; }
+.n5   { --c0:#04091a; --c1:#0a1c3d; --c2:#15316b; --ca:#4a8fd9; --cl:#dbeafe; --cm:#93c5fd; }
+.n10  { --c0:#1a0700; --c1:#3d1200; --c2:#6b2200; --ca:#e05c1a; --cl:#fdf0e8; --cm:#f4a261; }
+.n20  { --c0:#0e0118; --c1:#200440; --c2:#360a6a; --ca:#9b3ddd; --cl:#ede0ff; --cm:#c084fc; }
+.n50  { --c0:#140000; --c1:#3a0505; --c2:#680c0c; --ca:#dd2020; --cl:#ffe8e8; --cm:#f87171; }
+.n100 { --c0:#0f0b00; --c1:#2e2200; --c2:#544000; --ca:#c8970a; --cl:#fff8e1; --cm:#fcd34d; }
 
-/* ── Background gradient ── */
+/* ── Background ── */
 .nbg {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(ellipse 75% 85% at 52% 48%, var(--c2) 0%, var(--c1) 50%, var(--c0) 100%);
+  background: radial-gradient(ellipse 75% 85% at 52% 48%, var(--c2) 0%, var(--c1) 50%, var(--c0) 100%);
 }
 
-/* Subtle vignette */
-.nbg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 120% 120% at 50% 50%, transparent 40%, rgba(0,0,0,0.5) 100%);
-}
-
-/* ── Guilloche container (filled by JS) ── */
-.guilloché {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  overflow: hidden;
-}
+/* ── Guilloche ── */
+.guilloché { position: absolute; inset: 0; z-index: 1; overflow: hidden; }
 
 /* ── Microprint border ── */
-.mpborder {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-}
+.mpborder { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
 
-/* ── Holographic foil strip — left edge ── */
+/* ── Holographic foil strip ── */
 .foil {
   position: absolute;
   left: 0; top: 0; bottom: 0;
@@ -107,20 +195,15 @@ body {
   z-index: 9;
   background: repeating-linear-gradient(
     -40deg,
-    rgba(255,255,255,0.95)  0px,
-    rgba(190,150,255,0.80)  4px,
-    rgba(140,215,255,0.85)  8px,
-    rgba(140,255,195,0.80) 12px,
-    rgba(255,235,140,0.85) 16px,
-    rgba(255,165,185,0.80) 20px,
-    rgba(200,170,255,0.90) 24px,
-    rgba(255,255,255,0.95) 28px
+    rgba(255,255,255,0.95)  0px, rgba(190,150,255,0.80)  4px,
+    rgba(140,215,255,0.85)  8px, rgba(140,255,195,0.80) 12px,
+    rgba(255,235,140,0.85) 16px, rgba(255,165,185,0.80) 20px,
+    rgba(200,170,255,0.90) 24px, rgba(255,255,255,0.95) 28px
   );
   border-right: 1px solid rgba(255,255,255,0.22);
 }
-@media print { .foil { opacity: 0.55; } }
 
-/* ── Face content layer ── */
+/* ── Face ── */
 .face {
   position: absolute;
   inset: 0;
@@ -128,875 +211,331 @@ body {
   z-index: 5;
   display: flex;
   flex-direction: column;
-  gap: 0;
 }
 
-/* ── Serial / issue line ── */
-.serial-row {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  height: 11px;
-  margin-bottom: 1px;
-}
+.serial-row { display:flex; justify-content:flex-end; height:11px; margin-bottom:1px; }
+.serial-num { font-family:'Courier New',monospace; font-size:5pt; font-weight:700; letter-spacing:0.15em; color:var(--ca); opacity:0.65; }
 
-.serial-num {
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 5pt;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  color: var(--ca);
-  opacity: 0.65;
-}
+.top-row { display:flex; align-items:flex-start; gap:6px; flex-shrink:0; }
 
-/* ── Top row ── */
-.top-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  flex-shrink: 0;
-}
+.denom-left { display:flex; flex-direction:column; width:90px; flex-shrink:0; }
+.big-denom  { font-size:34pt; font-weight:900; line-height:0.92; color:var(--cl); letter-spacing:-1.5px; text-shadow:0 2px 8px rgba(0,0,0,0.7),0 0 24px var(--ca); }
+.denom-word { font-size:4.8pt; font-weight:700; letter-spacing:0.22em; text-transform:uppercase; color:var(--cm); margin-top:2px; }
 
-/* Left: denomination block */
-.denom-left {
-  display: flex;
-  flex-direction: column;
-  width: 90px;
-  flex-shrink: 0;
-}
+.title-block { flex:1; display:flex; flex-direction:column; align-items:center; padding-top:4px; gap:2px; }
+.brand-name  { font-size:14.5pt; font-weight:800; letter-spacing:0.38em; text-transform:uppercase; color:var(--cl); text-shadow:0 0 28px var(--ca),0 1px 4px rgba(0,0,0,0.6); line-height:1; }
+.brand-tagline{ font-size:4.5pt; font-weight:500; letter-spacing:0.28em; text-transform:uppercase; color:var(--cm); opacity:0.9; }
+.issue-line  { font-size:4pt; letter-spacing:0.14em; color:var(--ca); opacity:0.5; margin-top:2px; font-style:italic; }
 
-.big-denom {
-  font-size: 34pt;
-  font-weight: 900;
-  line-height: 0.92;
-  color: var(--cl);
-  letter-spacing: -1.5px;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.7), 0 0 24px var(--ca);
-  font-variant-numeric: tabular-nums;
-}
+.logo-block  { width:52px; flex-shrink:0; display:flex; flex-direction:column; align-items:flex-end; padding-top:2px; gap:2px; }
+.shield-logo { width:42px; height:42px; object-fit:contain; opacity:0.88; display:block; }
+.logo-label  { font-size:4pt; letter-spacing:0.25em; text-transform:uppercase; color:var(--cm); opacity:0.7; }
 
-.denom-word {
-  font-size: 4.8pt;
-  font-weight: 700;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--cm);
-  margin-top: 2px;
-  line-height: 1.2;
-}
-
-/* Center: title block */
-.title-block {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 4px;
-  gap: 2px;
-}
-
-.brand-name {
-  font-size: 14.5pt;
-  font-weight: 800;
-  letter-spacing: 0.38em;
-  text-transform: uppercase;
-  color: var(--cl);
-  text-shadow: 0 0 28px var(--ca), 0 1px 4px rgba(0,0,0,0.6);
-  line-height: 1;
-}
-
-.brand-tagline {
-  font-size: 4.5pt;
-  font-weight: 500;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: var(--cm);
-  opacity: 0.9;
-}
-
-.issue-line {
-  font-size: 4pt;
-  letter-spacing: 0.14em;
-  color: var(--ca);
-  opacity: 0.5;
-  margin-top: 2px;
-  font-style: italic;
-}
-
-/* Right: hurricane logo */
-.logo-block {
-  width: 52px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  padding-top: 2px;
-  gap: 2px;
-}
-
-.logo-block svg {
-  width: 44px;
-  height: 44px;
-}
-
-.logo-label {
-  font-size: 4pt;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: var(--cm);
-  opacity: 0.7;
-  text-align: right;
-}
-
-/* ── Middle: QR zone ── */
-.mid-row {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2px 0 0;
-}
-
-.qr-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-}
-
+.mid-row { flex:1; display:flex; align-items:center; justify-content:center; padding:2px 0 0; }
+.qr-wrap { display:flex; flex-direction:column; align-items:center; gap:3px; }
 .qr-frame {
-  width: 74px;
-  height: 74px;
+  width: 74px; height: 74px;
   background: rgba(255,255,255,0.97);
   border: 1.5px solid rgba(0,0,0,0.15);
   border-radius: 2px;
   position: relative;
   box-shadow: 0 2px 10px rgba(0,0,0,0.4);
 }
+.qr-frame canvas { width:100%!important; height:100%!important; display:block; border-radius:1px; }
 
-/* QR finder corners */
-.qfc {
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  border: 2.5px solid #111;
-}
-.qfc::after {
-  content: '';
-  position: absolute;
-  inset: 3px;
-  background: #111;
-}
-.qfc.tl { top: 4px; left: 4px; }
-.qfc.tr { top: 4px; right: 4px; }
-.qfc.bl { bottom: 4px; left: 4px; }
+.qfc { position:absolute; width:16px; height:16px; border:2.5px solid #111; }
+.qfc::after { content:''; position:absolute; inset:3px; background:#111; }
+.qfc.tl { top:4px; left:4px; } .qfc.tr { top:4px; right:4px; } .qfc.bl { bottom:4px; left:4px; }
 
-/* QR data grid (mock) */
-.qr-data {
-  position: absolute;
-  inset: 24px 24px 10px 10px;
-  display: grid;
-  gap: 1.5px;
-}
+.qr-data { position:absolute; inset:24px 24px 10px 10px; display:grid; gap:1.5px; }
+.qr-tip  { font-size:4pt; font-weight:600; letter-spacing:0.2em; color:var(--cm); text-transform:uppercase; opacity:0.8; }
 
-.qr-tip {
-  font-size: 4pt;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  color: var(--cm);
-  text-transform: uppercase;
-  opacity: 0.8;
-}
+.denom-br { position:absolute; bottom:30px; right:10px; z-index:6; font-size:26pt; font-weight:900; color:var(--cl); opacity:0.55; line-height:1; letter-spacing:-1px; text-shadow:0 1px 4px rgba(0,0,0,0.7); }
 
-/* ── Denom bottom-right (behind bearer) ── */
-.denom-br {
-  position: absolute;
-  bottom: 30px;
-  right: 10px;
-  z-index: 6;
-  font-size: 26pt;
-  font-weight: 900;
-  color: var(--cl);
-  opacity: 0.55;
-  line-height: 1;
-  letter-spacing: -1px;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.7);
-}
-
-/* ── Bearer strip ── */
 .bearer {
-  position: absolute;
-  bottom: 14px;
-  left: 0;
-  right: 0;
-  height: 16px;
-  z-index: 6;
-  background: rgba(0,0,0,0.42);
-  border-top: 0.5px solid rgba(255,255,255,0.12);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 9px 0 20px;
+  position: absolute; bottom:14px; left:0; right:0; height:16px; z-index:6;
+  background: rgba(0,0,0,0.42); border-top: 0.5px solid rgba(255,255,255,0.12);
+  display:flex; align-items:center; justify-content:space-between; padding:0 9px 0 20px;
 }
+.bearer-warn  { font-size:4.5pt; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:var(--cl); }
+.bearer-right { font-size:4pt; letter-spacing:0.18em; color:var(--cm); text-transform:uppercase; opacity:0.8; }
 
-.bearer-warn {
-  font-size: 4.5pt;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--cl);
-}
-
-.bearer-right {
-  font-size: 4pt;
-  letter-spacing: 0.18em;
-  color: var(--cm);
-  text-transform: uppercase;
-  opacity: 0.8;
-}
-
-/* ── Bottom strip ── */
 .bot {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 14px;
-  z-index: 6;
-  background: rgba(0,0,0,0.55);
-  border-top: 0.5px solid rgba(255,255,255,0.06);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 9px 0 20px;
+  position: absolute; bottom:0; left:0; right:0; height:14px; z-index:6;
+  background: rgba(0,0,0,0.55); border-top: 0.5px solid rgba(255,255,255,0.06);
+  display:flex; align-items:center; justify-content:space-between; padding:0 9px 0 20px;
 }
+.bot-left  { font-size:4pt; letter-spacing:0.14em; color:var(--cm); text-transform:uppercase; opacity:0.75; }
+.bot-right { font-size:4.5pt; font-weight:700; letter-spacing:0.22em; color:var(--ca); text-transform:uppercase; }
 
-.bot-left {
-  font-size: 4pt;
-  letter-spacing: 0.14em;
-  color: var(--cm);
-  text-transform: uppercase;
-  opacity: 0.75;
-}
-
-.bot-right {
-  font-size: 4.5pt;
-  font-weight: 700;
-  letter-spacing: 0.22em;
-  color: var(--ca);
-  text-transform: uppercase;
-}
-
-/* ── Shield logo (replaces hurricane SVG at runtime) ── */
-.shield-logo {
-  width: 42px;
-  height: 42px;
-  object-fit: contain;
-  opacity: 0.88;
-  display: block;
-}
-
-/* ── Single-note print view ── */
-.print-bar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 10px 0 14px;
-  flex-shrink: 0;
-}
-.print-btn {
-  padding: 10px 24px;
-  background: #8A2BE2;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  letter-spacing: 0.05em;
-  box-shadow: 0 0 20px rgba(138,43,226,0.5);
-}
-.print-btn:hover { background: #00ffea; color: #000; }
-.close-btn {
-  padding: 10px 18px;
-  background: transparent;
-  color: rgba(255,255,255,0.4);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-.close-btn:hover { color: #fff; border-color: rgba(255,255,255,0.4); }
-
-/* Single-note: larger QR frame */
-.note.single-view .qr-frame {
-  width: 90px;
-  height: 90px;
-}
-.note.single-view .qr-frame canvas {
-  width: 100% !important;
-  height: 100% !important;
-  display: block;
-  border-radius: 1px;
-}
-
+/* ── Print ── */
 @media print {
-  .print-bar { display: none; }
+  body { background:#fff; padding:0.1in; gap:0.15in; }
+  .creator, .empty-state, .print-row { display:none!important; }
+  .note { box-shadow:none; }
 }
 
 </style>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
 </head>
 <body>
 
-<p class="screen-label">PrivX Pay — Physical Notes — Print on letter paper, cut to 6.14 × 2.61 in</p>
-
-<!-- ═══════════════════════════════════════════════════════ $1 ONE DOLLAR -->
-<div class="note n1" id="note-1">
-  <div class="nbg"></div>
-  <div class="guilloché" id="g1"></div>
-  <div class="mpborder" id="mp1"></div>
-  <div class="foil"></div>
-
-  <div class="face">
-    <div class="serial-row"><span class="serial-num">PX · A00000001 · 2026</span></div>
-    <div class="top-row">
-      <div class="denom-left">
-        <div class="big-denom">$1</div>
-        <div class="denom-word">ONE DOLLAR</div>
-      </div>
-      <div class="title-block">
-        <div class="brand-name">PRIVX PAY</div>
-        <div class="brand-tagline">Private Digital Cash</div>
-        <div class="issue-line">Series 2026 · PulseChain</div>
-      </div>
-      <div class="logo-block">
-        <svg viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg" class="hurricane-svg n1-svg">
-          <circle cx="25" cy="25" r="21" stroke="currentColor" stroke-width="0.7" opacity="0.5"/>
-          <circle cx="25" cy="25" r="15.5" stroke="currentColor" stroke-width="0.8" opacity="0.65"/>
-          <circle cx="25" cy="25" r="10" stroke="currentColor" stroke-width="0.9" opacity="0.75"/>
-          <circle cx="25" cy="25" r="5"   stroke="currentColor" stroke-width="1"   opacity="0.85"/>
-          <path d="M25 4 Q46 13 46 25 Q46 41 30 46" stroke="currentColor" stroke-width="1.8" fill="none" opacity="0.85" stroke-linecap="round"/>
-          <path d="M25 46 Q4 37 4 25 Q4 9 20 4"    stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.55" stroke-linecap="round"/>
-          <circle cx="25" cy="25" r="2.8" fill="currentColor" opacity="0.9"/>
-          <circle cx="25" cy="25" r="1.2" fill="white" opacity="0.85"/>
-        </svg>
-        <span class="logo-label">PRIVX</span>
-      </div>
-    </div>
-    <div class="mid-row">
-      <div class="qr-wrap">
-        <div class="qr-frame">
-          <div class="qfc tl"></div>
-          <div class="qfc tr"></div>
-          <div class="qfc bl"></div>
-          <div class="qr-data" id="qrd1"></div>
-        </div>
-        <div class="qr-tip">Scan · Redeem · Verify</div>
-      </div>
+<!-- ── Creator UI ── -->
+<div class="creator" id="creator">
+  <div class="c-header">
+    <img src="./privx-shield.png" class="c-logo" alt="PrivX">
+    <div>
+      <div class="c-title">Note Printer</div>
+      <div class="c-sub">PrivX Pay · Physical Bearer Notes</div>
     </div>
   </div>
-
-  <div class="denom-br">$1</div>
-  <div class="bearer">
-    <span class="bearer-warn">Bearer Instrument — Treat Like Cash</span>
-    <span class="bearer-right">$1 · One Dollar</span>
-  </div>
-  <div class="bot">
-    <span class="bot-left">Redeemable on PulseChain · privxpay.io</span>
-    <span class="bot-right">PRIVX · PAY</span>
+  <div class="c-input-wrap">
+    <label class="c-label" for="note-input">Paste your note string</label>
+    <input type="text" id="note-input" class="c-input"
+      placeholder="hp-dai-20-abc123…"
+      autocomplete="off" autocorrect="off" spellcheck="false">
+    <div class="c-hint">Format: hp-{token}-{denom}-{nullifier}-{secret} · copy from your PrivX Pay wallet</div>
+    <div class="c-error" id="c-error"></div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════ $5 FIVE DOLLARS -->
-<div class="note n5" id="note-5">
-  <div class="nbg"></div>
-  <div class="guilloché" id="g5"></div>
-  <div class="mpborder" id="mp5"></div>
-  <div class="foil"></div>
-
-  <div class="face">
-    <div class="serial-row"><span class="serial-num">PX · B00000005 · 2026</span></div>
-    <div class="top-row">
-      <div class="denom-left">
-        <div class="big-denom">$5</div>
-        <div class="denom-word">Five Dollars</div>
-      </div>
-      <div class="title-block">
-        <div class="brand-name">PRIVX PAY</div>
-        <div class="brand-tagline">Private Digital Cash</div>
-        <div class="issue-line">Series 2026 · PulseChain</div>
-      </div>
-      <div class="logo-block">
-        <svg viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg" class="hurricane-svg n5-svg">
-          <circle cx="25" cy="25" r="21" stroke="currentColor" stroke-width="0.7" opacity="0.5"/>
-          <circle cx="25" cy="25" r="15.5" stroke="currentColor" stroke-width="0.8" opacity="0.65"/>
-          <circle cx="25" cy="25" r="10" stroke="currentColor" stroke-width="0.9" opacity="0.75"/>
-          <circle cx="25" cy="25" r="5"   stroke="currentColor" stroke-width="1"   opacity="0.85"/>
-          <path d="M25 4 Q46 13 46 25 Q46 41 30 46" stroke="currentColor" stroke-width="1.8" fill="none" opacity="0.85" stroke-linecap="round"/>
-          <path d="M25 46 Q4 37 4 25 Q4 9 20 4"    stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.55" stroke-linecap="round"/>
-          <circle cx="25" cy="25" r="2.8" fill="currentColor" opacity="0.9"/>
-          <circle cx="25" cy="25" r="1.2" fill="white" opacity="0.85"/>
-        </svg>
-        <span class="logo-label">PRIVX</span>
-      </div>
-    </div>
-    <div class="mid-row">
-      <div class="qr-wrap">
-        <div class="qr-frame">
-          <div class="qfc tl"></div>
-          <div class="qfc tr"></div>
-          <div class="qfc bl"></div>
-          <div class="qr-data" id="qrd5"></div>
-        </div>
-        <div class="qr-tip">Scan · Redeem · Verify</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="denom-br">$5</div>
-  <div class="bearer">
-    <span class="bearer-warn">Bearer Instrument — Treat Like Cash</span>
-    <span class="bearer-right">$5 · Five Dollars</span>
-  </div>
-  <div class="bot">
-    <span class="bot-left">Redeemable on PulseChain · privxpay.io</span>
-    <span class="bot-right">PRIVX · PAY</span>
-  </div>
+<!-- ── Print button (appears once note is valid) ── -->
+<div class="print-row" id="print-row">
+  <button class="btn-print" onclick="window.print()">Print Note</button>
+  <button class="btn-clear" onclick="clearNote()">Clear</button>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════ $10 TEN DOLLARS -->
-<div class="note n10" id="note-10">
-  <div class="nbg"></div>
-  <div class="guilloché" id="g10"></div>
-  <div class="mpborder" id="mp10"></div>
-  <div class="foil"></div>
-
-  <div class="face">
-    <div class="serial-row"><span class="serial-num">PX · C00000010 · 2026</span></div>
-    <div class="top-row">
-      <div class="denom-left">
-        <div class="big-denom">$10</div>
-        <div class="denom-word">Ten Dollars</div>
-      </div>
-      <div class="title-block">
-        <div class="brand-name">PRIVX PAY</div>
-        <div class="brand-tagline">Private Digital Cash</div>
-        <div class="issue-line">Series 2026 · PulseChain</div>
-      </div>
-      <div class="logo-block">
-        <svg viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg" class="hurricane-svg n10-svg">
-          <circle cx="25" cy="25" r="21" stroke="currentColor" stroke-width="0.7" opacity="0.5"/>
-          <circle cx="25" cy="25" r="15.5" stroke="currentColor" stroke-width="0.8" opacity="0.65"/>
-          <circle cx="25" cy="25" r="10" stroke="currentColor" stroke-width="0.9" opacity="0.75"/>
-          <circle cx="25" cy="25" r="5"   stroke="currentColor" stroke-width="1"   opacity="0.85"/>
-          <path d="M25 4 Q46 13 46 25 Q46 41 30 46" stroke="currentColor" stroke-width="1.8" fill="none" opacity="0.85" stroke-linecap="round"/>
-          <path d="M25 46 Q4 37 4 25 Q4 9 20 4"    stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.55" stroke-linecap="round"/>
-          <circle cx="25" cy="25" r="2.8" fill="currentColor" opacity="0.9"/>
-          <circle cx="25" cy="25" r="1.2" fill="white" opacity="0.85"/>
-        </svg>
-        <span class="logo-label">PRIVX</span>
-      </div>
-    </div>
-    <div class="mid-row">
-      <div class="qr-wrap">
-        <div class="qr-frame">
-          <div class="qfc tl"></div>
-          <div class="qfc tr"></div>
-          <div class="qfc bl"></div>
-          <div class="qr-data" id="qrd10"></div>
-        </div>
-        <div class="qr-tip">Scan · Redeem · Verify</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="denom-br">$10</div>
-  <div class="bearer">
-    <span class="bearer-warn">Bearer Instrument — Treat Like Cash</span>
-    <span class="bearer-right">$10 · Ten Dollars</span>
-  </div>
-  <div class="bot">
-    <span class="bot-left">Redeemable on PulseChain · privxpay.io</span>
-    <span class="bot-right">PRIVX · PAY</span>
-  </div>
+<!-- ── Empty state ── -->
+<div class="empty-state" id="empty-state">
+  <div class="es-icon">🖨</div>
+  <div class="es-text">Paste a note string above to generate your print-ready bearer note</div>
+  <div class="es-denoms">$1 · $5 · $10 · $20 · $50 · $100</div>
 </div>
 
-<div class="page-break"></div>
+<!-- ── Note templates injected here by JS ── -->
+<div id="notes-container"></div>
 
-<!-- ═══════════════════════════════════════════════════════ $20 TWENTY DOLLARS -->
-<div class="note n20" id="note-20">
-  <div class="nbg"></div>
-  <div class="guilloché" id="g20"></div>
-  <div class="mpborder" id="mp20"></div>
-  <div class="foil"></div>
-
-  <div class="face">
-    <div class="serial-row"><span class="serial-num">PX · D00000020 · 2026</span></div>
-    <div class="top-row">
-      <div class="denom-left">
-        <div class="big-denom">$20</div>
-        <div class="denom-word">Twenty Dollars</div>
-      </div>
-      <div class="title-block">
-        <div class="brand-name">PRIVX PAY</div>
-        <div class="brand-tagline">Private Digital Cash</div>
-        <div class="issue-line">Series 2026 · PulseChain</div>
-      </div>
-      <div class="logo-block">
-        <svg viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg" class="hurricane-svg n20-svg">
-          <circle cx="25" cy="25" r="21" stroke="currentColor" stroke-width="0.7" opacity="0.5"/>
-          <circle cx="25" cy="25" r="15.5" stroke="currentColor" stroke-width="0.8" opacity="0.65"/>
-          <circle cx="25" cy="25" r="10" stroke="currentColor" stroke-width="0.9" opacity="0.75"/>
-          <circle cx="25" cy="25" r="5"   stroke="currentColor" stroke-width="1"   opacity="0.85"/>
-          <path d="M25 4 Q46 13 46 25 Q46 41 30 46" stroke="currentColor" stroke-width="1.8" fill="none" opacity="0.85" stroke-linecap="round"/>
-          <path d="M25 46 Q4 37 4 25 Q4 9 20 4"    stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.55" stroke-linecap="round"/>
-          <circle cx="25" cy="25" r="2.8" fill="currentColor" opacity="0.9"/>
-          <circle cx="25" cy="25" r="1.2" fill="white" opacity="0.85"/>
-        </svg>
-        <span class="logo-label">PRIVX</span>
-      </div>
-    </div>
-    <div class="mid-row">
-      <div class="qr-wrap">
-        <div class="qr-frame">
-          <div class="qfc tl"></div>
-          <div class="qfc tr"></div>
-          <div class="qfc bl"></div>
-          <div class="qr-data" id="qrd20"></div>
-        </div>
-        <div class="qr-tip">Scan · Redeem · Verify</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="denom-br">$20</div>
-  <div class="bearer">
-    <span class="bearer-warn">Bearer Instrument — Treat Like Cash</span>
-    <span class="bearer-right">$20 · Twenty Dollars</span>
-  </div>
-  <div class="bot">
-    <span class="bot-left">Redeemable on PulseChain · privxpay.io</span>
-    <span class="bot-right">PRIVX · PAY</span>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════════════ $50 FIFTY DOLLARS -->
-<div class="note n50" id="note-50">
-  <div class="nbg"></div>
-  <div class="guilloché" id="g50"></div>
-  <div class="mpborder" id="mp50"></div>
-  <div class="foil"></div>
-
-  <div class="face">
-    <div class="serial-row"><span class="serial-num">PX · E00000050 · 2026</span></div>
-    <div class="top-row">
-      <div class="denom-left">
-        <div class="big-denom">$50</div>
-        <div class="denom-word">Fifty Dollars</div>
-      </div>
-      <div class="title-block">
-        <div class="brand-name">PRIVX PAY</div>
-        <div class="brand-tagline">Private Digital Cash</div>
-        <div class="issue-line">Series 2026 · PulseChain</div>
-      </div>
-      <div class="logo-block">
-        <svg viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg" class="hurricane-svg n50-svg">
-          <circle cx="25" cy="25" r="21" stroke="currentColor" stroke-width="0.7" opacity="0.5"/>
-          <circle cx="25" cy="25" r="15.5" stroke="currentColor" stroke-width="0.8" opacity="0.65"/>
-          <circle cx="25" cy="25" r="10" stroke="currentColor" stroke-width="0.9" opacity="0.75"/>
-          <circle cx="25" cy="25" r="5"   stroke="currentColor" stroke-width="1"   opacity="0.85"/>
-          <path d="M25 4 Q46 13 46 25 Q46 41 30 46" stroke="currentColor" stroke-width="1.8" fill="none" opacity="0.85" stroke-linecap="round"/>
-          <path d="M25 46 Q4 37 4 25 Q4 9 20 4"    stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.55" stroke-linecap="round"/>
-          <circle cx="25" cy="25" r="2.8" fill="currentColor" opacity="0.9"/>
-          <circle cx="25" cy="25" r="1.2" fill="white" opacity="0.85"/>
-        </svg>
-        <span class="logo-label">PRIVX</span>
-      </div>
-    </div>
-    <div class="mid-row">
-      <div class="qr-wrap">
-        <div class="qr-frame">
-          <div class="qfc tl"></div>
-          <div class="qfc tr"></div>
-          <div class="qfc bl"></div>
-          <div class="qr-data" id="qrd50"></div>
-        </div>
-        <div class="qr-tip">Scan · Redeem · Verify</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="denom-br">$50</div>
-  <div class="bearer">
-    <span class="bearer-warn">Bearer Instrument — Treat Like Cash</span>
-    <span class="bearer-right">$50 · Fifty Dollars</span>
-  </div>
-  <div class="bot">
-    <span class="bot-left">Redeemable on PulseChain · privxpay.io</span>
-    <span class="bot-right">PRIVX · PAY</span>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════════════ $100 ONE HUNDRED -->
-<div class="note n100" id="note-100">
-  <div class="nbg"></div>
-  <div class="guilloché" id="g100"></div>
-  <div class="mpborder" id="mp100"></div>
-  <div class="foil"></div>
-
-  <div class="face">
-    <div class="serial-row"><span class="serial-num">PX · F00000100 · 2026</span></div>
-    <div class="top-row">
-      <div class="denom-left">
-        <div class="big-denom">$100</div>
-        <div class="denom-word">One Hundred</div>
-      </div>
-      <div class="title-block">
-        <div class="brand-name">PRIVX PAY</div>
-        <div class="brand-tagline">Private Digital Cash</div>
-        <div class="issue-line">Series 2026 · PulseChain</div>
-      </div>
-      <div class="logo-block">
-        <svg viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg" class="hurricane-svg n100-svg">
-          <circle cx="25" cy="25" r="21" stroke="currentColor" stroke-width="0.7" opacity="0.5"/>
-          <circle cx="25" cy="25" r="15.5" stroke="currentColor" stroke-width="0.8" opacity="0.65"/>
-          <circle cx="25" cy="25" r="10" stroke="currentColor" stroke-width="0.9" opacity="0.75"/>
-          <circle cx="25" cy="25" r="5"   stroke="currentColor" stroke-width="1"   opacity="0.85"/>
-          <path d="M25 4 Q46 13 46 25 Q46 41 30 46" stroke="currentColor" stroke-width="1.8" fill="none" opacity="0.85" stroke-linecap="round"/>
-          <path d="M25 46 Q4 37 4 25 Q4 9 20 4"    stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.55" stroke-linecap="round"/>
-          <circle cx="25" cy="25" r="2.8" fill="currentColor" opacity="0.9"/>
-          <circle cx="25" cy="25" r="1.2" fill="white" opacity="0.85"/>
-        </svg>
-        <span class="logo-label">PRIVX</span>
-      </div>
-    </div>
-    <div class="mid-row">
-      <div class="qr-wrap">
-        <div class="qr-frame">
-          <div class="qfc tl"></div>
-          <div class="qfc tr"></div>
-          <div class="qfc bl"></div>
-          <div class="qr-data" id="qrd100"></div>
-        </div>
-        <div class="qr-tip">Scan · Redeem · Verify</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="denom-br">$100</div>
-  <div class="bearer">
-    <span class="bearer-warn">Bearer Instrument — Treat Like Cash</span>
-    <span class="bearer-right">$100 · One Hundred</span>
-  </div>
-  <div class="bot">
-    <span class="bot-left">Redeemable on PulseChain · privxpay.io</span>
-    <span class="bot-right">PRIVX · PAY</span>
-  </div>
-</div>
-
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
 <script>
-/* ── Color accent per note (matches CSS --ca variable) ── */
-const ACCENTS = {
-  g1:   '#52b788', g5:  '#4a8fd9', g10: '#e05c1a',
-  g20:  '#9b3ddd', g50: '#dd2020', g100:'#c8970a'
-};
 
-/* ── Guilloche generator ── */
-function buildGuilloche(containerId, seed) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-  const rect = container.getBoundingClientRect();
-  const W = rect.width  || 590;
-  const H = rect.height || 250;
-  const color = ACCENTS[containerId] || '#ffffff';
-  const paths = [];
+/* ── Denomination config ── */
+const DENOMS = [
+  { d:'1',   cls:'n1',   word:'One Dollar',     serial:'A00000001' },
+  { d:'5',   cls:'n5',   word:'Five Dollars',   serial:'B00000005' },
+  { d:'10',  cls:'n10',  word:'Ten Dollars',    serial:'C00000010' },
+  { d:'20',  cls:'n20',  word:'Twenty Dollars', serial:'D00000020' },
+  { d:'50',  cls:'n50',  word:'Fifty Dollars',  serial:'E00000050' },
+  { d:'100', cls:'n100', word:'One Hundred',    serial:'F00000100' },
+];
+
+const GUILLOCHE_SEEDS = { '1':1001, '5':2003, '10':3007, '20':4013, '50':5021, '100':6031 };
+const MICROPRINT_COLORS = { '1':'#52b788','5':'#4a8fd9','10':'#e05c1a','20':'#c084fc','50':'#f87171','100':'#fcd34d' };
+const YEAR = new Date().getFullYear();
+
+/* ── Build note HTML ── */
+function buildNotes() {
+  const container = document.getElementById('notes-container');
+  for (const { d, cls, word, serial } of DENOMS) {
+    const el = document.createElement('div');
+    el.className = `note ${cls}`;
+    el.id = `note-${d}`;
+    el.style.display = 'none';
+    el.innerHTML = `
+      <div class="nbg"></div>
+      <div class="guilloché" id="g${d}"></div>
+      <div class="mpborder" id="mp${d}"></div>
+      <div class="foil"></div>
+      <div class="face">
+        <div class="serial-row"><span class="serial-num" id="serial${d}">PX · ${serial} · ${YEAR}</span></div>
+        <div class="top-row">
+          <div class="denom-left">
+            <div class="big-denom">$${d}</div>
+            <div class="denom-word">${word}</div>
+          </div>
+          <div class="title-block">
+            <div class="brand-name">PRIVX PAY</div>
+            <div class="brand-tagline">Private Digital Cash</div>
+            <div class="issue-line">Series ${YEAR} · PulseChain</div>
+          </div>
+          <div class="logo-block">
+            <img src="./privx-shield.png" class="shield-logo" alt="PrivX">
+            <span class="logo-label">PRIVX</span>
+          </div>
+        </div>
+        <div class="mid-row">
+          <div class="qr-wrap">
+            <div class="qr-frame" id="qrf${d}">
+              <div class="qfc tl"></div><div class="qfc tr"></div><div class="qfc bl"></div>
+              <div class="qr-data" id="qrd${d}"></div>
+            </div>
+            <div class="qr-tip" id="qrtip${d}">Scan · Redeem · Verify</div>
+          </div>
+        </div>
+      </div>
+      <div class="denom-br">$${d}</div>
+      <div class="bearer">
+        <span class="bearer-warn">Bearer Instrument — Treat Like Cash</span>
+        <span class="bearer-right">$${d} · ${word}</span>
+      </div>
+      <div class="bot">
+        <span class="bot-left">Redeemable on PulseChain · privxpay.io</span>
+        <span class="bot-right">PRIVX · PAY</span>
+      </div>`;
+    container.appendChild(el);
+  }
+}
+
+/* ── Parse note string ── */
+function parseNote(str) {
+  const m = str.trim().match(/^hp-([a-z]+)-(\d+)-([0-9a-f]{60,})-([0-9a-f]{60,})$/i);
+  if (!m) return null;
+  return { token: m[1].toLowerCase(), denom: m[2], nullifier: m[3], note: str.trim() };
+}
+
+/* ── Main input handler ── */
+document.getElementById('note-input').addEventListener('input', function() {
+  onNoteInput(this.value);
+});
+
+function onNoteInput(val) {
+  val = val.trim();
+  const errEl    = document.getElementById('c-error');
+  const inputEl  = document.getElementById('note-input');
+  const printRow = document.getElementById('print-row');
+  const emptyEl  = document.getElementById('empty-state');
+
+  // Hide all notes
+  document.querySelectorAll('.note').forEach(n => n.style.display = 'none');
+  printRow.classList.remove('visible');
+
+  if (!val) {
+    errEl.textContent = '';
+    inputEl.className = 'c-input';
+    emptyEl.style.display = '';
+    return;
+  }
+
+  const parsed = parseNote(val);
+
+  if (!parsed) {
+    errEl.textContent = 'Invalid format — expected hp-{token}-{denom}-{nullifier}-{secret}';
+    inputEl.className = 'c-input invalid';
+    emptyEl.style.display = '';
+    return;
+  }
+
+  const noteEl = document.getElementById('note-' + parsed.denom);
+  if (!noteEl) {
+    errEl.textContent = 'Unknown denomination: $' + parsed.denom;
+    inputEl.className = 'c-input invalid';
+    emptyEl.style.display = '';
+    return;
+  }
+
+  errEl.textContent = '';
+  inputEl.className = 'c-input valid';
+  emptyEl.style.display = 'none';
+
+  // Show note
+  noteEl.style.display = '';
+
+  // Real QR code
+  const qrFrame = document.getElementById('qrf' + parsed.denom);
+  if (qrFrame && window.QRCode) {
+    qrFrame.innerHTML = '';
+    const canvas = document.createElement('canvas');
+    QRCode.toCanvas(canvas, parsed.note, {
+      width: 74, margin: 1, color: { dark:'#000', light:'#fff' }
+    }, err => { if (!err) qrFrame.appendChild(canvas); });
+  }
+
+  // Serial number from first 8 chars of nullifier
+  const s = parsed.nullifier.slice(0, 8).toUpperCase();
+  const tokenLabel = parsed.token === 'psundai' ? 'pSunDAI'
+                   : parsed.token === 'usdc'    ? 'USDC'
+                   : parsed.token.toUpperCase();
+  const serialEl = document.getElementById('serial' + parsed.denom);
+  if (serialEl) serialEl.textContent = `PX·${s.slice(0,4)}·${s.slice(4,8)} · ${tokenLabel} · ${YEAR}`;
+
+  // QR tip
+  const tipEl = document.getElementById('qrtip' + parsed.denom);
+  if (tipEl) tipEl.textContent = 'Scan to redeem on PulseChain';
+
+  // Print button
+  printRow.classList.add('visible');
+}
+
+function clearNote() {
+  document.getElementById('note-input').value = '';
+  onNoteInput('');
+}
+
+/* ── Guilloche ── */
+function buildGuilloche(id, seed) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const W = 590, H = 250;
   const rng = mulberry32(seed);
+  const paths = [];
 
-  /* Primary horizontal wave family */
-  const rows = 22;
-  for (let i = 0; i < rows; i++) {
-    const t    = i / (rows - 1);
-    const y0   = t * H;
-    const a1   = 6  + 4  * rng();
-    const a2   = 3  + 2  * rng();
-    const f1   = 0.022 + 0.006 * rng();
-    const f2   = 0.041 + 0.008 * rng();
-    const ph1  = rng() * Math.PI * 2;
-    const ph2  = rng() * Math.PI * 2;
+  for (let i = 0; i < 22; i++) {
+    const y0 = (i / 21) * H;
+    const a1 = 6 + 4 * rng(), a2 = 3 + 2 * rng();
+    const f1 = 0.022 + 0.006 * rng(), f2 = 0.041 + 0.008 * rng();
+    const p1 = rng() * Math.PI * 2, p2 = rng() * Math.PI * 2;
     let d = `M 0 ${y0.toFixed(1)}`;
     for (let x = 0; x <= W; x += 2) {
-      const y = y0
-        + a1 * Math.sin(x * f1 + ph1)
-        + a2 * Math.sin(x * f2 + ph2);
+      const y = y0 + a1 * Math.sin(x * f1 + p1) + a2 * Math.sin(x * f2 + p2);
       d += ` L ${x} ${y.toFixed(2)}`;
     }
-    paths.push(`<path d="${d}" stroke="${color}" stroke-width="0.45" fill="none" opacity="0.32"/>`);
+    paths.push(`<path d="${d}" stroke="white" stroke-width="0.45" fill="none" opacity="0.28"/>`);
   }
-
-  /* Secondary interlacing waves (denser, lighter) */
-  const rows2 = 18;
-  for (let i = 0; i < rows2; i++) {
-    const t    = i / (rows2 - 1);
-    const y0   = t * H;
-    const a1   = 4  + 3 * rng();
-    const f1   = 0.03 + 0.01 * rng();
-    const mod  = 0.012 + 0.004 * rng();
-    const ph   = Math.PI + rng() * Math.PI * 2;
+  for (let i = 0; i < 16; i++) {
+    const y0 = (i / 15) * H;
+    const a1 = 4 + 3 * rng(), f1 = 0.03 + 0.01 * rng(), mod = 0.012 + 0.004 * rng(), ph = Math.PI + rng() * Math.PI * 2;
     let d = `M 0 ${y0.toFixed(1)}`;
     for (let x = 0; x <= W; x += 2) {
-      const y = y0
-        + a1 * Math.sin(x * f1 + ph) * Math.cos(x * mod);
+      const y = y0 + a1 * Math.sin(x * f1 + ph) * Math.cos(x * mod);
       d += ` L ${x} ${y.toFixed(2)}`;
     }
-    paths.push(`<path d="${d}" stroke="${color}" stroke-width="0.3" fill="none" opacity="0.18"/>`);
+    paths.push(`<path d="${d}" stroke="white" stroke-width="0.3" fill="none" opacity="0.14"/>`);
   }
-
-  /* Rosette-style circular elements at intervals */
   for (let cx = 80; cx < W; cx += 130) {
     for (let cy = 50; cy < H; cy += 80) {
       const r1 = 18 + 8 * rng();
-      const r2 = r1 * 0.6;
-      const spokes = 12;
-      for (let s = 0; s < spokes; s++) {
-        const a = (s / spokes) * Math.PI * 2;
-        const x1 = (cx + r2 * Math.cos(a)).toFixed(1);
-        const y1 = (cy + r2 * Math.sin(a)).toFixed(1);
-        const x2 = (cx + r1 * Math.cos(a + 0.25)).toFixed(1);
-        const y2 = (cy + r1 * Math.sin(a + 0.25)).toFixed(1);
-        paths.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="0.4" opacity="0.2"/>`);
+      for (let s = 0; s < 12; s++) {
+        const a = (s / 12) * Math.PI * 2;
+        const r2 = r1 * 0.6;
+        paths.push(`<line x1="${(cx+r2*Math.cos(a)).toFixed(1)}" y1="${(cy+r2*Math.sin(a)).toFixed(1)}" x2="${(cx+r1*Math.cos(a+0.25)).toFixed(1)}" y2="${(cy+r1*Math.sin(a+0.25)).toFixed(1)}" stroke="white" stroke-width="0.4" opacity="0.18"/>`);
       }
-      paths.push(`<circle cx="${cx}" cy="${cy}" r="${(r1 * 0.35).toFixed(1)}" stroke="${color}" stroke-width="0.35" fill="none" opacity="0.15"/>`);
+      paths.push(`<circle cx="${cx}" cy="${cy}" r="${(r1*0.35).toFixed(1)}" stroke="white" stroke-width="0.35" fill="none" opacity="0.12"/>`);
     }
   }
-
-  container.innerHTML =
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" ` +
-    `width="${W}" height="${H}" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%">` +
-    `<g>${paths.join('')}</g></svg>`;
+  el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%"><g>${paths.join('')}</g></svg>`;
 }
 
-/* ── Microprint border generator ── */
-function buildMicroprint(mpId, color) {
-  const el = document.getElementById(mpId);
+/* ── Microprint border ── */
+function buildMicroprint(id, color) {
+  const el = document.getElementById(id);
   if (!el) return;
-  const txt = 'PRIVX·PAY PRIVATE·DIGITAL·CASH BEARER·INSTRUMENT PULSECHAIN ';
-  const rep = txt.repeat(30);
-  el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 590 250" width="100%" height="100%"
-    style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none">
-    <defs>
-      <path id="mp-path-${mpId}" d="M 3 3 H 587 V 247 H 3 Z"/>
-    </defs>
-    <text font-size="3.8" fill="${color}" font-family="Courier New, monospace"
-      letter-spacing="0.5" opacity="0.45">
-      <textPath href="#mp-path-${mpId}" startOffset="0">${rep}</textPath>
-    </text>
-  </svg>`;
+  const rep = 'PRIVX·PAY PRIVATE·DIGITAL·CASH BEARER·INSTRUMENT PULSECHAIN '.repeat(30);
+  el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 590 250" width="100%" height="100%" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"><defs><path id="mp-${id}" d="M 3 3 H 587 V 247 H 3 Z"/></defs><text font-size="3.8" fill="${color}" font-family="Courier New,monospace" letter-spacing="0.5" opacity="0.45"><textPath href="#mp-${id}">${rep}</textPath></text></svg>`;
 }
 
-/* ── QR data cells (random, per denom) ── */
-function buildQRData(gridId, seed) {
-  const el = document.getElementById(gridId);
+/* ── QR placeholder dots ── */
+function buildQRData(id, seed) {
+  const el = document.getElementById(id);
   if (!el) return;
   const rng = mulberry32(seed * 137 + 91);
-  const cols = 6, rows = 6;
-  el.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-  el.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-  for (let i = 0; i < cols * rows; i++) {
+  el.style.gridTemplateColumns = 'repeat(6,1fr)';
+  el.style.gridTemplateRows    = 'repeat(6,1fr)';
+  for (let i = 0; i < 36; i++) {
     const dot = document.createElement('div');
-    dot.className = 'qr-dot';
-    dot.style.background = rng() > 0.45 ? '#111' : 'transparent';
-    dot.style.borderRadius = '0';
+    dot.style.cssText = `background:${rng()>0.45?'#111':'transparent'};border-radius:0`;
     el.appendChild(dot);
   }
 }
 
-/* ── Replace hurricane SVGs with shield logo ── */
-function installShieldLogos() {
-  document.querySelectorAll('.logo-block').forEach(block => {
-    const svg = block.querySelector('svg');
-    if (!svg) return;
-    const img = document.createElement('img');
-    img.src   = './privx-shield.png';
-    img.className = 'shield-logo';
-    img.alt   = 'PrivX';
-    block.replaceChild(img, svg);
-  });
-}
-
-/* ── Parse a note string → { token, denom } ── */
-function parseNoteStr(str) {
-  const m = str.trim().match(/^hp-([a-z]+)-(\d+)-([0-9a-f]{60,})-([0-9a-f]{60,})$/i);
-  if (!m) return null;
-  return { token: m[1].toLowerCase(), denom: m[2], note: str.trim() };
-}
-
-/* ── Single-note print view (triggered by ?note= URL param) ── */
-function renderPrintNote(noteStr) {
-  const parsed = parseNoteStr(noteStr);
-  if (!parsed) return; // malformed — fall through to show all templates
-
-  const { token, denom, note } = parsed;
-
-  // Hide all notes, show only the matching denomination
-  document.querySelectorAll('.note').forEach(n => n.style.display = 'none');
-  const noteEl = document.getElementById('note-' + denom);
-  if (!noteEl) return;
-  noteEl.style.display = '';
-  noteEl.classList.add('single-view');
-
-  // Real QR code — replace the mock frame
-  const qrFrame = noteEl.querySelector('.qr-frame');
-  if (qrFrame && window.QRCode) {
-    const canvas = document.createElement('canvas');
-    QRCode.toCanvas(canvas, note, { width: 90, margin: 1, color: { dark: '#000', light: '#fff' } }, err => {
-      if (!err) {
-        qrFrame.innerHTML = '';
-        qrFrame.appendChild(canvas);
-      }
-    });
-  }
-
-  // Serial number derived from note (first 8 chars of nullifier hex)
-  const m2 = note.match(/-([0-9a-f]{8})/i);
-  if (m2) {
-    const s = m2[1].toUpperCase();
-    const serialEl = noteEl.querySelector('.serial-num');
-    if (serialEl) {
-      const tokenLabel = token === 'psundai' ? 'pSunDAI'
-                       : token === 'usdc'    ? 'USDC'
-                       : token.toUpperCase();
-      serialEl.textContent = `PX·${s.slice(0,4)}·${s.slice(4,8)} · ${tokenLabel} · ${new Date().getFullYear()}`;
-    }
-  }
-
-  // QR tip label
-  const tipEl = noteEl.querySelector('.qr-tip');
-  if (tipEl) tipEl.textContent = 'Scan to redeem on PulseChain';
-
-  // Update page label
-  const lbl = document.querySelector('.screen-label');
-  if (lbl) {
-    const tokenLabel = token === 'psundai' ? 'pSunDAI'
-                     : token === 'usdc'    ? 'USDC'
-                     : token.toUpperCase();
-    lbl.textContent = `PrivX Pay · $${denom} ${tokenLabel} note · Print and cut to 6.14 × 2.61 in`;
-    lbl.style.color = 'rgba(255,255,255,0.55)';
-  }
-
-  // Print control bar
-  const bar = document.createElement('div');
-  bar.className = 'print-bar';
-  bar.innerHTML =
-    `<button class="print-btn" onclick="window.print()">Print Note</button>` +
-    `<button class="close-btn" onclick="window.close()">Close</button>`;
-  document.body.insertBefore(bar, noteEl);
-}
-
-/* ── Mulberry32 PRNG (deterministic, seedable) ── */
+/* ── Mulberry32 PRNG ── */
 function mulberry32(seed) {
   let s = seed >>> 0;
   return function() {
@@ -1008,47 +547,14 @@ function mulberry32(seed) {
 }
 
 /* ── Init ── */
-window.addEventListener('load', () => {
-  /* Shield logos replace the placeholder SVGs */
-  installShieldLogos();
+buildNotes();
 
-  /* Guilloche seeds differ per denomination for visual variety */
-  buildGuilloche('g1',   1001);
-  buildGuilloche('g5',   2003);
-  buildGuilloche('g10',  3007);
-  buildGuilloche('g20',  4013);
-  buildGuilloche('g50',  5021);
-  buildGuilloche('g100', 6031);
+for (const { d } of DENOMS) {
+  buildGuilloche('g' + d, GUILLOCHE_SEEDS[d]);
+  buildMicroprint('mp' + d, MICROPRINT_COLORS[d]);
+  buildQRData('qrd' + d, Number(d));
+}
 
-  /* Microprint borders */
-  buildMicroprint('mp1',   '#52b788');
-  buildMicroprint('mp5',   '#4a8fd9');
-  buildMicroprint('mp10',  '#e05c1a');
-  buildMicroprint('mp20',  '#c084fc');
-  buildMicroprint('mp50',  '#f87171');
-  buildMicroprint('mp100', '#fcd34d');
-
-  /* QR placeholder data cells */
-  buildQRData('qrd1',   1);
-  buildQRData('qrd5',   5);
-  buildQRData('qrd10',  10);
-  buildQRData('qrd20',  20);
-  buildQRData('qrd50',  50);
-  buildQRData('qrd100', 100);
-
-  /* If ?k= param present, read note from localStorage (never in URL) */
-  const k = new URLSearchParams(window.location.search).get('k');
-  if (k) {
-    let noteStr = null;
-    try {
-      noteStr = localStorage.getItem(k);
-      localStorage.removeItem(k);              // consume immediately
-    } catch(e) { /* storage blocked */ }
-    history.replaceState(null, '', window.location.pathname); // scrub key from URL
-    if (noteStr) renderPrintNote(noteStr);
-  }
-});
 </script>
-
 </body>
 </html>
