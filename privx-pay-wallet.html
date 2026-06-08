@@ -17,7 +17,7 @@
 <style>
 :root{
   --p:#8A2BE2;--a:#00ffea;--bg:#0a0a0a;
-  --t:#fff;--t2:#888;--t3:#3a3a3a;--g:#00e664;
+  --t:#fff;--t2:#999;--t3:#666;--g:#00e664;
   --r:16px;
   --safe-top:env(safe-area-inset-top);
   --safe-bot:env(safe-area-inset-bottom);
@@ -55,15 +55,15 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t);
   transition:all .1s;user-select:none;touch-action:manipulation;-webkit-user-select:none}
 .pp:active{background:rgba(138,43,226,.22);border-color:rgba(138,43,226,.4);transform:scale(.93)}
 .pp-back{font-size:18px;color:var(--t2)}
-.ls-reset{font-size:11px;color:#2a2a2a;cursor:pointer;text-decoration:underline;
+.ls-reset{font-size:11px;color:#666;cursor:pointer;text-decoration:underline;
   margin-top:2px;padding:8px;display:none}
-.ls-reset:active{color:#555}
+.ls-reset:active{color:#999}
 .ls-cancel{font-size:13px;font-weight:600;color:var(--t2);cursor:pointer;padding:10px;
   display:none;touch-action:manipulation}
 .ls-cancel:active{color:#fff}
-.change-pin-link{font-size:11px;color:#2a2a2a;cursor:pointer;text-decoration:underline;
+.change-pin-link{font-size:11px;color:#666;cursor:pointer;text-decoration:underline;
   text-align:center;padding:16px 0 4px;touch-action:manipulation}
-.change-pin-link:active{color:#555}
+.change-pin-link:active{color:#999}
 
 /* ── App ── */
 #app.hidden{display:none}
@@ -81,7 +81,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t);
 .sh-badge{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
   color:var(--a);background:rgba(0,255,234,.07);border:1px solid rgba(0,255,234,.2);
   border-radius:20px;padding:4px 10px}
-.btn-lock{background:none;border:none;padding:6px;color:rgba(255,255,255,.18);
+.btn-lock{background:none;border:none;padding:6px;color:rgba(255,255,255,.5);
   cursor:pointer;border-radius:8px;transition:color .2s;display:flex;align-items:center;
   touch-action:manipulation}
 .btn-lock:active{color:var(--a)}
@@ -94,8 +94,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t);
 .w-stats .live{color:var(--g)}
 .w-stats .spent-ct{color:#ff6666}
 .web3-chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;
-  color:rgba(255,255,255,.28);background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:4px 10px;
+  color:rgba(255,255,255,.55);background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:4px 10px;
   cursor:pointer;margin-top:10px;transition:all .2s;touch-action:manipulation;
   font-family:inherit}
 .web3-chip:active{color:var(--a);border-color:rgba(0,255,234,.2)}
@@ -135,8 +135,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t);
   cursor:pointer;text-align:center;transition:all .15s;touch-action:manipulation;font-family:inherit}
 .dep-den.sel{border-color:var(--a);background:rgba(0,255,234,.07);color:var(--a)}
 .dep-den:active{opacity:.7}
-.dep-fee-row{font-size:11px;color:#3a3a3a;text-align:center;margin-bottom:20px;min-height:16px}
-.dep-fee-row span{color:#555}
+.dep-fee-row{font-size:11px;color:#888;text-align:center;margin-bottom:20px;min-height:16px}
+.dep-fee-row span{color:#bbb}
 .btn-shield{width:100%;padding:17px;background:linear-gradient(135deg,#6b1eb8,var(--p));
   border:none;border-radius:14px;color:#fff;font-size:16px;font-weight:800;cursor:pointer;
   transition:all .2s;touch-action:manipulation;font-family:inherit;letter-spacing:-.2px}
@@ -159,7 +159,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t);
 .wallet-opt-desc{font-size:11px;color:var(--t2);margin-top:2px}
 .wallet-opt svg{margin-left:auto;color:#333;flex-shrink:0}
 .wallet-copy-wrap{border-top:1px solid #1c1c1c;margin-top:8px;padding-top:18px}
-.wallet-copy-lbl{font-size:11px;color:#3a3a3a;text-align:center;margin-bottom:10px}
+.wallet-copy-lbl{font-size:11px;color:#888;text-align:center;margin-bottom:10px}
 .wallet-copy-btn{width:100%;padding:13px;background:rgba(255,255,255,.04);
   border:1px solid rgba(255,255,255,.08);border-radius:12px;color:var(--t2);
   font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
@@ -168,8 +168,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t);
 /* ── Actions ── */
 .wallet-actions{display:flex;gap:10px;margin-bottom:22px}
 .btn-scan{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
-  padding:14px;border:1px solid rgba(255,255,255,.1);border-radius:14px;
-  background:rgba(255,255,255,.04);color:var(--t2);font-size:14px;font-weight:700;
+  padding:14px;border:1px solid rgba(255,255,255,.18);border-radius:14px;
+  background:rgba(255,255,255,.06);color:#ddd;font-size:14px;font-weight:700;
   cursor:pointer;transition:all .2s;touch-action:manipulation}
 .btn-scan:active{border-color:rgba(0,255,234,.4);color:var(--a)}
 .btn-clear{flex:1;padding:14px;border:1px solid rgba(255,80,80,.2);border-radius:14px;
@@ -205,9 +205,9 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t);
   background:transparent;color:#ff7070;font-size:11px;font-weight:700;cursor:pointer;
   transition:all .2s;touch-action:manipulation}
 .bill-del:active{background:rgba(255,80,80,.15)}
-.section-sep{display:flex;align-items:center;gap:10px;margin:18px 0 12px;opacity:.5}
-.section-sep::before,.section-sep::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08)}
-.section-sep-lbl{font-size:9px;color:#555;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;white-space:nowrap}
+.section-sep{display:flex;align-items:center;gap:10px;margin:18px 0 12px}
+.section-sep::before,.section-sep::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.12)}
+.section-sep-lbl{font-size:9px;color:#888;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;white-space:nowrap}
 
 /* ── Note status dot ── */
 .note-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
@@ -215,17 +215,17 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t);
 
 /* ── Seed section ── */
 .seed-section{margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,.05);display:none}
-.seed-lbl{font-size:10px;color:#3a3a3a;font-weight:700;letter-spacing:.7px;text-transform:uppercase;margin-bottom:8px}
-.seed-display{background:#0f0f0f;border:1px solid rgba(138,43,226,.12);border-radius:10px;
-  padding:12px 14px;font-family:monospace;font-size:11px;color:#3a3a3a;letter-spacing:.8px;
-  word-break:break-all;cursor:pointer;transition:border-color .2s;margin-bottom:8px;user-select:all}
-.seed-display:hover{border-color:rgba(138,43,226,.3);color:#666}
-.seed-note{font-size:10px;color:#2a2a2a;line-height:1.55;margin-bottom:12px}
+.seed-lbl{font-size:10px;color:#999;font-weight:700;letter-spacing:.7px;text-transform:uppercase;margin-bottom:8px}
+.seed-display{background:#0f0f0f;border:1px solid rgba(138,43,226,.25);border-radius:10px;
+  padding:12px 14px;font-family:monospace;font-size:11px;color:#bbb;letter-spacing:.8px;
+  word-break:break-all;cursor:pointer;transition:border-color .2s,color .2s;margin-bottom:8px;user-select:all}
+.seed-display:hover{border-color:rgba(138,43,226,.5);color:#fff}
+.seed-note{font-size:11px;color:#888;line-height:1.6;margin-bottom:12px}
 .seed-actions{display:flex;gap:8px}
-.seed-action-btn{flex:1;padding:10px 8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
-  border-radius:10px;color:#3a3a3a;font-size:11px;font-weight:700;cursor:pointer;
+.seed-action-btn{flex:1;padding:10px 8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+  border-radius:10px;color:#ccc;font-size:12px;font-weight:700;cursor:pointer;
   font-family:inherit;transition:all .15s;text-align:center}
-.seed-action-btn:active{color:#888;border-color:rgba(255,255,255,.15)}
+.seed-action-btn:active{color:#fff;border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.1)}
 
 /* ── Empty ── */
 .empty{display:flex;flex-direction:column;align-items:center;padding:48px 24px;gap:16px}
@@ -235,7 +235,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t);
 
 /* ── Paste ── */
 .paste-wrap{margin-top:20px}
-.paste-lbl{font-size:10px;color:#444;font-weight:700;letter-spacing:.7px;text-transform:uppercase;margin-bottom:6px}
+.paste-lbl{font-size:10px;color:#888;font-weight:700;letter-spacing:.7px;text-transform:uppercase;margin-bottom:6px}
 input[type=text]{width:100%;padding:12px 14px;background:#0f0f0f;border:1px solid rgba(138,43,226,.2);
   border-radius:12px;color:#fff;font-size:13px;font-family:monospace;outline:none;transition:border-color .2s}
 input[type=text]:focus{border-color:var(--a)}
@@ -256,7 +256,7 @@ input[type=text]:focus{border-color:var(--a)}
 .qr-token{font-size:14px;font-weight:700;color:var(--a);margin-top:2px;letter-spacing:.6px}
 .qr-canvas-wrap{background:#fff;border-radius:16px;padding:16px;box-shadow:0 0 60px rgba(255,255,255,.08)}
 #qr-canvas{display:block;border-radius:4px}
-.qr-hint{font-size:11px;color:#444;text-align:center;max-width:240px;line-height:1.6}
+.qr-hint{font-size:11px;color:#888;text-align:center;max-width:240px;line-height:1.6}
 .qr-footer{display:flex;gap:10px;padding:16px 20px;flex-shrink:0}
 .btn-spent{flex:1;padding:14px;border:1px solid rgba(255,85,85,.25);border-radius:12px;
   background:rgba(255,85,85,.06);color:#ff7070;font-size:14px;font-weight:700;cursor:pointer;
@@ -298,6 +298,7 @@ input[type=text]:focus{border-color:var(--a)}
 <!-- ── LOCK SCREEN ── -->
 <div id="lock-scr">
   <div class="ls-logo">
+    <img src="./privx-shield.png" style="width:56px;height:56px;border-radius:14px;margin-bottom:10px;filter:drop-shadow(0 0 18px rgba(138,43,226,.6))" alt="">
     <div class="ls-title">PrivX Pay</div>
     <div class="ls-badge">WALLET</div>
   </div>
@@ -335,10 +336,13 @@ input[type=text]:focus{border-color:var(--a)}
 <div id="main">
 
   <div class="sh">
-    <div class="sh-title">PrivX Pay</div>
+    <div class="sh-title" style="display:flex;align-items:center;gap:8px">
+      <img src="./privx-shield.png" style="width:28px;height:28px;border-radius:7px" alt="">
+      PrivX Pay
+    </div>
     <div class="sh-right">
       <div class="sh-badge">WALLET</div>
-      <button class="btn-lock" id="btn-refresh" onclick="_checkAllLiveNotes()" title="Check spend status" style="opacity:.35">
+      <button class="btn-lock" id="btn-refresh" onclick="_checkAllLiveNotes()" title="Check spend status">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
           <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
@@ -393,7 +397,7 @@ input[type=text]:focus{border-color:var(--a)}
   <div class="seed-section" id="seed-section">
     <div class="seed-lbl">Recovery Seed</div>
     <div class="seed-display" id="seed-display" onclick="_copySeed()">—</div>
-    <div class="seed-note">Write this down. With this seed you can scan the blockchain to recover all your notes — even after losing this device.</div>
+    <div class="seed-note">Write this down and keep it secret — offline, not in a photo or cloud note. Every note you deposit is cryptographically derived from this seed, so a recovery scan can restore your full note history from the blockchain alone, even after total device loss. Anyone who has this seed can recover your notes.<br><br>Notes deposited before this wallet was first set up were generated randomly and won't appear in a recovery scan — but they still spend normally if you have the note string.</div>
     <div class="seed-actions">
       <button class="seed-action-btn" onclick="_copySeed()">Copy Seed</button>
       <button class="seed-action-btn" onclick="openRecovery()">Recover Notes</button>
