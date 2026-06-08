@@ -395,9 +395,9 @@ input[type=text]:focus{border-color:var(--a)}
   </div>
 
   <div class="seed-section" id="seed-section">
-    <div class="seed-lbl">Recovery Seed</div>
-    <div class="seed-display" id="seed-display" onclick="_copySeed()">—</div>
-    <div class="seed-note">Write this down and keep it secret — offline, not in a photo or cloud note. Every note you deposit is cryptographically derived from this seed, so a recovery scan can restore your full note history from the blockchain alone, even after total device loss. Anyone who has this seed can recover your notes.<br><br>Notes deposited before this wallet was first set up were generated randomly and won't appear in a recovery scan — but they still spend normally if you have the note string.</div>
+    <div class="seed-lbl">Recovery Seed <span style="font-weight:400;opacity:.6;text-transform:none;letter-spacing:0">· tap to reveal</span></div>
+    <div class="seed-display" id="seed-display" onclick="_toggleSeedReveal()" title="Tap to reveal / hide">•••••••• •••••••• •••••••• ••••••••</div>
+    <div class="seed-note">Tap the seed to reveal it — it hides automatically after 30 seconds. Write it down offline, never in a photo or cloud note. Anyone who has this seed can recover your notes.<br><br>Every note you deposit is derived from this seed, so a recovery scan can restore your full history from the blockchain alone, even after total device loss. Notes deposited before this wallet was set up won't appear in a recovery scan but still spend normally.</div>
     <div class="seed-actions">
       <button class="seed-action-btn" onclick="_copySeed()">Copy Seed</button>
       <button class="seed-action-btn" onclick="openRecovery()">Recover Notes</button>
@@ -590,8 +590,9 @@ const DEPOSIT_TOPIC = '0xa945e51eec50ab98c161376f0db4cf2aeba3ec92755fe2fcd388bdb
 // Runtime state — null means locked
 let _notes        = null;
 let _key          = null;
-let _seed         = null;   // 32-char hex master seed
-let _seedIdx      = 0;      // next index to use for derivation
+let _seed            = null;   // 32-char hex master seed
+let _seedIdx         = 0;      // next index to use for derivation
+let _seedRevealTimer = null;   // auto-hide timer
 let _lockTimer    = null;
 let _changingPin  = false;
 let _poseidon     = null;   // lazy loaded
@@ -767,13 +768,33 @@ function _showSeedSection() {
   const sec  = document.getElementById('seed-section');
   const disp = document.getElementById('seed-display');
   if (sec)  sec.style.display = 'block';
-  if (disp) disp.textContent  = _seed.slice(0,8)+' '+_seed.slice(8,16)+' '+_seed.slice(16,24)+' '+_seed.slice(24,32);
+  if (disp) { disp.textContent = '•••••••• •••••••• •••••••• ••••••••'; disp.dataset.revealed = 'false'; }
+}
+
+function _toggleSeedReveal() {
+  const disp = document.getElementById('seed-display');
+  if (!disp || !_seed) return;
+  if (disp.dataset.revealed === 'true') {
+    disp.textContent = '•••••••• •••••••• •••••••• ••••••••';
+    disp.dataset.revealed = 'false';
+    if (_seedRevealTimer) { clearTimeout(_seedRevealTimer); _seedRevealTimer = null; }
+  } else {
+    disp.textContent = _seed.slice(0,8)+' '+_seed.slice(8,16)+' '+_seed.slice(16,24)+' '+_seed.slice(24,32);
+    disp.dataset.revealed = 'true';
+    if (_seedRevealTimer) clearTimeout(_seedRevealTimer);
+    _seedRevealTimer = setTimeout(() => {
+      disp.textContent = '•••••••• •••••••• •••••••• ••••••••';
+      disp.dataset.revealed = 'false';
+      _seedRevealTimer = null;
+    }, 30000);
+  }
 }
 
 function lock() {
   _stopSpendWatch();
   _stopBgPoll();
   _notes = null; _key = null; _seed = null; _seedIdx = 0;
+  if (_seedRevealTimer) { clearTimeout(_seedRevealTimer); _seedRevealTimer = null; }
   const sec = document.getElementById('seed-section');
   if (sec) sec.style.display = 'none';
   _pin = ''; _pinFirst = '';
