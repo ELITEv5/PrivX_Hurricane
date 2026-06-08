@@ -209,6 +209,24 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t);
 .section-sep::before,.section-sep::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08)}
 .section-sep-lbl{font-size:9px;color:#555;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;white-space:nowrap}
 
+/* ── Note status dot ── */
+.note-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.note-dot.live{background:var(--g);box-shadow:0 0 5px rgba(0,230,100,.5)}
+
+/* ── Seed section ── */
+.seed-section{margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,.05);display:none}
+.seed-lbl{font-size:10px;color:#3a3a3a;font-weight:700;letter-spacing:.7px;text-transform:uppercase;margin-bottom:8px}
+.seed-display{background:#0f0f0f;border:1px solid rgba(138,43,226,.12);border-radius:10px;
+  padding:12px 14px;font-family:monospace;font-size:11px;color:#3a3a3a;letter-spacing:.8px;
+  word-break:break-all;cursor:pointer;transition:border-color .2s;margin-bottom:8px;user-select:all}
+.seed-display:hover{border-color:rgba(138,43,226,.3);color:#666}
+.seed-note{font-size:10px;color:#2a2a2a;line-height:1.55;margin-bottom:12px}
+.seed-actions{display:flex;gap:8px}
+.seed-action-btn{flex:1;padding:10px 8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+  border-radius:10px;color:#3a3a3a;font-size:11px;font-weight:700;cursor:pointer;
+  font-family:inherit;transition:all .15s;text-align:center}
+.seed-action-btn:active{color:#888;border-color:rgba(255,255,255,.15)}
+
 /* ── Empty ── */
 .empty{display:flex;flex-direction:column;align-items:center;padding:48px 24px;gap:16px}
 .empty-icon{font-size:52px;opacity:.3}
@@ -372,6 +390,16 @@ input[type=text]:focus{border-color:var(--a)}
       oninput="onPasteNote(this.value)">
   </div>
 
+  <div class="seed-section" id="seed-section">
+    <div class="seed-lbl">Recovery Seed</div>
+    <div class="seed-display" id="seed-display" onclick="_copySeed()">—</div>
+    <div class="seed-note">Write this down. With this seed you can scan the blockchain to recover all your notes — even after losing this device.</div>
+    <div class="seed-actions">
+      <button class="seed-action-btn" onclick="_copySeed()">Copy Seed</button>
+      <button class="seed-action-btn" onclick="openRecovery()">Recover Notes</button>
+    </div>
+  </div>
+
   <div class="change-pin-link" onclick="startChangePin()">· change PIN ·</div>
 
 </div><!-- /main -->
@@ -493,6 +521,30 @@ input[type=text]:focus{border-color:var(--a)}
   </div>
 </div>
 
+<!-- ── RECOVERY SHEET ── -->
+<div class="dep-overlay" id="recover-overlay" onclick="if(event.target===this)closeRecovery()">
+  <div class="dep-sheet">
+    <div class="dep-handle"></div>
+    <div class="dep-title">Recover from Seed</div>
+    <div class="dep-sub">Scans all shields on-chain to find your deposited notes</div>
+
+    <div class="dep-lbl">Seed (32 hex chars, spaces OK)</div>
+    <input type="text" id="recover-seed-input" placeholder="a1b2c3d4 e5f6a7b8 c9d0e1f2 a3b4c5d6"
+      style="font-family:monospace;margin-bottom:16px;font-size:12px"
+      autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+
+    <div class="dep-lbl">Scan depth</div>
+    <div class="dep-denoms" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
+      <button class="dep-den rec-den" id="rd-25" onclick="_setRecoverDepth(25)">25</button>
+      <button class="dep-den rec-den sel" id="rd-50" onclick="_setRecoverDepth(50)">50</button>
+      <button class="dep-den rec-den" id="rd-100" onclick="_setRecoverDepth(100)">100</button>
+    </div>
+
+    <button class="btn-shield" id="btn-recover" onclick="_doRecover()">Scan for Notes</button>
+    <div class="dep-status" id="recover-status"></div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
 <script>
 
@@ -529,9 +581,13 @@ const TOKEN_DECIMALS = { dai: 18, psundai: 18, usdc: 6 };
 const FEE_BP = 50n; // 0.5% (50 / 10000)
 const PULSECHAIN_ID = '0x171';
 
+const DEPOSIT_TOPIC = '0xa945e51eec50ab98c161376f0db4cf2aeba3ec92755fe2fcd388bdbbb80ff196';
+
 // Runtime state — null means locked
 let _notes        = null;
 let _key          = null;
+let _seed         = null;   // 32-char hex master seed
+let _seedIdx      = 0;      // next index to use for derivation
 let _lockTimer    = null;
 let _changingPin  = false;
 let _poseidon     = null;   // lazy loaded
@@ -539,6 +595,7 @@ let _spendWatchId = null;
 let _spendWatchNoteId = null;
 let _bgPollId     = null;
 let _checking     = false;
+let _recoverDepth = 50;
 
 // PIN state
 let _pin      = '';
@@ -643,11 +700,14 @@ async function _createWallet(pin) {
   const saltBytes = crypto.getRandomValues(new Uint8Array(16));
   localStorage.setItem(SALT_KEY, [...saltBytes].map(b=>b.toString(16).padStart(2,'0')).join(''));
   const key = await _deriveKey(pin, saltBytes);
-  // Migrate any legacy plain-JSON notes
   const raw = localStorage.getItem(STORE);
   let notes = [];
   if (raw && raw.startsWith('[')) { try { notes = JSON.parse(raw); } catch {} }
-  localStorage.setItem(STORE, await _encrypt(notes, key));
+  // Generate master seed for note derivation
+  const seedBytes = crypto.getRandomValues(new Uint8Array(16));
+  _seed    = [...seedBytes].map(b=>b.toString(16).padStart(2,'0')).join('');
+  _seedIdx = 0;
+  localStorage.setItem(STORE, await _encrypt({ notes, seed: _seed, seedIdx: _seedIdx }, key));
   _key = key; _notes = notes;
   _unlock();
 }
@@ -657,15 +717,30 @@ async function _tryUnlock(pin) {
   if (!saltHex) { _setPrompt('Enter your PIN'); _pinErr('Wallet not found — reset and start over'); return; }
   const saltBytes = Uint8Array.from(saltHex.match(/.{2}/g), h=>parseInt(h,16));
   try {
-    const key  = await _deriveKey(pin, saltBytes);
-    const raw  = localStorage.getItem(STORE);
-    let notes  = [];
+    const key = await _deriveKey(pin, saltBytes);
+    const raw = localStorage.getItem(STORE);
+    let notes = [], seed = null, seedIdx = 0;
     if (raw) {
-      // Transparently migrate legacy plain-JSON storage if present
-      notes = raw.startsWith('[') ? JSON.parse(raw) : await _decrypt(raw, key);
-      if (raw.startsWith('[')) localStorage.setItem(STORE, await _encrypt(notes, key));
+      let blob;
+      if (raw.startsWith('[')) {
+        blob = JSON.parse(raw);           // legacy plain-JSON array
+      } else {
+        blob = await _decrypt(raw, key);  // encrypted — could be array or {notes,seed,seedIdx}
+      }
+      if (Array.isArray(blob)) {
+        // Old format: just a notes array. Migrate: generate a seed.
+        notes = blob;
+        const seedBytes = crypto.getRandomValues(new Uint8Array(16));
+        seed    = [...seedBytes].map(b=>b.toString(16).padStart(2,'0')).join('');
+        seedIdx = 0;
+        localStorage.setItem(STORE, await _encrypt({ notes, seed, seedIdx }, key));
+      } else {
+        notes   = blob.notes   || [];
+        seed    = blob.seed    || null;
+        seedIdx = blob.seedIdx || 0;
+      }
     }
-    _key = key; _notes = notes;
+    _key = key; _notes = notes; _seed = seed; _seedIdx = seedIdx;
     _unlock();
   } catch {
     _setPrompt('Enter your PIN');
@@ -680,12 +755,23 @@ function _unlock() {
   renderWallet();
   _resetTimer();
   _startBgPoll();
+  _showSeedSection();
+}
+
+function _showSeedSection() {
+  if (!_seed) return;
+  const sec  = document.getElementById('seed-section');
+  const disp = document.getElementById('seed-display');
+  if (sec)  sec.style.display = 'block';
+  if (disp) disp.textContent  = _seed.slice(0,8)+' '+_seed.slice(8,16)+' '+_seed.slice(16,24)+' '+_seed.slice(24,32);
 }
 
 function lock() {
   _stopSpendWatch();
   _stopBgPoll();
-  _notes = null; _key = null;
+  _notes = null; _key = null; _seed = null; _seedIdx = 0;
+  const sec = document.getElementById('seed-section');
+  if (sec) sec.style.display = 'none';
   _pin = ''; _pinFirst = '';
   _pinMode = localStorage.getItem(SALT_KEY) ? 'enter' : 'set';
   _drawDots(); _pinErr('');
@@ -853,7 +939,7 @@ async function _applyNewPin(pin) {
   const saltBytes = crypto.getRandomValues(new Uint8Array(16));
   localStorage.setItem(SALT_KEY, [...saltBytes].map(b=>b.toString(16).padStart(2,'0')).join(''));
   const newKey = await _deriveKey(pin, saltBytes);
-  localStorage.setItem(STORE, await _encrypt(_notes, newKey));
+  localStorage.setItem(STORE, await _encrypt({ notes: _notes, seed: _seed, seedIdx: _seedIdx }, newKey));
   _key = newKey; _changingPin = false;
   _pin = ''; _pinFirst = ''; _drawDots();
   document.getElementById('ls-cancel').style.display = 'none';
@@ -884,7 +970,12 @@ function getNotes() { return _notes || []; }
 async function putNotes(notes) {
   _notes = notes;
   if (!_key) return;
-  localStorage.setItem(STORE, await _encrypt(notes, _key));
+  localStorage.setItem(STORE, await _encrypt({ notes, seed: _seed, seedIdx: _seedIdx }, _key));
+}
+
+async function _putSeedState() {
+  if (!_key) return;
+  localStorage.setItem(STORE, await _encrypt({ notes: _notes, seed: _seed, seedIdx: _seedIdx }, _key));
 }
 
 function parseNote(str) {
@@ -894,10 +985,12 @@ function parseNote(str) {
   return null;
 }
 
-async function saveNote(note, token, denom) {
+async function saveNote(note, token, denom, si = null) {
   const notes = getNotes();
   if (notes.find(n=>n.note===note)) return;
-  notes.unshift({ id:crypto.randomUUID(), note, token, denom, ts:Date.now(), spent:false });
+  const entry = { id:crypto.randomUUID(), note, token, denom, ts:Date.now(), spent:false };
+  if (si !== null) entry.si = si;
+  notes.unshift(entry);
   await putNotes(notes);
 }
 async function deleteNoteById(id) { await putNotes(getNotes().filter(n=>n.id!==id)); renderWallet(); }
@@ -966,7 +1059,7 @@ function _makeBill(n, isSpent) {
     <div class="bill-bottom">
       <div class="bill-brand">PrivX Pay</div>
       <div style="display:flex;align-items:center;gap:8px">
-        ${isSpent ? '<div class="bill-spent-badge">Spent</div>' : ''}
+        ${isSpent ? '<div class="bill-spent-badge">Spent</div>' : '<div class="note-dot live" title="Unspent"></div>'}
         <div class="bill-date">${date}</div>
       </div>
     </div>`;
@@ -1124,7 +1217,7 @@ function _setDepToken(tok) {
 
 function _setDepDenom(d) {
   _depDenom = d;
-  document.querySelectorAll('.dep-den').forEach(el =>
+  document.querySelectorAll('.dep-den:not(.rec-den)').forEach(el =>
     el.classList.toggle('sel', el.textContent === '$'+d)
   );
   const dw  = SHIELDS[_depToken].wei[d];
@@ -1180,10 +1273,18 @@ async function _doDeposit() {
     _setDepStatus('', 'Generating note…');
     await _loadPoseidon();
 
-    const nBytes = crypto.getRandomValues(new Uint8Array(31));
-    const sBytes = crypto.getRandomValues(new Uint8Array(31));
-    const nHex = [...nBytes].map(b=>b.toString(16).padStart(2,'0')).join('');
-    const sHex = [...sBytes].map(b=>b.toString(16).padStart(2,'0')).join('');
+    // Derive note from seed if available, otherwise fall back to random
+    let nHex, sHex, usedSeedIdx = null;
+    if (_seed !== null) {
+      usedSeedIdx = _seedIdx;
+      const nHash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(_seed+':n:'+usedSeedIdx));
+      const sHash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(_seed+':s:'+usedSeedIdx));
+      nHex = [...new Uint8Array(nHash)].slice(0,31).map(b=>b.toString(16).padStart(2,'0')).join('');
+      sHex = [...new Uint8Array(sHash)].slice(0,31).map(b=>b.toString(16).padStart(2,'0')).join('');
+    } else {
+      nHex = [...crypto.getRandomValues(new Uint8Array(31))].map(b=>b.toString(16).padStart(2,'0')).join('');
+      sHex = [...crypto.getRandomValues(new Uint8Array(31))].map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
     const commitment = _poseidon(BigInt('0x'+nHex), BigInt('0x'+sHex));
     const commitHex  = '0x' + commitment.toString(16).padStart(64,'0');
 
@@ -1203,7 +1304,9 @@ async function _doDeposit() {
 
     // Save note BEFORE sending deposit tx — if receipt times out, note is already safe
     const noteStr = `hp-${_depToken}-${_depDenom}-${nHex}-${sHex}`;
-    await saveNote(noteStr, _depToken, _depDenom);
+    await saveNote(noteStr, _depToken, _depDenom, usedSeedIdx);
+    // Advance seed index immediately so a retry generates a fresh note
+    if (usedSeedIdx !== null) { _seedIdx++; await _putSeedState(); }
     renderWallet();
 
     _setDepStatus('', 'Confirm deposit in your wallet…');
@@ -1296,6 +1399,127 @@ async function _copyWalletUrl() {
     _showToast('URL copied!');
   } catch { _showToast('Copy failed'); }
 }
+
+// ─── Seed & Recovery ──────────────────────────────────────────────────────────
+
+async function _copySeed() {
+  if (!_seed) return;
+  const fmt = _seed.slice(0,8)+' '+_seed.slice(8,16)+' '+_seed.slice(16,24)+' '+_seed.slice(24,32);
+  try { await navigator.clipboard.writeText(fmt); _showToast('Seed copied!'); }
+  catch { _showToast('Copy failed'); }
+}
+
+function openRecovery() {
+  // Pre-fill with current seed
+  const inp = document.getElementById('recover-seed-input');
+  if (inp && _seed) inp.value = _seed.slice(0,8)+' '+_seed.slice(8,16)+' '+_seed.slice(16,24)+' '+_seed.slice(24,32);
+  document.getElementById('recover-overlay').classList.add('open');
+  _resetLockTimer();
+}
+
+function closeRecovery() {
+  document.getElementById('recover-overlay').classList.remove('open');
+  _setRecoverStatus('', '');
+}
+
+function _setRecoverDepth(n) {
+  _recoverDepth = n;
+  [25, 50, 100].forEach(d => {
+    const el = document.getElementById('rd-'+d);
+    if (el) el.classList.toggle('sel', d === n);
+  });
+}
+
+function _setRecoverStatus(type, msg) {
+  const el = document.getElementById('recover-status');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'dep-status' + (type === 'err' ? ' err' : type === 'ok' ? ' ok' : '');
+}
+
+async function _doRecover() {
+  const rawSeed = document.getElementById('recover-seed-input').value.replace(/\s/g,'').toLowerCase();
+  if (!/^[0-9a-f]{32}$/.test(rawSeed)) {
+    _setRecoverStatus('err', 'Seed must be 32 hex characters (spaces ignored)');
+    return;
+  }
+
+  await _loadPoseidon();
+  if (!_poseidon) { _setRecoverStatus('err', 'Poseidon not loaded — wait a moment and retry'); return; }
+
+  const btn = document.getElementById('btn-recover');
+  btn.disabled = true;
+
+  try {
+    // Fetch all deposit events from all 18 shields
+    const shields = [];
+    for (const [token, cfg] of Object.entries(SHIELDS))
+      for (const [denom, addr] of Object.entries(cfg.contracts))
+        shields.push({ token, denom, addr });
+
+    const commitMap = {};
+    for (let i = 0; i < shields.length; i++) {
+      _setRecoverStatus('', `Scanning shield ${i+1} of ${shields.length}…`);
+      try {
+        const logs = await _rpc('eth_getLogs', [{
+          address: shields[i].addr, topics: [DEPOSIT_TOPIC], fromBlock: '0x0', toBlock: 'latest'
+        }]);
+        for (const log of logs) {
+          const c = BigInt(log.topics[1]).toString(16).padStart(64,'0');
+          commitMap[c] = { token: shields[i].token, denom: shields[i].denom };
+        }
+      } catch { /* skip unavailable shield */ }
+    }
+
+    // Derive notes at each index and check against commitments
+    _setRecoverStatus('', `Checking ${_recoverDepth} indices…`);
+    const found = [];
+    for (let idx = 0; idx < _recoverDepth; idx++) {
+      const nHash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(rawSeed+':n:'+idx));
+      const sHash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(rawSeed+':s:'+idx));
+      const nHex  = [...new Uint8Array(nHash)].slice(0,31).map(b=>b.toString(16).padStart(2,'0')).join('');
+      const sHex  = [...new Uint8Array(sHash)].slice(0,31).map(b=>b.toString(16).padStart(2,'0')).join('');
+      const commit = _poseidon(BigInt('0x'+nHex), BigInt('0x'+sHex)).toString(16).padStart(64,'0');
+      if (commitMap[commit]) {
+        const { token, denom } = commitMap[commit];
+        found.push({ note: `hp-${token}-${denom}-${nHex}-${sHex}`, token, denom, si: idx });
+      }
+    }
+
+    if (!found.length) {
+      _setRecoverStatus('err', `No notes found in ${_recoverDepth} indices. Try a larger scan depth.`);
+      return;
+    }
+
+    let added = 0;
+    for (const n of found) {
+      if (!getNotes().find(x => x.note === n.note)) {
+        await saveNote(n.note, n.token, n.denom, n.si);
+        added++;
+      }
+    }
+    renderWallet();
+
+    // Adopt this seed if it's different from the current one
+    if (rawSeed !== _seed) {
+      _seed    = rawSeed;
+      _seedIdx = Math.max(...found.map(n=>n.si)) + 1;
+      await _putSeedState();
+      _showSeedSection();
+    }
+
+    _setRecoverStatus('ok',
+      `Found ${found.length} note${found.length!==1?'s':''} — ` +
+      (added > 0 ? `${added} added to wallet.` : 'all already in wallet.')
+    );
+  } catch(e) {
+    _setRecoverStatus('err', 'Recovery failed: ' + e.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function _resetLockTimer() { if (_key) _resetTimer(); }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
