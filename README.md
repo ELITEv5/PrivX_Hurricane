@@ -10,7 +10,7 @@
 
 **Chain:** PulseChain (chainId 369)
 
----
+--
 
 ## What Is PrivX Hurricane?
 
