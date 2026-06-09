@@ -9,9 +9,9 @@
   <link rel="icon" type="image/png" sizes="16x16" href="privx-shield.png">
   <link rel="apple-touch-icon" href="privx-shield.png">
   <meta name="theme-color" content="#8A2BE2">
-  <meta name="description" content="Multi-token PLONK zero-knowledge privacy shield on PulseChain. Shield PLS, HEX, PLSX, DAI, WETH, pSunDAI, pDAI, pCOCK and PrivX. Every withdrawal generates a Proof of Privacy and earns PRIVX. PrivX Hurricane Protocol.">
+  <meta name="description" content="Multi-token PLONK zero-knowledge privacy shield on PulseChain. Shield PLS, HEX, PLSX, DAI, WETH and PrivX. Every withdrawal generates a Proof of Privacy and earns PRIVX. PrivX Hurricane Protocol.">
   <meta property="og:title" content="PrivX Hurricane — Proof of Privacy Protocol">
-  <meta property="og:description" content="9 tokens. Zero knowledge. Every withdrawal earns PRIVX. The first PLONK-based privacy shield on PulseChain.">
+  <meta property="og:description" content="6 tokens. Zero knowledge. Every withdrawal earns PRIVX. The first PLONK-based privacy shield on PulseChain.">
   <style>
     :root {
       --primary: #8A2BE2;
@@ -211,7 +211,7 @@
         <img src="privx_logo.png" alt="PrivX Hurricane" class="privx-logo">
         <h1 style="font-size:clamp(1.8em,5vw,2.4em);font-weight:900;margin-bottom:6px;background:linear-gradient(90deg,#00ffea,#8A2BE2);-webkit-background-clip:text;-webkit-text-fill-color:transparent">PrivX Hurricane</h1>
         <div style="color:#fff;font-size:clamp(0.6em,2.2vw,0.82em);font-weight:700;letter-spacing:1px;margin-bottom:10px;opacity:0.7">PROOF OF PRIVACY — MULTI-TOKEN ZK SHIELD</div>
-        <p class="subtitle">9 tokens. Zero knowledge. Every withdrawal earns PRIVX.<br>
+        <p class="subtitle">6 tokens. Zero knowledge. Every withdrawal earns PRIVX.<br>
           <span style="font-size:0.85em;opacity:0.85"><span class="pop-badge">POP</span> <span class="privx-badge"><img src="privx-shield.png" style="height:12px;width:auto;vertical-align:middle;margin-right:4px;border-radius:3px" alt="">PrivX Hurricane Protocol</span></span>
         </p>
       </div>
@@ -238,10 +238,6 @@
           <!-- Row 2 -->
           <div class="token-card live"   id="token-dai"     onclick="selectToken('dai')"><div class="tc-name">DAI</div><div class="tc-sub">Stablecoin</div><div class="tc-live">Live Now</div></div>
           <div class="token-card live"   id="token-weth"    onclick="selectToken('weth')"><div class="tc-name">WETH</div><div class="tc-sub">Wrapped Ether</div><div class="tc-live">Live Now</div></div>
-          <div class="token-card live"   id="token-psundai" onclick="selectToken('psundai')"><div class="tc-name">pSunDAI</div><div class="tc-sub">Autonomous Stable</div><div class="tc-live">Live Now</div></div>
-          <!-- Row 3 -->
-          <div class="token-card live"        id="token-pdai" onclick="selectToken('pdai')"><div class="tc-name">pDAI</div><div class="tc-sub">Stable Asset</div><div class="tc-live">Live Now</div></div>
-          <div class="token-card live"   id="token-pcock"   onclick="selectToken('pcock')"><div class="tc-name">pCOCK</div><div class="tc-sub">Community Token</div><div class="tc-live">Live Now</div></div>
           <div class="token-card live"   id="token-privx"   onclick="selectToken('privx')"><div class="tc-name">PrivX</div><div class="tc-sub">Privacy Mining</div><div class="tc-live">Live Now</div></div>
         </div>
 
@@ -318,7 +314,7 @@
           <span style="color:#B57AFF">·</span> <strong style="color:#ddd">Use Relayer Mode</strong> — toggle it on below, generate the proof JSON, send it to any funded wallet to submit for you. Your fresh wallet never needs gas.
         </div>
 
-        <input type="text" id="withdrawNote" placeholder="privx-hurricane-pdai-1000-abc123..." style="width:100%;padding:16px;margin:8px 0 12px;border-radius:12px;border:1px solid #444;background:#111;color:#fff;font-family:monospace;font-size:13px">
+        <input type="text" id="withdrawNote" placeholder="privx-hurricane-dai-10-abc123..." style="width:100%;padding:16px;margin:8px 0 12px;border-radius:12px;border:1px solid #444;background:#111;color:#fff;font-family:monospace;font-size:13px">
         <input type="text" id="recipientAddress" placeholder="Recipient address (blank = connected wallet)" style="width:100%;padding:16px;margin:0 0 10px;border-radius:12px;border:1px solid #444;background:#111;color:#fff">
 
         <details id="mevGuard" style="margin-bottom:14px"><!-- mevGuard -->
@@ -407,8 +403,8 @@
         <h2 style="margin-bottom:16px">What You Need</h2>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px">
           <div style="background:rgba(138,43,226,0.1);border:1px solid rgba(138,43,226,0.3);border-radius:12px;padding:16px">
-            <strong style="color:var(--accent);display:block;margin-bottom:4px">Any of the 9 tokens</strong>
-            <p style="color:#aaa;font-size:13px;line-height:1.5">PLS, HEX, PLSX, DAI, WETH, pSunDAI, pDAI, pCOCK, or PrivX. The 0.5% fee is paid in the same token you're shielding — no PRIVX required to deposit.</p>
+            <strong style="color:var(--accent);display:block;margin-bottom:4px">Any of the 6 tokens</strong>
+            <p style="color:#aaa;font-size:13px;line-height:1.5">PLS, HEX, PLSX, DAI, WETH, or PrivX. The 0.5% fee is paid in the same token you're shielding — no PRIVX required to deposit.</p>
           </div>
           <div style="background:rgba(138,43,226,0.1);border:1px solid rgba(138,43,226,0.3);border-radius:12px;padding:16px">
             <strong style="color:var(--accent);display:block;margin-bottom:4px">PRIVX rewards — automatic</strong>
@@ -448,7 +444,7 @@
           <p style="color:#aaa;font-size:13px;line-height:1.5"><strong style="color:#fff">Mine PRIVX by withdrawing privately.</strong> Every successful withdrawal generates a Proof of Privacy (POP) — a zero-knowledge proof that you own a valid shielded note — and automatically triggers a PRIVX reward from the Mining Vault. No claim transaction. No staking. Just use the protocol and earn.</p>
         </div>
         <div style="background:rgba(138,43,226,0.1);border-radius:10px;padding:12px 16px">
-          <p style="color:#aaa;font-size:13px;line-height:1.5"><strong style="color:#fff">Rewards decay as the vault drains.</strong> The reward rate drops quadratically as PRIVX is paid out. The Fee Vault automatically refills the Mining Vault from every deposit across all 9 token shields — POP rewards are self-sustaining as long as the protocol is used.</p>
+          <p style="color:#aaa;font-size:13px;line-height:1.5"><strong style="color:#fff">Rewards decay as the vault drains.</strong> The reward rate drops quadratically as PRIVX is paid out. The Fee Vault automatically refills the Mining Vault from every deposit across all 6 token shields — POP rewards are self-sustaining as long as the protocol is used.</p>
         </div>
         <div style="background:rgba(138,43,226,0.1);border-radius:10px;padding:12px 16px">
           <p style="color:#aaa;font-size:13px;line-height:1.5"><strong style="color:#fff">Ownerless and immutable.</strong> No admin key, no upgrade proxy, no pause function. The shield contracts cannot be changed after deployment. No entity can freeze withdrawals or censor transactions. If you know the note, you can withdraw — always, unconditionally, forever.</p>
@@ -480,7 +476,7 @@
       <div style="display:flex;flex-direction:column;gap:14px;margin-top:4px">
         <details style="border-radius:10px;overflow:hidden">
           <summary style="cursor:pointer;font-weight:600;color:#fff;padding:12px 16px;background:rgba(138,43,226,0.1);list-style:none;display:flex;justify-content:space-between;align-items:center">What makes PrivX Hurricane unique? <span style="font-size:11px;color:var(--accent)">▼</span></summary>
-          <p style="padding:12px 16px;color:#aaa;font-size:14px;line-height:1.6;border-left:2px solid var(--primary);margin-top:6px">PrivX Hurricane is PulseChain's first PLONK-based privacy protocol — and the first of its kind to support multiple tokens simultaneously. It uses the same battle-tested circuit architecture as Tornado Cash (Poseidon Merkle tree, PLONK proofs) extended to 9 tokens, with the addition of PRIVX Proof-of-Privacy mining rewards paid automatically on every withdrawal.</p>
+          <p style="padding:12px 16px;color:#aaa;font-size:14px;line-height:1.6;border-left:2px solid var(--primary);margin-top:6px">PrivX Hurricane is PulseChain's first PLONK-based privacy protocol — and the first of its kind to support multiple tokens simultaneously. It uses the same battle-tested circuit architecture as Tornado Cash (Poseidon Merkle tree, PLONK proofs) extended to 6 tokens, with the addition of PRIVX Proof-of-Privacy mining rewards paid automatically on every withdrawal.</p>
         </details>
         <details style="border-radius:10px;overflow:hidden">
           <summary style="cursor:pointer;font-weight:600;color:#fff;padding:12px 16px;background:rgba(138,43,226,0.1);list-style:none;display:flex;justify-content:space-between;align-items:center">Is my note stored anywhere? <span style="font-size:11px;color:var(--accent)">▼</span></summary>
@@ -586,30 +582,6 @@
         <tr><td>10 WETH</td><td><a href="https://scan.pulsechain.com/address/0x62215cCcF17858fc21B3aA05C6184f9115F8c6Da" target="_blank">0x62215cCcF17858fc21B3aA05C6184f9115F8c6Da ↗</a></td></tr>
       </table>
 
-      <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">pSunDAI SHIELDS</p>
-      <table class="contract-table">
-        <tr><td>10 pSunDAI</td><td id="ct-psundai-d0"><a href="https://scan.pulsechain.com/address/0xB2C642DB931B9E8FdC0A2014C71E8C6Da480f3f9" target="_blank">0xB2C642DB931B9E8FdC0A2014C71E8C6Da480f3f9 ↗</a></td></tr>
-        <tr><td>100 pSunDAI</td><td id="ct-psundai-d1"><a href="https://scan.pulsechain.com/address/0xD8F8D437210EfE57F0161606F62C594290e17A7C" target="_blank">0xD8F8D437210EfE57F0161606F62C594290e17A7C ↗</a></td></tr>
-        <tr><td>1,000 pSunDAI</td><td id="ct-psundai-d2"><a href="https://scan.pulsechain.com/address/0xcd47aea1ff4cF308CF467B939C0Bb95aFA55DeFC" target="_blank">0xcd47aea1ff4cF308CF467B939C0Bb95aFA55DeFC ↗</a></td></tr>
-        <tr><td>10,000 pSunDAI</td><td id="ct-psundai-d3"><a href="https://scan.pulsechain.com/address/0x085f0f464fF5cc5C50e176A50f3EF8bE3513B652" target="_blank">0x085f0f464fF5cc5C50e176A50f3EF8bE3513B652 ↗</a></td></tr>
-      </table>
-
-      <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">pDAI SHIELDS</p>
-      <table class="contract-table">
-        <tr><td>1,000 pDAI</td><td><a href="https://scan.pulsechain.com/address/0x94D0Df289cE310462Fee8137aF945381844B94D1" target="_blank">0x94D0Df289cE310462Fee8137aF945381844B94D1 ↗</a></td></tr>
-        <tr><td>10,000 pDAI</td><td><a href="https://scan.pulsechain.com/address/0xc00D854d2fCBEdBe8A717c01a15C1351722858E7" target="_blank">0xc00D854d2fCBEdBe8A717c01a15C1351722858E7 ↗</a></td></tr>
-        <tr><td>100,000 pDAI</td><td><a href="https://scan.pulsechain.com/address/0x5136467D3E81bF2a722f364900DF2982adeE02EE" target="_blank">0x5136467D3E81bF2a722f364900DF2982adeE02EE ↗</a></td></tr>
-        <tr><td>1,000,000 pDAI</td><td><a href="https://scan.pulsechain.com/address/0xBbaFF183588FAB20cC24F67De7cd4263670a09E5" target="_blank">0xBbaFF183588FAB20cC24F67De7cd4263670a09E5 ↗</a></td></tr>
-      </table>
-
-      <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">pCOCK SHIELDS</p>
-      <table class="contract-table">
-        <tr><td>100 pCOCK</td><td><a href="https://scan.pulsechain.com/address/0x8F63010C4e5FE11f09654B9ff3471e81C36b4883" target="_blank">0x8F63010C4e5FE11f09654B9ff3471e81C36b4883 ↗</a></td></tr>
-        <tr><td>1,000 pCOCK</td><td><a href="https://scan.pulsechain.com/address/0x9DB59C1dc7C047d2c54ADb7c34f5E160cc94f52A" target="_blank">0x9DB59C1dc7C047d2c54ADb7c34f5E160cc94f52A ↗</a></td></tr>
-        <tr><td>10,000 pCOCK</td><td><a href="https://scan.pulsechain.com/address/0x81529f59F47Ed1f12D934e9cCa61a1637Ed1D02c" target="_blank">0x81529f59F47Ed1f12D934e9cCa61a1637Ed1D02c ↗</a></td></tr>
-        <tr><td>100,000 pCOCK</td><td><a href="https://scan.pulsechain.com/address/0xAe177f2e240FE3001addeFb93AAB69E853C5abAb" target="_blank">0xAe177f2e240FE3001addeFb93AAB69E853C5abAb ↗</a></td></tr>
-      </table>
-
       <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">PrivX SHIELDS</p>
       <table class="contract-table">
         <tr><td>100 PrivX</td><td><a href="https://scan.pulsechain.com/address/0x25B19282552cc67D4C95Ad9986FCC154166Db5BB" target="_blank">0x25B19282552cc67D4C95Ad9986FCC154166Db5BB ↗</a></td></tr>
@@ -627,11 +599,11 @@
       <button class="modal-close" onclick="closeDocsModal()">✕</button>
       <div class="docs-h1"><img src="privx-shield.png" style="height:28px;width:auto;vertical-align:middle;margin-right:10px;border-radius:6px" alt="">PrivX Hurricane — Protocol Docs</div>
       <p class="docs-p" style="border-left:3px solid var(--primary);padding-left:14px;font-style:italic;margin-bottom:24px">
-        PulseChain's first PLONK-based multi-token privacy protocol. Shield 9 tokens. Generate a Proof of Privacy. Mine PRIVX on every withdrawal.<br><br>
+        PulseChain's first PLONK-based multi-token privacy protocol. Shield 6 tokens. Generate a Proof of Privacy. Mine PRIVX on every withdrawal.<br><br>
         <strong style="color:#fff">Chain:</strong> PulseChain (chainId 369) &nbsp;·&nbsp; <strong style="color:#fff">Circuit:</strong> PrivXMixer(14) PLONK &nbsp;·&nbsp; <strong style="color:#fff">Powered by:</strong> PrivX Hurricane
       </p>
       <div class="docs-h2">What Is PrivX Hurricane?</div>
-      <p class="docs-p">PrivX Hurricane is PulseChain's first PLONK-based privacy protocol, and the first of its kind to shield multiple tokens simultaneously. Deposit any of 9 supported tokens into a shielded pool and withdraw them to a completely unlinked address. Every withdrawal generates a <strong style="color:#fff">Proof of Privacy (POP)</strong> and automatically pays PRIVX mining rewards. No PRIVX required to deposit — it is what you earn, not what you spend.</p>
+      <p class="docs-p">PrivX Hurricane is PulseChain's first PLONK-based privacy protocol, and the first of its kind to shield multiple tokens simultaneously. Deposit any of 6 supported tokens into a shielded pool and withdraw them to a completely unlinked address. Every withdrawal generates a <strong style="color:#fff">Proof of Privacy (POP)</strong> and automatically pays PRIVX mining rewards. No PRIVX required to deposit — it is what you earn, not what you spend.</p>
       <div class="docs-h2">Supported Tokens</div>
       <table class="docs-table">
         <tr><th>Token</th><th>Denominations</th><th>Notes</th></tr>
@@ -640,9 +612,6 @@
         <tr><td>PLSX</td><td>100K / 1M / 10M / 100M</td><td>Live ✓</td></tr>
         <tr><td>DAI</td><td>10 / 100 / 1K / 10K</td><td>Live ✓</td></tr>
         <tr><td>WETH</td><td>0.01 / 0.1 / 1 / 10</td><td>Live ✓</td></tr>
-        <tr><td>pSunDAI</td><td>10 / 100 / 1K / 10K</td><td>Live ✓</td></tr>
-        <tr><td>pDAI</td><td>1K / 10K / 100K / 1M</td><td>Live ✓</td></tr>
-        <tr><td>pCOCK</td><td>100 / 1K / 10K / 100K</td><td>Live ✓</td></tr>
         <tr><td>PrivX</td><td>100 / 1K / 10K / 100K</td><td>Live ✓</td></tr>
       </table>
       <div class="docs-h2">Fee Flow</div>
@@ -804,24 +773,6 @@
     // Lowest tier sized for $0.30–$1.60 at current prices to allow 10–50x
     // price appreciation before smallest denomination becomes impractical.
     const SHIELDS = {
-      pcock: {
-        label: "pCOCK", sublabel: "Community Token",
-        token: "0xc10A4Ed9b4042222d69ff0B374eddd47ed90fC1F",
-        decimals: 18, feeBP: 50,
-        swapUrl: "https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=0xc10A4Ed9b4042222d69ff0B374eddd47ed90fC1F",
-        contracts: { d0:"0x8F63010C4e5FE11f09654B9ff3471e81C36b4883", d1:"0x9DB59C1dc7C047d2c54ADb7c34f5E160cc94f52A", d2:"0x81529f59F47Ed1f12D934e9cCa61a1637Ed1D02c", d3:"0xAe177f2e240FE3001addeFb93AAB69E853C5abAb" },
-        denoms:   ["100","1000","10000","100000"],
-        denomWei: { d0:100000000000000000000n, d1:1000000000000000000000n, d2:10000000000000000000000n, d3:100000000000000000000000n },
-      },
-      pdai: {
-        label: "pDAI", sublabel: "Stable Asset",
-        token: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
-        decimals: 18, feeBP: 50,
-        swapUrl: "https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=0x6B175474E89094C44Da98b954EedeAC495271d0F",
-        contracts: { d0:"0x94D0Df289cE310462Fee8137aF945381844B94D1", d1:"0xc00D854d2fCBEdBe8A717c01a15C1351722858E7", d2:"0x5136467D3E81bF2a722f364900DF2982adeE02EE", d3:"0xBbaFF183588FAB20cC24F67De7cd4263670a09E5" },
-        denoms:   ["1000","10000","100000","1000000"],
-        denomWei: { d0:1000000000000000000000n, d1:10000000000000000000000n, d2:100000000000000000000000n, d3:1000000000000000000000000n },
-      },
       wpls: {
         label: "PLS", sublabel: "PulseChain",
         token: "0xA1077a294dDE1B09bB078844df40758a5D0f9a27",
@@ -867,15 +818,6 @@
         contracts: { d0:"0xAc4590446C34C2A470bd9F273CAD89e5F8E11df5", d1:"0x91BE28f8342dE81ce4646B4e80Bf353ea1568f8C", d2:"0xC8666F477e954957b983c3CaE70B2E9Fb288661c", d3:"0x62215cCcF17858fc21B3aA05C6184f9115F8c6Da" },
         denoms:   ["0.01","0.1","1","10"],
         denomWei: { d0:10000000000000000n, d1:100000000000000000n, d2:1000000000000000000n, d3:10000000000000000000n },
-      },
-      psundai: {
-        label: "pSunDAI", sublabel: "Autonomous Stable",
-        token: "0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f",
-        decimals: 18, feeBP: 50,
-        swapUrl: "https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f",
-        contracts: { d0:"0xB2C642DB931B9E8FdC0A2014C71E8C6Da480f3f9", d1:"0xD8F8D437210EfE57F0161606F62C594290e17A7C", d2:"0xcd47aea1ff4cF308CF467B939C0Bb95aFA55DeFC", d3:"0x085f0f464fF5cc5C50e176A50f3EF8bE3513B652" },
-        denoms:   ["10","100","1000","10000"],
-        denomWei: { d0:10000000000000000000n, d1:100000000000000000000n, d2:1000000000000000000000n, d3:10000000000000000000000n },
       },
       privx: {
         label: "PrivX", sublabel: "Privacy Mining",
@@ -936,7 +878,7 @@
     const fmt18 = v => Number(BigInt(v) / 10n**18n).toLocaleString();
     const fmtDec = (v, dec) => Number(BigInt(v) / 10n**BigInt(dec)).toLocaleString();
     const fmtDec2 = (v, dec) => (Number(v) / 10**dec).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
-    const STABLE2 = ['dai','psundai'];
+    const STABLE2 = ['dai'];
 
     async function getZkeyUrl(setStatus) {
       if (_zkeyBlobUrl) return _zkeyBlobUrl;
@@ -1260,7 +1202,7 @@
       const noteInput = document.getElementById("withdrawNote").value.trim();
       if (!noteInput) return alert("Paste your private note first");
       if (!poseidonFn) return alert("Poseidon not ready — wait a moment");
-      const match = noteInput.match(/^privx-hurricane-(pcock|pdai|wpls|plsx|hex|dai|weth|psundai|privx)-(\d+[.0-9]*)-([a-fA-F0-9]{62,64})-([a-fA-F0-9]{62,64})$/i);
+      const match = noteInput.match(/^privx-hurricane-(wpls|plsx|hex|dai|weth|privx)-(\d+[.0-9]*)-([a-fA-F0-9]{62,64})-([a-fA-F0-9]{62,64})$/i);
       if (!match) return alert("Invalid note format.");
       let [,tokenKey,denomStr,nHex,sHex] = match; tokenKey = tokenKey.toLowerCase();
       const shield    = SHIELDS[tokenKey];
@@ -1320,7 +1262,7 @@
       if(!noteInput) return alert("Paste your private note first");
       if(!userAccount) return alert("Connect wallet first");
       if(!poseidonFn) return alert("Poseidon not ready — wait a moment");
-      const match=noteInput.match(/^privx-hurricane-(pcock|pdai|wpls|plsx|hex|dai|weth|psundai|privx)-(\d+[.0-9]*)-([a-fA-F0-9]{62,64})-([a-fA-F0-9]{62,64})$/i);
+      const match=noteInput.match(/^privx-hurricane-(wpls|plsx|hex|dai|weth|privx)-(\d+[.0-9]*)-([a-fA-F0-9]{62,64})-([a-fA-F0-9]{62,64})$/i);
       if(!match) return alert("Invalid note format.\nExpected: privx-hurricane-<token>-<amount>-<nullifier>-<secret>");
       let[,tokenKey,denomStr,nHex,sHex]=match; tokenKey=tokenKey.toLowerCase();
       const shield=SHIELDS[tokenKey];
@@ -1491,15 +1433,12 @@
     const EXPECTED_VERIFIER = "0xcEDa1071542d537221B5a01BFd1cF920cF8B9829";
     const EXPECTED_HASHER   = "0x72740d65A93f2e9d9741234371d62FeE36AEf9dF";
     const VERIFY_SHIELDS = [
-      { label:"PLS",   addr:"0xFdbd8a02f112e722543C12bce3596f42b9Bb3b72", assetFn:"wpls",  expectedAsset:"0xA1077a294dDE1B09bB078844df40758a5D0f9a27" },
-      { label:"DAI",   addr:"0x34FC19C51f3CdD7E644f551db6698C3A90112667", assetFn:"asset", expectedAsset:"0xefD766cCb38EaF1dfd701853BFCe31359239F305" },
-      { label:"pDAI",  addr:"0x94D0Df289cE310462Fee8137aF945381844B94D1", assetFn:"asset", expectedAsset:"0x6B175474E89094C44Da98b954EedeAC495271d0F" },
-      { label:"pCOCK", addr:"0x8F63010C4e5FE11f09654B9ff3471e81C36b4883", assetFn:"asset", expectedAsset:"0xc10A4Ed9b4042222d69ff0B374eddd47ed90fC1F" },
-      { label:"WETH",  addr:"0xD446cbF3BBae6f90E7a1a48E853F35A269cE7Cde", assetFn:"asset", expectedAsset:"0x02DcdD04e3F455D838cd1249292C58f3B79e3C3C" },
-      { label:"HEX",    addr:"0x833F7eDDbCe1e713e83b83006A793C3A51d00eE2", assetFn:"asset", expectedAsset:"0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39" },
-      { label:"PrivX",  addr:"0x74471E88588c2dF518379c4f9feC981158f741F4", assetFn:"asset", expectedAsset:"0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986" },
-      { label:"PLSX",   addr:"0x9632527f45A93579C0c26b58c7d99267997264Fb", assetFn:"asset", expectedAsset:"0x95B303987A60C71504D99Aa1b13B4DA07b0790ab" },
-      { label:"pSunDAI",addr:"0xB2C642DB931B9E8FdC0A2014C71E8C6Da480f3f9", assetFn:"asset", expectedAsset:"0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f" },
+      { label:"PLS",  addr:"0x42D4653d745d12882731b85ddED079901a86D434", assetFn:"wpls",  expectedAsset:"0xA1077a294dDE1B09bB078844df40758a5D0f9a27" },
+      { label:"HEX",  addr:"0xfaF31B882e8E6f108c4174b27317D933fEDbC904", assetFn:"asset", expectedAsset:"0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39" },
+      { label:"PLSX", addr:"0xa17c9e32AC4C0e231c472e8958CbC067916Da8FB", assetFn:"asset", expectedAsset:"0x95B303987A60C71504D99Aa1b13B4DA07b0790ab" },
+      { label:"DAI",  addr:"0xFe63926D5535EA3B6e1EA204bdDf93F4E2a4b906", assetFn:"asset", expectedAsset:"0xefD766cCb38EaF1dfd701853BFCe31359239F305" },
+      { label:"WETH", addr:"0xAc4590446C34C2A470bd9F273CAD89e5F8E11df5", assetFn:"asset", expectedAsset:"0x02DcdD04e3F455D838cd1249292C58f3B79e3C3C" },
+      { label:"PrivX",addr:"0x25B19282552cc67D4C95Ad9986FCC154166Db5BB", assetFn:"asset", expectedAsset:"0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986" },
     ];
 
     let _verifyResults = null;
