@@ -451,16 +451,7 @@ PIN-protected mobile PWA for holding and redeeming notes. Designed to live on yo
 | $50 | [`0xB8a283dBFF9a254Bd687Acc5aCE9AbdC5d7A5145`](https://scan.pulsechain.com/address/0xB8a283dBFF9a254Bd687Acc5aCE9AbdC5d7A5145) |
 | $100 | [`0xe28eeF832d801869e4789ec6aC20019D4149524C`](https://scan.pulsechain.com/address/0xe28eeF832d801869e4789ec6aC20019D4149524C) |
 
-**pSunDAI Shields** · Token: [`0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f`](https://scan.pulsechain.com/address/0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f)
-
-| Denomination | Shield Contract |
-|---|---|
-| $1 | [`0x38e1D3fd69F7A978e6fe5e4de787Cf96b71Fa688`](https://scan.pulsechain.com/address/0x38e1D3fd69F7A978e6fe5e4de787Cf96b71Fa688) |
-| $5 | [`0xfd2d44332a54eB89016f95705fBb7C84f917a9B3`](https://scan.pulsechain.com/address/0xfd2d44332a54eB89016f95705fBb7C84f917a9B3) |
-| $10 | [`0x3007cFf2B4b79998905146bF41a6730f4f22c629`](https://scan.pulsechain.com/address/0x3007cFf2B4b79998905146bF41a6730f4f22c629) |
-| $20 | [`0x7c3CAC0556F00e48fB0E5400EF1877f966609952`](https://scan.pulsechain.com/address/0x7c3CAC0556F00e48fB0E5400EF1877f966609952) |
-| $50 | [`0x91EF673aECE26703D9B72E8eB591253F7b26F6B6`](https://scan.pulsechain.com/address/0x91EF673aECE26703D9B72E8eB591253F7b26F6B6) |
-| $100 | [`0xcDff42f6803Df9B9D76723263E73F017c97F68F7`](https://scan.pulsechain.com/address/0xcDff42f6803Df9B9D76723263E73F017c97F68F7) |
+**pSunDAI Shields** · Token: [`0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f`](https://scan.pulsechain.com/address/0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f) — **Coming Soon**
 
 **USDC Shields** · Token: [`0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07`](https://scan.pulsechain.com/address/0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07)
 
