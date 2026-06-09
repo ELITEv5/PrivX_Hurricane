@@ -225,7 +225,7 @@
     <div class="section-label">Choose Currency</div>
     <div class="token-grid">
       <div class="token-card active" id="buy-tok-dai"     onclick="selectBuyToken('dai')">    <div class="tc-name">DAI</div>    <div class="tc-sub">Stablecoin</div></div>
-      <div class="token-card" id="buy-tok-psundai" style="opacity:.45;cursor:not-allowed;position:relative" title="Coming Soon"><div class="tc-name">pSunDAI</div><div class="tc-sub" style="color:#a78bfa">Coming Soon</div></div>
+      <div class="token-card" id="buy-tok-psundai" onclick="selectBuyToken('psundai')"><div class="tc-name">pSunDAI</div><div class="tc-sub">Autonomous Stable</div></div>
       <div class="token-card"        id="buy-tok-usdc"    onclick="selectBuyToken('usdc')">   <div class="tc-name">USDC</div>   <div class="tc-sub">USD Coin</div></div>
     </div>
 
@@ -733,7 +733,6 @@ async function connectWallet() {
 // ─── BUY CASH TAB ────────────────────────────────────────────────────────────
 
 function selectBuyToken(tok) {
-  if (tok === 'psundai') return;
   selectedBuyToken = tok;
   selectedDenom    = null;
   document.querySelectorAll('.token-card').forEach(c => c.classList.remove('active'));
