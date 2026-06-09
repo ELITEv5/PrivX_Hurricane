@@ -2,11 +2,11 @@
 
 > Zero-knowledge token shielding on PulseChain. Shield tokens. Generate a Proof of Privacy. Mine PRIVX.
 
-**PrivX Hurricane** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx.html) &nbsp;·&nbsp; [IPFS](https://ipfs.io/ipfs/bafybeigie47gxgpxhp6audqmpbxo7xoprzcsxryqkt476suolxwqwl7wde/index.html)
+**PrivX Hurricane** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx.html) &nbsp;·&nbsp; [IPFS](https://ipfs.io/ipfs/bafybeid7kcfb3j3qg23u3es3ozlcla3o3y7gpkmdkpkpbrr7yavjuamjzy/index.html)
 
-**PrivX Pay ATM** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx-pay.html) &nbsp;·&nbsp; [IPFS](https://ipfs.io/ipfs/bafybeigie47gxgpxhp6audqmpbxo7xoprzcsxryqkt476suolxwqwl7wde/privx-pay.html) — private stablecoin cash, desktop ATM
+**PrivX Pay ATM** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx-pay.html) &nbsp;·&nbsp; [IPFS](https://ipfs.io/ipfs/bafybeid7kcfb3j3qg23u3es3ozlcla3o3y7gpkmdkpkpbrr7yavjuamjzy/privx-pay.html) — private stablecoin cash, desktop ATM
 
-**PrivX Pay Wallet** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx-pay-wallet.html) &nbsp;·&nbsp; [IPFS](https://ipfs.io/ipfs/bafybeigie47gxgpxhp6audqmpbxo7xoprzcsxryqkt476suolxwqwl7wde/privx-pay-wallet.html) — PIN-protected mobile wallet with seed recovery
+**PrivX Pay Wallet** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx-pay-wallet.html) &nbsp;·&nbsp; [IPFS](https://ipfs.io/ipfs/bafybeid7kcfb3j3qg23u3es3ozlcla3o3y7gpkmdkpkpbrr7yavjuamjzy/privx-pay-wallet.html) — PIN-protected mobile wallet with seed recovery
 
 **Chain:** PulseChain (chainId 369)
 
@@ -39,19 +39,28 @@ You have tokens to shield                 From a fresh wallet
 
 ---
 
-## Supported Tokens — 9 Tokens, 36 Pools
+## Supported Tokens — Hurricane: 6 Tokens, 24 Pools · Pay: 3 Tokens, 18 Pools
+
+**PrivX Hurricane**
 
 | Token | Denominations | Token CA |
 |---|---|---|
-| PLS | 100K / 1M / 10M / 100M | Native |
+| PLS (WPLS) | 100K / 1M / 10M / 100M | `0xA1077a294dDE1B09bB078844df40758a5D0f9a27` |
 | HEX | 1K / 10K / 100K / 1M | `0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39` |
 | PLSX | 100K / 1M / 10M / 100M | `0x95B303987A60C71504D99Aa1b13B4DA07b0790ab` |
 | DAI | 10 / 100 / 1K / 10K | `0xefD766cCb38EaF1dfd701853BFCe31359239F305` |
 | WETH | 0.01 / 0.1 / 1 / 10 | `0x02DcdD04e3F455D838cd1249292C58f3B79e3C3C` |
-| pSunDAI | 10 / 100 / 1K / 10K | `0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f` |
-| pDAI | 1K / 10K / 100K / 1M | `0x6B175474E89094C44Da98b954EedeAC495271d0F` |
-| pCOCK | 100 / 1K / 10K / 100K | `0xc10A4Ed9b4042222d69ff0B374eddd47ed90fC1F` |
 | PrivX | 100 / 1K / 10K / 100K | `0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986` |
+
+**PrivX Pay**
+
+| Token | Denominations | Token CA |
+|---|---|---|
+| DAI | $1 / $5 / $10 / $20 / $50 / $100 | `0xefD766cCb38EaF1dfd701853BFCe31359239F305` |
+| USDC | $1 / $5 / $10 / $20 / $50 / $100 | `0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07` |
+| pSunDAI | $1 / $5 / $10 / $20 / $50 / $100 | `0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f` |
+
+DAI $10 / $100 shields serve both protocols — same contract address in both Hurricane and Pay.
 
 ---
 
@@ -59,20 +68,30 @@ You have tokens to shield                 From a fresh wallet
 
 ### Shield Contracts
 
-Two shield contract variants share the same ZK circuit:
+Two shield contract variants cover all tokens:
 
-**`PrivX_Shield_V2.sol`** — Universal ERC-20 shield. Used for all tokens except native PLS. Fully immutable after deployment — no owner, no admin key, no upgrade proxy, no pause function.
+**`PrivX_Shield_V3.sol`** — Universal ERC-20 shield. Used for HEX, PLSX, DAI, WETH, and PrivX. Fully immutable after deployment — no owner, no admin key, no upgrade proxy, no pause function. V3 adds SNARK field overflow checks on all 4 public inputs.
 
-**`PrivX_PLS_Shield.sol`** — Native PLS shield. Wraps PLS → WPLS on deposit and unwraps WPLS → PLS on withdrawal. Same immutability guarantees.
+**`PrivX_PLS_Shield_V3.sol`** — Native PLS shield. Payable `deposit()` wraps PLS→WPLS internally; `withdraw()` unwraps WPLS→PLS and sends native PLS to the recipient address. Ensures recipients receive native PLS, not WPLS — critical for funding fresh wallets. Same immutability and V3 security guarantees as the ERC-20 variant.
 
-Both use `miningRewardAmount` — a constructor parameter that normalises POP rewards across all tokens regardless of denomination size or token decimals. Every d0 denomination earns the same PRIVX regardless of which token is shielded:
+`miningRewardAmount` is a constructor parameter that normalises POP rewards across all tokens regardless of denomination size or token decimals.
+
+**Hurricane fixed tiers (all 6 tokens):**
 
 | Tier | `miningRewardAmount` | PRIVX reward at peak vault |
 |---|---|---|
-| d0 | `1_000e18` | ~10 PRIVX |
-| d1 | `10_000e18` | ~100 PRIVX |
-| d2 | `100_000e18` | ~1,000 PRIVX |
-| d3 | `1_000_000e18` | ~10,000 PRIVX |
+| d0 | `100e18` | ~1 PRIVX |
+| d1 | `1_000e18` | ~10 PRIVX |
+| d2 | `10_000e18` | ~100 PRIVX |
+| d3 | `100_000e18` | ~1,000 PRIVX |
+
+**Pay proportional tiers (stables — denomination × 10 PRIVX):**
+
+| Denomination | `miningRewardAmount` | PRIVX reward at peak vault |
+|---|---|---|
+| $1 | `10e18` | ~0.1 PRIVX |
+| $10 | `100e18` | ~1 PRIVX |
+| $100 | `1_000e18` | ~10 PRIVX |
 
 - **Merkle tree:** 14-level incremental Poseidon Merkle tree (16,384 leaves per pool)
 - **Root history:** Last 100 roots stored — allows ~100 concurrent pending withdrawals
@@ -136,86 +155,59 @@ The recipient address is cryptographically embedded into the ZK proof at generat
 | Fee Vault | [`0x54818356b47b5F7b52DceAbf2B6eF52Cf8b072Fd`](https://scan.pulsechain.com/address/0x54818356b47b5F7b52DceAbf2B6eF52Cf8b072Fd) |
 | PRIVX Token | [`0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986`](https://scan.pulsechain.com/address/0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986) |
 
-### PLS Shields
+### PLS Shields (V3 — native PLS wrap/unwrap)
 
 | Denomination | Address |
 |---|---|
-| 100,000 PLS | [`0xFdbd8a02f112e722543C12bce3596f42b9Bb3b72`](https://scan.pulsechain.com/address/0xFdbd8a02f112e722543C12bce3596f42b9Bb3b72) |
-| 1,000,000 PLS | [`0xfD03a99A337931de9a217E5836046CBF13578B18`](https://scan.pulsechain.com/address/0xfD03a99A337931de9a217E5836046CBF13578B18) |
-| 10,000,000 PLS | [`0xE97135be5b9D6A3020C733AD122c4A6092ABF1F7`](https://scan.pulsechain.com/address/0xE97135be5b9D6A3020C733AD122c4A6092ABF1F7) |
-| 100,000,000 PLS | [`0xEB4297A2c769eD02778Fa9D3197a58665beD8834`](https://scan.pulsechain.com/address/0xEB4297A2c769eD02778Fa9D3197a58665beD8834) |
+| 100,000 PLS | [`0x4B24FDAEC9A7C11aBE0011Ae812358F2Fe14fCC8`](https://scan.pulsechain.com/address/0x4B24FDAEC9A7C11aBE0011Ae812358F2Fe14fCC8) |
+| 1,000,000 PLS | [`0x0aC3EF852345c9385b7aEd07d592241bC8BD3547`](https://scan.pulsechain.com/address/0x0aC3EF852345c9385b7aEd07d592241bC8BD3547) |
+| 10,000,000 PLS | [`0x7E89CF958bA87Ca35b2DD988620F35e323733bd5`](https://scan.pulsechain.com/address/0x7E89CF958bA87Ca35b2DD988620F35e323733bd5) |
+| 100,000,000 PLS | [`0xDe853DCcE8325FDe98cE1794143115811BA0822d`](https://scan.pulsechain.com/address/0xDe853DCcE8325FDe98cE1794143115811BA0822d) |
 
-### HEX Shields
-
-| Denomination | Address |
-|---|---|
-| 1,000 HEX | [`0x833F7eDDbCe1e713e83b83006A793C3A51d00eE2`](https://scan.pulsechain.com/address/0x833F7eDDbCe1e713e83b83006A793C3A51d00eE2) |
-| 10,000 HEX | [`0xAdd967989567A8cD6a5473e79B43A44fca139d2C`](https://scan.pulsechain.com/address/0xAdd967989567A8cD6a5473e79B43A44fca139d2C) |
-| 100,000 HEX | [`0x7FC864dA7aAcc6EcAf6E9D5baC442429734a66Ee`](https://scan.pulsechain.com/address/0x7FC864dA7aAcc6EcAf6E9D5baC442429734a66Ee) |
-| 1,000,000 HEX | [`0x7D33b4ace754062d17256a65c046068a7f49651C`](https://scan.pulsechain.com/address/0x7D33b4ace754062d17256a65c046068a7f49651C) |
-
-### PLSX Shields
+### HEX Shields (V3)
 
 | Denomination | Address |
 |---|---|
-| 100,000 PLSX | [`0x9632527f45A93579C0c26b58c7d99267997264Fb`](https://scan.pulsechain.com/address/0x9632527f45A93579C0c26b58c7d99267997264Fb) |
-| 1,000,000 PLSX | [`0x0C0aFe4Df8DBf983A3045AC1FB04d6b2f503d4fe`](https://scan.pulsechain.com/address/0x0C0aFe4Df8DBf983A3045AC1FB04d6b2f503d4fe) |
-| 10,000,000 PLSX | [`0x951bde47464C6a1BB34BF10bC85a7cAE9C418534`](https://scan.pulsechain.com/address/0x951bde47464C6a1BB34BF10bC85a7cAE9C418534) |
-| 100,000,000 PLSX | [`0xF039cEc211769bdc29De85FF19c3dAe85aabA75d`](https://scan.pulsechain.com/address/0xF039cEc211769bdc29De85FF19c3dAe85aabA75d) |
+| 1,000 HEX | [`0xfaF31B882e8E6f108c4174b27317D933fEDbC904`](https://scan.pulsechain.com/address/0xfaF31B882e8E6f108c4174b27317D933fEDbC904) |
+| 10,000 HEX | [`0x266E7Ee64254aD21B2b455681d6Dd42c94f0b59f`](https://scan.pulsechain.com/address/0x266E7Ee64254aD21B2b455681d6Dd42c94f0b59f) |
+| 100,000 HEX | [`0xf5900Ca66bb477f27d2f48Ea38349F463B818627`](https://scan.pulsechain.com/address/0xf5900Ca66bb477f27d2f48Ea38349F463B818627) |
+| 1,000,000 HEX | [`0x4495808b2Cd678CC59805A9E2Bd1C96805529F81`](https://scan.pulsechain.com/address/0x4495808b2Cd678CC59805A9E2Bd1C96805529F81) |
 
-### DAI Shields
-
-| Denomination | Address |
-|---|---|
-| 10 DAI | [`0x34FC19C51f3CdD7E644f551db6698C3A90112667`](https://scan.pulsechain.com/address/0x34FC19C51f3CdD7E644f551db6698C3A90112667) |
-| 100 DAI | [`0x73B23CD11ca4260A266A05539b077CF4CD746bcd`](https://scan.pulsechain.com/address/0x73B23CD11ca4260A266A05539b077CF4CD746bcd) |
-| 1,000 DAI | [`0x59f51683F93a2Fe8eE4b34408539Eb982Bbd94B2`](https://scan.pulsechain.com/address/0x59f51683F93a2Fe8eE4b34408539Eb982Bbd94B2) |
-| 10,000 DAI | [`0x8491102480Ce130ECA02f68fEBF6867c64FA69ea`](https://scan.pulsechain.com/address/0x8491102480Ce130ECA02f68fEBF6867c64FA69ea) |
-
-### WETH Shields
+### PLSX Shields (V3)
 
 | Denomination | Address |
 |---|---|
-| 0.01 WETH | [`0xD446cbF3BBae6f90E7a1a48E853F35A269cE7Cde`](https://scan.pulsechain.com/address/0xD446cbF3BBae6f90E7a1a48E853F35A269cE7Cde) |
-| 0.1 WETH | [`0xC028eacB0c047bA28Df00Ab7399f5F60fE6D9a99`](https://scan.pulsechain.com/address/0xC028eacB0c047bA28Df00Ab7399f5F60fE6D9a99) |
-| 1 WETH | [`0xEE47263286265Db0551a9895FB02CA892821251F`](https://scan.pulsechain.com/address/0xEE47263286265Db0551a9895FB02CA892821251F) |
-| 10 WETH | [`0xb7b951763A8794d2366C0cb9bd5FA79B239de6ee`](https://scan.pulsechain.com/address/0xb7b951763A8794d2366C0cb9bd5FA79B239de6ee) |
+| 100,000 PLSX | [`0xa17c9e32AC4C0e231c472e8958CbC067916Da8FB`](https://scan.pulsechain.com/address/0xa17c9e32AC4C0e231c472e8958CbC067916Da8FB) |
+| 1,000,000 PLSX | [`0x7E1395607AAE569ef246Dfe1E9E8723ef7c956b3`](https://scan.pulsechain.com/address/0x7E1395607AAE569ef246Dfe1E9E8723ef7c956b3) |
+| 10,000,000 PLSX | [`0xD3B401bd5578D8887243198D39705dCaC72870d4`](https://scan.pulsechain.com/address/0xD3B401bd5578D8887243198D39705dCaC72870d4) |
+| 100,000,000 PLSX | [`0x61bBB40C624bd8F3d75A73324F58F26Eb7A034CD`](https://scan.pulsechain.com/address/0x61bBB40C624bd8F3d75A73324F58F26Eb7A034CD) |
 
-### pSunDAI Shields
-
-| Denomination | Address |
-|---|---|
-| 10 pSunDAI | [`0xB2C642DB931B9E8FdC0A2014C71E8C6Da480f3f9`](https://scan.pulsechain.com/address/0xB2C642DB931B9E8FdC0A2014C71E8C6Da480f3f9) |
-| 100 pSunDAI | [`0xD8F8D437210EfE57F0161606F62C594290e17A7C`](https://scan.pulsechain.com/address/0xD8F8D437210EfE57F0161606F62C594290e17A7C) |
-| 1,000 pSunDAI | [`0xcd47aea1ff4cF308CF467B939C0Bb95aFA55DeFC`](https://scan.pulsechain.com/address/0xcd47aea1ff4cF308CF467B939C0Bb95aFA55DeFC) |
-| 10,000 pSunDAI | [`0x085f0f464fF5cc5C50e176A50f3EF8bE3513B652`](https://scan.pulsechain.com/address/0x085f0f464fF5cc5C50e176A50f3EF8bE3513B652) |
-
-### pDAI Shields
+### DAI Shields (V3 — shared with Pay $10/$100)
 
 | Denomination | Address |
 |---|---|
-| 1,000 pDAI | [`0x94D0Df289cE310462Fee8137aF945381844B94D1`](https://scan.pulsechain.com/address/0x94D0Df289cE310462Fee8137aF945381844B94D1) |
-| 10,000 pDAI | [`0xc00D854d2fCBEdBe8A717c01a15C1351722858E7`](https://scan.pulsechain.com/address/0xc00D854d2fCBEdBe8A717c01a15C1351722858E7) |
-| 100,000 pDAI | [`0x5136467D3E81bF2a722f364900DF2982adeE02EE`](https://scan.pulsechain.com/address/0x5136467D3E81bF2a722f364900DF2982adeE02EE) |
-| 1,000,000 pDAI | [`0xBbaFF183588FAB20cC24F67De7cd4263670a09E5`](https://scan.pulsechain.com/address/0xBbaFF183588FAB20cC24F67De7cd4263670a09E5) |
+| 10 DAI | [`0xFe63926D5535EA3B6e1EA204bdDf93F4E2a4b906`](https://scan.pulsechain.com/address/0xFe63926D5535EA3B6e1EA204bdDf93F4E2a4b906) ← also Pay $10 |
+| 100 DAI | [`0xDA6e061F10deE54DDcF8B3d054F2fdDC5848Ee79`](https://scan.pulsechain.com/address/0xDA6e061F10deE54DDcF8B3d054F2fdDC5848Ee79) ← also Pay $100 |
+| 1,000 DAI | [`0xc78011A35A2416515750C1f095e559b341BF6706`](https://scan.pulsechain.com/address/0xc78011A35A2416515750C1f095e559b341BF6706) |
+| 10,000 DAI | [`0x22a62AdcD8307Ca2C3934AC851a1fc4bebfe5Af7`](https://scan.pulsechain.com/address/0x22a62AdcD8307Ca2C3934AC851a1fc4bebfe5Af7) |
 
-### pCOCK Shields
-
-| Denomination | Address |
-|---|---|
-| 100 pCOCK | [`0x8F63010C4e5FE11f09654B9ff3471e81C36b4883`](https://scan.pulsechain.com/address/0x8F63010C4e5FE11f09654B9ff3471e81C36b4883) |
-| 1,000 pCOCK | [`0x9DB59C1dc7C047d2c54ADb7c34f5E160cc94f52A`](https://scan.pulsechain.com/address/0x9DB59C1dc7C047d2c54ADb7c34f5E160cc94f52A) |
-| 10,000 pCOCK | [`0x81529f59F47Ed1f12D934e9cCa61a1637Ed1D02c`](https://scan.pulsechain.com/address/0x81529f59F47Ed1f12D934e9cCa61a1637Ed1D02c) |
-| 100,000 pCOCK | [`0xAe177f2e240FE3001addeFb93AAB69E853C5abAb`](https://scan.pulsechain.com/address/0xAe177f2e240FE3001addeFb93AAB69E853C5abAb) |
-
-### PrivX Shields
+### WETH Shields (V3)
 
 | Denomination | Address |
 |---|---|
-| 100 PrivX | [`0x74471E88588c2dF518379c4f9feC981158f741F4`](https://scan.pulsechain.com/address/0x74471E88588c2dF518379c4f9feC981158f741F4) |
-| 1,000 PrivX | [`0xAbbF7729949eb15Ba2A9e739b591db7585d252ae`](https://scan.pulsechain.com/address/0xAbbF7729949eb15Ba2A9e739b591db7585d252ae) |
-| 10,000 PrivX | [`0x7DBc9558DA5aA494302d2099f5F36F307988a84a`](https://scan.pulsechain.com/address/0x7DBc9558DA5aA494302d2099f5F36F307988a84a) |
-| 100,000 PrivX | [`0x72DDf291c8cE3e2DCb7C555b48E09Cd353CE9177`](https://scan.pulsechain.com/address/0x72DDf291c8cE3e2DCb7C555b48E09Cd353CE9177) |
+| 0.01 WETH | [`0xAc4590446C34C2A470bd9F273CAD89e5F8E11df5`](https://scan.pulsechain.com/address/0xAc4590446C34C2A470bd9F273CAD89e5F8E11df5) |
+| 0.1 WETH | [`0x91BE28f8342dE81ce4646B4e80Bf353ea1568f8C`](https://scan.pulsechain.com/address/0x91BE28f8342dE81ce4646B4e80Bf353ea1568f8C) |
+| 1 WETH | [`0xC8666F477e954957b983c3CaE70B2E9Fb288661c`](https://scan.pulsechain.com/address/0xC8666F477e954957b983c3CaE70B2E9Fb288661c) |
+| 10 WETH | [`0x62215cCcF17858fc21B3aA05C6184f9115F8c6Da`](https://scan.pulsechain.com/address/0x62215cCcF17858fc21B3aA05C6184f9115F8c6Da) |
+
+### PrivX Shields (V3)
+
+| Denomination | Address |
+|---|---|
+| 100 PrivX | [`0x25B19282552cc67D4C95Ad9986FCC154166Db5BB`](https://scan.pulsechain.com/address/0x25B19282552cc67D4C95Ad9986FCC154166Db5BB) |
+| 1,000 PrivX | [`0xFFeADBA1cbe580aE98bEBcB7202aF546E6F92D68`](https://scan.pulsechain.com/address/0xFFeADBA1cbe580aE98bEBcB7202aF546E6F92D68) |
+| 10,000 PrivX | [`0xF7EeC1FEE57A19102aa6227A851D9F5511310Bb9`](https://scan.pulsechain.com/address/0xF7EeC1FEE57A19102aa6227A851D9F5511310Bb9) |
+| 100,000 PrivX | [`0x03EE452ea4049b97917Ea54e7fe06262290c5041`](https://scan.pulsechain.com/address/0x03EE452ea4049b97917Ea54e7fe06262290c5041) |
 
 ---
 
@@ -387,16 +379,20 @@ The proving key (~31MB) is fetched from IPFS on first use and cached in memory f
 
 ## Deploying New Token Shields
 
-Use `PrivX_Shield_V2.sol` for all new ERC-20 token shields. Set `_miningRewardAmount` to the standard tier value, not the raw denomination wei:
+Use `PrivX_Shield_V3.sol` for all new ERC-20 token shields. PLS also uses this contract with the WPLS token address (`0xA1077a294dDE1B09bB078844df40758a5D0f9a27`). Set `_miningRewardAmount` to the V3 tier value:
 
 ```
-d0 → 1_000e18    (~10 PRIVX reward at peak vault)
-d1 → 10_000e18
-d2 → 100_000e18
-d3 → 1_000_000e18
-```
+Hurricane fixed tiers (all tokens):
+  d0 →    100e18   (~1 PRIVX reward at peak vault)
+  d1 →  1_000e18
+  d2 → 10_000e18
+  d3 → 100_000e18
 
-For native PLS use `PrivX_PLS_Shield.sol` with the same values.
+Pay stables (denomination × 10 PRIVX):
+  $1  →    10e18   $5  →    50e18
+  $10 →   100e18   $20 →   200e18
+  $50 →   500e18   $100 → 1_000e18
+```
 
 **Setup flow:**
 1. Deploy 4× shield contracts with token address, denominations, and `_miningRewardAmount`
@@ -440,31 +436,40 @@ PIN-protected mobile PWA for holding and redeeming notes. Designed to live on yo
 | Fee Vault | [`0x54818356b47b5F7b52DceAbf2B6eF52Cf8b072Fd`](https://scan.pulsechain.com/address/0x54818356b47b5F7b52DceAbf2B6eF52Cf8b072Fd) |
 | PRIVX Token | [`0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986`](https://scan.pulsechain.com/address/0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986) |
 
-**DAI Shields** · Token: [`0xefD766cCb38EaF1dfd701853BFCe31359239F305`](https://scan.pulsechain.com/address/0xefD766cCb38EaF1dfd701853BFCe31359239F305)
+**DAI Shields (V4)** · Token: [`0xefD766cCb38EaF1dfd701853BFCe31359239F305`](https://scan.pulsechain.com/address/0xefD766cCb38EaF1dfd701853BFCe31359239F305)
 
 | Denomination | Shield Contract |
 |---|---|
-| $1 | [`0x52d5ACf3f0117955Ed7fd19735403372Df3B23F5`](https://scan.pulsechain.com/address/0x52d5ACf3f0117955Ed7fd19735403372Df3B23F5) |
-| $5 | [`0xfB18BE84A0d5f063cAfD0d54fF232ea90C6c022E`](https://scan.pulsechain.com/address/0xfB18BE84A0d5f063cAfD0d54fF232ea90C6c022E) |
-| $10 | [`0xc46bb4Dc486228f8A9c6B2638c5c896f911c8f98`](https://scan.pulsechain.com/address/0xc46bb4Dc486228f8A9c6B2638c5c896f911c8f98) |
-| $20 | [`0x353D7b8a33039F58D32331548AfADa38ef9fBd63`](https://scan.pulsechain.com/address/0x353D7b8a33039F58D32331548AfADa38ef9fBd63) |
-| $50 | [`0xB8a283dBFF9a254Bd687Acc5aCE9AbdC5d7A5145`](https://scan.pulsechain.com/address/0xB8a283dBFF9a254Bd687Acc5aCE9AbdC5d7A5145) |
-| $100 | [`0xe28eeF832d801869e4789ec6aC20019D4149524C`](https://scan.pulsechain.com/address/0xe28eeF832d801869e4789ec6aC20019D4149524C) |
+| $1 | [`0xdDdf0fe3A1A85eA5A913347FF8069a04390e4C31`](https://scan.pulsechain.com/address/0xdDdf0fe3A1A85eA5A913347FF8069a04390e4C31) |
+| $5 | [`0x1D57f03d48A2E5d9cE97d73F2f7710c313ee8577`](https://scan.pulsechain.com/address/0x1D57f03d48A2E5d9cE97d73F2f7710c313ee8577) |
+| $10 | [`0xFe63926D5535EA3B6e1EA204bdDf93F4E2a4b906`](https://scan.pulsechain.com/address/0xFe63926D5535EA3B6e1EA204bdDf93F4E2a4b906) ← also Hurricane 10 DAI |
+| $20 | [`0xE0fA07E91a4A1005C63f9414Fe11B9E84C9C599B`](https://scan.pulsechain.com/address/0xE0fA07E91a4A1005C63f9414Fe11B9E84C9C599B) |
+| $50 | [`0x7cfe4718be7991fCA3979Fb0008Bd26e51D01980`](https://scan.pulsechain.com/address/0x7cfe4718be7991fCA3979Fb0008Bd26e51D01980) |
+| $100 | [`0xDA6e061F10deE54DDcF8B3d054F2fdDC5848Ee79`](https://scan.pulsechain.com/address/0xDA6e061F10deE54DDcF8B3d054F2fdDC5848Ee79) ← also Hurricane 100 DAI |
 
-**pSunDAI Shields** · Token: [`0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f`](https://scan.pulsechain.com/address/0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f) — **Coming Soon**
-
-**USDC Shields** · Token: [`0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07`](https://scan.pulsechain.com/address/0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07)
+**pSunDAI Shields (V4)** · Token: [`0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f`](https://scan.pulsechain.com/address/0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f)
 
 | Denomination | Shield Contract |
 |---|---|
-| $1 | [`0xF67181F8E84Afb0B6fFc0966C1B5560425d7725c`](https://scan.pulsechain.com/address/0xF67181F8E84Afb0B6fFc0966C1B5560425d7725c) |
-| $5 | [`0x6F6c19fa4e3b47d34EDdc1CFD68dF10EB6bF1555`](https://scan.pulsechain.com/address/0x6F6c19fa4e3b47d34EDdc1CFD68dF10EB6bF1555) |
-| $10 | [`0x0D19A83E5b6332378e70c1B53C3473F1C96D38f5`](https://scan.pulsechain.com/address/0x0D19A83E5b6332378e70c1B53C3473F1C96D38f5) |
-| $20 | [`0x8cB8F00EC4C6A058D2839202a8cBF3350a3E652A`](https://scan.pulsechain.com/address/0x8cB8F00EC4C6A058D2839202a8cBF3350a3E652A) |
-| $50 | [`0x219089692bF3819a64f7d99e31c89BCF2539Fdde`](https://scan.pulsechain.com/address/0x219089692bF3819a64f7d99e31c89BCF2539Fdde) |
-| $100 | [`0x28757c786Ec67ea12f06C3e267853C5EA23D6684`](https://scan.pulsechain.com/address/0x28757c786Ec67ea12f06C3e267853C5EA23D6684) |
+| $1 | [`0x35187f9aa04297A17Ce123B99e19573fCa389b86`](https://scan.pulsechain.com/address/0x35187f9aa04297A17Ce123B99e19573fCa389b86) |
+| $5 | [`0x163b7E39E9019245dF6648b7B9DE99eDe328705F`](https://scan.pulsechain.com/address/0x163b7E39E9019245dF6648b7B9DE99eDe328705F) |
+| $10 | [`0x6b17dD5c9DCde755AF4f1797e626B23A7Ec33CD4`](https://scan.pulsechain.com/address/0x6b17dD5c9DCde755AF4f1797e626B23A7Ec33CD4) |
+| $20 | [`0xc8aCD0E405939CF7c29F3e16037098F186d83B1A`](https://scan.pulsechain.com/address/0xc8aCD0E405939CF7c29F3e16037098F186d83B1A) |
+| $50 | [`0xbEb3eb96F3379D664f314aeEf1D401D630bE8eA4`](https://scan.pulsechain.com/address/0xbEb3eb96F3379D664f314aeEf1D401D630bE8eA4) |
+| $100 | [`0x1720103Ac2f5E8d50Cb52bf3f55A2da973E7959D`](https://scan.pulsechain.com/address/0x1720103Ac2f5E8d50Cb52bf3f55A2da973E7959D) |
 
-All 18 PrivX Pay shield contracts are fully immutable — no admin key, no pause, no upgrade. The 0.5% deposit fee and PRIVX mining reward are fixed at construction.
+**USDC Shields (V4)** · Token: [`0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07`](https://scan.pulsechain.com/address/0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07)
+
+| Denomination | Shield Contract |
+|---|---|
+| $1 | [`0x6613d13bf8deB21cA06062904C875b36D053F04e`](https://scan.pulsechain.com/address/0x6613d13bf8deB21cA06062904C875b36D053F04e) |
+| $5 | [`0x96A869E58B97736615e57742a920667100A801d7`](https://scan.pulsechain.com/address/0x96A869E58B97736615e57742a920667100A801d7) |
+| $10 | [`0xe853A0966C4Add92D8c5935486B7E7fF7194a079`](https://scan.pulsechain.com/address/0xe853A0966C4Add92D8c5935486B7E7fF7194a079) |
+| $20 | [`0x658b5d0793b6796D6E3e95671C183b4B2F8CC24A`](https://scan.pulsechain.com/address/0x658b5d0793b6796D6E3e95671C183b4B2F8CC24A) |
+| $50 | [`0x835c48cF6270f2efF812254b1425400432652fB0`](https://scan.pulsechain.com/address/0x835c48cF6270f2efF812254b1425400432652fB0) |
+| $100 | [`0xc9569CF23D706627d7901ad15d9fBfaA49B0D5E2`](https://scan.pulsechain.com/address/0xc9569CF23D706627d7901ad15d9fBfaA49B0D5E2) |
+
+All 40 PrivX shield contracts are fully immutable — no admin key, no pause, no upgrade. The 0.5% deposit fee and PRIVX mining reward are fixed at construction.
 
 ### Note Format
 
