@@ -470,7 +470,7 @@ PIN-protected mobile PWA for holding and redeeming notes. Designed to live on yo
 | $5 | [`0x53B91dB1485f687D8d162f1268D8485EBB85dF13`](https://scan.pulsechain.com/address/0x53B91dB1485f687D8d162f1268D8485EBB85dF13) |
 | $10 | [`0x59f40474834C6Cb3Bf3A5189f6B6f525d22f80A4`](https://scan.pulsechain.com/address/0x59f40474834C6Cb3Bf3A5189f6B6f525d22f80A4) |
 | $20 | [`0x5965FEa1E24472d64F3a24Edb9e663Bc728Caee6`](https://scan.pulsechain.com/address/0x5965FEa1E24472d64F3a24Edb9e663Bc728Caee6) |
-| $50 | [`0x124A85fDB4ec3F11Ab257F6d4fC2eED8A4A6661fe`](https://scan.pulsechain.com/address/0x124A85fDB4ec3F11Ab257F6d4fC2eED8A4A6661fe) |
+| $50 | [`0x124A85fDB4ec3F11Ab257F6d4fC2eD8A4A6661fe`](https://scan.pulsechain.com/address/0x124A85fDB4ec3F11Ab257F6d4fC2eD8A4A6661fe) |
 | $100 | [`0x883c74eFC878105cbDd15FB546A1a32F4fA45d5b`](https://scan.pulsechain.com/address/0x883c74eFC878105cbDd15FB546A1a32F4fA45d5b) |
 
 All 18 PrivX Pay shield contracts are fully immutable — no admin key, no pause, no upgrade. The 0.5% deposit fee and PRIVX mining reward are fixed at construction.
