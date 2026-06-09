@@ -10,7 +10,7 @@
 
 **Chain:** PulseChain (chainId 369)
 
---
+---
 
 ## What Is PrivX Hurricane?
 
@@ -436,7 +436,7 @@ PIN-protected mobile PWA for holding and redeeming notes. Designed to live on yo
 
 | Contract | Address |
 |---|---|
-| HP Mining Vault | [`0xf7Abeb9a3ccea1B8c30ca8a6d359c609B0751650`](https://scan.pulsechain.com/address/0xf7Abeb9a3ccea1B8c30ca8a6d359c609B0751650) |
+| Mining Vault | [`0x7f6D1165a15a7DC4Bbbf27C6C18de7bfAA9E718C`](https://scan.pulsechain.com/address/0x7f6D1165a15a7DC4Bbbf27C6C18de7bfAA9E718C) |
 | Fee Vault | [`0x54818356b47b5F7b52DceAbf2B6eF52Cf8b072Fd`](https://scan.pulsechain.com/address/0x54818356b47b5F7b52DceAbf2B6eF52Cf8b072Fd) |
 | PRIVX Token | [`0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986`](https://scan.pulsechain.com/address/0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986) |
 
@@ -444,12 +444,12 @@ PIN-protected mobile PWA for holding and redeeming notes. Designed to live on yo
 
 | Denomination | Shield Contract |
 |---|---|
-| $1 | [`0x9ABb21e92f4f589515A65aEa79dc920b40A799D4`](https://scan.pulsechain.com/address/0x9ABb21e92f4f589515A65aEa79dc920b40A799D4) |
-| $5 | [`0x0840430d8870933614EFE7f3F45119CcA738B6E2`](https://scan.pulsechain.com/address/0x0840430d8870933614EFE7f3F45119CcA738B6E2) |
-| $10 | [`0x19a9Db059A2C1777Ea4d09dC8d234aD79b21F406`](https://scan.pulsechain.com/address/0x19a9Db059A2C1777Ea4d09dC8d234aD79b21F406) |
-| $20 | [`0x1eeB506568054d0bb7e6977c8030B0ffd05Ef0D2`](https://scan.pulsechain.com/address/0x1eeB506568054d0bb7e6977c8030B0ffd05Ef0D2) |
-| $50 | [`0xc88c22f57a24A2559a3dd3780cE160241aec709F`](https://scan.pulsechain.com/address/0xc88c22f57a24A2559a3dd3780cE160241aec709F) |
-| $100 | [`0x9e85fDdD5d231265b247d3cBC4dB80505582486b`](https://scan.pulsechain.com/address/0x9e85fDdD5d231265b247d3cBC4dB80505582486b) |
+| $1 | [`0x52d5ACf3f0117955Ed7fd19735403372Df3B23F5`](https://scan.pulsechain.com/address/0x52d5ACf3f0117955Ed7fd19735403372Df3B23F5) |
+| $5 | [`0xfB18BE84A0d5f063cAfD0d54fF232ea90C6c022E`](https://scan.pulsechain.com/address/0xfB18BE84A0d5f063cAfD0d54fF232ea90C6c022E) |
+| $10 | [`0xc46bb4Dc486228f8A9c6B2638c5c896f911c8f98`](https://scan.pulsechain.com/address/0xc46bb4Dc486228f8A9c6B2638c5c896f911c8f98) |
+| $20 | [`0x353D7b8a33039F58D32331548AfADa38ef9fBd63`](https://scan.pulsechain.com/address/0x353D7b8a33039F58D32331548AfADa38ef9fBd63) |
+| $50 | [`0xB8a283dBFF9a254Bd687Acc5aCE9AbdC5d7A5145`](https://scan.pulsechain.com/address/0xB8a283dBFF9a254Bd687Acc5aCE9AbdC5d7A5145) |
+| $100 | [`0xe28eeF832d801869e4789ec6aC20019D4149524C`](https://scan.pulsechain.com/address/0xe28eeF832d801869e4789ec6aC20019D4149524C) |
 
 **pSunDAI Shields** · Token: [`0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f`](https://scan.pulsechain.com/address/0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f)
 
@@ -466,12 +466,12 @@ PIN-protected mobile PWA for holding and redeeming notes. Designed to live on yo
 
 | Denomination | Shield Contract |
 |---|---|
-| $1 | [`0x2856661A94483486e25dE8F37DCf867938a13778`](https://scan.pulsechain.com/address/0x2856661A94483486e25dE8F37DCf867938a13778) |
-| $5 | [`0x53B91dB1485f687D8d162f1268D8485EBB85dF13`](https://scan.pulsechain.com/address/0x53B91dB1485f687D8d162f1268D8485EBB85dF13) |
-| $10 | [`0x59f40474834C6Cb3Bf3A5189f6B6f525d22f80A4`](https://scan.pulsechain.com/address/0x59f40474834C6Cb3Bf3A5189f6B6f525d22f80A4) |
-| $20 | [`0x5965FEa1E24472d64F3a24Edb9e663Bc728Caee6`](https://scan.pulsechain.com/address/0x5965FEa1E24472d64F3a24Edb9e663Bc728Caee6) |
-| $50 | [`0x124A85fDB4ec3F11Ab257F6d4fC2eD8A4A6661fe`](https://scan.pulsechain.com/address/0x124A85fDB4ec3F11Ab257F6d4fC2eD8A4A6661fe) |
-| $100 | [`0x883c74eFC878105cbDd15FB546A1a32F4fA45d5b`](https://scan.pulsechain.com/address/0x883c74eFC878105cbDd15FB546A1a32F4fA45d5b) |
+| $1 | [`0xF67181F8E84Afb0B6fFc0966C1B5560425d7725c`](https://scan.pulsechain.com/address/0xF67181F8E84Afb0B6fFc0966C1B5560425d7725c) |
+| $5 | [`0x6F6c19fa4e3b47d34EDdc1CFD68dF10EB6bF1555`](https://scan.pulsechain.com/address/0x6F6c19fa4e3b47d34EDdc1CFD68dF10EB6bF1555) |
+| $10 | [`0x0D19A83E5b6332378e70c1B53C3473F1C96D38f5`](https://scan.pulsechain.com/address/0x0D19A83E5b6332378e70c1B53C3473F1C96D38f5) |
+| $20 | [`0x8cB8F00EC4C6A058D2839202a8cBF3350a3E652A`](https://scan.pulsechain.com/address/0x8cB8F00EC4C6A058D2839202a8cBF3350a3E652A) |
+| $50 | [`0x219089692bF3819a64f7d99e31c89BCF2539Fdde`](https://scan.pulsechain.com/address/0x219089692bF3819a64f7d99e31c89BCF2539Fdde) |
+| $100 | [`0x28757c786Ec67ea12f06C3e267853C5EA23D6684`](https://scan.pulsechain.com/address/0x28757c786Ec67ea12f06C3e267853C5EA23D6684) |
 
 All 18 PrivX Pay shield contracts are fully immutable — no admin key, no pause, no upgrade. The 0.5% deposit fee and PRIVX mining reward are fixed at construction.
 
