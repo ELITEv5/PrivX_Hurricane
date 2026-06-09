@@ -14,7 +14,7 @@
 
 ## What Is PrivX Hurricane?
 
-PrivX Hurricane is PulseChain's first PLONK-based privacy protocol, and the first of its kind to shield multiple tokens simultaneously. Deposit any of 9 supported tokens into a shielded pool and withdraw them to a completely unlinked address. Every withdrawal generates a **Proof of Privacy (POP)** and automatically pays PRIVX mining rewards. No PRIVX required to deposit — it is what you earn, not what you spend.
+PrivX Hurricane is PulseChain's first PLONK-based privacy protocol, and the first of its kind to shield multiple tokens simultaneously. Deposit any of 6 supported tokens into a shielded pool and withdraw them to a completely unlinked address. Every withdrawal generates a **Proof of Privacy (POP)** and automatically pays PRIVX mining rewards. No PRIVX required to deposit — it is what you earn, not what you spend.
 
 The withdrawal proof is a **PLONK zero-knowledge proof** generated entirely in your browser. It proves you know a valid deposit note without revealing which deposit it came from. The on-chain verifier checks the math. The contract releases your tokens. No one — not the development team, not a node operator, not a block explorer — can link your deposit to your withdrawal.
 
@@ -114,7 +114,7 @@ Fee token accumulated → swap to WPLS (PulseX V2)
      (locked forever)   (POP rewards)  (deflationary)
 ```
 
-LP tokens are permanently locked — Protocol-Owned Liquidity that compounds with every deposit across all 36 pools.
+LP tokens are permanently locked — Protocol-Owned Liquidity that compounds with every deposit across all 24 Hurricane pools and 18 Pay pools.
 
 ### Mining Vault (`PrivX_Mining_Vault_V2.sol`)
 
@@ -218,7 +218,7 @@ PRIVX is the **Proof-of-Privacy mining token**. Fixed supply of 21 million. No m
 **Value flywheel:**
 
 ```
-Shield deposit (any of 9 tokens, any of 36 pools)
+Shield deposit (any of 6 Hurricane tokens / 3 Pay tokens, 42 total pools)
        │
        └─ 0.5% fee → FeeVault
                          │
@@ -276,6 +276,7 @@ The proving key (`PrivXMixer14_final.zkey`) is pinned to IPFS and served directl
 | Proof generated client-side | ✅ Never leaves your browser |
 | Recipient bound into ZK proof | ✅ MEV-proof withdrawals |
 | Double-spend prevention | ✅ On-chain nullifier mapping |
+| Field-element aliasing (V3) | ✅ All 4 public signals checked < SNARK_FIELD before verification |
 | Cross-denomination replay blocked | ✅ nullifierHash = Poseidon(nullifier, denomination) |
 | Zero-root deposits blocked | ✅ require(commitment != 0) |
 | No owner / admin key on shields | ✅ Fully immutable |
@@ -333,8 +334,8 @@ plonk-zk/
 │       ├── PrivXMixer14.wasm          # Compiled circuit for browser proof generation
 │       └── witness_calculator.js
 ├── contracts/
-│   ├── PrivX_Shield_V2.sol            # Universal ERC-20 shield (all tokens except PLS)
-│   ├── PrivX_PLS_Shield.sol           # Native PLS shield (wraps/unwraps WPLS internally)
+│   ├── PrivX_Shield_V3.sol            # Universal ERC-20 shield (HEX, PLSX, DAI, WETH, PrivX)
+│   ├── PrivX_PLS_Shield_V3.sol        # Native PLS shield (wraps/unwraps WPLS internally)
 │   ├── PrivX_FeeVault.sol             # Fee conversion → POL + rewards + burn
 │   └── PrivX_Mining_Vault_V2.sol      # POP reward distributor
 ├── build/
@@ -379,7 +380,7 @@ The proving key (~31MB) is fetched from IPFS on first use and cached in memory f
 
 ## Deploying New Token Shields
 
-Use `PrivX_Shield_V3.sol` for all new ERC-20 token shields. PLS also uses this contract with the WPLS token address (`0xA1077a294dDE1B09bB078844df40758a5D0f9a27`). Set `_miningRewardAmount` to the V3 tier value:
+Use `PrivX_Shield_V3.sol` for all new ERC-20 token shields (HEX, PLSX, DAI, WETH, PrivX, Pay stables). Use `PrivX_PLS_Shield_V3.sol` for PLS — it wraps/unwraps WPLS internally so recipients receive native PLS. Set `_miningRewardAmount` to the V3 tier value:
 
 ```
 Hurricane fixed tiers (all tokens):
