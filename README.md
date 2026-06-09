@@ -430,6 +430,51 @@ PIN-protected mobile PWA for holding and redeeming notes. Designed to live on yo
 - Notes scanned in from the ATM are random (not seed-derived) and require the encrypted wallet backup for recovery
 - Relayer-style **Redeem** tab for merchants: scan customer QR, ZK proof generated in browser, funds arrive instantly
 
+### Deployed Contracts — PrivX Pay Shields
+
+**Shared Infrastructure**
+
+| Contract | Address |
+|---|---|
+| HP Mining Vault | [`0xf7Abeb9a3ccea1B8c30ca8a6d359c609B0751650`](https://scan.pulsechain.com/address/0xf7Abeb9a3ccea1B8c30ca8a6d359c609B0751650) |
+| Fee Vault | [`0x54818356b47b5F7b52DceAbf2B6eF52Cf8b072Fd`](https://scan.pulsechain.com/address/0x54818356b47b5F7b52DceAbf2B6eF52Cf8b072Fd) |
+| PRIVX Token | [`0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986`](https://scan.pulsechain.com/address/0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986) |
+
+**DAI Shields** · Token: [`0xefD766cCb38EaF1dfd701853BFCe31359239F305`](https://scan.pulsechain.com/address/0xefD766cCb38EaF1dfd701853BFCe31359239F305)
+
+| Denomination | Shield Contract |
+|---|---|
+| $1 | [`0x9ABb21e92f4f589515A65aEa79dc920b40A799D4`](https://scan.pulsechain.com/address/0x9ABb21e92f4f589515A65aEa79dc920b40A799D4) |
+| $5 | [`0x0840430d8870933614EFE7f3F45119CcA738B6E2`](https://scan.pulsechain.com/address/0x0840430d8870933614EFE7f3F45119CcA738B6E2) |
+| $10 | [`0x19a9Db059A2C1777Ea4d09dC8d234aD79b21F406`](https://scan.pulsechain.com/address/0x19a9Db059A2C1777Ea4d09dC8d234aD79b21F406) |
+| $20 | [`0x1eeB506568054d0bb7e6977c8030B0ffd05Ef0D2`](https://scan.pulsechain.com/address/0x1eeB506568054d0bb7e6977c8030B0ffd05Ef0D2) |
+| $50 | [`0xc88c22f57a24A2559a3dd3780cE160241aec709F`](https://scan.pulsechain.com/address/0xc88c22f57a24A2559a3dd3780cE160241aec709F) |
+| $100 | [`0x9e85fDdD5d231265b247d3cBC4dB80505582486b`](https://scan.pulsechain.com/address/0x9e85fDdD5d231265b247d3cBC4dB80505582486b) |
+
+**pSunDAI Shields** · Token: [`0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f`](https://scan.pulsechain.com/address/0x1c2a9d0d6c641F92284EeCF8aC62D1e39D703E4f)
+
+| Denomination | Shield Contract |
+|---|---|
+| $1 | [`0x38e1D3fd69F7A978e6fe5e4de787Cf96b71Fa688`](https://scan.pulsechain.com/address/0x38e1D3fd69F7A978e6fe5e4de787Cf96b71Fa688) |
+| $5 | [`0xfd2d44332a54eB89016f95705fBb7C84f917a9B3`](https://scan.pulsechain.com/address/0xfd2d44332a54eB89016f95705fBb7C84f917a9B3) |
+| $10 | [`0x3007cFf2B4b79998905146bF41a6730f4f22c629`](https://scan.pulsechain.com/address/0x3007cFf2B4b79998905146bF41a6730f4f22c629) |
+| $20 | [`0x7c3CAC0556F00e48fB0E5400EF1877f966609952`](https://scan.pulsechain.com/address/0x7c3CAC0556F00e48fB0E5400EF1877f966609952) |
+| $50 | [`0x91EF673aECE26703D9B72E8eB591253F7b26F6B6`](https://scan.pulsechain.com/address/0x91EF673aECE26703D9B72E8eB591253F7b26F6B6) |
+| $100 | [`0xcDff42f6803Df9B9D76723263E73F017c97F68F7`](https://scan.pulsechain.com/address/0xcDff42f6803Df9B9D76723263E73F017c97F68F7) |
+
+**USDC Shields** · Token: [`0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07`](https://scan.pulsechain.com/address/0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07)
+
+| Denomination | Shield Contract |
+|---|---|
+| $1 | [`0x2856661A94483486e25dE8F37DCf867938a13778`](https://scan.pulsechain.com/address/0x2856661A94483486e25dE8F37DCf867938a13778) |
+| $5 | [`0x53B91dB1485f687D8d162f1268D8485EBB85dF13`](https://scan.pulsechain.com/address/0x53B91dB1485f687D8d162f1268D8485EBB85dF13) |
+| $10 | [`0x59f40474834C6Cb3Bf3A5189f6B6f525d22f80A4`](https://scan.pulsechain.com/address/0x59f40474834C6Cb3Bf3A5189f6B6f525d22f80A4) |
+| $20 | [`0x5965FEa1E24472d64F3a24Edb9e663Bc728Caee6`](https://scan.pulsechain.com/address/0x5965FEa1E24472d64F3a24Edb9e663Bc728Caee6) |
+| $50 | [`0x124A85fDB4ec3F11Ab257F6d4fC2eED8A4A6661fe`](https://scan.pulsechain.com/address/0x124A85fDB4ec3F11Ab257F6d4fC2eED8A4A6661fe) |
+| $100 | [`0x883c74eFC878105cbDd15FB546A1a32F4fA45d5b`](https://scan.pulsechain.com/address/0x883c74eFC878105cbDd15FB546A1a32F4fA45d5b) |
+
+All 18 PrivX Pay shield contracts are fully immutable — no admin key, no pause, no upgrade. The 0.5% deposit fee and PRIVX mining reward are fixed at construction.
+
 ### Note Format
 
 ```
