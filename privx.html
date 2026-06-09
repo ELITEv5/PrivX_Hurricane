@@ -544,10 +544,10 @@
 
       <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">PLS SHIELDS</p>
       <table class="contract-table">
-        <tr><td>100,000 PLS</td><td><a href="https://scan.pulsechain.com/address/0x42D4653d745d12882731b85ddED079901a86D434" target="_blank">0x42D4653d745d12882731b85ddED079901a86D434 ↗</a></td></tr>
-        <tr><td>1,000,000 PLS</td><td><a href="https://scan.pulsechain.com/address/0xCD1db527d8d49aF955515B4d0Ecf4c1D85eA0D05" target="_blank">0xCD1db527d8d49aF955515B4d0Ecf4c1D85eA0D05 ↗</a></td></tr>
-        <tr><td>10,000,000 PLS</td><td><a href="https://scan.pulsechain.com/address/0x0D79E9aDf3635B9D74338C64CBf8C224FCEF9d8E" target="_blank">0x0D79E9aDf3635B9D74338C64CBf8C224FCEF9d8E ↗</a></td></tr>
-        <tr><td>100,000,000 PLS</td><td><a href="https://scan.pulsechain.com/address/0x6bE5B2FD772045263Ef2ea64d6cE3619C7f85b99" target="_blank">0x6bE5B2FD772045263Ef2ea64d6cE3619C7f85b99 ↗</a></td></tr>
+        <tr><td>100,000 PLS</td><td><a href="https://scan.pulsechain.com/address/0x4B24FDAEC9A7C11aBE0011Ae812358F2Fe14fCC8" target="_blank">0x4B24FDAEC9A7C11aBE0011Ae812358F2Fe14fCC8 ↗</a></td></tr>
+        <tr><td>1,000,000 PLS</td><td><a href="https://scan.pulsechain.com/address/0x0aC3EF852345c9385b7aEd07d592241bC8BD3547" target="_blank">0x0aC3EF852345c9385b7aEd07d592241bC8BD3547 ↗</a></td></tr>
+        <tr><td>10,000,000 PLS</td><td><a href="https://scan.pulsechain.com/address/0x7E89CF958bA87Ca35b2DD988620F35e323733bd5" target="_blank">0x7E89CF958bA87Ca35b2DD988620F35e323733bd5 ↗</a></td></tr>
+        <tr><td>100,000,000 PLS</td><td><a href="https://scan.pulsechain.com/address/0xDe853DCcE8325FDe98cE1794143115811BA0822d" target="_blank">0xDe853DCcE8325FDe98cE1794143115811BA0822d ↗</a></td></tr>
       </table>
 
       <p style="color:var(--accent);font-size:12px;font-weight:700;margin-bottom:6px;margin-top:20px;letter-spacing:1px">HEX SHIELDS</p>
@@ -778,7 +778,7 @@
         token: "0xA1077a294dDE1B09bB078844df40758a5D0f9a27",
         decimals: 18, feeBP: 50, isNative: true,
         swapUrl: "https://app.pulsex.com/swap?inputCurrency=PLS&outputCurrency=0xA1077a294dDE1B09bB078844df40758a5D0f9a27",
-        contracts: { d0:"0x42D4653d745d12882731b85ddED079901a86D434", d1:"0xCD1db527d8d49aF955515B4d0Ecf4c1D85eA0D05", d2:"0x0D79E9aDf3635B9D74338C64CBf8C224FCEF9d8E", d3:"0x6bE5B2FD772045263Ef2ea64d6cE3619C7f85b99" },
+        contracts: { d0:"0x4B24FDAEC9A7C11aBE0011Ae812358F2Fe14fCC8", d1:"0x0aC3EF852345c9385b7aEd07d592241bC8BD3547", d2:"0x7E89CF958bA87Ca35b2DD988620F35e323733bd5", d3:"0xDe853DCcE8325FDe98cE1794143115811BA0822d" },
         denoms:   ["100000","1000000","10000000","100000000"],
         denomWei: { d0:100000000000000000000000n, d1:1000000000000000000000000n, d2:10000000000000000000000000n, d3:100000000000000000000000000n },
       },
@@ -851,11 +851,6 @@
       { inputs:[{name:"spender",type:"address"},{name:"amount",type:"uint256"}], name:"approve", outputs:[{name:"",type:"bool"}], stateMutability:"nonpayable", type:"function" },
       { inputs:[{name:"owner",type:"address"},{name:"spender",type:"address"}], name:"allowance", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" },
       { inputs:[{name:"account",type:"address"}], name:"balanceOf", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" }
-    ];
-    const WPLS_ABI = [
-      { inputs:[], name:"deposit", outputs:[], stateMutability:"payable", type:"function" },
-      { inputs:[{name:"spender",type:"address"},{name:"amount",type:"uint256"}], name:"approve", outputs:[{name:"",type:"bool"}], stateMutability:"nonpayable", type:"function" },
-      { inputs:[{name:"owner",type:"address"},{name:"spender",type:"address"}], name:"allowance", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" }
     ];
     const SHIELD_ABI = [
       { inputs:[{internalType:"bytes32",name:"_commitment",type:"bytes32"}], name:"deposit", outputs:[], stateMutability:"nonpayable", type:"function" },
@@ -1140,14 +1135,8 @@
         const shieldC=new web3.eth.Contract(SHIELD_ABI,shieldAddr);
         let tx;
         if(shield.isNative){
-          // V3 PLS shield is ERC-20 (WPLS). Wrap native PLS → WPLS, approve, then deposit.
-          const wplsC=new web3.eth.Contract(WPLS_ABI,shield.token);
-          btn.textContent="Wrapping PLS → WPLS...";
-          await wplsC.methods.deposit().send({from:userAccount,value:totalValue.toString()});
-          const allow=await wplsC.methods.allowance(userAccount,shieldAddr).call();
-          if(BigInt(allow)<totalValue){btn.textContent="Approving WPLS...";await wplsC.methods.approve(shieldAddr,totalValue.toString()).send({from:userAccount});}
           btn.textContent="Depositing...";
-          tx=await shieldC.methods.deposit(commitment).send({from:userAccount});
+          tx=await shieldC.methods.deposit(commitment).send({from:userAccount,value:totalValue.toString()});
         } else {
           const assetC=new web3.eth.Contract(ERC20_ABI,shield.token);
           const allow=await assetC.methods.allowance(userAccount,shieldAddr).call();
@@ -1448,7 +1437,7 @@
     const EXPECTED_VERIFIER = "0xcEDa1071542d537221B5a01BFd1cF920cF8B9829";
     const EXPECTED_HASHER   = "0x72740d65A93f2e9d9741234371d62FeE36AEf9dF";
     const VERIFY_SHIELDS = [
-      { label:"PLS",  addr:"0x42D4653d745d12882731b85ddED079901a86D434", assetFn:"asset", expectedAsset:"0xA1077a294dDE1B09bB078844df40758a5D0f9a27" },
+      { label:"PLS",  addr:"0x4B24FDAEC9A7C11aBE0011Ae812358F2Fe14fCC8", assetFn:"asset", expectedAsset:"0xA1077a294dDE1B09bB078844df40758a5D0f9a27" },
       { label:"HEX",  addr:"0xfaF31B882e8E6f108c4174b27317D933fEDbC904", assetFn:"asset", expectedAsset:"0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39" },
       { label:"PLSX", addr:"0xa17c9e32AC4C0e231c472e8958CbC067916Da8FB", assetFn:"asset", expectedAsset:"0x95B303987A60C71504D99Aa1b13B4DA07b0790ab" },
       { label:"DAI",  addr:"0xFe63926D5535EA3B6e1EA204bdDf93F4E2a4b906", assetFn:"asset", expectedAsset:"0xefD766cCb38EaF1dfd701853BFCe31359239F305" },
