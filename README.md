@@ -2,11 +2,11 @@
 
 > Zero-knowledge token shielding on PulseChain. Shield tokens. Generate a Proof of Privacy. Mine PRIVX.
 
-**PrivX Hurricane** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx.html) &nbsp;·&nbsp; [IPFS](https://ipfs.io/ipfs/bafybeihyohefvtegd6e7v7lclzaofhaokcqbaewd2n4xrxaatrkquyxpea/index.html)
+**PrivX Hurricane** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx.html) &nbsp;·&nbsp; [IPFS](https://ipfs.io/ipfs/bafybeigie47gxgpxhp6audqmpbxo7xoprzcsxryqkt476suolxwqwl7wde/index.html)
 
-**PrivX Pay ATM** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx-pay.html) &nbsp;·&nbsp; [IPFS](https://ipfs.io/ipfs/bafybeihyohefvtegd6e7v7lclzaofhaokcqbaewd2n4xrxaatrkquyxpea/privx-pay.html) — private stablecoin cash, desktop ATM
+**PrivX Pay ATM** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx-pay.html) &nbsp;·&nbsp; [IPFS](https://ipfs.io/ipfs/bafybeigie47gxgpxhp6audqmpbxo7xoprzcsxryqkt476suolxwqwl7wde/privx-pay.html) — private stablecoin cash, desktop ATM
 
-**PrivX Pay Wallet** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx-pay-wallet.html) &nbsp;·&nbsp; [IPFS](https://ipfs.io/ipfs/bafybeihyohefvtegd6e7v7lclzaofhaokcqbaewd2n4xrxaatrkquyxpea/privx-pay-wallet.html) — PIN-protected mobile wallet with seed recovery
+**PrivX Pay Wallet** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx-pay-wallet.html) &nbsp;·&nbsp; [IPFS](https://ipfs.io/ipfs/bafybeigie47gxgpxhp6audqmpbxo7xoprzcsxryqkt476suolxwqwl7wde/privx-pay-wallet.html) — PIN-protected mobile wallet with seed recovery
 
 **Chain:** PulseChain (chainId 369)
 
