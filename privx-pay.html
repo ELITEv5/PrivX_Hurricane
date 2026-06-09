@@ -225,7 +225,7 @@
     <div class="section-label">Choose Currency</div>
     <div class="token-grid">
       <div class="token-card active" id="buy-tok-dai"     onclick="selectBuyToken('dai')">    <div class="tc-name">DAI</div>    <div class="tc-sub">Stablecoin</div></div>
-      <div class="token-card"        id="buy-tok-psundai" onclick="selectBuyToken('psundai')"><div class="tc-name">pSunDAI</div><div class="tc-sub">Autonomous</div></div>
+      <div class="token-card" id="buy-tok-psundai" style="opacity:.45;cursor:not-allowed;position:relative" title="Coming Soon"><div class="tc-name">pSunDAI</div><div class="tc-sub" style="color:#a78bfa">Coming Soon</div></div>
       <div class="token-card"        id="buy-tok-usdc"    onclick="selectBuyToken('usdc')">   <div class="tc-name">USDC</div>   <div class="tc-sub">USD Coin</div></div>
     </div>
 
@@ -502,12 +502,12 @@ const HP_TOKENS = {
     addr:  "0xefD766cCb38EaF1dfd701853BFCe31359239F305",
     decimals: 18, feeBP: 50,
     shields: {
-      "1":   "0x9ABb21e92f4f589515A65aEa79dc920b40A799D4",
-      "5":   "0x0840430d8870933614EFE7f3F45119CcA738B6E2",
-      "10":  "0x19a9Db059A2C1777Ea4d09dC8d234aD79b21F406",
-      "20":  "0x1eeB506568054d0bb7e6977c8030B0ffd05Ef0D2",
-      "50":  "0xc88c22f57a24A2559a3dd3780cE160241aec709F",
-      "100": "0x9e85fDdD5d231265b247d3cBC4dB80505582486b"
+      "1":   "0x52d5ACf3f0117955Ed7fd19735403372Df3B23F5",
+      "5":   "0xfB18BE84A0d5f063cAfD0d54fF232ea90C6c022E",
+      "10":  "0xc46bb4Dc486228f8A9c6B2638c5c896f911c8f98",
+      "20":  "0x353D7b8a33039F58D32331548AfADa38ef9fBd63",
+      "50":  "0xB8a283dBFF9a254Bd687Acc5aCE9AbdC5d7A5145",
+      "100": "0xe28eeF832d801869e4789ec6aC20019D4149524C"
     },
     denomWei: {
       "1":   1000000000000000000n,
@@ -544,12 +544,12 @@ const HP_TOKENS = {
     addr:  "0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07",
     decimals: 6, feeBP: 50,
     shields: {
-      "1":   "0x2856661A94483486e25dE8F37DCf867938a13778",
-      "5":   "0x53B91dB1485f687D8d162f1268D8485EBB85dF13",
-      "10":  "0x59f40474834C6Cb3Bf3A5189f6B6f525d22f80A4",
-      "20":  "0x5965FEa1E24472d64F3a24Edb9e663Bc728Caee6",
-      "50":  "0x124A85fDB4ec3F11Ab257F6d4fC2eD8A4A6661fe",
-      "100": "0x883c74eFC878105cbDd15FB546A1a32F4fA45d5b"
+      "1":   "0xF67181F8E84Afb0B6fFc0966C1B5560425d7725c",
+      "5":   "0x6F6c19fa4e3b47d34EDdc1CFD68dF10EB6bF1555",
+      "10":  "0x0D19A83E5b6332378e70c1B53C3473F1C96D38f5",
+      "20":  "0x8cB8F00EC4C6A058D2839202a8cBF3350a3E652A",
+      "50":  "0x219089692bF3819a64f7d99e31c89BCF2539Fdde",
+      "100": "0x28757c786Ec67ea12f06C3e267853C5EA23D6684"
     },
     denomWei: {
       "1":   1000000n,
@@ -733,6 +733,7 @@ async function connectWallet() {
 // ─── BUY CASH TAB ────────────────────────────────────────────────────────────
 
 function selectBuyToken(tok) {
+  if (tok === 'psundai') return;
   selectedBuyToken = tok;
   selectedDenom    = null;
   document.querySelectorAll('.token-card').forEach(c => c.classList.remove('active'));
