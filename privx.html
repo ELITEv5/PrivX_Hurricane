@@ -218,7 +218,7 @@
 
       <div class="verify-wrap">
         <div id="verify-badge" class="verify-badge checking">⏳ Verifying contracts on-chain…</div>
-        <div class="verify-ipfs">IPFS: <a href="https://ipfs.io/ipfs/bafybeid7kcfb3j3qg23u3es3ozlcla3o3y7gpkmdkpkpbrr7yavjuamjzy/index.html" target="_blank" title="Censorship-resistant build — CID is the content hash">bafybei…jzy ↗</a></div>
+        <div class="verify-ipfs">IPFS: <a href="https://ipfs.io/ipfs/bafybeicc5rpmxdpprhtt3jecudzcevipnfhfeqxbdlau726vv3grl3mf6q/index.html" target="_blank" title="Censorship-resistant build — CID is the content hash">bafybei…f6q ↗</a></div>
       </div>
 
       <div class="tabs">
@@ -631,6 +631,7 @@
         <tr><td>Proof generated client-side</td><td><span style="color:#00ff88">✅</span> Never leaves your browser</td></tr>
         <tr><td>Recipient bound to ZK proof</td><td><span style="color:#00ff88">✅</span> MEV-proof withdrawals</td></tr>
         <tr><td>Double-spend prevention</td><td><span style="color:#00ff88">✅</span> On-chain nullifier mapping</td></tr>
+        <tr><td>Field-element aliasing (V3)</td><td><span style="color:#00ff88">✅</span> All 4 public signals checked &lt; SNARK_FIELD — prevents overflow double-spend</td></tr>
         <tr><td>No owner / admin key on shields</td><td><span style="color:#00ff88">✅</span> Fully immutable</td></tr>
         <tr><td>No upgrade proxy</td><td><span style="color:#00ff88">✅</span></td></tr>
         <tr><td>No pause function</td><td><span style="color:#00ff88">✅</span></td></tr>
@@ -672,6 +673,24 @@
       <p class="docs-p" style="margin-top:14px">Ecne confirmed all 8,349 signals are uniquely determined — no signal can be freely set by a prover without violating a constraint. The wire/constraint gap of 19 is consistent with this result. The two equality constraints (nullifierHash binding and Merkle root) are enforced through R1CS signal aliasing — the circom compiler merged them to the same wire, which is a stricter form of enforcement than an explicit constraint row.</p>
 
       <p class="docs-p" style="margin-top:10px;font-size:13px;color:#888">Circuit source: <code style="font-family:monospace;font-size:12px;color:#aaa">circuits/PrivXMixer.circom</code> · R1CS: <code style="font-family:monospace;font-size:12px;color:#aaa">build/PrivXMixer.r1cs</code> · Symbol file: <code style="font-family:monospace;font-size:12px;color:#aaa">build/PrivXMixer.sym</code> — all published on GitHub for independent analysis.</p>
+
+      <div class="docs-h2">V3 Security Audit</div>
+      <p class="docs-p">A full security audit of all V3 shield contracts was performed in June 2026, covering: fake proof attacks (ZEC/Sapling-style), recipient substitution and MEV, cross-denomination replay, reentrancy, double-spend via nullifier mapping, field-element aliasing double-spend (SNARK_FIELD overflow), zero-root attack, commitment grief, and Mining Vault manipulation.</p>
+      <p class="docs-p" style="margin-top:10px"><strong style="color:#00ff88">Result: No theft vectors found in any deployed V3 contract.</strong></p>
+      <p class="docs-p" style="margin-top:10px"><strong style="color:#fff">Key V3 fix — field-element aliasing:</strong> BN254's scalar field is ~254 bits; Solidity's uint256 is 256 bits. Without an explicit check, a value X and X + SNARK_FIELD are equivalent modulo the field — the ZK proof verifier treats them identically. An attacker could exploit this to double-spend: withdraw with nullifierHash=N (proof valid, N recorded as spent), then withdraw again with nullifierHash=N+SNARK_FIELD (proof still valid, mapping lookup misses because N ≠ N+SNARK_FIELD as uint256). V3 closes this with <code style="font-family:monospace;font-size:12px;color:#aaa">require(_pubSignals[i] &lt; SNARK_FIELD)</code> on all 4 public signals before any other checks run.</p>
+      <table class="docs-table" style="margin-top:12px">
+        <tr><th>Attack vector</th><th>V3 status</th></tr>
+        <tr><td>Fake / forged PLONK proof</td><td><span style="color:#00ff88">✅ Safe</span> — PLONK soundness</td></tr>
+        <tr><td>Recipient substitution / MEV theft</td><td><span style="color:#00ff88">✅ Safe</span> — recipient bound in proof</td></tr>
+        <tr><td>Cross-denomination replay</td><td><span style="color:#00ff88">✅ Safe</span> — independent Merkle trees</td></tr>
+        <tr><td>Reentrancy</td><td><span style="color:#00ff88">✅ Safe</span> — OZ ReentrancyGuard</td></tr>
+        <tr><td>Double-spend (nullifier)</td><td><span style="color:#00ff88">✅ Safe</span> — on-chain nullifier mapping</td></tr>
+        <tr><td>Double-spend (field aliasing)</td><td><span style="color:#00ff88">✅ Fixed in V3</span> — SNARK_FIELD overflow check</td></tr>
+        <tr><td>Zero-root attack</td><td><span style="color:#00ff88">✅ Safe</span> — isKnownRoot() rejects bytes32(0)</td></tr>
+        <tr><td>Commitment front-run grief</td><td><span style="color:#aaaaaa">Non-exploitable</span> — attacker loses more than victim</td></tr>
+        <tr><td>Mining Vault peakBalance grief</td><td><span style="color:#aaaaaa">Non-exploitable</span> — no theft; PRIVX stays in vault</td></tr>
+        <tr><td>convertAuto sandwich (Fee Vault)</td><td><span style="color:#aaaaaa">Accepted MEV risk</span> — permissionless by design</td></tr>
+      </table>
 
       <div class="docs-h2">Relayer Mode — Withdrawing Without Gas</div>
       <p class="docs-p">Every withdrawal requires a small amount of PLS for gas. If your fresh wallet has never been funded, it can't submit the transaction itself. Relayer Mode solves this without any trusted third party.</p>
