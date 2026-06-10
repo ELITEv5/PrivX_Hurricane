@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PrivX Hurricane — Trustless Relayer</title>
+<link rel="icon" href="privx-shield.png" type="image/png">
+<style>
+:root{--primary:#8A2BE2;--accent:#00ffea;--glow:rgba(138,43,226,0.4);--bg:#0a0a0a;--card:#111;--border:rgba(255,255,255,0.07);--green:#00e664;--red:#ff6666;--amber:#ffaa00}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:#e0e0e0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem}
+h1{font-size:1.6rem;font-weight:800;background:linear-gradient(90deg,var(--accent),var(--primary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;text-align:center}
+.sub{color:#555;font-size:0.85rem;text-align:center;margin-bottom:1.4rem;font-family:monospace}
+.wrap{width:100%;max-width:660px;display:flex;flex-direction:column;gap:1.2rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem}
+.card-title{font-size:0.75rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#555;margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+.step-badge{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--primary);color:#fff;font-size:0.65rem;font-weight:900;flex-shrink:0;letter-spacing:0}
+.info-box{background:rgba(138,43,226,0.06);border:1px solid rgba(138,43,226,0.2);border-radius:10px;padding:1rem 1.2rem;font-size:0.82rem;color:#888;line-height:1.7}
+.info-box strong{color:#B57AFF}
+.why-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-top:0.8rem}
+@media(max-width:500px){.why-grid{grid-template-columns:1fr}}
+.why-item{background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:8px;padding:0.8rem 1rem;font-size:0.78rem;color:#888;line-height:1.65}
+.why-item strong{color:var(--accent);display:block;margin-bottom:4px;font-size:0.68rem;letter-spacing:0.8px;text-transform:uppercase}
+/* Tabs */
+.tabs{display:flex;gap:0;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:0.2rem}
+.tab{flex:1;padding:12px 8px;background:transparent;border:none;color:#555;font-size:0.78rem;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;cursor:pointer;transition:all .2s;text-align:center}
+.tab:not(:last-child){border-right:1px solid var(--border)}
+.tab.active{background:rgba(138,43,226,0.12);color:#B57AFF}
+.tab:hover:not(.active){background:rgba(255,255,255,0.03);color:#888}
+.tab-content{display:none}
+.tab-content.active{display:flex;flex-direction:column;gap:1.2rem}
+/* Form elements */
+textarea{width:100%;height:150px;background:#0a0a0a;border:1px solid #222;border-radius:10px;color:#666;font-family:monospace;font-size:11px;padding:12px;resize:vertical;outline:none;line-height:1.5;transition:border-color .2s}
+textarea:focus{border-color:rgba(138,43,226,0.4)}
+input[type=text],input[type=number]{width:100%;background:#0a0a0a;border:1px solid #222;border-radius:8px;color:#ccc;font-family:monospace;font-size:0.85rem;padding:10px 12px;outline:none;transition:border-color .2s}
+input[type=text]:focus,input[type=number]:focus{border-color:rgba(138,43,226,0.4)}
+input::placeholder{color:#333}
+.input-label{font-size:0.72rem;color:#555;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px;display:block}
+.input-group{display:flex;flex-direction:column;gap:6px;margin-bottom:1rem}
+.input-row{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem}
+@media(max-width:480px){.input-row{grid-template-columns:1fr}}
+/* Buttons */
+.btn{width:100%;padding:14px;border-radius:10px;border:none;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:0.5px}
+.btn-primary{background:linear-gradient(135deg,var(--primary),#6a1fb0);color:#fff}
+.btn-primary:hover{box-shadow:0 0 24px var(--glow);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-green{background:linear-gradient(135deg,#00a845,#006e30);color:#fff}
+.btn-green:hover{box-shadow:0 0 24px rgba(0,200,80,0.3);transform:translateY(-1px)}
+.btn-green:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-amber{background:linear-gradient(135deg,#cc8800,#996600);color:#fff}
+.btn-amber:hover{box-shadow:0 0 24px rgba(200,140,0,0.3);transform:translateY(-1px)}
+.btn-amber:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-outline{background:transparent;color:#888;border:1px solid #333}
+.btn-outline:hover{border-color:#555;color:#aaa}
+.btn-teal{background:rgba(0,255,234,0.10);color:var(--accent);border:1px solid rgba(0,255,234,0.35)}
+.btn-teal:hover{background:rgba(0,255,234,0.18);box-shadow:0 0 18px rgba(0,255,234,0.12);transform:translateY(-1px)}
+/* File drop */
+.file-drop{border:2px dashed #222;border-radius:10px;padding:1.2rem;text-align:center;color:#444;font-size:0.82rem;cursor:pointer;transition:all .2s;margin-bottom:0.8rem}
+.file-drop:hover,.file-drop.over{border-color:rgba(138,43,226,0.4);color:#888;background:rgba(138,43,226,0.04)}
+/* Proof detail rows */
+.proof-detail{display:flex;flex-direction:column}
+.detail-row{display:grid;grid-template-columns:120px 1fr;gap:0.5rem;align-items:start;padding:0.55rem 0;border-bottom:1px solid var(--border)}
+.detail-row:last-child{border-bottom:none}
+.dk{font-family:monospace;font-size:0.68rem;color:#555;text-transform:uppercase;letter-spacing:0.5px;padding-top:2px}
+.dv{font-family:monospace;font-size:0.75rem;color:#ccc;word-break:break-all;line-height:1.5}
+.dv.hi{color:var(--accent);font-weight:700}
+.dv.green{color:var(--green)}
+.dv.red{color:var(--red)}
+.dv.amber{color:var(--amber)}
+.dv a{color:#777;text-decoration:none}
+.dv a:hover{color:#aaa}
+/* Status */
+.status{padding:1rem 1.2rem;border-radius:10px;font-size:0.82rem;line-height:1.65;font-family:monospace;display:none;white-space:pre-line;margin-top:0.2rem}
+.status.success{background:rgba(0,255,100,0.07);border:1px solid rgba(0,255,100,0.2);color:var(--green);display:block}
+.status.error{background:rgba(255,50,50,0.07);border:1px solid rgba(255,50,50,0.2);color:var(--red);display:block}
+.status.pending{background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);color:#B57AFF;display:block}
+/* Misc */
+.wallet-row{display:flex;gap:0.8rem;align-items:center;margin-bottom:1rem}
+.wallet-addr{font-family:monospace;font-size:0.73rem;color:#555;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.warn-box{background:rgba(255,180,0,0.05);border:1px solid rgba(255,180,0,0.15);border-radius:8px;padding:0.8rem 1rem;font-size:0.75rem;color:#997700;line-height:1.6;font-family:monospace;margin-top:0.8rem}
+.tip-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:700;letter-spacing:0.5px}
+.tip-none{background:rgba(255,255,255,0.05);color:#555}
+.tip-set{background:rgba(0,200,80,0.12);border:1px solid rgba(0,200,80,0.25);color:var(--green)}
+.contract-tag{font-family:monospace;font-size:0.7rem;color:#444;text-align:center;margin-top:0.5rem}
+.contract-tag a{color:#555;text-decoration:none}
+.contract-tag a:hover{color:#888}
+.seg-btns{display:flex;gap:0;border:1px solid #222;border-radius:8px;overflow:hidden;margin-bottom:0.3rem}
+.seg-btn{flex:1;padding:8px 4px;background:transparent;border:none;color:#555;font-size:0.75rem;font-weight:700;cursor:pointer;transition:all .15s;text-align:center}
+.seg-btn:not(:last-child){border-right:1px solid #222}
+.seg-btn.active{background:rgba(138,43,226,0.15);color:#B57AFF}
+.divider{height:1px;background:var(--border);margin:0.4rem 0}
+input[type=file]{display:none}
+</style>
+</head>
+<body>
+
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:0.4rem">
+  <img src="privx-shield.png" style="width:36px;height:36px;border-radius:8px" alt="">
+  <h1>PrivX Hurricane — Trustless Relayer</h1>
+</div>
+<p class="sub">Relay withdrawals for others and earn PLS tips — or get yours relayed without linking your wallets.</p>
+
+<div class="wrap">
+
+  <!-- Tab bar -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('request')">Request Relay</button>
+    <button class="tab" onclick="switchTab('relay')">Relay &amp; Earn</button>
+    <button class="tab" onclick="switchTab('reclaim')">Reclaim Tip</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       TAB 1 — REQUEST RELAY (user wants withdrawal relayed)
+  ══════════════════════════════════════════════════════════ -->
+  <div id="tab-request" class="tab-content active">
+
+    <div class="card">
+      <div class="card-title">How it works</div>
+      <div class="info-box">
+        Load your proof JSON below. Your <strong>withdrawal address has never touched the shield</strong> — to keep it that way, a relayer submits the transaction on your behalf. You escrow a PLS tip on-chain. The moment a relayer submits your proof, they receive the tip automatically. <strong>No trust required.</strong> If no one relays by your deadline, you reclaim the tip in full.
+      </div>
+    </div>
+
+    <!-- Step 1: Load proof -->
+    <div class="card">
+      <div class="card-title"><span class="step-badge">1</span> Load your proof JSON</div>
+      <div class="file-drop" id="req-drop" onclick="document.getElementById('req-file').click()"
+           ondragover="event.preventDefault();this.classList.add('over')"
+           ondragleave="this.classList.remove('over')"
+           ondrop="handleDrop(event,'req')">
+        📂 Drop your .json proof file here, or click to browse
+      </div>
+      <input type="file" id="req-file" accept=".json" onchange="handleFile(event,'req')">
+      <textarea id="req-input" placeholder='Or paste your proof JSON here…&#10;&#10;{"protocol":"PrivX Hurricane","chainId":369,"shield":"0x...","pubSignals":[...],...}'></textarea>
+      <button class="btn btn-teal" style="margin-top:0.8rem" onclick="parseProof('req')">Review Proof →</button>
+    </div>
+
+    <!-- Step 2: Proof review (hidden until parsed) -->
+    <div class="card" id="req-review" style="display:none">
+      <div class="card-title"><span class="step-badge">2</span> Confirm proof details</div>
+      <div class="proof-detail" id="req-detail"></div>
+    </div>
+
+    <!-- Step 3: Set terms -->
+    <div class="card" id="req-terms" style="display:none">
+      <div class="card-title"><span class="step-badge">3</span> Set relay terms</div>
+
+      <div class="input-group">
+        <span class="input-label">Tip amount (PLS)</span>
+        <input type="number" id="req-tip" placeholder="e.g. 50" min="1" step="1" oninput="updateTipBadge()">
+        <div style="font-size:11px;color:#444;font-family:monospace;margin-top:3px">Tip is escrowed on-chain and released to the relayer automatically on success.</div>
+      </div>
+
+      <div class="input-group">
+        <span class="input-label">Deadline</span>
+        <div class="seg-btns" id="deadline-segs">
+          <button class="seg-btn active" onclick="setDeadlineSeg(this,24)">24h</button>
+          <button class="seg-btn" onclick="setDeadlineSeg(this,48)">48h</button>
+          <button class="seg-btn" onclick="setDeadlineSeg(this,72)">72h</button>
+        </div>
+        <div style="font-size:11px;color:#444;font-family:monospace;margin-top:3px">If unrelayed by deadline, you reclaim the tip via the <strong style="color:#555">Reclaim Tip</strong> tab.</div>
+      </div>
+
+      <div class="input-group" style="margin-bottom:0">
+        <span class="input-label">Specific relayer <span style="color:#333;font-weight:400;text-transform:none;letter-spacing:0">(optional — leave blank to accept any)</span></span>
+        <input type="text" id="req-relayer" placeholder="0x…  or leave blank for open market">
+      </div>
+    </div>
+
+    <!-- Step 4: Connect & register -->
+    <div class="card" id="req-connect" style="display:none">
+      <div class="card-title"><span class="step-badge">4</span> Register on-chain</div>
+      <div class="wallet-row">
+        <button class="btn btn-outline" id="req-connectBtn" onclick="connectWallet('req')" style="width:auto;padding:10px 20px;font-size:0.82rem">Connect Wallet</button>
+        <span class="wallet-addr" id="req-walletAddr">Not connected</span>
+      </div>
+      <div class="divider"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.8rem;padding:0.6rem 0.8rem;background:#0a0a0a;border-radius:8px;border:1px solid #1a1a1a">
+        <span style="font-size:0.78rem;color:#555">Tip to escrow</span>
+        <span id="req-tip-preview" class="tip-badge tip-none">— PLS</span>
+      </div>
+      <button class="btn btn-primary" id="req-registerBtn" onclick="registerRequest()" disabled>Escrow Tip &amp; Register Request</button>
+      <div class="warn-box" style="margin-top:0.8rem">⚠ After registering, share your proof JSON with a relayer. The tip is locked until a relay succeeds or the deadline passes.</div>
+    </div>
+
+    <div class="status" id="req-status"></div>
+    <div class="contract-tag">Relayer Contract: <a href="https://scan.pulsechain.com/address/0xd4951090E0E10dcc9d588DEB62EC324a2487be6D" target="_blank">0xd4951090…be6D ↗</a></div>
+
+  </div><!-- /tab-request -->
+
+
+  <!-- ══════════════════════════════════════════════════════════
+       TAB 2 — RELAY & EARN (relayer submitting proofs)
+  ══════════════════════════════════════════════════════════ -->
+  <div id="tab-relay" class="tab-content">
+
+    <div class="card">
+      <div class="card-title">Earn PLS tips</div>
+      <div class="info-box">
+        Load a proof JSON a user has shared with you. The page checks on-chain whether a tip is registered. If it is, you can submit the withdrawal and collect the tip in the same transaction. <strong>You cannot redirect funds</strong> — the recipient is locked in the ZK proof and enforced by the contract.
+      </div>
+    </div>
+
+    <!-- Step 1: Load proof -->
+    <div class="card">
+      <div class="card-title"><span class="step-badge">1</span> Load proof JSON</div>
+      <div class="file-drop" id="earn-drop" onclick="document.getElementById('earn-file').click()"
+           ondragover="event.preventDefault();this.classList.add('over')"
+           ondragleave="this.classList.remove('over')"
+           ondrop="handleDrop(event,'earn')">
+        📂 Drop the user's .json proof file here, or click to browse
+      </div>
+      <input type="file" id="earn-file" accept=".json" onchange="handleFile(event,'earn')">
+      <textarea id="earn-input" placeholder='Or paste the proof JSON here…'></textarea>
+      <button class="btn btn-teal" style="margin-top:0.8rem" onclick="parseProof('earn')">Check &amp; Review →</button>
+    </div>
+
+    <!-- Step 2: Proof + request status -->
+    <div class="card" id="earn-review" style="display:none">
+      <div class="card-title"><span class="step-badge">2</span> Proof &amp; registered tip</div>
+      <div class="proof-detail" id="earn-detail"></div>
+    </div>
+
+    <!-- Step 3: Connect & relay -->
+    <div class="card" id="earn-connect" style="display:none">
+      <div class="card-title"><span class="step-badge">3</span> Connect &amp; relay</div>
+      <p style="font-size:0.8rem;color:#555;margin-bottom:1rem;line-height:1.6">Your wallet pays gas. The contract sends the withdrawal to the recipient and your tip to you — atomically.</p>
+      <div class="wallet-row">
+        <button class="btn btn-outline" id="earn-connectBtn" onclick="connectWallet('earn')" style="width:auto;padding:10px 20px;font-size:0.82rem">Connect Wallet</button>
+        <span class="wallet-addr" id="earn-walletAddr">Not connected</span>
+      </div>
+      <div class="divider"></div>
+      <button class="btn btn-green" id="earn-relayBtn" onclick="submitRelay()" disabled>Submit Withdrawal &amp; Collect Tip</button>
+      <div style="font-size:11px;color:#444;font-family:monospace;text-align:center;margin-top:8px" id="earn-hint">Connect wallet above to enable relay</div>
+    </div>
+
+    <div class="status" id="earn-status"></div>
+    <div class="contract-tag">Relayer Contract: <a href="https://scan.pulsechain.com/address/0xd4951090E0E10dcc9d588DEB62EC324a2487be6D" target="_blank">0xd4951090…be6D ↗</a></div>
+
+  </div><!-- /tab-relay -->
+
+
+  <!-- ══════════════════════════════════════════════════════════
+       TAB 3 — RECLAIM TIP
+  ══════════════════════════════════════════════════════════ -->
+  <div id="tab-reclaim" class="tab-content">
+
+    <div class="card">
+      <div class="card-title">Reclaim your escrowed tip</div>
+      <div class="info-box">
+        If your deadline has passed and no relayer submitted your withdrawal, you can reclaim your escrowed PLS tip here. Load your proof JSON or paste the nullifier hash directly.
+      </div>
+    </div>
+
+    <!-- Lookup -->
+    <div class="card">
+      <div class="card-title"><span class="step-badge">1</span> Identify your request</div>
+      <div class="file-drop" id="rec-drop" onclick="document.getElementById('rec-file').click()"
+           ondragover="event.preventDefault();this.classList.add('over')"
+           ondragleave="this.classList.remove('over')"
+           ondrop="handleDrop(event,'rec')">
+        📂 Drop your proof JSON here, or click to browse
+      </div>
+      <input type="file" id="rec-file" accept=".json" onchange="handleFile(event,'rec')">
+      <div style="text-align:center;color:#333;font-size:0.75rem;margin:0.3rem 0 0.8rem">— or paste your nullifier hash manually —</div>
+      <input type="text" id="rec-nullhash" placeholder="0x… nullifier hash from pubSignals[1]" style="margin-bottom:0.8rem">
+      <button class="btn btn-teal" onclick="lookupReclaim()">Check Request Status →</button>
+    </div>
+
+    <!-- Status display -->
+    <div class="card" id="rec-review" style="display:none">
+      <div class="card-title"><span class="step-badge">2</span> Request status</div>
+      <div class="proof-detail" id="rec-detail"></div>
+    </div>
+
+    <!-- Reclaim action -->
+    <div class="card" id="rec-connect" style="display:none">
+      <div class="card-title"><span class="step-badge">3</span> Reclaim</div>
+      <div class="wallet-row">
+        <button class="btn btn-outline" id="rec-connectBtn" onclick="connectWallet('rec')" style="width:auto;padding:10px 20px;font-size:0.82rem">Connect Wallet</button>
+        <span class="wallet-addr" id="rec-walletAddr">Not connected</span>
+      </div>
+      <div class="divider"></div>
+      <button class="btn btn-amber" id="rec-reclaimBtn" onclick="submitReclaim()" disabled>Reclaim Escrowed Tip</button>
+    </div>
+
+    <div class="status" id="rec-status"></div>
+    <div class="contract-tag">Relayer Contract: <a href="https://scan.pulsechain.com/address/0xd4951090E0E10dcc9d588DEB62EC324a2487be6D" target="_blank">0xd4951090…be6D ↗</a></div>
+
+  </div><!-- /tab-reclaim -->
+
+</div><!-- /wrap -->
+
+<script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+<script>
+
+// ── Config ─────────────────────────────────────────────────────────────────────
+
+const RELAYER_CONTRACT = '0xd4951090E0E10dcc9d588DEB62EC324a2487be6D';
+
+const CHAINS = {
+  369:  { chainId:'0x171', chainName:'PulseChain', rpcUrls:['https://rpc.pulsechain.com'], nativeCurrency:{name:'PLS',symbol:'PLS',decimals:18}, blockExplorerUrls:['https://scan.pulsechain.com'], explorerTx:'https://scan.pulsechain.com/tx/', explorerAddr:'https://scan.pulsechain.com/address/' },
+  1:    { chainId:'0x1',   chainName:'Ethereum',   rpcUrls:['https://cloudflare-eth.com'],  nativeCurrency:{name:'Ether',symbol:'ETH',decimals:18}, blockExplorerUrls:['https://etherscan.io'],       explorerTx:'https://etherscan.io/tx/',           explorerAddr:'https://etherscan.io/address/'   },
+  8453: { chainId:'0x2105',chainName:'Base',        rpcUrls:['https://mainnet.base.org'],    nativeCurrency:{name:'Ether',symbol:'ETH',decimals:18}, blockExplorerUrls:['https://basescan.org'],       explorerTx:'https://basescan.org/tx/',           explorerAddr:'https://basescan.org/address/'   },
+};
+
+const RELAYER_ABI = [
+  { inputs:[{name:"nullifierHash",type:"bytes32"},{name:"shield",type:"address"},{name:"relayer",type:"address"},{name:"deadline",type:"uint40"}], name:"registerRequest", outputs:[], stateMutability:"payable", type:"function" },
+  { inputs:[{name:"proof",type:"uint256[24]"},{name:"pubSignals",type:"uint256[4]"},{name:"recipient",type:"address"}], name:"relay", outputs:[], stateMutability:"nonpayable", type:"function" },
+  { inputs:[{name:"nullifierHash",type:"bytes32"}], name:"reclaimFee", outputs:[], stateMutability:"nonpayable", type:"function" },
+  { inputs:[{name:"nullifierHash",type:"bytes32"}], name:"getRequest", outputs:[{name:"shield",type:"address"},{name:"depositor",type:"address"},{name:"relayer",type:"address"},{name:"fee",type:"uint96"},{name:"deadline",type:"uint40"},{name:"exists",type:"bool"}], stateMutability:"view", type:"function" },
+  { inputs:[{name:"nullifierHash",type:"bytes32"}], name:"isRegistered", outputs:[{name:"",type:"bool"}], stateMutability:"view", type:"function" },
+  { anonymous:false, inputs:[{indexed:true,name:"nullifierHash",type:"bytes32"},{indexed:true,name:"relayer",type:"address"},{indexed:false,name:"fee",type:"uint256"}], name:"Relayed", type:"event" },
+  { anonymous:false, inputs:[{indexed:true,name:"nullifierHash",type:"bytes32"},{indexed:true,name:"depositor",type:"address"},{indexed:false,name:"fee",type:"uint256"}], name:"FeeReclaimed", type:"event" },
+];
+
+// ── State ──────────────────────────────────────────────────────────────────────
+
+const state = {
+  web3: null, account: null,
+  req:  { proof: null, deadlineHours: 24 },
+  earn: { proof: null },
+  rec:  { nullHash: null },
+};
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
+const toBytes32 = dec => '0x' + BigInt(dec).toString(16).padStart(64, '0');
+const fmtWei    = wei  => (Number(BigInt(wei)) / 1e18).toLocaleString(undefined, {maximumFractionDigits:4});
+const escHtml   = s   => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+const ETH_ADDR  = /^0x[0-9a-fA-F]{40}$/;
+const fmtTime   = ts  => {
+  const rem = Number(ts) - Math.floor(Date.now() / 1000);
+  if (rem <= 0) return '<span class="red">Expired</span>';
+  const h = Math.floor(rem / 3600), m = Math.floor((rem % 3600) / 60);
+  return `<span class="green">${h}h ${m}m remaining</span>`;
+};
+const scanAddr = (addr, chain) => {
+  if (!ETH_ADDR.test(addr)) return escHtml(addr);
+  const base = (chain && CHAINS[chain]) ? CHAINS[chain].explorerAddr : 'https://scan.pulsechain.com/address/';
+  return `<a href="${base}${addr}" target="_blank" rel="noopener noreferrer">${addr.slice(0,10)}…${addr.slice(-8)} ↗</a>`;
+};
+
+function showStatus(tab, type, msg) {
+  const el = document.getElementById(`${tab}-status`);
+  el.className = 'status ' + type;
+  el.textContent = msg;
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+function clearStatus(tab) {
+  const el = document.getElementById(`${tab}-status`);
+  el.className = 'status'; el.textContent = '';
+}
+
+// ── Tabs ───────────────────────────────────────────────────────────────────────
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelector(`.tab[onclick*="${name}"]`).classList.add('active');
+  document.getElementById(`tab-${name}`).classList.add('active');
+}
+
+// ── File handling ──────────────────────────────────────────────────────────────
+
+function handleDrop(e, tab) {
+  e.preventDefault();
+  document.getElementById(`${tab}-drop`).classList.remove('over');
+  const file = e.dataTransfer.files[0];
+  if (file) readFileForTab(file, tab);
+}
+function handleFile(e, tab) {
+  const file = e.target.files[0];
+  if (file) readFileForTab(file, tab);
+}
+function readFileForTab(file, tab) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    document.getElementById(`${tab}-input`).value = ev.target.result;
+    if (tab === 'rec') lookupReclaim();
+    else parseProof(tab);
+  };
+  reader.readAsText(file);
+}
+
+// ── Parse proof JSON ──────────────────────────────────────────────────────────
+
+function parseProof(tab) {
+  const raw = document.getElementById(`${tab}-input`).value.trim();
+  if (!raw) return;
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { return showStatus(tab, 'error', 'Invalid JSON: ' + e.message); }
+
+  if (data.protocol !== 'PrivX Hurricane') return showStatus(tab, 'error', 'Not a PrivX Hurricane proof.');
+  if (!data.shield || !data.proof || !data.pubSignals || !data.recipient)
+    return showStatus(tab, 'error', 'Proof JSON missing required fields.');
+  if (!Array.isArray(data.proof) || data.proof.length !== 24)
+    return showStatus(tab, 'error', `proof must be 24 elements (got ${Array.isArray(data.proof)?data.proof.length:'non-array'}).`);
+  if (!Array.isArray(data.pubSignals) || data.pubSignals.length !== 4)
+    return showStatus(tab, 'error', `pubSignals must be 4 elements (got ${Array.isArray(data.pubSignals)?data.pubSignals.length:'non-array'}).`);
+  if (!ETH_ADDR.test(data.shield))
+    return showStatus(tab, 'error', 'Invalid shield address in proof JSON.');
+  if (!ETH_ADDR.test(data.recipient))
+    return showStatus(tab, 'error', 'Invalid recipient address in proof JSON.');
+
+  const nullHash = toBytes32(data.pubSignals[1]);
+  const chainId  = data.chainId || 369;
+  const chain    = CHAINS[chainId];
+  clearStatus(tab);
+
+  if (tab === 'req') {
+    state.req.proof = { ...data, nullHash, chainId };
+    document.getElementById('req-detail').innerHTML = `
+      <div class="detail-row"><span class="dk">Chain</span><span class="dv">${chain ? escHtml(chain.chainName) : 'Chain '+escHtml(String(chainId))}</span></div>
+      <div class="detail-row"><span class="dk">Token</span><span class="dv">${escHtml(data.token||'—')}</span></div>
+      <div class="detail-row"><span class="dk">Denomination</span><span class="dv">${escHtml(data.denomination||'—')}</span></div>
+      <div class="detail-row"><span class="dk">Shield</span><span class="dv">${scanAddr(data.shield, chainId)}</span></div>
+      <div class="detail-row"><span class="dk">Recipient</span><span class="dv hi">${data.recipient}</span></div>
+      <div class="detail-row"><span class="dk">Nullifier</span><span class="dv" style="font-size:0.65rem">${nullHash}</span></div>
+    `;
+    document.getElementById('req-review').style.display  = 'block';
+    document.getElementById('req-terms').style.display   = 'block';
+    document.getElementById('req-connect').style.display = 'block';
+    document.getElementById('req-review').scrollIntoView({ behavior:'smooth', block:'nearest' });
+
+  } else if (tab === 'earn') {
+    state.earn.proof = { ...data, nullHash, chainId };
+    checkRegisteredRequest(nullHash, chainId).then(req => {
+      const tipStr  = req.exists ? `<span class="green">${fmtWei(req.fee)} PLS</span>` : '<span class="red">No tip registered</span>';
+      const dlStr   = req.exists ? fmtTime(req.deadline) : '—';
+      const relStr  = req.exists
+        ? (req.relayer === '0x0000000000000000000000000000000000000000'
+            ? '<span class="green">Any relayer accepted</span>'
+            : scanAddr(req.relayer, chainId))
+        : '—';
+      document.getElementById('earn-detail').innerHTML = `
+        <div class="detail-row"><span class="dk">Chain</span><span class="dv">${chain ? escHtml(chain.chainName) : 'Chain '+escHtml(String(chainId))}</span></div>
+        <div class="detail-row"><span class="dk">Token</span><span class="dv">${escHtml(data.token||'—')}</span></div>
+        <div class="detail-row"><span class="dk">Denomination</span><span class="dv">${escHtml(data.denomination||'—')}</span></div>
+        <div class="detail-row"><span class="dk">Recipient</span><span class="dv hi">${data.recipient}</span></div>
+        <div class="detail-row"><span class="dk">Tip</span><span class="dv">${tipStr}</span></div>
+        <div class="detail-row"><span class="dk">Deadline</span><span class="dv">${dlStr}</span></div>
+        <div class="detail-row"><span class="dk">Relayer</span><span class="dv">${relStr}</span></div>
+        <div class="detail-row"><span class="dk">Nullifier</span><span class="dv" style="font-size:0.65rem">${nullHash}</span></div>
+      `;
+      document.getElementById('earn-review').style.display  = 'block';
+      document.getElementById('earn-connect').style.display = 'block';
+
+      if (!req.exists) {
+        showStatus('earn', 'error', 'No tip registered for this proof. Ask the user to register a request first via the "Request Relay" tab.');
+        document.getElementById('earn-relayBtn').disabled = true;
+      } else if (Number(req.deadline) < Math.floor(Date.now() / 1000)) {
+        showStatus('earn', 'error', 'This request has expired. The user may have already reclaimed their tip.');
+        document.getElementById('earn-relayBtn').disabled = true;
+      } else {
+        document.getElementById('earn-hint').textContent = `Ready — connect wallet to relay and earn ${fmtWei(req.fee)} PLS`;
+      }
+      document.getElementById('earn-review').scrollIntoView({ behavior:'smooth', block:'nearest' });
+    });
+  }
+}
+
+async function checkRegisteredRequest(nullHash, chainId) {
+  try {
+    const rpc = (CHAINS[chainId] || CHAINS[369]).rpcUrls[0];
+    const w   = new Web3(rpc);
+    const c   = new w.eth.Contract(RELAYER_ABI, RELAYER_CONTRACT);
+    return await c.methods.getRequest(nullHash).call();
+  } catch(e) { return { exists: false }; }
+}
+
+// ── Deadline segment ──────────────────────────────────────────────────────────
+
+function setDeadlineSeg(el, hours) {
+  document.querySelectorAll('#deadline-segs .seg-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  state.req.deadlineHours = hours;
+}
+
+// ── Tip badge preview ─────────────────────────────────────────────────────────
+
+function updateTipBadge() {
+  const val = parseFloat(document.getElementById('req-tip').value);
+  const el  = document.getElementById('req-tip-preview');
+  if (!val || val <= 0) {
+    el.className = 'tip-badge tip-none'; el.textContent = '— PLS';
+  } else {
+    el.className = 'tip-badge tip-set'; el.textContent = `${val} PLS`;
+  }
+}
+
+// ── Wallet ────────────────────────────────────────────────────────────────────
+
+async function connectWallet(tab) {
+  if (!window.ethereum) return showStatus(tab, 'error', 'No wallet detected. Install MetaMask.');
+  const proof = tab === 'req' ? state.req.proof : tab === 'earn' ? state.earn.proof : null;
+  const chainId = proof ? proof.chainId : 369;
+  const chain   = CHAINS[chainId] || CHAINS[369];
+  try {
+    try { await window.ethereum.request({ method:'wallet_switchEthereumChain', params:[{chainId:chain.chainId}] }); }
+    catch(e) { if (e.code===4902) await window.ethereum.request({ method:'wallet_addEthereumChain', params:[chain] }); else throw e; }
+    const accounts = await window.ethereum.request({ method:'eth_requestAccounts' });
+    state.account = accounts[0];
+    state.web3    = new Web3(window.ethereum);
+    [`req`,`earn`,`rec`].forEach(t => {
+      const addr = document.getElementById(`${t}-walletAddr`);
+      const btn  = document.getElementById(`${t}-connectBtn`);
+      if (addr) addr.textContent = state.account;
+      if (btn)  { btn.textContent = 'Connected ✓'; btn.style.borderColor='rgba(0,255,100,0.4)'; btn.style.color='#00e664'; }
+    });
+    document.getElementById(`${tab}-${tab==='req'?'registerBtn':tab==='earn'?'relayBtn':'reclaimBtn'}`).disabled = false;
+  } catch(e) { showStatus(tab, 'error', 'Connection failed: ' + e.message); }
+}
+
+// ── Register request ──────────────────────────────────────────────────────────
+
+async function registerRequest() {
+  const proof = state.req.proof;
+  if (!proof)          return showStatus('req', 'error', 'Load a proof first.');
+  if (!state.account)  return showStatus('req', 'error', 'Connect wallet first.');
+  const tipPls = parseFloat(document.getElementById('req-tip').value);
+  if (!tipPls || tipPls <= 0) return showStatus('req', 'error', 'Enter a tip amount greater than 0.');
+  const relayerInput = document.getElementById('req-relayer').value.trim();
+  const relayerAddr  = relayerInput || '0x0000000000000000000000000000000000000000';
+  if (relayerInput && !state.web3.utils.isAddress(relayerInput))
+    return showStatus('req', 'error', 'Invalid relayer address.');
+  const tipWei     = state.web3.utils.toWei(tipPls.toString(), 'ether');
+  const deadline   = Math.floor(Date.now() / 1000) + state.req.deadlineHours * 3600;
+  const btn        = document.getElementById('req-registerBtn');
+  btn.disabled = true; btn.textContent = 'Registering…';
+  showStatus('req', 'pending', '⏳ Awaiting wallet confirmation…');
+  try {
+    const contract = new state.web3.eth.Contract(RELAYER_ABI, RELAYER_CONTRACT);
+    const already  = await contract.methods.isRegistered(proof.nullHash).call();
+    if (already) { showStatus('req', 'error', 'A request is already registered for this proof.'); btn.disabled=false; btn.textContent='Escrow Tip & Register Request'; return; }
+    const tx = await contract.methods
+      .registerRequest(proof.nullHash, proof.shield, relayerAddr, deadline)
+      .send({ from: state.account, value: tipWei });
+    if (!tx.status) throw new Error('Reverted: ' + tx.transactionHash);
+    const explorerTx = (CHAINS[proof.chainId]||CHAINS[369]).explorerTx;
+    showStatus('req', 'success',
+      `✓ Request registered!\n\nTip escrowed: ${tipPls} PLS\nDeadline: ${new Date(deadline*1000).toLocaleString()}\n\nTX: ${tx.transactionHash}\n${explorerTx}${tx.transactionHash}\n\nNow share your proof JSON with a relayer.`);
+    btn.textContent = '✓ Registered';
+  } catch(e) {
+    showStatus('req', 'error', '✗ Failed: ' + (e.message || 'check console'));
+    btn.disabled = false; btn.textContent = 'Escrow Tip & Register Request';
+  }
+}
+
+// ── Submit relay ──────────────────────────────────────────────────────────────
+
+async function submitRelay() {
+  const proof = state.earn.proof;
+  if (!proof)         return showStatus('earn', 'error', 'Load a proof first.');
+  if (!state.account) return showStatus('earn', 'error', 'Connect wallet first.');
+  const btn = document.getElementById('earn-relayBtn');
+  btn.disabled = true; btn.textContent = 'Relaying…';
+  showStatus('earn', 'pending', '⏳ Submitting withdrawal — do not close this tab…');
+  try {
+    const contract   = new state.web3.eth.Contract(RELAYER_ABI, RELAYER_CONTRACT);
+    const req        = await contract.methods.getRequest(proof.nullHash).call();
+    if (!req.exists) throw new Error('No registered request found for this proof.');
+    if (req.relayer !== '0x0000000000000000000000000000000000000000' &&
+        req.relayer.toLowerCase() !== state.account.toLowerCase())
+      throw new Error('You are not the designated relayer for this request.');
+    if (Number(req.deadline) < Math.floor(Date.now() / 1000))
+      throw new Error('This request has expired.');
+    const tx = await contract.methods
+      .relay(proof.proof, proof.pubSignals, proof.recipient)
+      .send({ from: state.account });
+    if (!tx.status) throw new Error('Reverted: ' + tx.transactionHash);
+    const tipEarned  = fmtWei(req.fee);
+    const explorerTx = (CHAINS[proof.chainId]||CHAINS[369]).explorerTx;
+    showStatus('earn', 'success',
+      `✓ Withdrawal relayed successfully!\n\nTip earned: ${tipEarned} PLS\nFunds sent to: ${proof.recipient}\n\nTX: ${tx.transactionHash}\n${explorerTx}${tx.transactionHash}`);
+    btn.textContent = '✓ Relayed';
+  } catch(e) {
+    console.error(e);
+    const msg = e.message || '';
+    if (msg.includes('already spent') || msg.includes('nullifier'))
+      showStatus('earn', 'error', '✗ Note already spent — this proof has been used before.');
+    else if (msg.includes('recipient'))
+      showStatus('earn', 'error', '✗ Recipient mismatch — proof may have been tampered with.');
+    else if (msg.includes('root'))
+      showStatus('earn', 'error', '✗ Stale Merkle root — ask user to regenerate the proof (>100 deposits since proof was made).');
+    else
+      showStatus('earn', 'error', '✗ Failed: ' + msg);
+    btn.disabled = false; btn.textContent = 'Submit Withdrawal & Collect Tip';
+  }
+}
+
+// ── Reclaim lookup ────────────────────────────────────────────────────────────
+
+async function lookupReclaim() {
+  let nullHash = document.getElementById('rec-nullhash').value.trim();
+  const raw    = document.getElementById('rec-input')?.value?.trim();
+
+  if (!nullHash && raw) {
+    try {
+      const data = JSON.parse(raw);
+      if (data.pubSignals && data.pubSignals[1]) {
+        nullHash = toBytes32(data.pubSignals[1]);
+        document.getElementById('rec-nullhash').value = nullHash;
+      }
+    } catch(e) {}
+  }
+
+  if (!nullHash) return showStatus('rec', 'error', 'Load a proof JSON or enter a nullifier hash.');
+  if (!nullHash.match(/^0x[0-9a-fA-F]{64}$/))
+    return showStatus('rec', 'error', 'Invalid nullifier hash format (expected 0x + 64 hex chars).');
+
+  state.rec.nullHash = nullHash;
+  clearStatus('rec');
+
+  try {
+    const w   = new Web3(CHAINS[369].rpcUrls[0]);
+    const c   = new w.eth.Contract(RELAYER_ABI, RELAYER_CONTRACT);
+    const req = await c.methods.getRequest(nullHash).call();
+
+    if (!req.exists) {
+      document.getElementById('rec-detail').innerHTML = `
+        <div class="detail-row"><span class="dk">Status</span><span class="dv red">No request found</span></div>
+        <div class="detail-row"><span class="dk">Nullifier</span><span class="dv" style="font-size:0.65rem">${nullHash}</span></div>
+      `;
+      document.getElementById('rec-review').style.display   = 'block';
+      document.getElementById('rec-connect').style.display  = 'none';
+      return showStatus('rec', 'error', 'No registered request for this nullifier hash. It may have already been relayed or reclaimed.');
+    }
+
+    const expired  = Number(req.deadline) < Math.floor(Date.now() / 1000);
+    const statusHtml = expired
+      ? '<span class="green">Deadline passed — eligible to reclaim</span>'
+      : `<span class="amber">Active — ${fmtTime(req.deadline)}</span>`;
+
+    document.getElementById('rec-detail').innerHTML = `
+      <div class="detail-row"><span class="dk">Status</span><span class="dv">${statusHtml}</span></div>
+      <div class="detail-row"><span class="dk">Tip</span><span class="dv green">${fmtWei(req.fee)} PLS</span></div>
+      <div class="detail-row"><span class="dk">Depositor</span><span class="dv">${scanAddr(req.depositor, 369)}</span></div>
+      <div class="detail-row"><span class="dk">Deadline</span><span class="dv">${new Date(Number(req.deadline)*1000).toLocaleString()}</span></div>
+      <div class="detail-row"><span class="dk">Nullifier</span><span class="dv" style="font-size:0.65rem">${nullHash}</span></div>
+    `;
+    document.getElementById('rec-review').style.display  = 'block';
+    document.getElementById('rec-connect').style.display = expired ? 'block' : 'none';
+    if (!expired)
+      showStatus('rec', 'error', `Deadline not yet reached.\n\nYou can reclaim after: ${new Date(Number(req.deadline)*1000).toLocaleString()}`);
+    else
+      document.getElementById('rec-review').scrollIntoView({ behavior:'smooth', block:'nearest' });
+
+  } catch(e) { showStatus('rec', 'error', 'Lookup failed: ' + e.message); }
+}
+
+// ── Reclaim submit ────────────────────────────────────────────────────────────
+
+async function submitReclaim() {
+  if (!state.rec.nullHash) return showStatus('rec', 'error', 'Look up your request first.');
+  if (!state.account)      return showStatus('rec', 'error', 'Connect wallet first.');
+  const btn = document.getElementById('rec-reclaimBtn');
+  btn.disabled = true; btn.textContent = 'Reclaiming…';
+  showStatus('rec', 'pending', '⏳ Awaiting wallet confirmation…');
+  try {
+    const contract = new state.web3.eth.Contract(RELAYER_ABI, RELAYER_CONTRACT);
+    const tx = await contract.methods.reclaimFee(state.rec.nullHash).send({ from: state.account });
+    if (!tx.status) throw new Error('Reverted: ' + tx.transactionHash);
+    showStatus('rec', 'success',
+      `✓ Tip reclaimed!\n\nTX: ${tx.transactionHash}\nhttps://scan.pulsechain.com/tx/${tx.transactionHash}`);
+    btn.textContent = '✓ Reclaimed';
+  } catch(e) {
+    showStatus('rec', 'error', '✗ Failed: ' + (e.message||'check console'));
+    btn.disabled = false; btn.textContent = 'Reclaim Escrowed Tip';
+  }
+}
+
+// ── Auto-parse on paste ───────────────────────────────────────────────────────
+
+document.addEventListener('DOMContentLoaded', () => {
+  ['req','earn'].forEach(tab => {
+    const el = document.getElementById(`${tab}-input`);
+    if (el) el.addEventListener('paste', () => setTimeout(() => parseProof(tab), 60));
+  });
+  const recEl = document.getElementById('rec-input');
+  if (recEl) recEl.addEventListener('paste', () => setTimeout(lookupReclaim, 60));
+});
+
+</script>
+</body>
+</html>
