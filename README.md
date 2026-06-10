@@ -4,9 +4,9 @@
 
 **PrivX Hurricane** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx.html) &nbsp;·&nbsp; [IPFS](https://ipfs.io/ipfs/bafybeicifgncprdop7xgineg37l4xvnscnifgqns66zeuofjvlgkcwloz4/index.html)
 
-**PrivX Pay ATM** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx-pay.html) &nbsp;·&nbsp; [IPFS](https://ipfs.io/ipfs/bafybeiarjmtktm7z4qa2yggvrgwysthr4ycfvaosvaslbwxzefvgfz3tlm/privx-pay.html) — private stablecoin cash, desktop ATM
+**PrivX Pay ATM** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx-pay.html) — private stablecoin cash, desktop ATM
 
-**PrivX Pay Wallet** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx-pay-wallet.html) &nbsp;·&nbsp; [IPFS](https://ipfs.io/ipfs/bafybeiarjmtktm7z4qa2yggvrgwysthr4ycfvaosvaslbwxzefvgfz3tlm/privx-pay-wallet.html) — PIN-protected mobile wallet with seed recovery
+**PrivX Pay Wallet** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx-pay-wallet.html) — PIN-protected mobile wallet with seed recovery
 
 **Chain:** PulseChain (chainId 369)
 
