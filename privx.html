@@ -344,17 +344,33 @@
 
         <div id="proofExportPanel" style="display:none">
           <div class="proof-export">
-            <div class="proof-export-title">✓ Proof ready — send this JSON to a relayer</div>
+            <div class="proof-export-title">✓ Proof ready — choose how to relay it</div>
             <textarea id="proofJson" class="proof-json" readonly></textarea>
             <div class="proof-actions">
               <button class="proof-btn" onclick="copyProofJson()">📋 Copy JSON</button>
               <button class="proof-btn" onclick="downloadProofJson()">⬇ Download .json</button>
             </div>
-            <div class="proof-actions" style="margin-top:0">
-              <a href="relayer.html" target="_blank" class="proof-btn" style="text-decoration:none;text-align:center">🔗 Open Relayer Page</a>
+            <!-- Relay options -->
+            <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+              <div style="border:1px solid rgba(0,255,234,0.18);border-radius:8px;padding:10px 12px;background:rgba(0,255,234,0.03)">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+                  <span style="color:#00ffea;font-size:12px;font-weight:700">📦 Manual Relay</span>
+                  <span style="font-size:10px;color:#555;font-family:monospace;letter-spacing:0.3px">No tip required · social trust</span>
+                </div>
+                <div style="font-size:11px;color:#666;line-height:1.6;margin-bottom:8px">Share your proof JSON with a trusted friend or community relayer. They submit from their wallet, you agree on a gas tip off-chain. Free and simple.</div>
+                <a href="relayer.html" target="_blank" rel="noopener noreferrer" class="proof-btn" style="text-decoration:none;text-align:center;display:block">🔗 Open Manual Relayer</a>
+              </div>
+              <div style="border:1px solid rgba(138,43,226,0.28);border-radius:8px;padding:10px 12px;background:rgba(138,43,226,0.04)">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+                  <span style="color:#B57AFF;font-size:12px;font-weight:700">🔒 Trustless Relay</span>
+                  <span style="font-size:10px;color:#555;font-family:monospace;letter-spacing:0.3px">PLS tip escrowed on-chain</span>
+                </div>
+                <div style="font-size:11px;color:#666;line-height:1.6;margin-bottom:8px">Escrow a PLS tip in the PrivX Relayer contract. Any relayer submits your proof and auto-collects the tip — no trust needed, no social agreement. Tip returns to you if unrelayed by your deadline.</div>
+                <a href="privx-relayer.html" target="_blank" rel="noopener noreferrer" style="text-decoration:none;text-align:center;display:block;padding:10px;border-radius:8px;border:1px solid rgba(138,43,226,0.35);background:rgba(138,43,226,0.09);color:#B57AFF;font-size:12px;font-weight:700;font-family:monospace;transition:all .2s">🔒 Open Trustless Relayer</a>
+              </div>
             </div>
             <div class="proof-warn">
-              ⚠ This proof is single-use. Once any relayer submits it the nullifier is permanently spent — do not share it twice.<br>
+              ⚠ This proof is single-use. Once submitted the nullifier is permanently spent — do not share it with multiple relayers.<br>
               The recipient address is cryptographically locked into the proof. No relayer can redirect your funds.
             </div>
           </div>
@@ -693,23 +709,33 @@
       </table>
 
       <div class="docs-h2">Relayer Mode — Withdrawing Without Gas</div>
-      <p class="docs-p">Every withdrawal requires a small amount of PLS for gas. If your fresh wallet has never been funded, it can't submit the transaction itself. Relayer Mode solves this without any trusted third party.</p>
-
-      <p class="docs-p"><strong style="color:#fff">How it works:</strong> Instead of submitting the withdrawal directly, your browser generates the ZK proof and packages it as a JSON file. You send that JSON to any willing wallet — a friend, a community relayer, anyone — and they submit it on your behalf. The funds still go to your fresh wallet. The relayer receives nothing from the contract and cannot redirect your funds under any circumstances.</p>
+      <p class="docs-p">Every withdrawal requires a small amount of PLS for gas. If your fresh wallet has never been funded, it can't submit the transaction itself. Relayer Mode solves this — your browser generates the ZK proof and packages it as a JSON file that any willing wallet can submit on your behalf.</p>
 
       <p class="docs-p"><strong style="color:#fff">Why the relayer can't steal:</strong> The recipient address is cryptographically embedded inside the ZK proof at generation time as a public signal. The contract enforces that the address passed to the function exactly matches what's inside the proof. If a relayer tries to change the recipient, the transaction reverts with <code style="font-family:monospace;font-size:12px;color:#aaa">recipient: mismatch</code>. This is mathematically enforced — not a policy.</p>
 
-      <div style="background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);border-radius:10px;padding:14px 16px;margin:14px 0">
-        <div style="font-size:12px;font-weight:700;color:#B57AFF;margin-bottom:10px;letter-spacing:0.5px">STEP BY STEP — RELAYER MODE</div>
+      <div style="background:rgba(0,255,234,0.03);border:1px solid rgba(0,255,234,0.15);border-radius:10px;padding:14px 16px;margin:14px 0">
+        <div style="font-size:12px;font-weight:700;color:#00ffea;margin-bottom:6px;letter-spacing:0.5px">📦 OPTION 1 — MANUAL RELAY</div>
+        <p class="docs-p" style="margin:0 0 10px">Share your proof JSON with a trusted friend, a community relayer, or post in a group. The relayer submits from their wallet using the <a href="relayer.html" target="_blank" rel="noopener noreferrer" style="color:#00ffea;text-decoration:none">Manual Relayer page ↗</a> and you agree on a gas tip off-chain. Simple and free — no contract interaction required.</p>
         <div style="font-size:13px;color:#aaa;line-height:2">
-          <span style="color:#B57AFF">1.</span> In the Withdraw tab, toggle <strong style="color:#fff">📦 Relayer Mode</strong> ON<br>
-          <span style="color:#B57AFF">2.</span> Paste your private note and enter the <strong style="color:#fff">recipient address</strong> (your fresh wallet)<br>
-          <span style="color:#B57AFF">3.</span> Click <strong style="color:#fff">Generate Proof for Relayer</strong> — takes 15–30 seconds, no wallet needed<br>
-          <span style="color:#B57AFF">4.</span> Copy or download the proof JSON<br>
-          <span style="color:#B57AFF">5.</span> Send the JSON to a relayer — share the <strong style="color:#fff">🔗 Open Relayer Page</strong> link with them<br>
-          <span style="color:#B57AFF">6.</span> Relayer pastes your JSON, connects their wallet, and submits<br>
-          <span style="color:#B57AFF">7.</span> Your fresh wallet receives the tokens + PRIVX reward automatically
+          <span style="color:#00ffea">1.</span> Toggle <strong style="color:#fff">📦 Relayer Mode</strong> ON in the Withdraw tab<br>
+          <span style="color:#00ffea">2.</span> Enter the recipient address (your fresh wallet) and click <strong style="color:#fff">Generate Proof for Relayer</strong><br>
+          <span style="color:#00ffea">3.</span> Copy or download the proof JSON — send it to your relayer along with the Manual Relayer link<br>
+          <span style="color:#00ffea">4.</span> Relayer pastes the JSON, connects wallet, and submits<br>
+          <span style="color:#00ffea">5.</span> Your fresh wallet receives the tokens + PRIVX reward
         </div>
+      </div>
+
+      <div style="background:rgba(138,43,226,0.05);border:1px solid rgba(138,43,226,0.2);border-radius:10px;padding:14px 16px;margin:14px 0">
+        <div style="font-size:12px;font-weight:700;color:#B57AFF;margin-bottom:6px;letter-spacing:0.5px">🔒 OPTION 2 — TRUSTLESS RELAY (ON-CHAIN ESCROW)</div>
+        <p class="docs-p" style="margin:0 0 10px">No trust in any person needed. Before sharing your proof, you deposit a PLS tip into the <a href="privx-relayer.html" target="_blank" rel="noopener noreferrer" style="color:#B57AFF;text-decoration:none">PrivX Relayer contract ↗</a> — an immutable, ownerless contract that holds the tip until someone relays your withdrawal. The first wallet to relay collects the tip automatically. If nobody relays before your deadline, you reclaim 100% of the tip.</p>
+        <div style="font-size:13px;color:#aaa;line-height:2">
+          <span style="color:#B57AFF">1.</span> Generate your proof JSON as above<br>
+          <span style="color:#B57AFF">2.</span> On the <strong style="color:#fff">Trustless Relayer page</strong>, register a relay request — escrow a PLS tip keyed to your nullifier, set a deadline and optionally a specific relayer<br>
+          <span style="color:#B57AFF">3.</span> Share your proof JSON (and the Trustless Relayer page link) with any relayer<br>
+          <span style="color:#B57AFF">4.</span> Relayer submits through the contract and auto-collects the tip — no off-chain agreement needed<br>
+          <span style="color:#B57AFF">5.</span> If unrelayed by deadline: return to the Reclaim Tip tab to recover your PLS
+        </div>
+        <div style="margin-top:10px;font-size:11px;color:#666;font-family:monospace">Contract: <a href="https://scan.pulsechain.com/address/0xd4951090E0E10dcc9d588DEB62EC324a2487be6D" target="_blank" rel="noopener noreferrer" style="color:#555;text-decoration:none">0xd4951090E0E10dcc9d588DEB62EC324a2487be6D ↗</a> · Immutable · No owner · Sourcify verified</div>
       </div>
 
       <p class="docs-p" style="background:rgba(255,50,50,0.06);border:1px solid rgba(255,50,50,0.2);border-radius:8px;padding:12px 14px;color:#ff9999">
@@ -1328,6 +1354,7 @@
         _lastProofData = {
           protocol:    "PrivX Hurricane",
           version:     "1",
+          chainId:     369,
           shield:      shieldAddr,
           token:       shield.label,
           denomination: `${denomStr} ${shield.label}`,
