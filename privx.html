@@ -218,7 +218,7 @@
 
       <div class="verify-wrap">
         <div id="verify-badge" class="verify-badge checking">⏳ Verifying contracts on-chain…</div>
-        <div class="verify-ipfs">IPFS: <a href="https://ipfs.io/ipfs/bafybeiarjmtktm7z4qa2yggvrgwysthr4ycfvaosvaslbwxzefvgfz3tlm/index.html" target="_blank" title="Censorship-resistant build — CID is the content hash">bafybei…tlm ↗</a></div>
+        <div class="verify-ipfs">IPFS: <a href="https://ipfs.io/ipfs/bafybeicifgncprdop7xgineg37l4xvnscnifgqns66zeuofjvlgkcwloz4/index.html" target="_blank" title="Censorship-resistant build — CID is the content hash">bafybei…oz4 ↗</a></div>
       </div>
 
       <div class="tabs">
@@ -689,7 +689,7 @@
         <tr><td>Zero-root attack</td><td><span style="color:#00ff88">✅ Safe</span> — isKnownRoot() rejects bytes32(0)</td></tr>
         <tr><td>Commitment front-run grief</td><td><span style="color:#aaaaaa">Non-exploitable</span> — attacker loses more than victim</td></tr>
         <tr><td>Mining Vault peakBalance grief</td><td><span style="color:#aaaaaa">Non-exploitable</span> — no theft; PRIVX stays in vault</td></tr>
-        <tr><td>convertAuto sandwich (Fee Vault)</td><td><span style="color:#aaaaaa">Accepted MEV risk</span> — permissionless by design</td></tr>
+        <tr><td>Fee Vault sandwich</td><td><span style="color:#44ff88">Mitigated</span> — UI uses convert() with on-chain quotes + slippage cap</td></tr>
       </table>
 
       <div class="docs-h2">Relayer Mode — Withdrawing Without Gas</div>
@@ -879,11 +879,20 @@
       { anonymous:false, inputs:[{indexed:true,internalType:"bytes32",name:"commitment",type:"bytes32"},{indexed:false,internalType:"uint32",name:"leafIndex",type:"uint32"},{indexed:false,internalType:"uint256",name:"timestamp",type:"uint256"}], name:"Deposit", type:"event" }
     ];
     const FEE_VAULT_ABI = [
+      { inputs:[{name:"token",type:"address"},{name:"minWrappedNativeOut",type:"uint256"},{name:"minPrivxPolLp",type:"uint256"},{name:"minPrivxVault",type:"uint256"},{name:"minPrivxBurn",type:"uint256"}], name:"convert", outputs:[], stateMutability:"nonpayable", type:"function" },
       { inputs:[{name:"token",type:"address"},{name:"slippageBP",type:"uint256"}], name:"convertAuto", outputs:[], stateMutability:"nonpayable", type:"function" },
+      { inputs:[{name:"token",type:"address"}], name:"quoteConvert", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" },
+      { inputs:[], name:"splitConfig", outputs:[{name:"pol",type:"uint256"},{name:"vault",type:"uint256"},{name:"burn",type:"uint256"}], stateMutability:"view", type:"function" },
+      { inputs:[], name:"wpls", outputs:[{name:"",type:"address"}], stateMutability:"view", type:"function" },
+      { inputs:[], name:"router", outputs:[{name:"",type:"address"}], stateMutability:"view", type:"function" },
+      { inputs:[], name:"privx", outputs:[{name:"",type:"address"}], stateMutability:"view", type:"function" },
       { inputs:[{name:"token",type:"address"}], name:"accumulated", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" },
       { inputs:[], name:"totalPrivxBurned", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" },
       { inputs:[], name:"totalPrivxToVault", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" },
       { inputs:[], name:"polLpBalance", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" }
+    ];
+    const ROUTER_ABI = [
+      { inputs:[{name:"amountIn",type:"uint256"},{name:"path",type:"address[]"}], name:"getAmountsOut", outputs:[{name:"amounts",type:"uint256[]"}], stateMutability:"view", type:"function" }
     ];
     const MINING_VAULT_ABI = [
       { inputs:[], name:"vaultBalance", outputs:[{name:"",type:"uint256"}], stateMutability:"view", type:"function" },
@@ -957,20 +966,84 @@
     async function triggerFeeVaultConversion() {
       if (!userAccount) return alert("Connect wallet first");
       if (!FEE_VAULT || FEE_VAULT==="DEPLOY_FIRST") return alert("Fee Vault not yet deployed.");
-      const tokenAddr = document.getElementById('fvTokenAddr').value.trim();
-      const slippage  = parseInt(document.getElementById('fvSlippage').value, 10);
+      const tokenAddr  = document.getElementById('fvTokenAddr').value.trim();
+      const slippageBP = parseInt(document.getElementById('fvSlippage').value, 10);
       if (!tokenAddr) return alert("Enter a token address");
-      if (isNaN(slippage)||slippage<1||slippage>800) return alert("Slippage must be 1–800bp (max 8%). For higher tolerance call convert() directly.");
+      if (isNaN(slippageBP)||slippageBP<1||slippageBP>800) return alert("Slippage must be 1–800bp (max 8%). For higher tolerance call convert() directly.");
       const btn = document.getElementById('fvConvertBtn');
-      btn.disabled=true; btn.textContent="Sending…";
+      btn.disabled = true;
       try {
         const vault = new web3.eth.Contract(FEE_VAULT_ABI, FEE_VAULT);
-        const tx = await vault.methods.convertAuto(tokenAddr, slippage).send({from:userAccount});
-        if (!tx.status) throw new Error("Reverted: "+tx.transactionHash);
-        alert("Conversion successful!\nTX: "+tx.transactionHash);
+        btn.textContent = "Fetching quotes…";
+
+        const [splits, wplsAddr, routerAddr, privxAddr] = await Promise.all([
+          vault.methods.splitConfig().call(),
+          vault.methods.wpls().call(),
+          vault.methods.router().call(),
+          vault.methods.privx().call(),
+        ]);
+
+        const polBP_  = BigInt(splits.pol   ?? splits[0]);
+        const vaultBP_= BigInt(splits.vault ?? splits[1]);
+        const BP      = 10000n;
+        const applySlip = n => n * BigInt(10000 - slippageBP) / BP;
+
+        const router = new web3.eth.Contract(ROUTER_ABI, routerAddr);
+        const tokenLower = tokenAddr.toLowerCase();
+        const isWpls  = tokenLower === wplsAddr.toLowerCase();
+        const isPrivx = tokenLower === privxAddr.toLowerCase();
+
+        const quoteOut = async (amountIn, path) => {
+          if (amountIn === 0n) return 0n;
+          const res = await router.methods.getAmountsOut(amountIn.toString(), path).call();
+          return BigInt(res[res.length - 1]);
+        };
+
+        let minWplsOut = 0n, minPolLp = 0n, minVault = 0n, minBurn = 0n;
+
+        if (isWpls) {
+          const balance = BigInt(await vault.methods.accumulated(wplsAddr).call());
+          const polW    = balance * polBP_   / BP;
+          const vaultW  = balance * vaultBP_ / BP;
+          const burnW   = balance - polW - vaultW;
+          [minPolLp, minVault, minBurn] = await Promise.all([
+            quoteOut(polW / 2n, [wplsAddr, privxAddr]).then(applySlip),
+            quoteOut(vaultW,    [wplsAddr, privxAddr]).then(applySlip),
+            quoteOut(burnW,     [wplsAddr, privxAddr]).then(applySlip),
+          ]);
+        } else if (isPrivx) {
+          const balance  = BigInt(await vault.methods.accumulated(privxAddr).call());
+          const polPrivx = balance * polBP_ / BP;
+          const wplsQ    = await quoteOut(polPrivx / 2n, [privxAddr, wplsAddr]);
+          minWplsOut = applySlip(wplsQ);
+          // vault + burn go direct to vault/dead — no WPLS→PRIVX swap, no minOut needed
+        } else {
+          const wplsExpected = BigInt(await vault.methods.quoteConvert(tokenAddr).call());
+          if (wplsExpected === 0n) throw new Error("No liquidity — vault balance may be zero or pair has no liquidity.");
+          minWplsOut = applySlip(wplsExpected);
+          const polW   = wplsExpected * polBP_   / BP;
+          const vaultW = wplsExpected * vaultBP_ / BP;
+          const burnW  = wplsExpected - polW - vaultW;
+          [minPolLp, minVault, minBurn] = await Promise.all([
+            quoteOut(polW / 2n, [wplsAddr, privxAddr]).then(applySlip),
+            quoteOut(vaultW,    [wplsAddr, privxAddr]).then(applySlip),
+            quoteOut(burnW,     [wplsAddr, privxAddr]).then(applySlip),
+          ]);
+        }
+
+        btn.textContent = "Sending…";
+        const tx = await vault.methods.convert(
+          tokenAddr,
+          minWplsOut.toString(),
+          minPolLp.toString(),
+          minVault.toString(),
+          minBurn.toString()
+        ).send({ from: userAccount });
+        if (!tx.status) throw new Error("Reverted: " + tx.transactionHash);
+        alert("Conversion successful!\nTX: " + tx.transactionHash);
         loadFeeVaultStats();
-      } catch(e) { alert("Failed: "+(e.message||"check console")); }
-      finally { btn.disabled=false; btn.textContent="Convert Fees → PRIVX POL + Vault + Burn"; }
+      } catch(e) { alert("Failed: " + (e.message || "check console")); }
+      finally { btn.disabled = false; btn.textContent = "Convert Fees → PRIVX POL + Vault + Burn"; }
     }
 
     async function loadMiningVaultStats() {
