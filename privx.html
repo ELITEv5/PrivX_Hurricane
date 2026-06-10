@@ -218,7 +218,7 @@
 
       <div class="verify-wrap">
         <div id="verify-badge" class="verify-badge checking">⏳ Verifying contracts on-chain…</div>
-        <div class="verify-ipfs">IPFS: <a href="https://ipfs.io/ipfs/bafybeiepyjouvahyvis22st6pzkrjemlqvdzq5xioxx2vglse5zv2qjjwq/index.html" target="_blank" title="Censorship-resistant build — CID is the content hash">bafybei…wq ↗</a></div>
+        <div class="verify-ipfs">IPFS: <a href="https://ipfs.io/ipfs/bafybeiarjmtktm7z4qa2yggvrgwysthr4ycfvaosvaslbwxzefvgfz3tlm/index.html" target="_blank" title="Censorship-resistant build — CID is the content hash">bafybei…tlm ↗</a></div>
       </div>
 
       <div class="tabs">
@@ -742,8 +742,8 @@
       <label style="display:block;color:#888;font-size:12px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;margin-top:16px">Fee token address</label>
       <input class="fv-input" id="fvTokenAddr" placeholder="Token address">
       <label style="display:block;color:#888;font-size:12px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;margin-top:12px">Max slippage (100bp = 1%)</label>
-      <input class="fv-input" id="fvSlippage" type="number" value="200" min="1" max="2000" placeholder="200">
-      <div style="font-size:11px;color:#888;margin:-2px 0 16px 2px">200bp (2%) slippage works for all live tokens.</div>
+      <input class="fv-input" id="fvSlippage" type="number" value="200" min="1" max="800" placeholder="200">
+      <div style="font-size:11px;color:#888;margin:-2px 0 16px 2px">200bp (2%) recommended. Max 800bp (8%) — use convert() directly for higher tolerance.</div>
       <button class="button" id="fvConvertBtn" onclick="triggerFeeVaultConversion()">Convert Fees → PRIVX POL + Vault + Burn</button>
       <div class="warning-box" style="margin-top:16px;font-size:13px">
         <strong>What happens when you convert:</strong> The vault swaps the accumulated fee token into PRIVX, then automatically splits it — 80% is paired with WPLS and locked as liquidity forever, 10% tops up the mining rewards vault, and 10% is sent to the burn address. Anyone can trigger a conversion at any time.
@@ -960,7 +960,7 @@
       const tokenAddr = document.getElementById('fvTokenAddr').value.trim();
       const slippage  = parseInt(document.getElementById('fvSlippage').value, 10);
       if (!tokenAddr) return alert("Enter a token address");
-      if (isNaN(slippage)||slippage<1||slippage>=10000) return alert("Slippage must be 1–9999");
+      if (isNaN(slippage)||slippage<1||slippage>800) return alert("Slippage must be 1–800bp (max 8%). For higher tolerance call convert() directly.");
       const btn = document.getElementById('fvConvertBtn');
       btn.disabled=true; btn.textContent="Sending…";
       try {
