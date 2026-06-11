@@ -121,6 +121,28 @@ input[type=file]{display:none}
       </div>
     </div>
 
+    <!-- Privacy warning -->
+    <div class="card" style="border-color:rgba(255,160,0,0.35);background:rgba(255,140,0,0.04)">
+      <div class="card-title" style="color:#FFA500">⚠ Privacy tradeoff — read before continuing</div>
+      <div style="font-size:0.82rem;color:#aaa;line-height:1.8">
+        <p style="margin:0 0 10px">Calling <strong style="color:#fff">registerRequest()</strong> is an on-chain transaction. It permanently records your <strong style="color:#fff">wallet address</strong> alongside the <strong style="color:#fff">nullifier hash</strong> and <strong style="color:#fff">shield contract</strong> on the public blockchain. Anyone can see that your wallet initiated a private withdrawal.</p>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
+          <div style="display:flex;gap:8px;align-items:flex-start">
+            <span style="color:#ff6644;flex-shrink:0">✗</span>
+            <span><strong style="color:#ddd">Visible on-chain:</strong> your wallet address, which shield contract, tip size (hints at denomination), deadline</span>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-start">
+            <span style="color:#00cc88;flex-shrink:0">✓</span>
+            <span><strong style="color:#ddd">Never on-chain:</strong> your recipient address, the exact denomination, the ZK proof itself — these remain off-chain</span>
+          </div>
+        </div>
+        <div style="background:rgba(0,0,0,0.3);border-radius:6px;padding:10px 12px;border:1px solid #1a1a1a">
+          <strong style="color:#FFA500">If your depositor wallet being linked to a withdrawal is sensitive — use Manual Relay instead.</strong><br>
+          <span style="color:#666">Manual relay: share your proof JSON directly with a trusted relayer. Nothing goes on-chain until they submit the withdrawal — zero depositor fingerprint.</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Step 1: Load proof -->
     <div class="card">
       <div class="card-title"><span class="step-badge">1</span> Load your proof JSON</div>
@@ -147,8 +169,13 @@ input[type=file]{display:none}
 
       <div class="input-group">
         <span class="input-label">Tip amount (PLS)</span>
-        <input type="number" id="req-tip" placeholder="e.g. 50" min="1" step="1" oninput="updateTipBadge()">
-        <div style="font-size:11px;color:#444;font-family:monospace;margin-top:3px">Tip is escrowed on-chain and released to the relayer automatically on success.</div>
+        <div class="seg-btns" id="tip-segs">
+          <button class="seg-btn" data-tip="10000"    onclick="setTipSeg(this,10000)">10K</button>
+          <button class="seg-btn" data-tip="100000"   onclick="setTipSeg(this,100000)">100K</button>
+          <button class="seg-btn" data-tip="1000000"  onclick="setTipSeg(this,1000000)">1M</button>
+          <button class="seg-btn" data-tip="10000000" onclick="setTipSeg(this,10000000)">10M</button>
+        </div>
+        <div style="font-size:11px;color:#444;font-family:monospace;margin-top:3px">Auto-suggested from your denomination. Relayers won't submit if tip doesn't cover their gas + effort.</div>
       </div>
 
       <div class="input-group">
@@ -181,6 +208,9 @@ input[type=file]{display:none}
       </div>
       <button class="btn btn-primary" id="req-registerBtn" onclick="registerRequest()" disabled>Escrow Tip &amp; Register Request</button>
       <div class="warn-box" style="margin-top:0.8rem">⚠ After registering, share your proof JSON with a relayer. The tip is locked until a relay succeeds or the deadline passes.</div>
+      <div style="margin-top:0.6rem;padding:8px 10px;border-radius:6px;background:rgba(255,140,0,0.06);border:1px solid rgba(255,140,0,0.25);font-size:0.75rem;color:#888;line-height:1.6">
+        🔍 <strong style="color:#FFA500">On-chain record:</strong> This transaction permanently links your connected wallet to this nullifier hash on the public blockchain. Your recipient address and proof remain off-chain.
+      </div>
     </div>
 
     <div class="status" id="req-status"></div>
@@ -318,7 +348,7 @@ const RELAYER_ABI = [
 
 const state = {
   web3: null, account: null,
-  req:  { proof: null, deadlineHours: 24 },
+  req:  { proof: null, deadlineHours: 24, tipPls: 0 },
   earn: { proof: null },
   rec:  { nullHash: null },
 };
@@ -421,6 +451,7 @@ function parseProof(tab) {
     document.getElementById('req-review').style.display  = 'block';
     document.getElementById('req-terms').style.display   = 'block';
     document.getElementById('req-connect').style.display = 'block';
+    autoSelectTip(data.denomination);
     document.getElementById('req-review').scrollIntoView({ behavior:'smooth', block:'nearest' });
 
   } else if (tab === 'earn') {
@@ -477,16 +508,27 @@ function setDeadlineSeg(el, hours) {
   state.req.deadlineHours = hours;
 }
 
-// ── Tip badge preview ─────────────────────────────────────────────────────────
+// ── Tip segment selector ──────────────────────────────────────────────────────
 
-function updateTipBadge() {
-  const val = parseFloat(document.getElementById('req-tip').value);
-  const el  = document.getElementById('req-tip-preview');
-  if (!val || val <= 0) {
-    el.className = 'tip-badge tip-none'; el.textContent = '— PLS';
-  } else {
-    el.className = 'tip-badge tip-set'; el.textContent = `${val} PLS`;
+function setTipSeg(el, amount) {
+  document.querySelectorAll('#tip-segs .seg-btn').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+  state.req.tipPls = amount;
+  const preview = document.getElementById('req-tip-preview');
+  if (preview) {
+    preview.className = amount ? 'tip-badge tip-set' : 'tip-badge tip-none';
+    preview.textContent = amount ? `${amount.toLocaleString()} PLS` : '— PLS';
   }
+}
+
+function autoSelectTip(denomination) {
+  const num = parseFloat(String(denomination || '').replace(/[^\d.]/g, ''));
+  let tip = 10000;
+  if      (num >= 1000000) tip = 10000000;
+  else if (num >= 100000)  tip = 1000000;
+  else if (num >= 10000)   tip = 100000;
+  const btn = document.querySelector(`#tip-segs .seg-btn[data-tip="${tip}"]`);
+  setTipSeg(btn, tip);
 }
 
 // ── Wallet ────────────────────────────────────────────────────────────────────
@@ -518,8 +560,8 @@ async function registerRequest() {
   const proof = state.req.proof;
   if (!proof)          return showStatus('req', 'error', 'Load a proof first.');
   if (!state.account)  return showStatus('req', 'error', 'Connect wallet first.');
-  const tipPls = parseFloat(document.getElementById('req-tip').value);
-  if (!tipPls || tipPls <= 0) return showStatus('req', 'error', 'Enter a tip amount greater than 0.');
+  const tipPls = state.req.tipPls;
+  if (!tipPls || tipPls <= 0) return showStatus('req', 'error', 'Select a tip amount.');
   const relayerInput = document.getElementById('req-relayer').value.trim();
   const relayerAddr  = relayerInput || '0x0000000000000000000000000000000000000000';
   if (relayerInput && !state.web3.utils.isAddress(relayerInput))
