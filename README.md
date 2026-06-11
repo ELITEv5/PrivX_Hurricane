@@ -2,7 +2,7 @@
 
 > Zero-knowledge token shielding on PulseChain. Shield tokens. Generate a Proof of Privacy. Mine PRIVX.
 
-**PrivX Hurricane** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx.html) &nbsp;·&nbsp; [IPFS](https://ipfs.io/ipfs/bafybeig7ws26eqtleyn6bke3flpkweje6sawpbipulroam3tjhzw6h6gyq/index.html)
+**PrivX Hurricane** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx.html) &nbsp;·&nbsp; [IPFS](https://ipfs.io/ipfs/bafybeiguhe57tfzpux34rqwnm3btmiipjbnjn7yyogdtwkh5dnrifwcowa/index.html)
 
 **PrivX Relayer** &nbsp;·&nbsp; [Live](https://elitev5.github.io/PrivX_Hurricane/privx-relayer.html) — trustless on-chain relay escrow · contract `0xd4951090E0E10dcc9d588DEB62EC324a2487be6D`
 
