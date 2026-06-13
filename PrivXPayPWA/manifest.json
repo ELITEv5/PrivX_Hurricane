@@ -1,0 +1,16 @@
+{
+  "name": "PrivX Pay",
+  "short_name": "PrivX Pay",
+  "description": "Private digital cash on PulseChain",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#8A2BE2",
+  "background_color": "#000000",
+  "icons": [
+    { "src": "./icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icon.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "categories": ["finance", "utilities"]
+}
