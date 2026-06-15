@@ -198,7 +198,7 @@
     <a href="#" onclick="openMiningVaultModal();return false;" class="nav-link">⛏ Mining Vault</a>
     <a href="relayer.html" target="_blank" class="nav-link">📦 Relayer</a>
     <a href="privx-relayer.html" target="_blank" class="nav-link">🔒 Trustless Relayer</a>
-    <a href="https://elitev5.github.io/PrivX_Hurricane/privx-pay.html" target="_blank" class="nav-link"><img src="privx-shield.png" class="privx-icon" alt="">PrivX Pay</a>
+    <a href="https://ipfs.io/ipfs/bafybeiak7w57fccfhwmcn5jlvcskoz4e7tqbdiqicjlfheisdz7h5zxsbe" target="_blank" rel="noopener noreferrer" class="nav-link"><img src="privx-shield.png" class="privx-icon" alt="">PrivX Pay</a>
   </div>
 
   <div id="walletButton" class="wallet-button">
@@ -469,6 +469,44 @@
       </div>
     </div>
 
+    <!-- PrivX Pay -->
+    <div class="info-card">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <img src="privx-shield.png" style="height:44px;width:44px;border-radius:12px;box-shadow:0 0 20px rgba(138,43,226,0.5)" alt="PrivX Pay">
+        <div>
+          <h2 style="margin-bottom:2px">PrivX Pay</h2>
+          <p style="font-size:11px;color:#888;letter-spacing:1px;text-transform:uppercase;font-weight:700">Digital Bearer Cash · Mobile PWA · PulseChain</p>
+        </div>
+      </div>
+      <p style="color:#aaa;font-size:14px;line-height:1.75;margin-bottom:16px">PrivX Pay is the companion product that brings ZK privacy to everyday spending — without requiring proof generation at the point of payment. Instead of scanning a ZK proof at checkout, PrivX Pay works like digital bearer cash: <strong style="color:#fff">whoever holds the private key owns the funds, instantly, with no verification required</strong>. Bills are bearer instruments. Possession is ownership. Privacy is structural.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px">
+        <div style="background:rgba(138,43,226,0.1);border:1px solid rgba(138,43,226,0.25);border-radius:12px;padding:13px">
+          <strong style="color:var(--accent);display:block;margin-bottom:5px;font-size:13px">⚡ Instant payments</strong>
+          <p style="color:#aaa;font-size:13px;line-height:1.5">Bills are bearer wallets. Hand someone a private key to pay — no proof generation, no vendor scan, no waiting.</p>
+        </div>
+        <div style="background:rgba(138,43,226,0.1);border:1px solid rgba(138,43,226,0.25);border-radius:12px;padding:13px">
+          <strong style="color:var(--accent);display:block;margin-bottom:5px;font-size:13px">🔐 ZK unlinking</strong>
+          <p style="color:#aaa;font-size:13px;line-height:1.5">Deposits and withdrawals are cryptographically severed by the same PLONK circuit that powers Hurricane.</p>
+        </div>
+        <div style="background:rgba(138,43,226,0.1);border:1px solid rgba(138,43,226,0.25);border-radius:12px;padding:13px">
+          <strong style="color:var(--accent);display:block;margin-bottom:5px;font-size:13px">📱 Mobile-first PWA</strong>
+          <p style="color:#aaa;font-size:13px;line-height:1.5">Install it to your home screen like a native app. Fully self-custodial — no server, no account, no custodian.</p>
+        </div>
+        <div style="background:rgba(138,43,226,0.1);border:1px solid rgba(138,43,226,0.25);border-radius:12px;padding:13px">
+          <strong style="color:var(--accent);display:block;margin-bottom:5px;font-size:13px">🚫 No custodian</strong>
+          <p style="color:#aaa;font-size:13px;line-height:1.5">No account to freeze. No statement. No reversal. No viewer keys. No recovery without your seed.</p>
+        </div>
+      </div>
+      <div style="background:rgba(0,255,234,0.04);border:1px solid rgba(0,255,234,0.14);border-radius:12px;padding:14px 16px;margin-bottom:18px;font-size:13px;color:#888;line-height:1.75">
+        <strong style="color:#00ffea;display:block;margin-bottom:5px">How it fits with Hurricane</strong>
+        Hurricane is the ZK shield layer — deposit, let the anonymity set grow, withdraw to a fresh wallet. PrivX Pay picks up where Hurricane leaves off: withdrawn funds become bearer bills that can be <strong style="color:#fff">handed to anyone, anywhere, instantly</strong>. Bill creation is rooted in a Hurricane withdrawal, so every PrivX Pay user contributes to the Proof of Privacy mining economy and earns PRIVX automatically.
+      </div>
+      <a href="https://ipfs.io/ipfs/bafybeiak7w57fccfhwmcn5jlvcskoz4e7tqbdiqicjlfheisdz7h5zxsbe" target="_blank" rel="noopener noreferrer" class="buy-btn" style="background:linear-gradient(135deg,#8A2BE2,#007766)">
+        <img src="privx-shield.png" style="height:18px;width:18px;vertical-align:middle;margin-right:8px;border-radius:4px" alt="">Open PrivX Pay PWA ↗
+      </a>
+      <p style="text-align:center;font-size:11px;color:#444;margin-top:8px;font-family:monospace">Hosted on IPFS · self-custodial · no server</p>
+    </div>
+
     <!-- Why Privacy -->
     <div class="info-card">
       <h2>Why Financial Privacy Matters</h2>
@@ -497,7 +535,7 @@
         </details>
         <details style="border-radius:10px;overflow:hidden">
           <summary style="cursor:pointer;font-weight:600;color:#fff;padding:12px 16px;background:rgba(138,43,226,0.1);list-style:none;display:flex;justify-content:space-between;align-items:center">Is my note stored anywhere? <span style="font-size:11px;color:var(--accent)">▼</span></summary>
-          <p style="padding:12px 16px;color:#aaa;font-size:14px;line-height:1.6;border-left:2px solid var(--primary);margin-top:6px">No. Your note is generated entirely inside your browser using the Web Crypto API. It is never sent to a server, never stored on-chain, and never leaves your device unless you copy it. If you lose it, there is no recovery mechanism on this page — the funds are locked in the contract permanently. If you want seed-based recovery, use the <strong style="color:#fff">PrivX Pay Wallet</strong> — it derives every note from a master seed so your full note history can be scanned back from the blockchain if you ever lose your device.</p>
+          <p style="padding:12px 16px;color:#aaa;font-size:14px;line-height:1.6;border-left:2px solid var(--primary);margin-top:6px">No. Your note is generated entirely inside your browser using the Web Crypto API. It is never sent to a server, never stored on-chain, and never leaves your device unless you copy it. If you lose it, there is no recovery mechanism on this page — the funds are locked in the contract permanently. If you want a managed wallet experience, use <a href="https://ipfs.io/ipfs/bafybeiak7w57fccfhwmcn5jlvcskoz4e7tqbdiqicjlfheisdz7h5zxsbe" target="_blank" rel="noopener noreferrer" style="color:var(--accent)">PrivX Pay</a> — a self-custodial mobile PWA that manages bearer bills derived from your seed, with an encrypted device backup so you can restore everything from a single seed phrase.</p>
         </details>
         <details style="border-radius:10px;overflow:hidden">
           <summary style="cursor:pointer;font-weight:600;color:#fff;padding:12px 16px;background:rgba(138,43,226,0.1);list-style:none;display:flex;justify-content:space-between;align-items:center">What is a zero-knowledge proof? <span style="font-size:11px;color:var(--accent)">▼</span></summary>
