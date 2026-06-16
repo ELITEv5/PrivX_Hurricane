@@ -219,7 +219,7 @@
 
       <div class="verify-wrap">
         <div id="verify-badge" class="verify-badge checking">⏳ Verifying contracts on-chain…</div>
-        <div class="verify-ipfs">IPFS: <a href="https://ipfs.io/ipfs/bafybeifuacijy4umaks3657yaovinevvfc4k5unbkw4yjxf5bs4mfjxxoi/index.html" target="_blank" title="Censorship-resistant build on IPFS">bafybei…xoi ↗</a></div>
+        <div class="verify-ipfs">IPFS: <a href="https://ipfs.io/ipfs/bafybeiejsos5dv2bztajit44zum2knr47osvy32v3aeelkhyagbah2q4ki/index.html" target="_blank" title="Censorship-resistant build on IPFS">bafybei…4ki ↗</a></div>
       </div>
 
       <div class="tabs">
@@ -560,6 +560,14 @@
         <details style="border-radius:10px;overflow:hidden">
           <summary style="cursor:pointer;font-weight:600;color:#fff;padding:12px 16px;background:rgba(138,43,226,0.1);list-style:none;display:flex;justify-content:space-between;align-items:center">What happens if I try to withdraw an already-spent note? <span style="font-size:11px;color:var(--accent)">▼</span></summary>
           <p style="padding:12px 16px;color:#aaa;font-size:14px;line-height:1.6;border-left:2px solid var(--primary);margin-top:6px">Before starting proof generation, the app automatically queries the shield contract on-chain to check whether your note's nullifier has already been recorded as spent. If it has, you see an immediate error — saving the 15–30 seconds of proof computation that would result in a reverted transaction anyway. Valid, unspent notes pass this check instantly and proceed normally.</p>
+        </details>
+        <details style="border-radius:10px;overflow:hidden">
+          <summary style="cursor:pointer;font-weight:600;color:#fff;padding:12px 16px;background:rgba(138,43,226,0.1);list-style:none;display:flex;justify-content:space-between;align-items:center">Why doesn't PrivX Pay have a send button, PrivX balance, or wallet import? <span style="font-size:11px;color:var(--accent)">▼</span></summary>
+          <p style="padding:12px 16px;color:#aaa;font-size:14px;line-height:1.6;border-left:2px solid var(--primary);margin-top:6px">By design. PrivX Pay is a ZK cash instrument, not a general-purpose wallet — and its limited feature set is what protects your privacy.<br><br>
+          <strong style="color:#fff">No direct send:</strong> A regular send creates a direct on-chain link between your Pay wallet address and the recipient. The ZK shield flow (Restock → Bills → Pay tab) is what severs that link. A send button would let you skip the privacy layer entirely and expose your wallet as the source of funds.<br><br>
+          <strong style="color:#fff">No MetaMask / Rabby import:</strong> If you import your PrivX Pay seed into MetaMask, the same key signs both private ZK transactions and regular public ones. Any on-chain analyst can then correlate your MetaMask address with your Pay vault — collapsing the privacy wall completely.<br><br>
+          <strong style="color:#fff">No PrivX balance:</strong> PrivX Pay uses DAI, pSunDAI, and USDC shields. PRIVX token is not part of the Pay flow — it is what you earn through Hurricane withdrawals. Showing a PRIVX balance would mislead users into thinking they can shield PRIVX through Pay.<br><br>
+          For regular transfers and PRIVX management, use MetaMask or Rabby connected to the Hurricane shield above.</p>
         </details>
       </div>
     </div>
