@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PrivX Pay — Print Note</title>
+<link rel="icon" href="./privx-shield.png" type="image/png">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+@page { size: letter portrait; margin: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #0a0a0a;
+  color: #fff;
+  padding: 0.4in 0.5in;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2in;
+  min-height: 100vh;
+}
+
+.ui {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.ui-header { display:flex; align-items:center; gap:12px; }
+.ui-logo { width:36px; height:36px; border-radius:8px; filter:drop-shadow(0 0 10px rgba(138,43,226,.5)); }
+.ui-title { font-size:18px; font-weight:900; background:linear-gradient(90deg,#00ffea,#8A2BE2); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.ui-sub { font-size:11px; color:#555; letter-spacing:.8px; text-transform:uppercase; margin-top:2px; }
+
+.warn-box {
+  background: rgba(255,180,0,0.07);
+  border: 1px solid rgba(255,180,0,0.25);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 12px;
+  color: #cc9900;
+  line-height: 1.6;
+}
+.err-box {
+  background: rgba(255,80,80,0.08);
+  border: 1px solid rgba(255,80,80,0.25);
+  border-radius: 10px;
+  padding: 16px;
+  font-size: 13px;
+  color: #ff8888;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.btn-print {
+  padding: 12px 28px;
+  background: #8A2BE2;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 0 24px rgba(138,43,226,0.4);
+  letter-spacing: .04em;
+}
+.btn-print:hover { background: #00ffea; color: #000; }
+
+/* ── Note shell ── */
+.note {
+  width: 6.14in;
+  height: 2.61in;
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 10px 50px rgba(0,0,0,.8), inset 0 0 0 1px rgba(255,255,255,.07);
+}
+
+/* Denomination colour themes */
+.n1   { --c0:#081408; --c1:#0f2a14; --c2:#1a4a2e; --ca:#52b788; --cl:#d8f3dc; --cm:#95d5b2; }
+.n5   { --c0:#04091a; --c1:#0a1c3d; --c2:#15316b; --ca:#4a8fd9; --cl:#dbeafe; --cm:#93c5fd; }
+.n10  { --c0:#1a0700; --c1:#3d1200; --c2:#6b2200; --ca:#e05c1a; --cl:#fdf0e8; --cm:#f4a261; }
+.n20  { --c0:#0e0118; --c1:#200440; --c2:#360a6a; --ca:#9b3ddd; --cl:#ede0ff; --cm:#c084fc; }
+.n50  { --c0:#140000; --c1:#3a0505; --c2:#680c0c; --ca:#dd2020; --cl:#ffe8e8; --cm:#f87171; }
+.n100 { --c0:#0f0b00; --c1:#2e2200; --c2:#544000; --ca:#c8970a; --cl:#fff8e1; --cm:#fcd34d; }
+
+.nbg { position:absolute; inset:0; background:radial-gradient(ellipse 75% 85% at 52% 48%, var(--c2) 0%, var(--c1) 50%, var(--c0) 100%); }
+.guilloché { position:absolute; inset:0; z-index:1; overflow:hidden; }
+.mpborder { position:absolute; inset:0; z-index:2; pointer-events:none; }
+.foil {
+  position:absolute; left:0; top:0; bottom:0; width:15px; z-index:9;
+  background: repeating-linear-gradient(-40deg,
+    rgba(255,255,255,.95) 0px, rgba(190,150,255,.80) 4px,
+    rgba(140,215,255,.85) 8px, rgba(140,255,195,.80) 12px,
+    rgba(255,235,140,.85) 16px, rgba(255,165,185,.80) 20px,
+    rgba(200,170,255,.90) 24px, rgba(255,255,255,.95) 28px);
+  border-right: 1px solid rgba(255,255,255,.22);
+}
+.face { position:absolute; inset:0; padding:9px 14px 30px 20px; z-index:5; display:flex; flex-direction:column; }
+.serial-row { display:flex; justify-content:flex-end; height:11px; margin-bottom:1px; }
+.serial-num { font-family:'Courier New',monospace; font-size:5pt; font-weight:700; letter-spacing:.15em; color:var(--ca); opacity:.65; }
+.top-row { display:flex; align-items:flex-start; gap:6px; flex-shrink:0; }
+.denom-left { display:flex; flex-direction:column; width:90px; flex-shrink:0; }
+.big-denom  { font-size:34pt; font-weight:900; line-height:.92; color:var(--cl); letter-spacing:-1.5px; text-shadow:0 2px 8px rgba(0,0,0,.7),0 0 24px var(--ca); }
+.denom-word { font-size:4.8pt; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--cm); margin-top:2px; }
+.note-token { font-size:7pt; font-weight:800; letter-spacing:.18em; text-transform:uppercase; color:var(--ca); margin-top:4px; }
+.title-block { flex:1; display:flex; flex-direction:column; align-items:center; padding-top:4px; gap:2px; }
+.brand-name    { font-size:14.5pt; font-weight:800; letter-spacing:.38em; text-transform:uppercase; color:var(--cl); text-shadow:0 0 28px var(--ca),0 1px 4px rgba(0,0,0,.6); line-height:1; }
+.brand-tagline { font-size:4.5pt; font-weight:500; letter-spacing:.28em; text-transform:uppercase; color:var(--cm); opacity:.9; }
+.issue-line    { font-size:4pt; letter-spacing:.14em; color:var(--ca); opacity:.5; margin-top:2px; font-style:italic; }
+.logo-block  { width:90px; flex-shrink:0; display:flex; flex-direction:column; align-items:flex-end; padding-top:2px; gap:2px; }
+.shield-logo { width:42px; height:42px; object-fit:contain; opacity:.88; display:block; }
+.logo-label  { font-size:4pt; letter-spacing:.25em; text-transform:uppercase; color:var(--cm); opacity:.7; }
+.mid-row { flex:1; display:flex; align-items:center; justify-content:center; padding:2px 0 0; }
+.qr-wrap  { display:flex; flex-direction:column; align-items:center; gap:3px; }
+.qr-frame {
+  width:120px; height:120px;
+  background: #fff;
+  border: 1.5px solid rgba(0,0,0,.15);
+  border-radius: 2px;
+  position: relative;
+  box-shadow: 0 2px 10px rgba(0,0,0,.4);
+  flex-shrink: 0;
+}
+.qr-frame canvas { width:100%!important; height:100%!important; display:block; border-radius:1px; }
+.qr-print-img { display:none; width:100%!important; height:100%!important; border-radius:1px; }
+.qr-tip { font-size:4pt; font-weight:600; letter-spacing:.18em; color:var(--cm); text-transform:uppercase; opacity:.9; max-width:106px; text-align:center; line-height:1.4; }
+.denom-br { position:absolute; bottom:30px; right:10px; z-index:6; font-size:26pt; font-weight:900; color:var(--cl); opacity:.55; line-height:1; letter-spacing:-1px; text-shadow:0 1px 4px rgba(0,0,0,.7); }
+.bearer {
+  position:absolute; bottom:14px; left:0; right:0; height:16px; z-index:6;
+  background:rgba(0,0,0,.42); border-top:.5px solid rgba(255,255,255,.12);
+  display:flex; align-items:center; justify-content:space-between; padding:0 9px 0 20px;
+}
+.bearer-warn  { font-size:4.5pt; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--cl); }
+.bearer-right { font-size:4pt; letter-spacing:.18em; color:var(--cm); text-transform:uppercase; opacity:.8; }
+.bot {
+  position:absolute; bottom:0; left:0; right:0; height:14px; z-index:6;
+  background:rgba(0,0,0,.55); border-top:.5px solid rgba(255,255,255,.06);
+  display:flex; align-items:center; justify-content:space-between; padding:0 9px 0 20px;
+}
+.bot-left  { font-size:4pt; letter-spacing:.12em; color:var(--cm); text-transform:uppercase; opacity:.75; }
+.bot-right { font-size:4.5pt; font-weight:700; letter-spacing:.22em; color:var(--ca); text-transform:uppercase; }
+
+.cut-line {
+  width: 6.14in;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255,255,255,.2);
+  font-size: 8px;
+  letter-spacing: .15em;
+}
+.cut-line::before, .cut-line::after {
+  content: '';
+  flex: 1;
+  border-top: 1px dashed rgba(255,255,255,.15);
+}
+@media print {
+  body { background:#fff; padding:0.4in 0.5in; gap:0.15in; }
+  .ui, .print-btn-row { display:none!important; }
+  .note { box-shadow:none; }
+  .qr-frame canvas { display:none!important; }
+  .qr-print-img { display:block!important; }
+  .cut-line { color: rgba(0,0,0,.25); }
+  .cut-line::before, .cut-line::after { border-top-color: rgba(0,0,0,.2); }
+}
+</style>
+</head>
+<body>
+
+<div class="ui" id="ui">
+  <div class="ui-header">
+    <img src="./privx-shield.png" class="ui-logo" alt="PrivX">
+    <div>
+      <div class="ui-title">PrivX Pay · Cash Note</div>
+      <div class="ui-sub">Bearer Instrument · Print Ready</div>
+    </div>
+  </div>
+  <div class="warn-box" id="warn-box" style="display:none">
+    ⚠ <strong>Bearer instrument</strong> — anyone who scans this QR can redeem the funds. Treat like physical cash. Print, then close this tab — do not leave it open on a shared device.
+  </div>
+  <div class="err-box" id="err-box" style="display:none"></div>
+</div>
+
+<div class="print-btn-row" id="print-btn-row" style="display:none">
+  <button class="btn-print" onclick="window.print()">🖨 Print Note</button>
+</div>
+
+<div id="note-wrap"></div>
+
+<script src="./qrcode.min.js"></script>
+<script>
+const DENOM_META = {
+  '1':   { cls:'n1',   word:'One',         serial:'A' },
+  '5':   { cls:'n5',   word:'Five',        serial:'B' },
+  '10':  { cls:'n10',  word:'Ten',         serial:'C' },
+  '20':  { cls:'n20',  word:'Twenty',      serial:'D' },
+  '50':  { cls:'n50',  word:'Fifty',       serial:'E' },
+  '100': { cls:'n100', word:'One Hundred', serial:'F' },
+};
+const GUILLOCHE_SEEDS   = {'1':1001,'5':2003,'10':3007,'20':4013,'50':5021,'100':6031};
+const MICROPRINT_COLORS = {'1':'#52b788','5':'#4a8fd9','10':'#e05c1a','20':'#c084fc','50':'#f87171','100':'#fcd34d'};
+const YEAR = new Date().getFullYear();
+
+function mulberry32(seed) {
+  let s = seed >>> 0;
+  return function() {
+    s += 0x6D2B79F5;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function buildGuilloche(el, seed) {
+  const W = 590, H = 250, rng = mulberry32(seed), paths = [];
+  for (let i = 0; i < 22; i++) {
+    const y0=i/21*H, a1=6+4*rng(), a2=3+2*rng(), f1=.022+.006*rng(), f2=.041+.008*rng(), p1=rng()*Math.PI*2, p2=rng()*Math.PI*2;
+    let d=`M 0 ${y0.toFixed(1)}`;
+    for (let x=0;x<=W;x+=2) d+=` L ${x} ${(y0+a1*Math.sin(x*f1+p1)+a2*Math.sin(x*f2+p2)).toFixed(2)}`;
+    paths.push(`<path d="${d}" stroke="white" stroke-width=".45" fill="none" opacity=".28"/>`);
+  }
+  for (let i=0;i<16;i++) {
+    const y0=i/15*H, a1=4+3*rng(), f1=.03+.01*rng(), mod=.012+.004*rng(), ph=Math.PI+rng()*Math.PI*2;
+    let d=`M 0 ${y0.toFixed(1)}`;
+    for (let x=0;x<=W;x+=2) d+=` L ${x} ${(y0+a1*Math.sin(x*f1+ph)*Math.cos(x*mod)).toFixed(2)}`;
+    paths.push(`<path d="${d}" stroke="white" stroke-width=".3" fill="none" opacity=".14"/>`);
+  }
+  for (let cx=80;cx<W;cx+=130) for (let cy=50;cy<H;cy+=80) {
+    const r1=18+8*rng();
+    for (let s=0;s<12;s++) {
+      const a=s/12*Math.PI*2, r2=r1*.6;
+      paths.push(`<line x1="${(cx+r2*Math.cos(a)).toFixed(1)}" y1="${(cy+r2*Math.sin(a)).toFixed(1)}" x2="${(cx+r1*Math.cos(a+.25)).toFixed(1)}" y2="${(cy+r1*Math.sin(a+.25)).toFixed(1)}" stroke="white" stroke-width=".4" opacity=".18"/>`);
+    }
+    paths.push(`<circle cx="${cx}" cy="${cy}" r="${(r1*.35).toFixed(1)}" stroke="white" stroke-width=".35" fill="none" opacity=".12"/>`);
+  }
+  el.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%"><g>${paths.join('')}</g></svg>`;
+}
+
+function buildMicroprint(el, color) {
+  const rep = 'PRIVX·PAY PRIVATE·DIGITAL·CASH BEARER·INSTRUMENT PULSECHAIN '.repeat(30);
+  const uid = 'mp' + Math.random().toString(36).slice(2);
+  el.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 590 250" width="100%" height="100%" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"><defs><path id="${uid}" d="M 3 3 H 587 V 247 H 3 Z"/></defs><text font-size="3.8" fill="${color}" font-family="Courier New,monospace" letter-spacing=".5" opacity=".45"><textPath href="#${uid}">${rep}</textPath></text></svg>`;
+}
+
+function renderNote({ privKey, token, denom, qrData }) {
+  const meta = DENOM_META[denom];
+  if (!meta) return null;
+
+  const tokenLabel = token === 'psundai' ? 'pSunDAI' : token === 'usdc' ? 'USDC' : 'DAI';
+  const serial = meta.serial + denom.padStart(8, '0');
+  const uid = Math.random().toString(36).slice(2);
+
+  const wrap = document.createElement('div');
+  wrap.className = `note ${meta.cls}`;
+  wrap.innerHTML = `
+    <div class="nbg"></div>
+    <div class="guilloché" id="g${uid}"></div>
+    <div class="mpborder" id="mp${uid}"></div>
+    <div class="foil"></div>
+    <div class="face">
+      <div class="serial-row"><span class="serial-num">PX · ${serial} · ${YEAR}</span></div>
+      <div class="top-row">
+        <div class="denom-left">
+          <div class="big-denom">${denom}</div>
+          <div class="denom-word">${meta.word}</div>
+          <div class="note-token">${tokenLabel}</div>
+        </div>
+        <div class="title-block">
+          <div class="brand-name">PRIVX PAY</div>
+          <div class="brand-tagline">Private Digital Cash</div>
+          <div class="issue-line">Series ${YEAR} · PulseChain</div>
+        </div>
+        <div class="logo-block">
+          <img src="./privx-shield.png" class="shield-logo" alt="PrivX">
+          <span class="logo-label">PRIVX</span>
+        </div>
+      </div>
+      <div class="mid-row">
+        <div class="qr-wrap">
+          <div class="qr-frame" id="qrf${uid}"></div>
+          <div class="qr-tip">Scan with PrivX Pay to redeem</div>
+        </div>
+      </div>
+    </div>
+    <div class="denom-br">${denom}</div>
+    <div class="bearer">
+      <span class="bearer-warn">Bearer Instrument — Treat Like Cash</span>
+      <span class="bearer-right">${denom} ${tokenLabel} · ${meta.word}</span>
+    </div>
+    <div class="bot">
+      <span class="bot-left">Open PrivX Pay → Receive tab → Scan Cash Note (or Pay tab → Scan)</span>
+      <span class="bot-right">PRIVX · PAY</span>
+    </div>`;
+
+  document.getElementById('note-wrap').appendChild(wrap);
+
+  buildGuilloche(document.getElementById('g' + uid), GUILLOCHE_SEEDS[denom] || 1001);
+  buildMicroprint(document.getElementById('mp' + uid), MICROPRINT_COLORS[denom] || '#888');
+
+  if (window.QRCode) {
+    const frame = document.getElementById('qrf' + uid);
+    const canvas = document.createElement('canvas');
+    QRCode.toCanvas(canvas, qrData, {
+      width: 600, margin: 2, errorCorrectionLevel: 'H',
+      color: { dark: '#000000', light: '#ffffff' }
+    }, err => {
+      if (!err) {
+        frame.appendChild(canvas);
+        // Pre-bake a static img for print — no timing dependency on beforeprint
+        const printImg = document.createElement('img');
+        printImg.src = canvas.toDataURL('image/png');
+        printImg.className = 'qr-print-img';
+        frame.appendChild(printImg);
+      }
+    });
+  }
+
+  return wrap;
+}
+
+
+function init() {
+  const hash = window.location.hash.slice(1);
+  const errEl = document.getElementById('err-box');
+  const warnEl = document.getElementById('warn-box');
+  const btnRow = document.getElementById('print-btn-row');
+
+  if (!hash || !hash.startsWith('privxpay:')) {
+    errEl.textContent = 'No note data found. Open this page from a bill card in PrivX Pay — tap the bill and press Print Note.';
+    errEl.style.display = '';
+    return;
+  }
+
+  // Format: privxpay:{privateKey}:{token}:{denom}
+  const inner = hash.slice('privxpay:'.length);
+  // Split on ':' — privateKey starts with '0x' so it won't have a colon
+  const parts = inner.split(':');
+  if (parts.length < 3) {
+    errEl.textContent = 'Invalid note format in URL.';
+    errEl.style.display = '';
+    return;
+  }
+  const [privKey, token, denom] = parts;
+
+  if (!DENOM_META[denom]) {
+    errEl.textContent = 'Unrecognised denomination: ' + denom;
+    errEl.style.display = '';
+    return;
+  }
+
+  const qrData = `privxpay:${privKey}:${token}:${denom}`;
+  const note = renderNote({ privKey, token, denom, qrData });
+  if (note) {
+    // Second identical note for 2-per-page printing — cut on the dashed line
+    const cut = document.createElement('div');
+    cut.className = 'cut-line';
+    cut.textContent = '✂ cut here';
+    document.getElementById('note-wrap').appendChild(cut);
+    renderNote({ privKey, token, denom, qrData });
+    warnEl.style.display = '';
+    btnRow.style.display = '';
+  }
+}
+
+init();
+</script>
+</body>
+</html>

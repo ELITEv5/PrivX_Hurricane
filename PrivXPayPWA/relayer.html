@@ -195,20 +195,40 @@ function parseProof() {
   parsedProof = data;
   clearStatus();
 
-  // Build review table
-  const scan = addr => `<a href="https://scan.pulsechain.com/address/${addr}" target="_blank">${addr.slice(0,10)}…${addr.slice(-8)} ↗</a>`;
-  const gen  = data.generated ? new Date(data.generated).toLocaleString() : 'Unknown';
+  // Build review table using DOM — proof JSON is untrusted input, never use innerHTML with it
+  const container = document.getElementById('proofDetail');
+  container.innerHTML = '';
 
-  document.getElementById('proofDetail').innerHTML = `
-    <div class="detail-row"><span class="dk">Protocol</span><span class="dv">${data.protocol} v${data.version||'1'}</span></div>
-    <div class="detail-row"><span class="dk">Token</span><span class="dv">${data.token||'—'}</span></div>
-    <div class="detail-row"><span class="dk">Denomination</span><span class="dv">${data.denomination||'—'}</span></div>
-    <div class="detail-row"><span class="dk">Shield</span><span class="dv">${scan(data.shield)}</span></div>
-    <div class="detail-row"><span class="dk">Recipient</span><span class="dv recipient">${data.recipient}</span></div>
-    <div class="detail-row"><span class="dk">Proof</span><span class="dv">${data.proof.length} elements ✓</span></div>
-    <div class="detail-row"><span class="dk">pubSignals</span><span class="dv">${data.pubSignals.length} elements ✓</span></div>
-    <div class="detail-row"><span class="dk">Generated</span><span class="dv">${gen}</span></div>
-  `;
+  function addRow(label, value, extraClass) {
+    const row = document.createElement('div'); row.className = 'detail-row';
+    const dk  = document.createElement('span'); dk.className = 'dk'; dk.textContent = label;
+    const dv  = document.createElement('span'); dv.className = 'dv' + (extraClass ? ' ' + extraClass : '');
+    if (value && typeof value === 'object') {
+      dv.appendChild(value); // pre-built element (e.g. <a>)
+    } else {
+      dv.textContent = value;
+    }
+    row.appendChild(dk); row.appendChild(dv);
+    container.appendChild(row);
+  }
+
+  function scanLink(addr) {
+    const a = document.createElement('a');
+    a.href = 'https://scan.pulsechain.com/address/' + encodeURIComponent(addr);
+    a.target = '_blank'; a.rel = 'noopener noreferrer';
+    a.textContent = addr.slice(0,10) + '…' + addr.slice(-8) + ' ↗';
+    return a;
+  }
+
+  const gen = data.generated ? new Date(data.generated).toLocaleString() : 'Unknown';
+  addRow('Protocol',    (data.protocol || '') + ' v' + (data.version || '1'));
+  addRow('Token',       data.token || '—');
+  addRow('Denomination', data.denomination || '—');
+  addRow('Shield',      scanLink(data.shield));
+  addRow('Recipient',   data.recipient, 'recipient');
+  addRow('Proof',       data.proof.length + ' elements ✓');
+  addRow('pubSignals',  data.pubSignals.length + ' elements ✓');
+  addRow('Generated',   gen);
 
   document.getElementById('reviewCard').style.display = 'block';
   document.getElementById('submitCard').style.display = 'block';
