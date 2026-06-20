@@ -124,6 +124,8 @@ input::placeholder{color:var(--dim)}
 .chip.active{border-color:var(--accent);background:rgba(0,255,234,.07);box-shadow:0 0 20px rgba(0,255,234,0.15);transform:scale(1.03)}
 .chip .cval{font-size:17px;font-weight:800;color:#fff}
 .chip-soon{opacity:.35;cursor:not-allowed;pointer-events:none}
+.swap-denom-btn{flex:1;min-width:46px;padding:8px 4px;font-size:13px;font-weight:700;border-radius:10px}
+.swap-denom-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(0,255,234,.07)}
 .chip .csub{font-size:10px;color:var(--dim);margin-top:2px}
 .chip.active .cval{color:var(--accent)}
 
@@ -743,22 +745,45 @@ input::placeholder{color:var(--dim)}
 
     <!-- SWAP panel -->
     <div id="rst-swap" style="display:none">
-      <p class="sub">Swap PLS for stablecoins directly in-app via PulseX — no MetaMask needed.</p>
+      <p class="sub">Enter how much you want to shield — the required input is calculated automatically, including the 0.5% deposit fee.</p>
 
-      <div class="label">You send (PLS)</div>
-      <input id="swap-pls-input" type="number" inputmode="decimal" placeholder="e.g. 10000" min="0" step="any" oninput="onSwapInput()">
+      <div class="label">From</div>
+      <div id="swap-from-grid" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px"></div>
 
-      <div class="label">You receive</div>
-      <div class="grid3" id="swap-token-grid" style="margin-bottom:12px"></div>
+      <div class="label">To</div>
+      <div class="grid3" id="swap-token-grid" style="margin-bottom:14px"></div>
+
+      <div class="label">Amount to shield</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+        <button class="btn btn-outline swap-denom-btn" onclick="setSwapDenom(1)">$1</button>
+        <button class="btn btn-outline swap-denom-btn" onclick="setSwapDenom(5)">$5</button>
+        <button class="btn btn-outline swap-denom-btn" onclick="setSwapDenom(10)">$10</button>
+        <button class="btn btn-outline swap-denom-btn" onclick="setSwapDenom(20)">$20</button>
+        <button class="btn btn-outline swap-denom-btn" onclick="setSwapDenom(50)">$50</button>
+        <button class="btn btn-outline swap-denom-btn" onclick="setSwapDenom(100)">$100</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <span style="font-size:16px;font-weight:700;color:var(--muted)">$</span>
+        <input id="swap-dollar-input" type="number" inputmode="decimal" placeholder="custom amount" min="0" step="any" oninput="onSwapInput()" style="flex:1">
+      </div>
+      <div style="font-size:11px;color:var(--dim);margin-bottom:12px">Shield fee (0.5%) added to swap target automatically</div>
 
       <div id="swap-quote-box" style="display:none;background:rgba(0,255,234,0.04);border:1px solid rgba(0,255,234,0.2);border-radius:12px;padding:14px 16px;margin-bottom:12px">
         <div style="display:flex;justify-content:space-between;align-items:center">
-          <span style="color:var(--muted);font-size:13px">Expected output</span>
-          <span id="swap-quote-amount" style="font-size:18px;font-weight:900;color:var(--accent)">—</span>
+          <span id="swap-quote-input-label" style="color:var(--muted);font-size:13px">You send</span>
+          <span id="swap-quote-pls" style="font-size:18px;font-weight:900;color:var(--accent)">—</span>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
-          <span style="color:var(--dim);font-size:12px">Minimum (0.5% slippage)</span>
-          <span id="swap-quote-min" style="font-size:12px;color:var(--muted)">—</span>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.05)">
+          <span style="color:var(--dim);font-size:12px">Stable received</span>
+          <span id="swap-quote-stable" style="font-size:12px;color:var(--muted)">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+          <span style="color:var(--dim);font-size:12px">Shield fee (0.5%)</span>
+          <span id="swap-quote-fee" style="font-size:12px;color:var(--muted)">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+          <span style="color:var(--dim);font-size:12px">Net shielded</span>
+          <span id="swap-quote-net" style="font-size:12px;font-weight:700;color:var(--success)">—</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
           <span style="color:var(--dim);font-size:12px">Route</span>
@@ -771,8 +796,8 @@ input::placeholder{color:var(--dim)}
         <div class="card" style="border-color:rgba(0,255,234,0.25);background:rgba(0,255,234,0.03);margin-bottom:12px">
           <div class="label" style="margin-top:0">Confirm swap</div>
           <div class="row"><span class="rl">Sending</span><span class="rv" id="sc-pls-out">—</span></div>
-          <div class="row"><span class="rl">Receiving (min)</span><span class="rv" id="sc-token-in">—</span></div>
-          <div class="row"><span class="rl">Slippage tolerance</span><span class="rv">0.5%</span></div>
+          <div class="row"><span class="rl">Stable received</span><span class="rv" id="sc-stable-in">—</span></div>
+          <div class="row"><span class="rl">Net shielded</span><span class="rv" id="sc-net-shielded" style="color:var(--success)">—</span></div>
           <div class="row"><span class="rl">Via</span><span class="rv">PulseX V2</span></div>
           <div class="row"><span class="rl">To</span><span class="rv mono" id="sc-swap-to" style="font-size:11px">—</span></div>
         </div>
