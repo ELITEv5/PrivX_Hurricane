@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PrivX Hurricane — Proof Relayer</title>
+<link rel="icon" href="privx-shield.png" type="image/png">
+<style>
+:root {
+  --primary: #8A2BE2;
+  --accent:  #00ffea;
+  --glow:    rgba(138,43,226,0.4);
+  --bg:      #0a0a0a;
+  --card:    #111;
+  --border:  rgba(255,255,255,0.07);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:#e0e0e0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem}
+h1{font-size:1.6rem;font-weight:800;background:linear-gradient(90deg,var(--accent),var(--primary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;text-align:center}
+.sub{color:#555;font-size:0.85rem;text-align:center;margin-bottom:1.2rem;font-family:monospace}
+.wrap{width:100%;max-width:640px;display:flex;flex-direction:column;gap:1.2rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem}
+.card-title{font-size:0.75rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#555;margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+.step-badge{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--primary);color:#fff;font-size:0.65rem;font-weight:900;flex-shrink:0;letter-spacing:0}
+.info-box{background:rgba(138,43,226,0.06);border:1px solid rgba(138,43,226,0.2);border-radius:10px;padding:1rem 1.2rem;font-size:0.82rem;color:#888;line-height:1.7}
+.info-box strong{color:#B57AFF}
+.why-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-top:0.8rem}
+@media(max-width:500px){.why-grid{grid-template-columns:1fr}}
+.why-item{background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:8px;padding:0.8rem 1rem;font-size:0.78rem;color:#888;line-height:1.65}
+.why-item strong{color:var(--accent);display:block;margin-bottom:4px;font-size:0.68rem;letter-spacing:0.8px;text-transform:uppercase}
+textarea{width:100%;height:160px;background:#0a0a0a;border:1px solid #222;border-radius:10px;color:#666;font-family:monospace;font-size:11px;padding:12px;resize:vertical;outline:none;line-height:1.5;transition:border-color .2s}
+textarea:focus{border-color:rgba(138,43,226,0.4)}
+.btn{width:100%;padding:14px;border-radius:10px;border:none;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:0.5px}
+.btn-primary{background:linear-gradient(135deg,var(--primary),#6a1fb0);color:#fff}
+.btn-primary:hover{box-shadow:0 0 24px var(--glow);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-outline{background:transparent;color:#888;border:1px solid #333}
+.btn-outline:hover{border-color:#555;color:#aaa}
+.btn-teal{background:rgba(0,255,234,0.10);color:var(--accent);border:1px solid rgba(0,255,234,0.35);font-size:1rem}
+.btn-teal:hover{background:rgba(0,255,234,0.18);box-shadow:0 0 18px rgba(0,255,234,0.12);transform:translateY(-1px)}
+.file-drop{border:2px dashed #222;border-radius:10px;padding:1.5rem;text-align:center;color:#444;font-size:0.82rem;cursor:pointer;transition:all .2s;margin-bottom:0.8rem}
+.file-drop:hover,.file-drop.over{border-color:rgba(138,43,226,0.4);color:#888;background:rgba(138,43,226,0.04)}
+.proof-detail{display:flex;flex-direction:column;gap:0.6rem}
+.detail-row{display:grid;grid-template-columns:120px 1fr;gap:0.5rem;align-items:start;padding:0.6rem 0;border-bottom:1px solid var(--border)}
+.detail-row:last-child{border-bottom:none}
+.dk{font-family:monospace;font-size:0.68rem;color:#555;text-transform:uppercase;letter-spacing:0.5px;padding-top:2px}
+.dv{font-family:monospace;font-size:0.78rem;color:#ccc;word-break:break-all;line-height:1.5}
+.dv a{color:#777;text-decoration:none}
+.dv a:hover{color:#aaa}
+.dv.recipient{color:var(--accent);font-weight:700}
+.status{padding:1rem 1.2rem;border-radius:10px;font-size:0.85rem;line-height:1.6;font-family:monospace;display:none;white-space:pre-line}
+.status.success{background:rgba(0,255,100,0.07);border:1px solid rgba(0,255,100,0.2);color:#00e664;display:block}
+.status.error{background:rgba(255,50,50,0.07);border:1px solid rgba(255,50,50,0.2);color:#ff6666;display:block}
+.status.pending{background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);color:#B57AFF;display:block}
+.status.warn{background:rgba(255,180,0,0.07);border:1px solid rgba(255,180,0,0.3);color:#cc9900;display:block;white-space:pre-line}
+.wallet-row{display:flex;gap:0.8rem;align-items:center}
+.wallet-addr{font-family:monospace;font-size:0.75rem;color:#555;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.warn-box{background:rgba(255,180,0,0.05);border:1px solid rgba(255,180,0,0.15);border-radius:8px;padding:0.8rem 1rem;font-size:0.75rem;color:#997700;line-height:1.6;font-family:monospace}
+.divider{height:1px;background:var(--border);margin:0.2rem 0}
+#hidden-file{display:none}
+</style>
+</head>
+<body>
+
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:0.5rem">
+  <img src="privx-shield.png" style="width:36px;height:36px;border-radius:8px">
+  <h1>PrivX Hurricane — Proof Relayer</h1>
+</div>
+<p class="sub">Earn PLS tips by submitting withdrawals for others — no custody, no trust required.</p>
+
+<div class="wrap">
+
+  <!-- Why a relayer? -->
+  <div class="card">
+    <div class="card-title">Why a relayer?</div>
+    <div class="info-box">
+      Without a relayer, the user must submit the ZK proof <em>from their own wallet</em> — which links their withdrawal address to the shield contract on-chain. A relayer breaks that link.
+      <br><br>
+      The user generates the proof privately in their browser and sends you the JSON file. <strong>You submit it from your wallet.</strong> The funds go directly to their fresh address, which has never touched the shield. No visible connection. Clean privacy.
+      <br><br>
+      <strong>You cannot steal or redirect funds</strong> — the recipient address is cryptographically locked inside the ZK proof. The contract will reject any modification.
+    </div>
+    <div class="why-grid">
+      <div class="why-item"><strong>For the user</strong>Their withdrawal wallet never appears on-chain alongside the shield contract. Funds simply arrive.</div>
+      <div class="why-item"><strong>For the relayer</strong>You submit the proof and pay gas. You can agree an off-chain tip with the user before relaying.</div>
+      <div class="why-item"><strong>Zero custody</strong>You never hold funds. The contract routes directly to the locked recipient — you only pay the gas cost.</div>
+      <div class="why-item"><strong>Trustless</strong>The ZK proof is verified on-chain. If the proof is invalid or already spent, the transaction reverts. You lose only the gas.</div>
+    </div>
+  </div>
+
+  <!-- Step 1: Paste JSON -->
+  <div class="card">
+    <div class="card-title"><span class="step-badge">1</span> Load the proof JSON</div>
+    <div class="file-drop" id="fileDrop" onclick="document.getElementById('hidden-file').click()"
+         ondragover="event.preventDefault();this.classList.add('over')"
+         ondragleave="this.classList.remove('over')"
+         ondrop="handleFileDrop(event)">
+      📂 Drop the .json proof file here, or click to browse
+    </div>
+    <input type="file" id="hidden-file" accept=".json,application/json" onchange="handleFileInput(event)">
+    <textarea id="proofInput" placeholder='Or paste the proof JSON the user sent you…&#10;&#10;{"protocol":"PrivX Hurricane","shield":"0x...","proof":[...],...}'></textarea>
+    <button class="btn btn-teal" style="margin-top:0.8rem" onclick="parseProof()">Verify &amp; Review Proof →</button>
+  </div>
+
+  <!-- Step 2: Review -->
+  <div class="card" id="reviewCard" style="display:none">
+    <div class="card-title"><span class="step-badge">2</span> Review before submitting</div>
+    <div id="unknown-shield-warn" style="display:none;background:rgba(255,180,0,0.07);border:1px solid rgba(255,180,0,0.35);border-radius:8px;padding:0.8rem 1rem;font-size:0.78rem;color:#cc9900;line-height:1.6;margin-bottom:1rem;font-family:monospace;white-space:pre-line"></div>
+    <div class="proof-detail" id="proofDetail"></div>
+    <div style="margin-top:1rem">
+      <div class="warn-box">⚠ Confirm the recipient address above is correct. Once submitted the nullifier is permanently spent — this proof cannot be used again by anyone.</div>
+    </div>
+  </div>
+
+  <!-- Step 3: Connect + Submit -->
+  <div class="card" id="submitCard" style="display:none">
+    <div class="card-title"><span class="step-badge">3</span> Connect your wallet &amp; submit</div>
+    <p style="font-size:0.8rem;color:#555;margin-bottom:1rem;line-height:1.6">Your wallet pays gas in PLS. The contract sends tokens directly to the recipient — nothing passes through you.</p>
+    <div class="wallet-row" style="margin-bottom:1rem">
+      <button class="btn btn-outline" id="connectBtn" onclick="connectWallet()" style="width:auto;padding:10px 20px;font-size:0.82rem">Connect Wallet</button>
+      <span class="wallet-addr" id="walletAddr">Not connected</span>
+    </div>
+    <div class="divider" style="margin-bottom:1rem"></div>
+    <button class="btn btn-primary" id="submitBtn" onclick="submitProof()" disabled>Submit Withdrawal on Behalf of User</button>
+    <div style="color:#444;font-size:11px;font-family:monospace;text-align:center;margin-top:10px">
+      Connect your wallet above to enable submission
+    </div>
+  </div>
+
+  <!-- Status -->
+  <div class="status" id="statusBox"></div>
+
+</div>
+
+<script src="./web3.min.js"></script>
+<script>
+const WITHDRAW_ABI = [
+  { inputs:[
+      {internalType:"uint256[24]",name:"_proof",    type:"uint256[24]"},
+      {internalType:"uint256[4]", name:"_pubSignals",type:"uint256[4]"},
+      {internalType:"address",    name:"_recipient", type:"address"}
+    ], name:"withdraw", outputs:[], stateMutability:"nonpayable", type:"function" }
+];
+
+const PULSECHAIN = { chainId:'0x171', chainName:'PulseChain', rpcUrls:['https://rpc.pulsechain.com'], nativeCurrency:{name:'PLS',symbol:'PLS',decimals:18}, blockExplorerUrls:['https://scan.pulsechain.com'] };
+
+// Known PrivX Pay shield contracts — any address not in this set triggers a warning
+const KNOWN_SHIELDS = new Set([
+  // DAI
+  '0xdDdf0fe3A1A85eA5A913347FF8069a04390e4C31','0x1D57f03d48A2E5d9cE97d73F2f7710c313ee8577',
+  '0xFe63926D5535EA3B6e1EA204bdDf93F4E2a4b906','0xE0fA07E91a4A1005C63f9414Fe11B9E84C9C599B',
+  '0x7cfe4718be7991fCA3979Fb0008Bd26e51D01980','0xDA6e061F10deE54DDcF8B3d054F2fdDC5848Ee79',
+  // pSunDAI
+  '0xC78b470dB2E56CA273fa1aE6dE46aDFdeFa32aB1','0x8D5A907c8d8bd422C7E054C762e6ed1928cc0546',
+  '0x81AF3986228fd7fcE300bbD5791f3Eb3A674a6d0','0x6436B944F68bb71eC396D232d6b8d828Bd6ead72',
+  '0xFC59e5316f6Efd5002Aeb8C756EeADBBDc44B2CD','0x7202a555d06159eD13adeF437c40B13d65387f8B',
+  // USDC
+  '0x6613d13bf8deB21cA06062904C875b36D053F04e','0x96A869E58B97736615e57742a920667100A801d7',
+  '0xe853A0966C4Add92D8c5935486B7E7fF7194a079','0x658b5d0793b6796D6E3e95671C183b4B2F8CC24A',
+  '0x835c48cF6270f2efF812254b1425400432652fB0','0xc9569CF23D706627d7901ad15d9fBfaA49B0D5E2',
+].map(a => a.toLowerCase()));
+
+let web3, account, parsedProof;
+
+// ── File handling ──────────────────────────────────────────────────────────
+
+function handleFileDrop(e) {
+  e.preventDefault();
+  document.getElementById('fileDrop').classList.remove('over');
+  const file = e.dataTransfer.files[0];
+  if (file) readFile(file);
+}
+
+function handleFileInput(e) {
+  const file = e.target.files[0];
+  if (file) readFile(file);
+}
+
+function readFile(file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    document.getElementById('proofInput').value = ev.target.result;
+    parseProof();
+  };
+  reader.readAsText(file);
+}
+
+// Auto-parse when user pastes into textarea
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('proofInput').addEventListener('paste', () => {
+    setTimeout(parseProof, 60);
+  });
+});
+
+// ── Parse ──────────────────────────────────────────────────────────────────
+
+function parseProof() {
+  const raw = document.getElementById('proofInput').value.trim();
+  if (!raw) return;
+
+  let data;
+  try { data = JSON.parse(raw); }
+  catch(e) { return showStatus('error', 'Invalid JSON: ' + e.message); }
+
+  if (data.protocol !== 'PrivX Hurricane') return showStatus('error', 'Not a PrivX Hurricane proof (wrong protocol field).');
+  if (!data.shield || !data.proof || !data.pubSignals || !data.recipient)
+    return showStatus('error', 'Proof JSON is missing required fields (shield, proof, pubSignals, recipient).');
+  if (!Array.isArray(data.proof) || data.proof.length !== 24)
+    return showStatus('error', `proof must be an array of 24 elements (got ${Array.isArray(data.proof)?data.proof.length:'non-array'}).`);
+  if (!Array.isArray(data.pubSignals) || data.pubSignals.length !== 4)
+    return showStatus('error', `pubSignals must be an array of 4 elements (got ${Array.isArray(data.pubSignals)?data.pubSignals.length:'non-array'}).`);
+  const unknownShield = !KNOWN_SHIELDS.has((data.shield || '').toLowerCase());
+
+  parsedProof = data;
+  clearStatus();
+
+  // Build review table using DOM — proof JSON is untrusted input, never use innerHTML with it
+  const container = document.getElementById('proofDetail');
+  container.innerHTML = '';
+
+  function addRow(label, value, extraClass) {
+    const row = document.createElement('div'); row.className = 'detail-row';
+    const dk  = document.createElement('span'); dk.className = 'dk'; dk.textContent = label;
+    const dv  = document.createElement('span'); dv.className = 'dv' + (extraClass ? ' ' + extraClass : '');
+    if (value && typeof value === 'object') {
+      dv.appendChild(value); // pre-built element (e.g. <a>)
+    } else {
+      dv.textContent = value;
+    }
+    row.appendChild(dk); row.appendChild(dv);
+    container.appendChild(row);
+  }
+
+  function scanLink(addr) {
+    const a = document.createElement('a');
+    a.href = 'https://scan.pulsechain.com/address/' + encodeURIComponent(addr);
+    a.target = '_blank'; a.rel = 'noopener noreferrer';
+    a.textContent = addr.slice(0,10) + '…' + addr.slice(-8) + ' ↗';
+    return a;
+  }
+
+  const gen = data.generated ? new Date(data.generated).toLocaleString() : 'Unknown';
+  addRow('Protocol',    (data.protocol || '') + ' v' + (data.version || '1'));
+  addRow('Token',       data.token || '—');
+  addRow('Denomination', data.denomination || '—');
+  addRow('Shield',      scanLink(data.shield));
+  addRow('Recipient',   data.recipient, 'recipient');
+  addRow('Proof',       data.proof.length + ' elements ✓');
+  addRow('pubSignals',  data.pubSignals.length + ' elements ✓');
+  addRow('Generated',   gen);
+
+  // Persistent unknown-shield warning inside review card — not cleared by clearStatus()
+  const warnBanner = document.getElementById('unknown-shield-warn');
+  if (unknownShield) {
+    warnBanner.textContent = `⚠ Unknown shield: ${data.shield} — not a recognised PrivX Pay contract. Your gas will be spent but you cannot lose tokens. Only proceed if you trust the proof source.`;
+    warnBanner.style.display = 'block';
+  } else {
+    warnBanner.style.display = 'none';
+  }
+
+  document.getElementById('reviewCard').style.display = 'block';
+  document.getElementById('submitCard').style.display = 'block';
+  document.getElementById('reviewCard').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+// ── Wallet ──────────────────────────────────────────────────────────────────
+
+async function connectWallet() {
+  if (!window.ethereum) return showStatus('error', 'No wallet detected. Install MetaMask.');
+  try {
+    // Switch to PulseChain
+    try { await window.ethereum.request({method:'wallet_switchEthereumChain', params:[{chainId:'0x171'}]}); }
+    catch(e) {
+      if (e.code === 4902) await window.ethereum.request({method:'wallet_addEthereumChain', params:[PULSECHAIN]});
+    }
+    const accounts = await window.ethereum.request({method:'eth_requestAccounts'});
+    account = accounts[0];
+    web3 = new Web3(window.ethereum);
+    document.getElementById('walletAddr').textContent = account;
+    document.getElementById('connectBtn').textContent = 'Connected ✓';
+    document.getElementById('connectBtn').style.borderColor = 'rgba(0,255,100,0.4)';
+    document.getElementById('connectBtn').style.color = '#00e664';
+    document.getElementById('submitBtn').disabled = false;
+    document.getElementById('submitBtn').nextElementSibling.textContent = 'Ready — click above to submit the withdrawal.';
+  } catch(e) {
+    showStatus('error', 'Wallet connection failed: ' + e.message);
+  }
+}
+
+// ── Submit ──────────────────────────────────────────────────────────────────
+
+async function submitProof() {
+  if (!parsedProof) return showStatus('error', 'No proof loaded.');
+  if (!account) return showStatus('error', 'Connect your wallet first.');
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+  showStatus('pending', '⏳ Transaction pending — do not close this tab…');
+
+  try {
+    const shield = new web3.eth.Contract(WITHDRAW_ABI, parsedProof.shield);
+    const tx = await shield.methods
+      .withdraw(parsedProof.proof, parsedProof.pubSignals, parsedProof.recipient)
+      .send({ from: account });
+
+    if (!tx.status) throw new Error('Transaction reverted. TX: ' + tx.transactionHash);
+
+    showStatus('success',
+      `✓ Withdrawal submitted successfully!\n\nTX: ${tx.transactionHash}\n\nFunds sent to: ${parsedProof.recipient}\n\nView on PulseScan:\nhttps://scan.pulsechain.com/tx/${tx.transactionHash}`
+    );
+    btn.textContent = '✓ Submitted';
+  } catch(e) {
+    console.error(e);
+    const msg = e.message || 'Unknown error';
+    if (msg.includes('already spent') || msg.includes('nullifier'))
+      showStatus('error', '✗ Note already spent — this proof has been used before. The nullifier is recorded on-chain.');
+    else if (msg.includes('recipient'))
+      showStatus('error', '✗ Recipient mismatch — the proof was generated for a different recipient address. Do not modify the JSON.');
+    else if (msg.includes('root'))
+      showStatus('error', '✗ Merkle root unknown — the root is stale. Ask the user to regenerate the proof (more than 100 new deposits occurred since it was created).');
+    else
+      showStatus('error', '✗ Failed: ' + msg);
+
+    btn.disabled = false;
+    btn.textContent = 'Retry Submission';
+  }
+}
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
+
+function showStatus(type, msg) {
+  const box = document.getElementById('statusBox');
+  box.className = 'status ' + type;
+  box.textContent = msg;
+  box.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function clearStatus() {
+  const box = document.getElementById('statusBox');
+  box.className = 'status';
+  box.textContent = '';
+}
+</script>
+</body>
+</html>

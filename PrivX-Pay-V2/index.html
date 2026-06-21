@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#8A2BE2">
+<link rel="icon" href="./favicon-32x32.png" type="image/png">
+<link rel="shortcut icon" href="./favicon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PrivX Pay">
+<title>PrivX Pay</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#000;--surface:#111;--surface2:#151515;
+  --border:rgba(138,43,226,0.25);--primary:#8A2BE2;--accent:#00ffea;
+  --glow:rgba(138,43,226,0.6);--glow2:rgba(0,255,234,0.15);
+  --text:#fff;--muted:#888;--dim:#555;
+  --success:#00e664;--warn:#ffb400;--err:#ff6666;--info:#B57AFF;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bot:env(safe-area-inset-bottom,0px);
+}
+html{height:100%;background:#000}
+body{
+  height:100%;
+  background:
+    radial-gradient(ellipse at 15% 5%,rgba(138,43,226,0.18) 0%,transparent 55%),
+    radial-gradient(ellipse at 85% 92%,rgba(0,255,234,0.05) 0%,transparent 45%),
+    #000;
+  color:var(--text);
+  font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;
+  overflow:hidden
+}
+#app{display:flex;flex-direction:column;height:100%;padding-top:var(--safe-top)}
+
+.screen{display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0;overscroll-behavior-y:contain}
+.screen.active{display:flex;flex-direction:column}
+
+/* tab bar */
+#tabbar{display:none;flex-shrink:0;flex-direction:row;background:rgba(5,5,5,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);padding-bottom:var(--safe-bot)}
+#tabbar.visible{display:flex}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 0 8px;gap:4px;background:none;border:none;color:var(--dim);font-size:10px;font-weight:700;letter-spacing:.8px;cursor:pointer;text-transform:uppercase;transition:all .25s;position:relative}
+.tab.active{color:var(--accent)}
+.tab.active::after{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:var(--accent);border-radius:0 0 3px 3px;box-shadow:0 0 10px var(--accent)}
+.tab svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* layout */
+.page{padding:20px 16px;max-width:480px;margin:0 auto;width:100%}
+h1{font-size:26px;font-weight:900;margin-bottom:6px;
+  background:linear-gradient(90deg,var(--accent),var(--primary));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+h2{font-size:18px;font-weight:800;margin-bottom:12px}
+.sub{color:var(--muted);font-size:13px;line-height:1.65;margin-bottom:16px}
+.label{font-size:10px;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase;margin:14px 0 7px;font-weight:700}
+
+/* cards */
+.card{background:rgba(20,20,20,0.7);backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:16px;padding:16px}
+.row{display:flex;justify-content:space-between;align-items:center;padding:8px 0}
+.row+.row{border-top:1px solid rgba(255,255,255,.06)}
+.rl{color:var(--muted);font-size:13px}
+.rv{color:var(--text);font-size:13px;font-weight:700;font-family:monospace}
+
+/* inputs */
+input,textarea{width:100%;background:#111;border:1px solid rgba(138,43,226,0.3);border-radius:12px;padding:13px 15px;color:var(--text);font-size:14px;outline:none;font-family:inherit;transition:border-color .2s,box-shadow .2s}
+input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,255,234,0.08)}
+input::placeholder{color:var(--dim)}
+
+/* buttons */
+.btn{display:block;width:100%;padding:15px;border-radius:14px;border:none;font-size:16px;font-weight:800;cursor:pointer;transition:all .3s;text-align:center;letter-spacing:.3px}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 0 30px var(--glow)}
+.btn-primary:hover:not(:disabled){background:var(--accent);color:#000;transform:translateY(-2px)}
+.btn-outline{background:transparent;border:1px solid rgba(138,43,226,0.4);color:var(--muted);font-size:15px;font-weight:700}
+.btn-outline:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.35;pointer-events:none}
+.btn-sm{padding:9px 16px;font-size:13px;font-weight:700;border-radius:10px;border:1px solid rgba(0,255,234,0.3);background:rgba(0,255,234,0.07);color:var(--accent);cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-sm:hover{background:rgba(0,255,234,0.14)}
+
+/* status */
+.status{border-radius:12px;padding:12px 15px;font-size:13px;line-height:1.65;margin:10px 0;display:none;white-space:pre-wrap}
+.status.show{display:block}
+.status.info{background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);color:var(--info)}
+.status.ok{background:rgba(0,230,100,0.07);border:1px solid rgba(0,230,100,0.2);color:var(--success)}
+.status.bad{background:rgba(255,100,100,0.07);border:1px solid rgba(255,100,100,0.2);color:var(--err)}
+.status.warn{background:rgba(255,180,0,.07);border:1px solid rgba(255,180,0,.22);color:var(--warn)}
+
+/* warning box */
+.warn-box{background:rgba(255,180,0,.06);border:1px solid rgba(255,180,0,.22);border-radius:12px;padding:14px 16px;margin:12px 0;line-height:1.65}
+.warn-box b{color:var(--warn);display:block;margin-bottom:6px;font-size:13px}
+.warn-box p,.warn-box span{color:#ccaa44;font-size:13px}
+.warn-box strong{color:#e8c76a}
+
+/* pills */
+.pill-row{display:flex;gap:8px;flex-wrap:wrap}
+.pill{padding:9px 20px;border-radius:50px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:14px;font-weight:700;cursor:pointer;transition:all .25s}
+.pill.active{border-color:var(--accent);background:rgba(0,255,234,.08);color:var(--accent);box-shadow:0 0 12px rgba(0,255,234,0.15)}
+
+/* misc */
+.mono{font-family:'Courier New',monospace;font-size:12px;color:var(--accent);word-break:break-all}
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:16px;text-align:center;padding:20px}
+.spinner{width:36px;height:36px;border:3px solid rgba(138,43,226,.25);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* CSS fallback: if JS never hides the splash, fade it out after 20s */
+@keyframes splash-timeout{99%{opacity:0;pointer-events:none}to{visibility:hidden;opacity:0;pointer-events:none}}
+#loading-splash{animation:splash-timeout 0.4s 20s forwards}
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:18px 0}
+
+/* bill cards */
+.bill-card{display:flex;justify-content:space-between;align-items:center;background:rgba(20,20,20,0.7);border:1px solid rgba(138,43,226,0.2);border-radius:14px;padding:14px 16px;margin-bottom:8px;transition:border-color .2s}
+.bill-card:hover{border-color:rgba(138,43,226,0.5)}
+.bill-denom{font-size:22px;font-weight:900;color:#fff}
+.bill-token{font-size:11px;color:var(--accent);margin-top:2px;font-weight:700;letter-spacing:.5px}
+.bill-age{font-size:11px;color:var(--dim)}
+.badge{font-size:10px;padding:3px 10px;border-radius:50px;background:rgba(255,180,0,.12);color:var(--warn);margin-top:5px;display:inline-block;font-weight:700}
+
+/* chip grid (token/denom) */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.chip{text-align:center;padding:13px 6px;background:rgba(20,20,20,0.6);border:2px solid rgba(255,255,255,.1);border-radius:12px;cursor:pointer;transition:all .3s}
+.chip:hover{border-color:var(--primary);transform:translateY(-1px)}
+.chip.active{border-color:var(--accent);background:rgba(0,255,234,.07);box-shadow:0 0 20px rgba(0,255,234,0.15);transform:scale(1.03)}
+.chip .cval{font-size:17px;font-weight:800;color:#fff}
+.chip-soon{opacity:.35;cursor:not-allowed;pointer-events:none}
+.swap-denom-btn{flex:1;min-width:46px;padding:8px 4px;font-size:13px;font-weight:700;border-radius:10px}
+.swap-denom-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(0,255,234,.07)}
+.chip .csub{font-size:10px;color:var(--dim);margin-top:2px}
+.chip.active .cval{color:var(--accent)}
+
+/* QR canvas */
+#qr-img-receive{border-radius:10px;display:block;margin:0 auto;border:2px solid rgba(138,43,226,0.35);max-width:100%}
+
+/* camera */
+#cam-wrap{position:fixed;inset:0;background:#000;z-index:100;display:none;flex-direction:column;align-items:center}
+#cam-wrap.show{display:flex}
+#cam-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#cam-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;pointer-events:none}
+
+/* top brand bar */
+#cam-header{position:absolute;top:0;left:0;right:0;padding:calc(var(--safe-top) + 14px) 20px 16px;background:linear-gradient(to bottom,rgba(0,0,0,.85) 0%,transparent 100%);display:flex;flex-direction:column;align-items:center;gap:4px;pointer-events:none}
+#cam-brand{display:flex;align-items:center;gap:8px}
+#cam-logo{width:28px;height:28px;opacity:.95}
+#cam-brand-name{color:#fff;font-size:15px;font-weight:700;letter-spacing:.5px}
+#cam-title{color:rgba(255,255,255,.75);font-size:13px;font-weight:500;letter-spacing:.3px}
+
+/* viewfinder */
+#cam-finder{position:absolute;top:50%;left:50%;transform:translate(-50%,-55%);width:min(76vw,290px);height:min(76vw,290px)}
+/* dim everything outside the box using 4 divs */
+#cam-shade-t,#cam-shade-b,#cam-shade-l,#cam-shade-r{position:fixed;background:rgba(0,0,0,.62);pointer-events:none}
+#cam-shade-t{top:0;left:0;right:0;bottom:calc(50% + min(38vw,145px) + 55px - 50vh + 50vh);/* dynamic calc via JS */}
+/* corners */
+#cam-finder::before,#cam-finder::after,#cam-corner-bl,#cam-corner-br{content:'';position:absolute;width:28px;height:28px;pointer-events:none}
+#cam-finder::before{top:0;left:0;border-top:3px solid var(--accent);border-left:3px solid var(--accent);border-radius:6px 0 0 0}
+#cam-finder::after{top:0;right:0;border-top:3px solid var(--accent);border-right:3px solid var(--accent);border-radius:0 6px 0 0}
+#cam-corner-bl{bottom:0;left:0;border-bottom:3px solid var(--accent);border-left:3px solid var(--accent);border-radius:0 0 0 6px}
+#cam-corner-br{bottom:0;right:0;border-bottom:3px solid var(--accent);border-right:3px solid var(--accent);border-radius:0 0 6px 0}
+/* scan line */
+#cam-scanline{position:absolute;left:4px;right:4px;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);border-radius:2px;animation:scanline 2s ease-in-out infinite;box-shadow:0 0 8px var(--accent)}
+@keyframes scanline{0%,100%{top:8px;opacity:.4}50%{top:calc(100% - 10px);opacity:1}}
+/* outer glow on box */
+#cam-finder{filter:drop-shadow(0 0 12px rgba(0,255,234,.35))}
+
+/* bottom area */
+#cam-bottom{position:absolute;bottom:0;left:0;right:0;padding:20px 24px calc(var(--safe-bot) + 20px);background:linear-gradient(to top,rgba(0,0,0,.88) 0%,transparent 100%);display:flex;flex-direction:column;align-items:center;gap:16px;pointer-events:none}
+#cam-hint{color:rgba(255,255,255,.8);font-size:14px;text-align:center;line-height:1.5}
+#cam-close{pointer-events:all;background:rgba(255,255,255,.1);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:14px;font-weight:600;padding:12px 36px;border-radius:100px;cursor:pointer;letter-spacing:.3px}
+
+/* seed grid */
+.seed-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}
+.seed-word{background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.22);border-radius:10px;padding:9px 10px;display:flex;gap:6px;align-items:center}
+.seed-num{color:var(--dim);font-size:10px;min-width:16px;font-weight:700}
+.seed-w{color:var(--accent);font-size:13px;font-weight:700}
+
+/* note cards */
+.note-card{background:#111;border:1px solid rgba(138,43,226,0.2);border-radius:12px;padding:14px 16px;margin-bottom:8px;cursor:pointer;transition:all .25s}
+.note-card:hover{border-color:rgba(138,43,226,0.5)}
+.note-card.active{border-color:var(--accent);background:rgba(0,255,234,0.05);box-shadow:0 0 20px rgba(0,255,234,0.08)}
+.nc-top{display:flex;justify-content:space-between;align-items:center}
+.nc-denom{font-size:16px;font-weight:800;color:#fff}
+.nc-date{font-size:11px;color:var(--dim);font-family:monospace}
+
+/* wallet hero */
+.hero{text-align:center;padding:24px 16px 22px;position:relative}
+.hero::before{content:'';position:absolute;top:-20px;left:50%;transform:translateX(-50%);width:280px;height:140px;background:radial-gradient(ellipse,rgba(138,43,226,0.22) 0%,transparent 70%);pointer-events:none}
+.hero-logo{height:52px;display:block;margin:0 auto 14px;position:relative}
+.hero-label{font-size:10px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;font-weight:700;position:relative}
+.hero-val{font-size:clamp(32px,14vw,56px);font-weight:900;line-height:1;position:relative;
+  background:linear-gradient(90deg,var(--accent),var(--primary));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{color:var(--muted);font-size:13px;margin-top:8px;position:relative}
+.low-warn{display:flex;align-items:center;gap:6px;background:rgba(255,180,0,.08);border:1px solid rgba(255,180,0,.2);border-radius:50px;padding:7px 16px;margin:10px auto;width:fit-content;font-size:12px;color:var(--warn);font-weight:700;position:relative}
+.backup-banner{background:rgba(255,90,0,.09);border:1px solid rgba(255,120,0,.28);border-radius:12px;padding:11px 13px;margin:10px 0 2px;display:flex;align-items:center;gap:10px}
+.backup-banner-text{flex:1;font-size:12px;color:#ff9944;font-weight:600;line-height:1.45}
+.backup-banner-btn{background:rgba(255,140,0,.18);border:1px solid rgba(255,140,0,.35);color:#ffaa44;border-radius:8px;padding:6px 13px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.backup-banner-x{color:var(--dim);background:none;border:none;font-size:17px;cursor:pointer;padding:0 2px;line-height:1;flex-shrink:0}
+
+/* checkbox */
+.check-row{display:flex;align-items:center;gap:12px;padding:8px 0;cursor:pointer}
+.check-box{width:24px;height:24px;border:2px solid var(--primary);border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.check-box.on{background:var(--primary);box-shadow:0 0 12px var(--glow)}
+.check-box.on::after{content:'✓';color:#fff;font-size:14px;font-weight:900}
+.check-label{font-size:14px;color:var(--text);flex:1;line-height:1.4}
+
+/* restock sub-tabs */
+.sub-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:18px}
+.sub-tab{flex:1;padding:13px;text-align:center;font-size:14px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .25s;letter-spacing:.3px}
+.sub-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* onboarding */
+.ob-logo{height:48px;display:block;margin:0 auto 6px}
+.tagline{color:var(--dim);font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:20px}
+.cash-badge{display:inline-block;background:rgba(0,255,234,0.07);border:1px solid rgba(0,255,234,0.2);border-radius:20px;padding:5px 16px;font-size:11px;font-weight:700;color:var(--accent);letter-spacing:1.5px;margin-bottom:16px}
+
+/* guide */
+.guide-hero{text-align:center;padding:36px 24px 28px;border-bottom:1px solid var(--border)}
+.guide-hero img{width:100%;max-width:380px;display:block;margin:0 auto 14px}
+.guide-hero .gh-badge{display:inline-block;font-size:10px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent);border:1px solid rgba(0,255,234,0.25);border-radius:20px;padding:4px 14px;margin-bottom:12px}
+.guide-hero p{color:var(--muted);font-size:13px;line-height:1.65;max-width:300px;margin:0 auto}
+.accord{border-bottom:1px solid var(--border)}
+.accord-hd{display:flex;justify-content:space-between;align-items:center;padding:16px;cursor:pointer;user-select:none;transition:background .2s;gap:12px}
+.accord-hd:active{background:rgba(255,255,255,.03)}
+.accord-icon{font-size:20px;flex-shrink:0;width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:rgba(138,43,226,0.1);border-radius:10px;border:1px solid var(--border)}
+.accord-title{flex:1;font-size:15px;font-weight:700;color:var(--text)}
+.accord-arrow{color:var(--dim);font-size:18px;transition:transform .25s;flex-shrink:0}
+.accord.open .accord-arrow{transform:rotate(90deg);color:var(--accent)}
+.accord-body{display:none;padding:0 16px 18px}
+.accord.open .accord-body{display:block}
+.guide-step{display:flex;gap:12px;margin-bottom:14px;align-items:flex-start}
+.step-num{width:26px;height:26px;border-radius:50%;background:var(--primary);color:#fff;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 12px var(--glow);margin-top:1px}
+.step-text{font-size:13px;color:#ccc;line-height:1.65;flex:1}
+.step-text strong{color:#fff;font-weight:700}
+.step-text code{background:rgba(138,43,226,0.15);border:1px solid rgba(138,43,226,0.25);border-radius:4px;padding:1px 6px;font-family:monospace;font-size:12px;color:var(--info)}
+.guide-note{background:rgba(0,255,234,0.05);border:1px solid rgba(0,255,234,0.15);border-radius:10px;padding:11px 13px;font-size:12px;color:#aaa;line-height:1.65;margin:10px 0}
+.guide-note b{color:var(--accent);display:block;margin-bottom:4px}
+.guide-warn{background:rgba(255,180,0,.06);border:1px solid rgba(255,180,0,.2);border-radius:10px;padding:11px 13px;font-size:12px;color:#ccaa44;line-height:1.65;margin:10px 0}
+.guide-warn b{color:var(--warn);display:block;margin-bottom:4px}
+.guide-danger{background:rgba(255,80,80,.06);border:1px solid rgba(255,80,80,.2);border-radius:10px;padding:11px 13px;font-size:12px;color:#e89898;line-height:1.65;margin:10px 0}
+.guide-danger b{color:var(--err);display:block;margin-bottom:4px}
+.sec-label{font-size:10px;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin:14px 0 8px}
+.faq-q{font-size:13px;font-weight:700;color:var(--info);margin-bottom:4px}
+.faq-a{font-size:13px;color:#bbb;line-height:1.65;margin-bottom:14px}
+.contracts-table{width:100%;border-collapse:collapse;font-size:11px;margin:8px 0}
+.contracts-table td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:top}
+/* walkthrough */
+.wt-wrap{padding:20px 16px 0;max-width:480px;margin:0 auto;width:100%}
+.wt-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.wt-title{font-size:16px;font-weight:900;color:var(--text)}
+.wt-reset{font-size:11px;color:var(--dim);background:none;border:none;cursor:pointer;padding:4px 0;text-decoration:underline;text-underline-offset:3px}
+.wt-track{background:rgba(138,43,226,0.12);border-radius:50px;height:5px;margin-bottom:18px;overflow:hidden}
+.wt-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--primary));border-radius:50px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.wt-step{border-radius:14px;padding:13px 15px;margin-bottom:9px;transition:all .3s;border:1px solid}
+.wt-step.done{border-color:rgba(0,230,100,0.25);background:rgba(0,230,100,0.03)}
+.wt-step.active{border-color:rgba(0,255,234,0.35);background:rgba(0,255,234,0.04)}
+.wt-step.pending{border-color:rgba(138,43,226,0.12);background:rgba(138,43,226,0.02)}
+.wt-step-hdr{display:flex;align-items:center;gap:10px}
+.wt-dot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0;transition:all .3s}
+.wt-dot.done{background:var(--success);color:#000}
+.wt-dot.active{background:var(--accent);color:#000}
+.wt-dot.pending{background:rgba(138,43,226,0.2);color:var(--dim)}
+.wt-step-title{font-size:14px;font-weight:800;transition:color .3s;flex:1}
+.wt-body{margin-top:11px;font-size:13px;color:#ccc;line-height:1.7}
+.wt-body strong{color:#fff}
+.wt-btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.wt-go{padding:9px 16px;font-size:13px;font-weight:700;border-radius:10px;border:1px solid rgba(0,255,234,0.4);background:rgba(0,255,234,0.1);color:var(--accent);cursor:pointer;transition:all .2s}
+.wt-go:hover{background:rgba(0,255,234,0.18)}
+.wt-check{padding:9px 16px;font-size:13px;font-weight:700;border-radius:10px;border:1px solid rgba(138,43,226,0.35);background:rgba(138,43,226,0.07);color:var(--info);cursor:pointer;transition:all .2s}
+.wt-check:disabled{opacity:.45;pointer-events:none}
+.wt-mark{padding:9px 16px;font-size:13px;font-weight:700;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:transparent;color:var(--muted);cursor:pointer;transition:all .2s}
+.wt-complete{text-align:center;padding:18px 12px;border:1px solid rgba(0,230,100,0.3);border-radius:14px;background:rgba(0,230,100,0.04);margin-bottom:9px}
+.wt-complete-icon{font-size:36px;margin-bottom:8px}
+.wt-complete-title{font-size:16px;font-weight:900;color:var(--success);margin-bottom:6px}
+.wt-complete-sub{font-size:13px;color:#aaa;line-height:1.6;margin-bottom:14px}
+.contracts-table td:first-child{color:var(--muted);white-space:nowrap;width:60px}
+.contracts-table td:last-child{font-family:monospace;color:var(--accent);word-break:break-all}
+
+/* ── global header ─────────────────────────────────────────────────── */
+#global-header{display:none;flex-shrink:0;background:rgba(4,4,8,0.82);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid rgba(138,43,226,0.18);padding:10px 16px}
+#global-header.visible{display:block}
+.gh-row{display:flex;align-items:center;gap:10px;max-width:480px;margin:0 auto}
+.gh-net{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:.8px;color:var(--dim);text-transform:uppercase;flex-shrink:0}
+.gh-dot{width:7px;height:7px;border-radius:50%;background:var(--dim);flex-shrink:0;transition:background .4s,box-shadow .4s}
+.gh-dot.ok{background:var(--success);box-shadow:0 0 7px var(--success)}
+.gh-dot.err{background:var(--err)}
+.gh-addr{flex:1;display:flex;align-items:center;gap:6px;cursor:pointer;overflow:hidden;min-width:0}
+.gh-addr-text{font-family:monospace;font-size:12px;color:var(--accent);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gh-addr svg{flex-shrink:0;opacity:.5;width:13px;height:13px;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.gh-pls{font-size:11px;font-weight:800;color:var(--muted);white-space:nowrap;flex-shrink:0;font-family:monospace}
+
+/* ── wallet balance strip ──────────────────────────────────────────── */
+#wallet-balances{padding:0 16px 4px;max-width:480px;margin:0 auto;width:100%}
+.bal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.bal-cell{background:rgba(20,20,20,0.7);border:1px solid rgba(138,43,226,0.15);border-radius:10px;padding:9px 8px;text-align:center}
+.bal-label{font-size:9px;color:var(--dim);font-weight:800;letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px}
+.bal-val{font-size:13px;font-weight:900;color:var(--text);font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bal-cell.pls-cell .bal-val{color:var(--accent)}
+.bal-refresh{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--dim);cursor:pointer;padding:2px 0 8px;width:fit-content}
+.bal-refresh svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+.bal-refresh:hover{color:var(--accent)}
+.bal-refresh.spinning svg{animation:spin .7s linear infinite}
+
+/* PIN pad */
+.pin-key{width:68px;height:68px;border-radius:50%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:#fff;font-size:24px;font-weight:700;cursor:pointer;transition:all .12s;display:flex;align-items:center;justify-content:center}
+.pin-key:active{background:rgba(138,43,226,0.35);transform:scale(0.9)}
+.pin-dot{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.3);transition:all .15s}
+.pin-dot.filled{background:var(--primary);border-color:var(--primary);box-shadow:0 0 10px var(--glow)}
+
+/* token colors */
+.tok-dai    {color:#FFD700!important}
+.tok-psundai{color:var(--success)!important}
+.tok-usdc   {color:#5199FF!important}
+
+/* history */
+#wallet-history{padding:0 16px 16px;max-width:480px;margin:0 auto;width:100%}
+
+/* add-to-homescreen banner */
+#hs-banner{display:none;position:sticky;top:0;z-index:200;background:rgba(138,43,226,0.15);border-bottom:1px solid rgba(138,43,226,0.3);padding:10px 16px;text-align:center}
+#hs-banner p{font-size:12px;color:#ccc;line-height:1.5;margin-bottom:6px}
+#hs-banner strong{color:var(--accent)}
+
+/* proof warning modal */
+#proof-warn{display:none;position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:24px}
+#proof-warn.show{display:flex}
+.proof-warn-box{background:#111;border:1px solid rgba(138,43,226,0.35);border-radius:20px;padding:28px 22px;max-width:340px;width:100%;text-align:center}
+.proof-warn-box h2{font-size:18px;font-weight:900;margin-bottom:10px;color:var(--warn)}
+.proof-warn-box p{font-size:13px;color:#ccc;line-height:1.65;margin-bottom:8px}
+.proof-warn-box .pw-time{font-size:22px;font-weight:900;color:var(--accent);margin:10px 0}
+
+/* ── mobile layout fixes ─────────────────────────────────────────── */
+@media(max-width:400px){
+  .sub-tab{font-size:11px;padding:10px 4px;letter-spacing:0}
+  .bal-grid{grid-template-columns:repeat(2,1fr)}
+  .hero-logo{height:42px;margin-bottom:10px}
+}
+/* safe-area bottom padding so last content row clears the home indicator */
+.page{padding-bottom:calc(20px + var(--safe-bot))}
+#wallet-history{padding-bottom:calc(16px + var(--safe-bot))}
+</style>
+</head>
+<body>
+<div id="loading-splash" style="position:fixed;inset:0;z-index:999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px">
+  <img src="./privx-shield.png" style="height:80px;animation:pulse 1.6s ease-in-out infinite" alt="PrivX">
+  <div class="spinner"></div>
+  <p style="color:var(--dim);font-size:12px;letter-spacing:1px;text-align:center;line-height:1.8" id="splash-msg">LOADING…</p>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.06)}}</style>
+
+<!-- Add-to-home-screen banner (iOS in-browser only) -->
+<div id="hs-banner">
+  <p>📱 You're viewing PrivX Pay in the browser.<br>
+  <strong>Add to Home Screen first</strong>, then set up your wallet inside the app — browser and home screen have <strong>separate storage</strong>.</p>
+  <button onclick="document.getElementById('hs-banner').style.display='none'" style="font-size:12px;color:var(--dim);background:none;border:none;cursor:pointer;text-decoration:underline">Got it, dismiss</button>
+</div>
+
+<!-- ZK proof warning modal -->
+<div id="proof-warn">
+  <div class="proof-warn-box">
+    <div style="font-size:36px;margin-bottom:8px">⏳</div>
+    <h2>ZK Proof — Keep Screen On</h2>
+    <div class="pw-time" id="pw-time">~2–5 min</div>
+    <p>Your phone must stay unlocked and <strong>PrivX Pay must stay open</strong> while the proof generates.</p>
+    <p style="color:var(--dim);font-size:12px">Switching apps or locking your screen will cancel it. The 53 MB proving key is bundled with this app — on first proof it loads locally, so stay on WiFi if your connection is slow.</p>
+    <button class="btn btn-primary" style="margin-top:16px" onclick="confirmProofWarn()">I'm Ready — Start Proof</button>
+    <button onclick="document.getElementById('proof-warn').classList.remove('show')" style="display:block;width:100%;margin-top:10px;font-size:13px;color:var(--dim);background:none;border:none;cursor:pointer">Cancel</button>
+  </div>
+</div>
+
+<div id="app">
+
+<!-- ══ ONBOARDING ═══════════════════════════════════════════════════════ -->
+<div id="screen-onboard" class="screen active">
+  <div id="ob-welcome" class="page center" style="max-width:480px;margin:auto">
+    <img src="./privx_logo.png" class="ob-logo" alt="PrivX" style="height:60px">
+    <div class="cash-badge">ZK BEARER CASH · PULSECHAIN</div>
+    <p class="sub" style="max-width:320px;margin-left:auto;margin-right:auto">Digital cash that behaves like banknotes, not bank accounts. Zero-knowledge proofs cryptographically sever the link between who deposited and who withdrew. Bills are bearer instruments — possession is ownership, privacy is structural.</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px;text-align:center">
+      <div style="background:rgba(138,43,226,0.08);border:1px solid rgba(138,43,226,0.2);border-radius:12px;padding:10px 6px">
+        <div style="font-size:18px;margin-bottom:4px">🔐</div>
+        <div style="font-size:10px;font-weight:800;color:var(--accent);letter-spacing:.5px;margin-bottom:3px">ZK Unlinking</div>
+        <div style="font-size:10px;color:var(--dim);line-height:1.4">Deposits and withdrawals are cryptographically severed</div>
+      </div>
+      <div style="background:rgba(0,255,234,0.05);border:1px solid rgba(0,255,234,0.12);border-radius:12px;padding:10px 6px">
+        <div style="font-size:18px;margin-bottom:4px">💵</div>
+        <div style="font-size:10px;font-weight:800;color:var(--accent);letter-spacing:.5px;margin-bottom:3px">Bearer Bills</div>
+        <div style="font-size:10px;color:var(--dim);line-height:1.4">Whoever holds the key owns the funds. No identity required</div>
+      </div>
+      <div style="background:rgba(255,100,100,0.04);border:1px solid rgba(255,100,100,0.12);border-radius:12px;padding:10px 6px">
+        <div style="font-size:18px;margin-bottom:4px">🚫</div>
+        <div style="font-size:10px;font-weight:800;color:var(--accent);letter-spacing:.5px;margin-bottom:3px">No Custodian</div>
+        <div style="font-size:10px;color:var(--dim);line-height:1.4">No account to freeze, no statement, no reversal</div>
+      </div>
+    </div>
+    <div class="warn-box" style="text-align:left">
+      <b>⚠ Bearer Instrument</b>
+      <p>PrivX Pay is designed to behave like digital bearer cash. No viewer keys. No account statement. No recovery. No reversal. Privacy is based on possession plus ZK unlinking — not on any third party's cooperation.<br><br>
+      Bills carry value the way banknotes do: whoever holds the private key can spend them. Your seed phrase controls your primary wallet. Your encrypted device backup (Wallet tab → Export Backup) preserves your bills and notes. Lose both and your funds are gone permanently. There is no support that can help you.</p>
+    </div>
+    <button class="btn btn-primary" onclick="startGenerate()">Generate My Wallet</button>
+    <button class="btn btn-outline" onclick="showImport()" style="margin-top:10px">Import Existing Wallet</button>
+  </div>
+
+  <!-- IMPORT SCREEN -->
+  <div id="ob-import" class="page" style="display:none;max-width:480px;margin:auto">
+    <img src="./privx-shield.png" style="height:48px;display:block;margin:8px auto 16px" alt="PrivX">
+    <h1 style="margin-top:0;text-align:center">Import Wallet</h1>
+    <p class="sub">Enter your 12 or 24-word BIP39 seed phrase. Works with MetaMask, Rabby, and any standard EVM wallet.</p>
+    <div class="label">Seed Phrase</div>
+    <textarea id="import-input" rows="4" placeholder="word1 word2 word3 … word12" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" oninput="onImportInput()" style="font-family:monospace;resize:none;line-height:1.8"></textarea>
+    <div id="import-word-grid" class="seed-grid" style="display:none"></div>
+    <div id="import-status" class="status" style="margin-top:8px"></div>
+    <button class="btn btn-primary" id="import-btn" disabled onclick="finishImport()" style="margin-top:14px">Import Wallet</button>
+    <button class="btn btn-outline" onclick="showWelcome()" style="margin-top:10px">Back</button>
+  </div>
+
+  <div id="ob-seed" class="page" style="display:none;max-width:480px;margin:auto">
+    <img src="./privx-shield.png" style="height:48px;display:block;margin:8px auto 16px" alt="PrivX">
+    <h1 style="margin-top:0;text-align:center">Your Seed Phrase</h1>
+    <p class="sub">Write these 12 words in order on paper. Store it somewhere safe. Do not screenshot.</p>
+    <div class="seed-grid" id="seed-display"></div>
+    <div class="warn-box">
+      <p>These 12 words control all your bills. Once you continue they will not be shown again.</p>
+    </div>
+    <div class="check-row" onclick="toggleCheck('ob-check','ob-continue')">
+      <div class="check-box" id="ob-check"></div>
+      <span class="check-label">I have written down my seed phrase</span>
+    </div>
+    <button class="btn btn-primary" id="ob-continue" disabled onclick="finishOnboard()" style="margin-top:12px">Continue to Wallet</button>
+  </div>
+</div>
+
+<!-- ══ GLOBAL HEADER ════════════════════════════════════════════════════ -->
+<div id="global-header">
+  <div class="gh-row">
+    <div class="gh-net">
+      <span class="gh-dot" id="gh-dot"></span>
+      PulseChain
+    </div>
+    <div class="gh-addr" onclick="copyAddress()" title="Copy address">
+      <span class="gh-addr-text" id="gh-addr-text">—</span>
+      <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+    </div>
+    <div class="gh-pls" id="gh-pls-bal">— PLS</div>
+  </div>
+</div>
+
+<!-- ══ PIN LOCK ═══════════════════════════════════════════════════════════ -->
+<div id="screen-lock" style="display:none;position:fixed;inset:0;z-index:9000;background:#000;flex-direction:column;align-items:center;justify-content:center;gap:20px">
+  <img src="./privx-shield.png" style="height:64px" alt="PrivX">
+  <div id="lock-subtitle" style="font-size:14px;color:var(--muted);text-align:center;max-width:260px;line-height:1.5">Enter PIN to unlock</div>
+  <div id="pin-dots" style="display:flex;gap:14px;margin:4px 0"></div>
+  <div id="pin-status" style="font-size:13px;color:var(--err);min-height:20px;text-align:center"></div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px">
+    <button class="pin-key" onclick="pinKey('1')">1</button>
+    <button class="pin-key" onclick="pinKey('2')">2</button>
+    <button class="pin-key" onclick="pinKey('3')">3</button>
+    <button class="pin-key" onclick="pinKey('4')">4</button>
+    <button class="pin-key" onclick="pinKey('5')">5</button>
+    <button class="pin-key" onclick="pinKey('6')">6</button>
+    <button class="pin-key" onclick="pinKey('7')">7</button>
+    <button class="pin-key" onclick="pinKey('8')">8</button>
+    <button class="pin-key" onclick="pinKey('9')">9</button>
+    <button class="pin-key" onclick="pinBackspace()" style="font-size:18px">⌫</button>
+    <button class="pin-key" onclick="pinKey('0')">0</button>
+    <button class="pin-key" onclick="pinSubmit()" style="font-size:16px">✓</button>
+  </div>
+  <button onclick="nukeClearData()" style="font-size:11px;color:var(--dim);background:none;border:none;cursor:pointer;margin-top:20px;padding:8px">Forgot PIN? Reset all data</button>
+</div>
+
+<!-- ══ MAIN APP ══════════════════════════════════════════════════════════ -->
+
+<!-- WALLET TAB -->
+<div id="screen-wallet" class="screen">
+  <div class="hero">
+    <img src="./privx-shield.png" class="hero-logo" alt="PrivX">
+    <div class="hero-label">Total Cash</div>
+    <div class="hero-val" id="wallet-total">$0</div>
+    <div class="hero-sub" id="wallet-count">0 bills · tap Restock to add more</div>
+    <div class="low-warn" id="wallet-low" style="display:none">⚠ Running low — restock soon</div>
+    <div class="backup-banner" id="backup-banner" style="display:none">
+      <div class="backup-banner-text">⚠ Unspent bills on device — export backup before any app update or your bills may be lost</div>
+      <button class="backup-banner-btn" onclick="exportBackup()">Backup Now</button>
+      <button class="backup-banner-x" onclick="dismissBackupBanner()">✕</button>
+    </div>
+  </div>
+
+  <!-- Primary wallet live balances -->
+  <div id="wallet-balances">
+    <div class="bal-refresh" id="bal-refresh-btn" onclick="refreshWalletBalances(true)">
+      <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      <span id="bal-refresh-label">Wallet balances</span>
+    </div>
+    <div class="bal-grid">
+      <div class="bal-cell pls-cell"><div class="bal-label">PLS</div><div class="bal-val" id="wb-pls">—</div></div>
+      <div class="bal-cell"><div class="bal-label">DAI</div><div class="bal-val" id="wb-dai">—</div></div>
+      <div class="bal-cell"><div class="bal-label">pSunDAI</div><div class="bal-val" id="wb-psundai">—</div></div>
+      <div class="bal-cell"><div class="bal-label">USDC</div><div class="bal-val" id="wb-usdc">—</div></div>
+    </div>
+  </div>
+
+  <div class="page" style="padding-top:0">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <span></span>
+      <button onclick="clearSpentBills()" style="font-size:11px;color:var(--dim);background:none;border:none;cursor:pointer;padding:4px 0;text-decoration:underline;text-underline-offset:3px">Clear spent</button>
+    </div>
+    <div id="wallet-bills"></div>
+    <div id="wallet-spent"></div>
+    <div id="wallet-empty" class="center" style="padding:40px 20px">
+      <svg viewBox="0 0 24 24" style="width:48px;height:48px;stroke:var(--muted);fill:none;stroke-width:1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+      <p style="color:var(--muted);font-size:14px;max-width:220px">Your wallet is empty. Go to Restock to shield stablecoins and create bills.</p>
+    </div>
+
+    <div class="label" style="margin-top:28px">Device Backup</div>
+    <div style="background:rgba(20,20,20,0.7);border:1px solid rgba(138,43,226,0.2);border-radius:14px;padding:14px 16px;margin-bottom:16px">
+      <p style="font-size:12px;color:var(--muted);line-height:1.65;margin-bottom:12px">Encrypted with your seed phrase — only your seed can open it. Treat the file as sensitive: anyone with both the file and your seed gets your bill private keys. Restoring merges new bills and notes without touching existing ones.</p>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-outline" style="flex:1;font-size:13px;padding:10px" onclick="exportBackup()">Export Backup</button>
+        <button class="btn btn-outline" style="flex:1;font-size:13px;padding:10px" onclick="document.getElementById('backup-file-input').click()">Restore Backup</button>
+      </div>
+      <input type="file" id="backup-file-input" accept=".json,application/json" style="display:none" onchange="handleBackupFile(this)">
+      <div id="backup-status" class="status" style="margin-top:10px"></div>
+    </div>
+  </div>
+  <div id="wallet-history" style="display:none"></div>
+</div>
+
+<!-- PAY TAB -->
+<div id="screen-pay" class="screen">
+  <div id="pay-input" class="page">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+      <img src="./privx-shield.png" style="height:34px" alt="">
+      <h1 style="margin:0">Pay</h1>
+    </div>
+    <p class="sub">Scan or paste a recipient address, enter amount.</p>
+    <div class="label">Recipient</div>
+    <div style="display:flex;gap:8px;margin-bottom:4px">
+      <input id="pay-addr" placeholder="0x…" autocomplete="off" autocapitalize="none">
+      <button class="btn-sm btn-outline" onclick="openCamera('pay')" style="flex-shrink:0;white-space:nowrap">
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;vertical-align:middle"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
+        Scan
+      </button>
+    </div>
+    <div class="label">Amount to send</div>
+    <input id="pay-amount" type="number" placeholder="e.g. 47" inputmode="numeric" min="1" step="1">
+    <div id="pay-avail" class="status info show" style="margin-top:10px"></div>
+    <div id="pay-status" class="status"></div>
+    <button class="btn btn-primary" onclick="reviewPayment()" style="margin-top:16px">Review Payment</button>
+  </div>
+
+  <div id="pay-confirm" class="page" style="display:none">
+    <h1>Confirm</h1>
+    <div class="card" style="margin-bottom:16px">
+      <div class="row"><span class="rl">Recipient</span><span class="rv mono" id="pc-addr"></span></div>
+      <div class="row"><span class="rl">Total</span><span class="rv" id="pc-total"></span></div>
+      <div class="row"><span class="rl">Bills</span><span class="rv" id="pc-count"></span></div>
+    </div>
+    <div class="label">Bills to spend</div>
+    <div id="pc-bills"></div>
+    <div style="display:flex;align-items:center;gap:6px;margin:12px 0;color:var(--muted);font-size:12px">
+      <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--accent);fill:none;stroke-width:2;flex-shrink:0"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Privacy established at bill creation — payment is a plain token transfer.
+    </div>
+    <div id="pc-status" class="status"></div>
+    <button class="btn btn-primary" onclick="sendPayment()" id="pc-send-btn">Send Payment</button>
+    <button class="btn btn-outline" onclick="showPayInput()" style="margin-top:10px">Back</button>
+  </div>
+
+  <!-- Note redeem panel — shown when a privxpay: QR is scanned -->
+  <div id="pay-note-redeem" class="page" style="display:none">
+    <h1>Bearer Note</h1>
+    <p class="sub" style="margin-bottom:16px">Scan confirmed — tap Redeem to receive funds to your primary wallet.</p>
+    <div class="card" style="margin-bottom:16px">
+      <div class="row"><span class="rl">Type</span><span class="rv">PrivX Pay Cash Note</span></div>
+      <div class="row"><span class="rl">Amount</span><span class="rv" id="nr-amount">—</span></div>
+      <div class="row"><span class="rl">To</span><span class="rv mono" style="font-size:12px" id="nr-dest">—</span></div>
+    </div>
+    <div id="nr-status" class="status"></div>
+    <button class="btn btn-primary" id="nr-btn" onclick="executeRedeemNote()" style="margin-top:12px">Redeem Note</button>
+    <button class="btn btn-outline" onclick="showPayInput()" style="margin-top:10px">Cancel</button>
+  </div>
+
+  <div id="pay-done" class="page center" style="display:none">
+    <svg viewBox="0 0 24 24" style="width:72px;height:72px;stroke:var(--success);fill:none;stroke-width:1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    <h1>Sent!</h1>
+    <p class="sub" id="pay-done-msg"></p>
+    <div id="pay-done-link" style="margin-bottom:4px"></div>
+
+    <!-- PrivX claim card — shown if spent bill wallets hold PRIVX mining rewards -->
+    <div id="sweep-card" style="display:none;width:100%;margin-top:16px;text-align:left">
+      <div class="card" style="border-color:rgba(138,43,226,0.4);background:rgba(138,43,226,0.06)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--primary);fill:none;stroke-width:2;flex-shrink:0"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <span style="font-weight:700;font-size:14px">PRIVX Mining Reward</span>
+        </div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:10px">Your bill earned <strong id="sweep-amount" style="color:var(--accent)">—</strong> PRIVX from Hurricane mining. Send it to any address — for maximum privacy use a fresh wallet with no connection to this app.</p>
+        <input id="sweep-dest" type="text" placeholder="Destination address (0x…)" autocomplete="off" spellcheck="false" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(138,43,226,0.3);border-radius:8px;color:#fff;padding:9px 12px;font-size:12px;font-family:monospace;margin-bottom:10px;outline:none">
+        <div id="sweep-status" class="status"></div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-outline" style="flex:1;font-size:13px" onclick="hideSweepCard()">Later</button>
+          <button class="btn btn-primary" style="flex:2;font-size:13px" id="sweep-btn" onclick="executeSweep()">Claim PRIVX</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="resetPay()" style="margin-top:16px">New Payment</button>
+  </div>
+</div>
+
+<!-- RECEIVE TAB -->
+<div id="screen-receive" class="screen">
+  <div class="page">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+      <img src="./privx-shield.png" style="height:34px" alt="">
+      <h1 style="margin:0">Receive</h1>
+    </div>
+    <p class="sub">Share your address to receive stablecoins or PLS. Then restock bills from the Restock tab.</p>
+    <div style="background:#fff;border-radius:16px;padding:16px;margin:12px 0;text-align:center;box-shadow:0 0 40px rgba(138,43,226,0.3),0 0 80px rgba(138,43,226,0.15)">
+      <img id="qr-img-receive" style="border-radius:10px;display:block;margin:0 auto;border:2px solid rgba(138,43,226,0.35);max-width:100%" alt="Wallet QR code">
+    </div>
+    <p class="mono" id="receive-addr" style="text-align:center;margin:8px 0;font-size:11px"></p>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn btn-outline" onclick="copyAddress()" style="flex:1" id="copy-btn">Copy Address</button>
+    </div>
+    <div class="divider"></div>
+    <div class="label">Redeem a Cash Note</div>
+    <p class="sub" style="margin-bottom:10px;font-size:12px">Someone handing you a printed PrivX Pay note? Scan the QR and the funds transfer to your wallet automatically.</p>
+    <button class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px" onclick="openCamera('receive')">
+      <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
+      Scan Cash Note
+    </button>
+    <div id="receive-note-status" class="status" style="margin-top:10px"></div>
+    <div class="divider"></div>
+    <div class="label">Request specific amount (optional)</div>
+    <input id="req-amount" type="number" inputmode="numeric" placeholder="e.g. 20" min="1" step="1" oninput="updateRequestQr()">
+    <p class="sub" style="margin-top:8px;font-size:12px">Share this QR to request a dollar amount — recipient's Pay tab will pre-fill it.</p>
+    <div class="divider"></div>
+    <div class="card">
+      <div class="row"><span class="rl">PLS balance</span><span class="rv" id="pls-bal">—</span></div>
+    </div>
+    <div class="warn-box" style="margin-top:12px">
+      <b>Gas required</b>
+      <p>Your wallet needs PLS for gas. Each auto-relay bill pre-funds ~150 PLS into the bill wallet as a spending budget. Keep 1,000+ PLS here to comfortably cover shielding and several bills. Export Proof bills receive their gas automatically when you tap Check Relay after the external relay confirms.</p>
+    </div>
+  </div>
+</div>
+
+<!-- RESTOCK TAB -->
+<div id="screen-restock" class="screen">
+  <div class="page">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+      <img src="./privx-shield.png" style="height:34px" alt="">
+      <h1 style="margin:0">Restock</h1>
+    </div>
+    <div class="sub-tabs">
+      <div class="sub-tab active" id="rst-tab-bills" onclick="setRestockTab('bills')">Create Bills</div>
+      <div class="sub-tab" id="rst-tab-shield" onclick="setRestockTab('shield')">Shield</div>
+      <div class="sub-tab" id="rst-tab-swap" onclick="setRestockTab('swap')">Swap</div>
+    </div>
+
+    <!-- CREATE BILLS panel -->
+    <div id="rst-bills">
+      <p class="sub">Select a shielded note, then generate bills via ZK proof. Each bill is a fresh wallet — spending is instant with no ZK needed.</p>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="label" style="margin:14px 0 7px">Your notes</div>
+        <button onclick="clearWithdrawnNotes()" style="font-size:11px;color:var(--dim);background:none;border:none;cursor:pointer;padding:4px 0;text-decoration:underline;text-underline-offset:3px">Clear used</button>
+      </div>
+      <div id="notes-list"></div>
+      <div id="notes-empty" style="display:none;text-align:center;padding:20px;color:var(--muted);font-size:13px">No notes yet — use the Shield tab to deposit stablecoins.</div>
+
+      <div id="bills-controls" style="display:none">
+        <div class="warn-box" style="margin-top:4px">
+          <p>Each note can only create <strong>one bill</strong> — the nullifier is spent on withdrawal. ZK proof takes <strong>2–5 min on mobile</strong>. Keep the screen on.</p>
+        </div>
+        <div id="bills-status" class="status" style="margin-top:10px"></div>
+        <div id="bills-progress" style="display:none;margin:10px 0">
+          <div style="height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden">
+            <div id="bills-bar" style="height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:2px;width:0%;transition:width .5s;box-shadow:0 0 8px var(--accent)"></div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;text-align:right" id="bills-bar-label"></div>
+        </div>
+
+        <!-- Relay choice — shown after proof generation, before withdrawal is submitted -->
+        <div id="relay-choice" style="display:none;margin:12px 0;padding:16px;background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.28);border-radius:14px">
+          <div style="font-size:13px;font-weight:800;color:#B57AFF;margin-bottom:6px">ZK Proof Ready — Choose Relay Method</div>
+          <p style="font-size:12px;color:var(--muted);line-height:1.65;margin-bottom:14px">
+            <strong style="color:#ccc">Auto-Relay</strong> — a proxy wallet submits the withdrawal. Fast, no extra steps. Your primary wallet funds the proxy, so the chain: primary → proxy → shield is visible on-chain.<br>
+            <strong style="color:#ccc">Export Proof</strong> — download proof JSON, hand it to any relayer. An independent wallet submits the withdrawal. Zero on-chain link between your primary wallet and the shield.
+          </p>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button class="btn btn-primary" onclick="resolveRelayChoice('auto')">Auto-Relay via Proxy →</button>
+            <button class="btn btn-outline" onclick="resolveRelayChoice('export')">Export Proof (Max Privacy)</button>
+            <button onclick="resolveRelayChoice('cancel')" style="font-size:12px;color:var(--dim);background:none;border:none;cursor:pointer;padding:6px 0;text-decoration:underline;text-underline-offset:3px">Cancel</button>
+          </div>
+        </div>
+
+        <button class="btn btn-outline" id="verify-btn" onclick="verifyNoteCommitment()" style="margin-bottom:8px;font-size:13px">Verify deposit on-chain</button>
+        <button class="btn btn-primary" id="create-btn" onclick="startCreateBills()">Create Bill</button>
+      </div>
+    </div>
+
+    <!-- SHIELD panel -->
+    <div id="rst-shield" style="display:none">
+      <p class="sub">Deposit stablecoins into a PrivX privacy pool. A 0.5% fee is added on top at deposit — your bill is worth the full denomination. You receive a note — redeemable for bills.</p>
+      <div class="label">Token</div>
+      <div class="grid3" id="token-grid"></div>
+      <div class="label">Denomination</div>
+      <div class="grid3" id="denom-grid"></div>
+      <!-- Confirmation card — shown before any tx is sent -->
+      <div id="shield-confirm" style="display:none;margin-top:14px">
+        <div class="card" style="border-color:rgba(0,255,234,0.25);background:rgba(0,255,234,0.03)">
+          <div class="label" style="margin-top:0">Transaction preview</div>
+          <div class="row"><span class="rl">Action</span><span class="rv" id="sc-action">—</span></div>
+          <div class="row"><span class="rl">Shield contract</span><span class="rv mono" id="sc-contract" style="font-size:11px">—</span></div>
+          <div class="row"><span class="rl">Your balance</span><span class="rv" id="sc-balance">—</span></div>
+          <div class="row"><span class="rl">Deposit amount</span><span class="rv" id="sc-amount">—</span></div>
+          <div class="row"><span class="rl">Protocol fee (0.5%)</span><span class="rv" id="sc-fee">—</span></div>
+          <div class="row" style="border-top:1px solid rgba(0,255,234,0.15);margin-top:4px;padding-top:12px">
+            <span class="rl" style="font-weight:700;color:#ccc">Total approved</span>
+            <span class="rv" id="sc-total" style="color:var(--accent)">—</span>
+          </div>
+        </div>
+        <div class="guide-note" style="margin-top:10px">
+          <b>Two transactions will be sent</b>
+          Step 1: Approve the shield contract to spend your tokens.<br>
+          Step 2: Deposit into the privacy pool — on-chain and linked to your primary wallet, but with no traceable link to your bills or spending.
+        </div>
+        <div style="display:flex;gap:10px;margin-top:14px">
+          <button class="btn btn-outline" style="flex:1" onclick="cancelShieldConfirm()">Cancel</button>
+          <button class="btn btn-primary" style="flex:2" id="shield-confirm-btn" onclick="doShield()">Confirm &amp; Deposit</button>
+        </div>
+      </div>
+
+      <div id="shield-status" class="status"></div>
+      <div id="note-reveal" style="display:none;margin-top:12px">
+        <div class="warn-box">
+          <b>⚠ Back up your note — do it now</b>
+          <p>This note is the only way to create bills from your deposit. If you lose it before creating the bill, your funds are stuck forever. Copy it somewhere safe.</p>
+        </div>
+        <div class="label">Your note</div>
+        <div id="note-reveal-text" class="mono" style="background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.25);border-radius:10px;padding:12px;font-size:11px;line-height:1.8;word-break:break-all"></div>
+        <button class="btn btn-outline" id="note-copy-btn" onclick="copyNote()" style="margin-top:10px">Copy Note</button>
+      </div>
+      <button class="btn btn-primary" id="shield-btn" disabled onclick="reviewShield()" style="margin-top:16px">Select denomination</button>
+    </div>
+
+    <!-- SWAP panel -->
+    <div id="rst-swap" style="display:none">
+      <p class="sub">Enter how much you want to shield — the required input is calculated automatically, including the 0.5% deposit fee.</p>
+
+      <div class="label">From</div>
+      <div id="swap-from-grid" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px"></div>
+
+      <div class="label">To</div>
+      <div class="grid3" id="swap-token-grid" style="margin-bottom:14px"></div>
+
+      <div class="label">Amount to shield</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+        <button class="btn btn-outline swap-denom-btn" onclick="setSwapDenom(1)">$1</button>
+        <button class="btn btn-outline swap-denom-btn" onclick="setSwapDenom(5)">$5</button>
+        <button class="btn btn-outline swap-denom-btn" onclick="setSwapDenom(10)">$10</button>
+        <button class="btn btn-outline swap-denom-btn" onclick="setSwapDenom(20)">$20</button>
+        <button class="btn btn-outline swap-denom-btn" onclick="setSwapDenom(50)">$50</button>
+        <button class="btn btn-outline swap-denom-btn" onclick="setSwapDenom(100)">$100</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <span style="font-size:16px;font-weight:700;color:var(--muted)">$</span>
+        <input id="swap-dollar-input" type="number" inputmode="decimal" placeholder="custom amount" min="0" step="any" oninput="onSwapInput()" style="flex:1">
+      </div>
+      <div style="font-size:11px;color:var(--dim);margin-bottom:12px">Shield fee (0.5%) added to swap target automatically</div>
+
+      <div id="swap-quote-box" style="display:none;background:rgba(0,255,234,0.04);border:1px solid rgba(0,255,234,0.2);border-radius:12px;padding:14px 16px;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span id="swap-quote-input-label" style="color:var(--muted);font-size:13px">You send</span>
+          <span id="swap-quote-pls" style="font-size:18px;font-weight:900;color:var(--accent)">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.05)">
+          <span style="color:var(--dim);font-size:12px">Stable received</span>
+          <span id="swap-quote-stable" style="font-size:12px;color:var(--muted)">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+          <span style="color:var(--dim);font-size:12px">Shield fee (0.5%)</span>
+          <span id="swap-quote-fee" style="font-size:12px;color:var(--muted)">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+          <span style="color:var(--dim);font-size:12px">Net shielded</span>
+          <span id="swap-quote-net" style="font-size:12px;font-weight:700;color:var(--success)">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+          <span style="color:var(--dim);font-size:12px">Route</span>
+          <span id="swap-quote-route" style="font-size:12px;color:var(--muted)">—</span>
+        </div>
+      </div>
+
+      <!-- Swap confirm card -->
+      <div id="swap-confirm" style="display:none">
+        <div class="card" style="border-color:rgba(0,255,234,0.25);background:rgba(0,255,234,0.03);margin-bottom:12px">
+          <div class="label" style="margin-top:0">Confirm swap</div>
+          <div class="row"><span class="rl">Sending</span><span class="rv" id="sc-pls-out">—</span></div>
+          <div class="row"><span class="rl">Stable received</span><span class="rv" id="sc-stable-in">—</span></div>
+          <div class="row"><span class="rl">Net shielded</span><span class="rv" id="sc-net-shielded" style="color:var(--success)">—</span></div>
+          <div class="row"><span class="rl">Via</span><span class="rv">PulseX V2</span></div>
+          <div class="row"><span class="rl">To</span><span class="rv mono" id="sc-swap-to" style="font-size:11px">—</span></div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-outline" style="flex:1" onclick="cancelSwapConfirm()">Cancel</button>
+          <button class="btn btn-primary" style="flex:2" id="swap-confirm-btn" onclick="executeSwap()">Confirm Swap</button>
+        </div>
+      </div>
+
+      <div id="swap-status" class="status"></div>
+      <button class="btn btn-primary" id="swap-btn" disabled onclick="reviewSwap()" style="margin-top:4px">Enter amount</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- GUIDE TAB -->
+<div id="screen-guide" class="screen">
+
+  <!-- PRIVACY SETUP WALKTHROUGH -->
+  <div class="wt-wrap">
+    <div class="wt-header">
+      <span class="wt-title">Privacy Setup</span>
+      <button class="wt-reset" onclick="resetWalkthrough()">reset</button>
+    </div>
+    <div class="wt-track"><div class="wt-bar" id="wt-bar" style="width:0%"></div></div>
+    <div id="wt-steps"></div>
+  </div>
+
+  <div class="guide-hero">
+    <img src="./privx_logo.png" alt="PrivX Pay">
+    <div class="gh-badge">Pay · User Guide</div>
+    <p>Private digital cash for PulseChain.<br>Read this once before you start.</p>
+  </div>
+
+  <!-- WHAT IS THIS -->
+  <div class="accord open" id="ac-about">
+    <div class="accord-hd" onclick="toggleAccord('ac-about')">
+      <div class="accord-icon">⬡</div>
+      <span class="accord-title">What is PrivX Pay?</span>
+      <span class="accord-arrow">›</span>
+    </div>
+    <div class="accord-body">
+      <p style="font-size:13px;color:#ccc;line-height:1.7;margin-bottom:12px">
+        PrivX Pay is a <strong>self-custodial private cash wallet</strong> for PulseChain stablecoins (DAI, pSunDAI, USDC). It uses zero-knowledge proofs to break the on-chain link between your deposit and your spending.
+      </p>
+      <p style="font-size:13px;color:#ccc;line-height:1.7;margin-bottom:12px">
+        Think of it like a digital equivalent of withdrawing cash from a bank: once withdrawn, spending leaves no trail back to your account.
+      </p>
+      <div class="guide-note">
+        <b>The "bill" model</b>
+        ZK proofs are computed <em>in advance</em> during Restock — not at point of sale. Each bill is a fresh wallet holding stablecoins. Paying someone is a plain token transfer: instant, cheap, and no ZK computation at checkout.
+      </div>
+      <div class="guide-warn">
+        <b>This is a bearer instrument</b>
+        Bills work like physical cash. Whoever holds the private key can spend the bill. There is no reversal, no dispute, no recovery.
+      </div>
+    </div>
+  </div>
+
+  <!-- FIRST TIME SETUP -->
+  <div class="accord" id="ac-setup">
+    <div class="accord-hd" onclick="toggleAccord('ac-setup')">
+      <div class="accord-icon">🚀</div>
+      <span class="accord-title">First-Time Setup</span>
+      <span class="accord-arrow">›</span>
+    </div>
+    <div class="accord-body">
+      <div class="guide-step">
+        <div class="step-num">1</div>
+        <div class="step-text"><strong>Add to Home Screen</strong> — in Safari tap Share → "Add to Home Screen". In Chrome tap the menu → "Install App". This gives you the full-screen experience and enables offline use.</div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">2</div>
+        <div class="step-text"><strong>Generate your wallet</strong> — tap "Generate My Wallet". A 12-word seed phrase is created. It controls your primary wallet address. Bills and notes are preserved separately via the encrypted backup in the Wallet tab.</div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">3</div>
+        <div class="step-text"><strong>Write down your seed phrase</strong> — on paper, in order, stored somewhere safe. Do not screenshot it. Do not store it digitally. This is the only way to recover your wallet.</div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">4</div>
+        <div class="step-text"><strong>Fund your primary wallet</strong> — go to the Receive tab, copy your address. Send PLS for gas (you need ~150 PLS per bill you plan to create, plus enough stablecoins to shield). <strong>For maximum privacy, fund from a previously shielded fresh wallet — not directly from an exchange.</strong> See "Best Privacy Practices" below.</div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">5</div>
+        <div class="step-text"><strong>Shield and create bills</strong> — see the Restock guide below. Do this on WiFi with the screen on; it takes a few minutes per bill.</div>
+      </div>
+      <div class="guide-note">
+        <b>No MetaMask needed</b>
+        PrivX Pay manages its own keys. You never connect an external wallet. Your seed phrase IS the wallet.
+      </div>
+    </div>
+  </div>
+
+  <!-- RESTOCK -->
+  <div class="accord" id="ac-restock">
+    <div class="accord-hd" onclick="toggleAccord('ac-restock')">
+      <div class="accord-icon">🛡</div>
+      <span class="accord-title">Restock: Shielding & Creating Bills</span>
+      <span class="accord-arrow">›</span>
+    </div>
+    <div class="accord-body">
+      <div class="sec-label">Step 1 — Shield tokens (Shield tab)</div>
+      <div class="guide-step">
+        <div class="step-num">1</div>
+        <div class="step-text">Go to <strong>Restock → Shield</strong>. Select your token (DAI / pSunDAI / USDC) and denomination ($1 to $100).</div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">2</div>
+        <div class="step-text">Tap <strong>Deposit</strong>. The app approves the token spend then deposits into the PrivX privacy pool contract. A 0.5% fee is added on top of the denomination and sent to the fee vault — the pool holds exactly the denomination, so your bill pays out the full amount.</div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">3</div>
+        <div class="step-text">A <strong>note</strong> is saved locally — it looks like <code>hp-dai-100-abc…-def…</code>. This note is your claim ticket. Keep your phone safe; the note only exists in this app.</div>
+      </div>
+      <div class="guide-warn">
+        <b>One note = one bill</b>
+        Each note can only be withdrawn once. The ZK proof spends the nullifier on-chain permanently.
+      </div>
+
+      <div class="sec-label" style="margin-top:18px">Step 2 — Create bills (Create Bills tab)</div>
+      <div class="guide-step">
+        <div class="step-num">1</div>
+        <div class="step-text">Go to <strong>Restock → Create Bills</strong>. Tap your note to select it, then tap Create Bill.</div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">2</div>
+        <div class="step-text">Tap <strong>Create Bill</strong>. The app fetches the Merkle tree, generates a ZK proof, then asks you to choose: <strong>Auto-Relay</strong> (a proxy wallet submits the withdrawal — fast, ~150 PLS) or <strong>Export Proof</strong> (download proof JSON for a separate relayer — max privacy, no PLS needed upfront). <strong>Keep the screen on — the ZK proof takes 2–5 minutes on mobile.</strong></div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">3</div>
+        <div class="step-text">When done the bill appears in your <strong>Wallet</strong> tab, ready to spend.</div>
+      </div>
+      <div class="guide-note">
+        <b>WiFi recommended</b>
+        The 53 MB proving key is bundled with this app — it loads locally on first proof. The ZK computation itself is CPU-intensive and takes 2–5 minutes on mobile. Do this at home, not while standing at a register.
+      </div>
+      <div class="guide-note">
+        <b>Multiple denominations</b>
+        Create bills in several denominations so you can make exact change. E.g. shield a $100, then a $50, a $20, and several $5s and $1s so you can pay any amount exactly.
+      </div>
+      <div class="guide-note">
+        <b>Cash Notes</b>
+        Once a bill is ready, expand it in your Wallet tab and tap <strong>🖨 Print Note</strong>. A print-ready bearer note is generated — hand it to anyone and they scan the QR with PrivX Pay to instantly receive the funds. No phone needed on the sender's side at the moment of exchange.
+      </div>
+    </div>
+  </div>
+
+  <!-- PAY -->
+  <div class="accord" id="ac-pay">
+    <div class="accord-hd" onclick="toggleAccord('ac-pay')">
+      <div class="accord-icon">💸</div>
+      <span class="accord-title">Paying Someone</span>
+      <span class="accord-arrow">›</span>
+    </div>
+    <div class="accord-body">
+      <div class="guide-step">
+        <div class="step-num">1</div>
+        <div class="step-text">Go to the <strong>Pay</strong> tab. Enter the recipient's wallet address, or tap <strong>Scan</strong> to read their QR code. Scanning a PrivX Pay Cash Note automatically opens the redeem flow instead.</div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">2</div>
+        <div class="step-text">Enter the total amount. The app automatically selects bills to cover the exact total (largest first). The amount must be achievable exactly from your available bills — no change is made.</div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">3</div>
+        <div class="step-text">Review the confirmation screen — it shows which bills will be spent. Tap <strong>Send Payment</strong>.</div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">4</div>
+        <div class="step-text">Each bill wallet sends an ERC20 transfer to the recipient. Payment confirms within seconds on PulseChain.</div>
+      </div>
+      <div class="guide-note">
+        <b>No ZK at checkout</b>
+        Paying is just a token transfer — it confirms in one block (~3 seconds). The privacy was established days or weeks earlier when you created the bill.
+      </div>
+      <div class="guide-warn">
+        <b>Exact change required</b>
+        The app selects bills automatically (largest first) but cannot make change. If you owe $47 and your smallest combination using available bills doesn't hit $47 exactly, the payment will be blocked. Shield multiple denominations — a mix of $20, $10, $5, and $1 bills gives you the most flexibility.
+      </div>
+    </div>
+  </div>
+
+  <!-- RECEIVE -->
+  <div class="accord" id="ac-receive">
+    <div class="accord-hd" onclick="toggleAccord('ac-receive')">
+      <div class="accord-icon">📥</div>
+      <span class="accord-title">Receiving Funds</span>
+      <span class="accord-arrow">›</span>
+    </div>
+    <div class="accord-body">
+      <div class="guide-step">
+        <div class="step-num">1</div>
+        <div class="step-text">Go to the <strong>Receive</strong> tab. Your primary wallet address is shown as a QR code.</div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">2</div>
+        <div class="step-text">Share this address to receive <strong>stablecoins</strong> from an exchange, DEX, or other wallet — these go into your primary wallet for shielding.</div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">3</div>
+        <div class="step-text">Also use this address to receive <strong>PLS</strong> for gas fees. You need PLS in the primary wallet to cover deposits, ZK withdrawals, and bill gas funding (~150 PLS per bill).</div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">4</div>
+        <div class="step-text"><strong>Redeem a printed Cash Note</strong> — if someone hands you a physical PrivX Pay note, tap <strong>Scan Cash Note</strong> below your address. Aim at the QR — funds transfer to your wallet automatically, no address needed.</div>
+      </div>
+      <div class="guide-note">
+        <b>This address is your primary wallet</b>
+        Funds sent here are visible on-chain before shielding. Only send to this address from sources you're comfortable associating with your primary identity. The privacy begins after shielding.
+      </div>
+    </div>
+  </div>
+
+  <!-- SECURITY -->
+  <div class="accord" id="ac-security">
+    <div class="accord-hd" onclick="toggleAccord('ac-security')">
+      <div class="accord-icon">🔒</div>
+      <span class="accord-title">Security Advice</span>
+      <span class="accord-arrow">›</span>
+    </div>
+    <div class="accord-body">
+      <div class="guide-danger">
+        <b>Your seed phrase is everything</b>
+        Anyone who has your 12 words can import your wallet and sweep all bills and all funds. Never type it into any website, app, or chat. Never photograph it. Write it on paper, store it like cash.
+      </div>
+      <div class="guide-danger">
+        <b>Two things to back up</b>
+        Your seed phrase recovers your primary wallet. Your encrypted device backup (Wallet tab → Export Backup) recovers your bills, notes, and history. Without a backup, clearing app data or switching devices means permanent loss of all active bills. Keep both.
+      </div>
+      <div class="guide-warn">
+        <b>Bills are hot wallet funds</b>
+        Bill wallets are stored encrypted in your PIN-protected vault. Treat bills like cash in your pocket — keep only what you need for near-term spending. Large savings should stay in cold storage and be shielded in small batches.
+      </div>
+      <div class="guide-warn">
+        <b>Bill theft risk</b>
+        If someone obtains your bill's private key (e.g. device compromise), they can sweep that bill. The bill owner has no recourse — it's the same as losing a banknote.
+      </div>
+      <div class="guide-note">
+        <b>Best practices</b>
+        · Keep your device locked with a strong PIN or biometrics<br>
+        · Create bills from different deposit events for better anonymity<br>
+        · Wait some time between shielding and creating bills<br>
+        · Don't reuse the same bill wallet for multiple payments<br>
+        · Don't discuss your balance or transactions in linked accounts
+      </div>
+      <div class="guide-note">
+        <b>Privacy model</b>
+        PrivX Pay uses the PrivX Hurricane PLONK protocol. Your deposit is added to a 2^14-leaf Merkle tree. The ZK proof proves membership without revealing which leaf — anonymity set of up to 16,384 deposits per pool (larger set = stronger privacy, which is why waiting after deposit matters).<br><br>
+        <strong style="color:#ccc">Auto-Relay:</strong> your primary wallet funds an ephemeral proxy, which calls the shield. You never call the shield directly, but the chain primary → proxy → shield is traceable on-chain by a determined analyst.<br>
+        <strong style="color:#ccc">Export Proof:</strong> an independent third party submits the withdrawal from their own wallet. Your primary wallet has zero on-chain connection to the shield or the bill wallet. This is the maximum privacy path.
+      </div>
+      <div class="guide-note">
+        <b>What PrivX Pay does NOT hide</b>
+        · The fact that you used PrivX Pay (on-chain deposit is public)<br>
+        · The denomination and token of your deposit<br>
+        · The final ERC20 transfer at point of sale (recipient, amount, token)<br>
+        · Metadata: your IP, timing, device fingerprint (use a VPN + Tor browser for maximum privacy)
+      </div>
+    </div>
+  </div>
+
+  <!-- BEST PRIVACY PRACTICES -->
+  <div class="accord" id="ac-privacy">
+    <div class="accord-hd" onclick="toggleAccord('ac-privacy')">
+      <div class="accord-icon">🕵</div>
+      <span class="accord-title">Best Privacy Practices</span>
+      <span class="accord-arrow">›</span>
+    </div>
+    <div class="accord-body">
+      <p style="font-size:13px;color:#ccc;line-height:1.7;margin-bottom:14px">
+        PrivX Pay breaks the on-chain link between your deposit and your spending — but only if you set it up correctly. Follow this flow for maximum privacy.
+      </p>
+
+      <div class="sec-label">The full privacy chain</div>
+      <div class="guide-note">
+        <b>Ideal flow (each arrow = link broken)</b>
+        <span style="font-family:monospace;font-size:12px;line-height:2;display:block;margin-top:6px">
+          Your identity<br>
+          &nbsp;&nbsp;↓ (exchange, DEX, P2P)<br>
+          Source PLS/stables<br>
+          &nbsp;&nbsp;↓ PrivX Hurricane shield + ZK withdrawal<br>
+          Fresh wallet (your "clean" PLS source)<br>
+          &nbsp;&nbsp;↓ fund with PLS + send stables<br>
+          PrivX Pay primary wallet<br>
+          &nbsp;&nbsp;↓ shield deposit<br>
+          PrivX Hurricane pool<br>
+          &nbsp;&nbsp;↓ ZK proof → [link broken here]<br>
+          Bill wallet (fresh, no history)<br>
+          &nbsp;&nbsp;↓ ERC20 transfer<br>
+          Recipient
+        </span>
+      </div>
+
+      <div class="sec-label" style="margin-top:16px">Step-by-step optimal setup</div>
+      <div class="guide-step">
+        <div class="step-num">1</div>
+        <div class="step-text"><strong>Get a "clean" PLS source first.</strong> Before you even open PrivX Pay, shield some PLS through PrivX Hurricane from your main wallet. Withdraw to a brand new address. This fresh wallet is your funding source — it has no link to your identity.</div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">2</div>
+        <div class="step-text"><strong>Get stablecoins into your PrivX Pay wallet.</strong> Two ways — both maintain privacy since your PLS source is already clean:
+          <br><br><strong>Option A:</strong> If your clean source wallet already holds stablecoins (DAI, USDC etc.) — send them directly to your PrivX Pay address. Simplest path.
+          <br><br><strong>Option B:</strong> Use the built-in <strong>Restock → Swap</strong> tab to swap PLS for stablecoins directly — no MetaMask, no external site. The swap is visible on-chain, but since the PLS has no identity link, privacy is maintained.</div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">3</div>
+        <div class="step-text"><strong>Shield stablecoins into PrivX Pay.</strong> Go to Restock → Shield. This deposits into the Hurricane PLONK pool. Your primary wallet is now the depositor — visible on-chain, but untraceable to your identity because of step 1–2.</div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">4</div>
+        <div class="step-text"><strong>Wait before creating bills.</strong> Let some time pass between your deposit and your ZK withdrawal. More deposits from other users enter the pool, increasing your anonymity set. Hours is good; days is better.</div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">5</div>
+        <div class="step-text"><strong>Create bills when you're ready to spend.</strong> After the ZK proof, choose Auto-Relay (your primary wallet funds a proxy which submits the withdrawal — fast, one-hop chain link) or Export Proof (hand the proof JSON to an independent relayer via the bundled Hurricane Proof Relayer — zero on-chain link, maximum privacy). Either way, the bill wallet appears with no history — it just suddenly holds stablecoins.</div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">6</div>
+        <div class="step-text"><strong>Pay from bill wallets.</strong> The recipient sees only: an ERC20 transfer from a random fresh wallet. No link to you, your primary wallet, or your exchange account.</div>
+      </div>
+
+      <div class="guide-warn">
+        <b>Don't skip step 1</b>
+        If you fund your PrivX Pay wallet directly from an exchange or KYC'd wallet, your primary wallet is linked to your identity on-chain. The shield + ZK still breaks the link to your bills, but blockchain analytics can see "exchange address → PrivX Pay primary wallet → shield deposit." Start clean.
+      </div>
+      <div class="guide-warn">
+        <b>Denomination linkage</b>
+        The denomination you deposit ($1, $10, $100 etc.) is visible on-chain. If you deposit a unique amount at a unique time, that alone can narrow the anonymity set. Stick to standard denominations and avoid depositing immediately before spending.
+      </div>
+      <div class="guide-note">
+        <b>What the ZK proof actually hides</b>
+        The proof proves you know the secret behind one of the 16,384 leaves in the Merkle tree — without revealing which one. An observer sees a valid withdrawal from the pool but cannot determine which deposit it corresponds to. This is the core privacy guarantee.
+      </div>
+      <div class="guide-note">
+        <b>Additional hardening</b>
+        · Use a VPN or Tor when accessing the app — your IP is not hidden by ZK proofs<br>
+        · Don't correlate payment amounts with known purchases on linked accounts<br>
+        · Create bills across multiple sessions, not all at once<br>
+        · Never share a bill's private key digitally — the exception is printing a Cash Note for an immediate physical handoff<br>
+        · The app works fully offline after first load — use it offline when possible
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="accord" id="ac-faq">
+    <div class="accord-hd" onclick="toggleAccord('ac-faq')">
+      <div class="accord-icon">❓</div>
+      <span class="accord-title">FAQ &amp; Troubleshooting</span>
+      <span class="accord-arrow">›</span>
+    </div>
+    <div class="accord-body">
+      <div class="faq-q">Proof generation is taking forever / failed</div>
+      <div class="faq-a">The 53 MB proving key is bundled with this app and loads locally — no external download needed. On older phones the ZK computation itself can take 10+ minutes. Keep the screen on. If the proof fails, try again — the key is cached in the app after first use.</div>
+
+      <div class="faq-q">I can't make exact change</div>
+      <div class="faq-a">Restock more bills in smaller denominations ($1, $5, $10). The pay algorithm requires an exact match. Plan your denomination mix based on how you expect to spend.</div>
+
+      <div class="faq-q">My bill shows "funding gas…"</div>
+      <div class="faq-a">In Auto-Relay mode, each bill uses ~150 PLS from your primary wallet as a gas budget sent to the bill wallet. Check your PLS balance on the Receive tab. In Export Proof mode, tap "Check Relay" on the bill card after the relay confirms — gas is funded automatically.</div>
+
+      <div class="faq-q">I switched browsers / devices — my bills are gone</div>
+      <div class="faq-a">Bills are stored in your encrypted local vault. Your seed phrase re-derives your primary wallet address, but bill private keys are not embedded in the seed — they were generated fresh at creation. To recover bills on a new device, use the encrypted backup: Wallet tab → Export Backup before switching devices, then Import on the new one. The backup is encrypted with your seed phrase so only you can open it. Without a backup, bills from withdrawn notes are gone permanently. Treat bills like cash — don't keep more on-device than you need.</div>
+
+      <div class="faq-q">Can I send bills to another person?</div>
+      <div class="faq-a">Yes — through Cash Notes. Tap a ready bill in your Wallet tab, expand it, and tap <strong>🖨 Print Note</strong>. This opens a print-ready bearer note with a QR code. Hand the printed note to anyone — they open PrivX Pay, go to the Pay tab, tap Scan, and point their camera at the QR. The funds transfer to their wallet automatically using the gas already in the bill. Treat a printed note exactly like physical cash: whoever scans the QR first receives the funds, and there is no reversal.</div>
+
+      <div class="faq-q">What is the 0.5% fee?</div>
+      <div class="faq-a">The PrivX protocol adds a 0.5% fee on top of the denomination at deposit. To create a $100 bill you approve $100.50 — $100 goes into the pool, $0.50 goes to the fee vault. The bill pays out exactly $100 on withdrawal. There is no fee on withdrawal or spending.</div>
+
+      <div class="faq-q">What is PRIVX and why do I earn it?</div>
+      <div class="faq-a">PRIVX is the native token of the PrivX protocol (contract: 0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986). Every successful ZK withdrawal earns a mining reward sent directly to your bill wallet by the shield contract. After you spend a bill, the reward card lets you claim PRIVX to any address you choose. For maximum privacy send it to a fresh wallet with no connection to this app — that way there is no on-chain link between the bill and your identity. The PRIVX stays in the bill wallet until you claim it, so you can take your time. Spent bills remain accessible in your Wallet tab if you need to claim later.</div>
+
+      <div class="faq-q">Is this open source / audited?</div>
+      <div class="faq-a">The PrivX Hurricane PLONK shield contracts are immutable and deployed on PulseChain — no upgrade keys, no admin controls. All contract addresses are listed in the Contract Addresses section and are publicly readable on PulseScan. The proving key is deterministic and its IPFS CID is published. This app is a fully client-side interface with no server — you can verify every network request it makes in your browser's developer tools.</div>
+    </div>
+  </div>
+
+  <!-- CONTRACTS -->
+  <div class="accord" id="ac-contracts">
+    <div class="accord-hd" onclick="toggleAccord('ac-contracts')">
+      <div class="accord-icon">📋</div>
+      <span class="accord-title">Contract Addresses</span>
+      <span class="accord-arrow">›</span>
+    </div>
+    <div class="accord-body">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.5">All contracts are immutable and deployed on PulseChain (chain ID 369). Verify them independently before depositing.</p>
+      <div class="sec-label">DAI <span style="color:var(--dim);font-weight:400">(0xefD766cC…)</span></div>
+      <table class="contracts-table">
+        <tr><td>$1</td><td>0xdDdf0fe3A1A85eA5A913347FF8069a04390e4C31</td></tr>
+        <tr><td>$5</td><td>0x1D57f03d48A2E5d9cE97d73F2f7710c313ee8577</td></tr>
+        <tr><td>$10</td><td>0xFe63926D5535EA3B6e1EA204bdDf93F4E2a4b906</td></tr>
+        <tr><td>$20</td><td>0xE0fA07E91a4A1005C63f9414Fe11B9E84C9C599B</td></tr>
+        <tr><td>$50</td><td>0x7cfe4718be7991fCA3979Fb0008Bd26e51D01980</td></tr>
+        <tr><td>$100</td><td>0xDA6e061F10deE54DDcF8B3d054F2fdDC5848Ee79</td></tr>
+      </table>
+      <div class="sec-label">pSunDAI <span style="color:var(--dim);font-weight:400">(0x0b5701…)</span></div>
+      <table class="contracts-table">
+        <tr><td>$1</td><td>0xC78b470dB2E56CA273fa1aE6dE46aDFdeFa32aB1</td></tr>
+        <tr><td>$5</td><td>0x8D5A907c8d8bd422C7E054C762e6ed1928cc0546</td></tr>
+        <tr><td>$10</td><td>0x81AF3986228fd7fcE300bbD5791f3Eb3A674a6d0</td></tr>
+        <tr><td>$20</td><td>0x6436B944F68bb71eC396D232d6b8d828Bd6ead72</td></tr>
+        <tr><td>$50</td><td>0xFC59e5316f6Efd5002Aeb8C756EeADBBDc44B2CD</td></tr>
+        <tr><td>$100</td><td>0x7202a555d06159eD13adeF437c40B13d65387f8B</td></tr>
+      </table>
+      <div class="sec-label">USDC <span style="color:var(--dim);font-weight:400">(0x15D38573…)</span></div>
+      <table class="contracts-table">
+        <tr><td>$1</td><td>0x6613d13bf8deB21cA06062904C875b36D053F04e</td></tr>
+        <tr><td>$5</td><td>0x96A869E58B97736615e57742a920667100A801d7</td></tr>
+        <tr><td>$10</td><td>0xe853A0966C4Add92D8c5935486B7E7fF7194a079</td></tr>
+        <tr><td>$20</td><td>0x658b5d0793b6796D6E3e95671C183b4B2F8CC24A</td></tr>
+        <tr><td>$50</td><td>0x835c48cF6270f2efF812254b1425400432652fB0</td></tr>
+        <tr><td>$100</td><td>0xc9569CF23D706627d7901ad15d9fBfaA49B0D5E2</td></tr>
+      </table>
+      <div class="guide-note" style="margin-top:12px">
+        <b>Proving key CID</b>
+        <span style="font-family:monospace;font-size:11px;word-break:break-all">bafybeiahcycu5sbkgdxfxt4py3qagjrce2nxrbxenwv7oxkg67xoy4qwmu</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONVERT FEES -->
+  <div class="accord" id="ac-feevault">
+    <div class="accord-hd" onclick="toggleAccord('ac-feevault');if(document.getElementById('ac-feevault').classList.contains('open'))loadFeeVaultStats()">
+      <div class="accord-icon">⚡</div>
+      <span class="accord-title">Convert Protocol Fees</span>
+      <span class="accord-arrow">›</span>
+    </div>
+    <div class="accord-body">
+      <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:14px">Every deposit pays a 0.5% fee in the shielded token. Fees accumulate in the Fee Vault until anyone triggers a conversion — they're swapped to PRIVX, then split: <strong style="color:var(--text)">80%</strong> locked as permanent PRIVX/WPLS liquidity, <strong style="color:var(--text)">10%</strong> added to the POP Mining Vault (funds withdrawal rewards), <strong style="color:var(--text)">10%</strong> burned permanently. This is a public community function — no special role or permission required. Anyone can call it, at any time.</p>
+
+      <div class="sec-label">Protocol Stats</div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="row"><span class="rl">PRIVX Burned 🔥</span><span class="rv" id="fv-burned">—</span></div>
+        <div class="row"><span class="rl">Sent to Mining Vault ⛏</span><span class="rv" id="fv-vault">—</span></div>
+        <div class="row"><span class="rl">Liquidity Locked Forever 🔒</span><span class="rv" id="fv-lp">—</span></div>
+      </div>
+
+      <div class="sec-label">Fees Ready to Convert</div>
+      <div class="card" style="margin-bottom:10px">
+        <div class="row"><span class="rl">DAI</span><span class="rv" id="fv-acc-dai">—</span></div>
+        <div class="row"><span class="rl">pSunDAI</span><span class="rv" id="fv-acc-psundai">—</span></div>
+        <div class="row"><span class="rl">USDC</span><span class="rv" id="fv-acc-usdc">—</span></div>
+      </div>
+      <button class="btn btn-outline" style="width:100%;margin-bottom:18px;font-size:13px" onclick="loadFeeVaultStats()">↻ Refresh Stats</button>
+
+      <div class="sec-label">Convert Fees → PRIVX</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5">Choose a token with accumulated fees and tap Convert. Your primary wallet pays the gas — the fee token itself is not spent from your wallet, only the vault's balance is used. You earn no direct reward, but you deepen PRIVX liquidity and increase mining rewards for everyone.</p>
+
+      <label style="display:block;color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Fee token to convert</label>
+      <select id="fv-token-sel" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:12px 14px;font-size:14px;margin-bottom:12px;-webkit-appearance:none;appearance:none">
+        <option value="dai">DAI</option>
+        <option value="psundai">pSunDAI</option>
+        <option value="usdc">USDC</option>
+      </select>
+
+      <label style="display:block;color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Max slippage (100 = 1%)</label>
+      <input id="fv-slippage" type="number" value="200" min="1" max="800" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:12px 14px;font-size:14px;margin-bottom:4px;box-sizing:border-box">
+      <p style="font-size:11px;color:var(--dim);margin:0 0 14px 2px">200 bp (2%) recommended. Max 800 bp.</p>
+
+      <button id="fv-convert-btn" class="btn btn-primary" style="width:100%" onclick="triggerFeeConvert()">Convert Fees → PRIVX POL + Vault + Burn</button>
+      <div id="fv-status" class="status" style="margin-top:10px"></div>
+
+      <div class="guide-note" style="margin-top:16px">
+        <b>Fee Vault</b><br>
+        <span style="font-family:monospace;font-size:11px;word-break:break-all">0x54818356b47b5F7b52DceAbf2B6eF52Cf8b072Fd</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:24px 16px;text-align:center;border-top:1px solid var(--border);margin-top:8px">
+    <img src="./privx-shield.png" style="height:40px;opacity:.4;display:block;margin:0 auto 10px" alt="">
+    <p style="font-size:11px;color:var(--dim);line-height:1.8">
+      PrivX Pay · PulseChain · Chain ID 369<br>
+      IPFS-hosted · No server · No admin keys<br>
+      Use at your own risk. Not financial advice.
+    </p>
+  </div>
+
+</div>
+
+<!-- ══ CAMERA ════════════════════════════════════════════════════════════ -->
+<div id="cam-wrap">
+  <video id="cam-video" autoplay playsinline muted></video>
+  <!-- brand header -->
+  <div id="cam-header">
+    <div id="cam-brand">
+      <img id="cam-logo" src="./privx-shield.png" alt="">
+      <span id="cam-brand-name">PrivX Pay</span>
+    </div>
+    <div id="cam-title">Scan QR Code</div>
+  </div>
+  <!-- viewfinder -->
+  <div id="cam-finder">
+    <div id="cam-corner-bl"></div>
+    <div id="cam-corner-br"></div>
+    <div id="cam-scanline"></div>
+  </div>
+  <!-- bottom -->
+  <div id="cam-bottom">
+    <div id="cam-hint">Point the camera at a QR code</div>
+    <button id="cam-close" onclick="closeCamera()">Cancel</button>
+  </div>
+  <canvas id="cam-canvas" style="display:none"></canvas>
+</div>
+
+<!-- ══ TAB BAR ══════════════════════════════════════════════════════════ -->
+<nav id="tabbar">
+  <button class="tab active" id="tab-wallet" onclick="switchTab('wallet')">
+    <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><circle cx="17" cy="15" r="1" fill="currentColor"/></svg>
+    Wallet
+  </button>
+  <button class="tab" id="tab-pay" onclick="switchTab('pay')">
+    <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    Pay
+  </button>
+  <button class="tab" id="tab-receive" onclick="switchTab('receive')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="8 12 12 16 16 12"/><line x1="12" y1="8" x2="12" y2="16"/></svg>
+    Receive
+  </button>
+  <button class="tab" id="tab-restock" onclick="switchTab('restock')">
+    <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    Restock
+  </button>
+  <button class="tab" id="tab-guide" onclick="switchTab('guide')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17" stroke-width="2.5"/></svg>
+    Guide
+  </button>
+</nav>
+</div>
+
+<!-- ══ SCRIPTS ═══════════════════════════════════════════════════════════ -->
+<!-- SW registered early (before defer scripts) so Chrome sees it immediately for install prompt -->
+<script>if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});</script>
+<!-- defer: all scripts load in parallel, execute in order after HTML parsed -->
+<script src="./snarkjs.min.js" defer></script>
+<script src="./circomlibjs.js" defer></script>
+<script src="./ethers.umd.min.js" defer></script>
+<script src="./qrcode.min.js" defer></script>
+<script src="./jsqr.js" defer></script>
+<script src="./app.js" defer></script>
+</body>
+</html>
