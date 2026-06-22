@@ -1,0 +1,26 @@
+{
+  "name": "PrivX Pay",
+  "short_name": "PrivX Pay",
+  "description": "Private digital cash — carry shielded stablecoins as encrypted notes",
+  "start_url": "./privx-pay-wallet.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#0a0a0a",
+  "background_color": "#0a0a0a",
+  "categories": ["finance", "utilities"],
+  "icons": [
+    {
+      "src": "./privx-shield.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./privx-shield.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "name": "PrivX Pay ATM",
+  "short_name": "PrivX ATM",
+  "description": "Private digital cash ATM — shield, send, and redeem encrypted stablecoin notes",
+  "start_url": "./privx-pay.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#8A2BE2",
+  "background_color": "#0a0a0a",
+  "categories": ["finance", "utilities"],
+  "icons": [
+    {
+      "src": "./favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./privx-shield.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

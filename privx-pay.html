@@ -61,6 +61,8 @@
     .token-card{flex:1;padding:12px 8px;border:2px solid rgba(255,255,255,0.1);border-radius:12px;background:rgba(20,20,20,0.6);cursor:pointer;text-align:center;transition:all .3s}
     .token-card:hover{border-color:var(--primary)}
     .token-card.active{border-color:var(--accent);background:rgba(0,255,234,0.07);box-shadow:0 0 20px rgba(0,255,234,0.15)}
+    .token-card.soon{opacity:.45;cursor:not-allowed;pointer-events:none;position:relative}
+    .token-card.soon .tc-sub{color:#888}
     .tc-name{font-weight:800;font-size:15px;color:#fff;margin-bottom:2px}
     .tc-sub{font-size:10px;color:#555}
     /* Denomination grid — $1 $5 $10 $20 $50 $100 */
@@ -225,7 +227,7 @@
     <div class="section-label">Choose Currency</div>
     <div class="token-grid">
       <div class="token-card active" id="buy-tok-dai"     onclick="selectBuyToken('dai')">    <div class="tc-name">DAI</div>    <div class="tc-sub">Stablecoin</div></div>
-      <div class="token-card" id="buy-tok-psundai" onclick="selectBuyToken('psundai')"><div class="tc-name">pSunDAI</div><div class="tc-sub">Autonomous Stable</div></div>
+      <div class="token-card soon" id="buy-tok-psundai"><div class="tc-name">pSunDAI</div><div class="tc-sub">Coming Soon</div></div>
       <div class="token-card"        id="buy-tok-usdc"    onclick="selectBuyToken('usdc')">   <div class="tc-name">USDC</div>   <div class="tc-sub">USD Coin</div></div>
     </div>
 
