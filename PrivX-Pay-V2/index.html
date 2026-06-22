@@ -4,17 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#8A2BE2">
-<link rel="icon" href="./privx-shield.png" type="image/png">
-<link rel="shortcut icon" href="./privx-shield.png">
+<link rel="icon" href="./favicon-32x32.png" type="image/png">
+<link rel="shortcut icon" href="./favicon.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="PrivX Pay">
 <title>PrivX Pay</title>
 <link rel="manifest" href="./manifest.json">
-<link rel="apple-touch-icon" href="./privx-shield.png">
-<meta property="og:image" content="./privx-shield.png">
-<meta name="twitter:image" content="./privx-shield.png">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -362,7 +360,7 @@ input::placeholder{color:var(--dim)}
     <h2>ZK Proof — Keep Screen On</h2>
     <div class="pw-time" id="pw-time">~2–5 min</div>
     <p>Your phone must stay unlocked and <strong>PrivX Pay must stay open</strong> while the proof generates.</p>
-    <p style="color:var(--dim);font-size:12px">Switching apps or locking your screen will cancel it. The 53 MB proving key is downloaded once from IPFS on first use and then cached in the app — stay on WiFi for that first download.</p>
+    <p style="color:var(--dim);font-size:12px">Switching apps or locking your screen will cancel it. The 53 MB proving key is bundled with this app — on first proof it loads locally, so stay on WiFi if your connection is slow.</p>
     <button class="btn btn-primary" style="margin-top:16px" onclick="confirmProofWarn()">I'm Ready — Start Proof</button>
     <button onclick="document.getElementById('proof-warn').classList.remove('show')" style="display:block;width:100%;margin-top:10px;font-size:13px;color:var(--dim);background:none;border:none;cursor:pointer">Cancel</button>
   </div>
@@ -936,7 +934,7 @@ input::placeholder{color:var(--dim)}
       </div>
       <div class="guide-note">
         <b>WiFi recommended</b>
-        The 53 MB proving key is downloaded once from IPFS on first use and cached in the app. The ZK computation itself is CPU-intensive and takes 2–5 minutes on mobile. Do this at home, not while standing at a register.
+        The 53 MB proving key is bundled with this app — it loads locally on first proof. The ZK computation itself is CPU-intensive and takes 2–5 minutes on mobile. Do this at home, not while standing at a register.
       </div>
       <div class="guide-note">
         <b>Multiple denominations</b>
@@ -1155,7 +1153,7 @@ input::placeholder{color:var(--dim)}
     </div>
     <div class="accord-body">
       <div class="faq-q">Proof generation is taking forever / failed</div>
-      <div class="faq-a">The 53 MB proving key is downloaded once from IPFS on first use, then cached in the app — no repeat download needed. On older phones the ZK computation itself can take 10+ minutes. Keep the screen on. If the proof fails, try again — the cached key loads instantly on retry.</div>
+      <div class="faq-a">The 53 MB proving key is bundled with this app and loads locally — no external download needed. On older phones the ZK computation itself can take 10+ minutes. Keep the screen on. If the proof fails, try again — the key is cached in the app after first use.</div>
 
       <div class="faq-q">I can't make exact change</div>
       <div class="faq-a">Restock more bills in smaller denominations ($1, $5, $10). The pay algorithm requires an exact match. Plan your denomination mix based on how you expect to spend.</div>

@@ -28,10 +28,6 @@ const PRIVX_TOKEN   = '0x34310B5d3a8d1e5f8e4A40dcf38E48d90170E986';
 const EXTERNAL_RELAYER_URL = 'https://bafybeidhl7dh5iqzeudtjwqboy6fsagg4ljbmbtab2l6dzurifwn5nnzuu.ipfs.inbrowser.link/relayer.html';
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Earliest block to scan for Deposit events — eliminates scanning from genesis
-// Set to the block just before the first shield was deployed
-const SHIELD_DEPLOY_BLOCK = '0x1981573'; // block 26744179 — $1 DAI shield deployment (earliest shield)
-
 const TOKENS = {
   dai: {
     label:'DAI', addr:'0xefD766cCb38EaF1dfd701853BFCe31359239F305', decimals:18, feeBP:50,
@@ -60,7 +56,7 @@ let zkeyBlobUrl = null;
 let primaryWallet = null;   // ethers.Wallet
 let provider = null;
 let bills = [];             // [{id,address,privateKey,denomination,token,gasReady,spent,createdAt}]
-let notes = [];             // [{noteStr,token,denom,ts,withdrawn,relayPending}]
+let notes = [];             // [{noteStr,token,denom,ts,withdrawn}]
 let selectedNote = null;
 let selectedToken = 'dai';
 let selectedDenom = null;
@@ -633,7 +629,7 @@ async function ethCall(to, sel, arg='') {
   return rpc('eth_call',[{to, data: sel+(arg||'')}, 'latest']);
 }
 async function ethLogs(address, topic) {
-  return rpc('eth_getLogs',[{ address, topics:[topic], fromBlock: SHIELD_DEPLOY_BLOCK, toBlock:'latest' }]);
+  return rpc('eth_getLogs',[{ address, topics:[topic], fromBlock:'0x0', toBlock:'latest' }]);
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -915,7 +911,6 @@ function renderWallet() {
         <button class="btn btn-primary" style="width:100%;font-size:13px">Open Hurricane Relayer ↗ <span style="font-size:10px;opacity:.7;font-weight:400">(max privacy — any wallet)</span></button>
       </a>
       <button class="btn btn-outline" style="width:100%;font-size:12px;padding:8px;margin-bottom:8px" onclick="event.stopPropagation();submitProofFromJson('${b.id}')">Submit via Proxy (in-app)</button>
-      ${b.proofJson ? `<button class="btn btn-outline" style="width:100%;font-size:12px;padding:8px;margin-bottom:8px;color:#cc9900;border-color:rgba(255,170,0,0.3)" onclick="event.stopPropagation();reExportProof('${b.id}')">↓ Re-download Proof JSON</button>` : ''}
       <div style="display:flex;gap:8px;margin-bottom:8px">
         <button class="btn btn-outline" style="flex:1;font-size:12px;padding:8px" onclick="event.stopPropagation();checkRelayStatus('${b.id}')">Check Relay</button>
         ${!b.gasReady?`<button class="btn btn-outline" style="flex:1;font-size:12px;padding:8px" onclick="event.stopPropagation();refuelBill('${b.id}')">Fund Gas</button>`:`<div style="flex:1;font-size:12px;padding:8px;text-align:center;color:var(--success)">✓ Gas ready</div>`}
@@ -1496,8 +1491,7 @@ function renderNotes() {
   const ctrl  = document.getElementById('bills-controls');
   list.innerHTML = '';
 
-  const active    = notes.filter(n => !n.withdrawn && !n.relayPending);
-  const relayPend = notes.filter(n =>  n.relayPending);
+  const active    = notes.filter(n => !n.withdrawn);
   const withdrawn = notes.filter(n =>  n.withdrawn);
 
   if (!notes.length) {
@@ -1546,22 +1540,6 @@ function renderNotes() {
     }
     list.appendChild(div);
   });
-
-  // Render relay-pending notes (amber, not selectable — awaiting on-chain confirmation)
-  if (relayPend.length) {
-    const sep = document.createElement('div');
-    sep.style.cssText = 'font-size:10px;color:#cc9900;letter-spacing:1px;text-transform:uppercase;margin:12px 0 6px;font-weight:700';
-    sep.textContent = 'Relay pending';
-    list.appendChild(sep);
-    relayPend.forEach(n => {
-      const tok = TOKENS[n.token];
-      const div = document.createElement('div');
-      div.className = 'note-card';
-      div.style.cssText = 'opacity:0.7;pointer-events:none;border-color:rgba(255,170,0,0.3)';
-      div.innerHTML = `<div class="nc-top"><span class="nc-denom">$${n.denom} ${tok ? tok.label : n.token}</span><span class="nc-date" style="color:#cc9900;font-size:10px;font-weight:800">⏳ relay pending</span></div><div style="font-size:10px;color:var(--dim);margin-top:4px">Proof exported — check your bill's Check Relay button once submitted</div>`;
-      list.appendChild(div);
-    });
-  }
 
   // Render withdrawn notes (greyed out, not selectable)
   if (withdrawn.length) {
@@ -1853,10 +1831,10 @@ async function runExportRelay({ argv, billWallet, parsed, noteObj, st, bar, barL
   document.body.appendChild(a); a.click();
   setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
 
-  // Mark note relay-pending — NOT withdrawn yet. Note stays visible until on-chain spend is confirmed via Check Relay.
-  noteObj.relayPending = true; saveNotes();
+  // Mark note withdrawn — nullifier committed once proof is shared
+  noteObj.withdrawn = true; saveNotes();
 
-  // Save bill in pending-relay state — store sourceNoteStr for exact match on confirmation
+  // Save bill in pending-relay state
   const bill = {
     id: 'bill_'+Date.now()+'_'+Math.random().toString(36).slice(2),
     address: billWallet.address, privateKey: billWallet.privateKey,
@@ -1864,9 +1842,7 @@ async function runExportRelay({ argv, billWallet, parsed, noteObj, st, bar, barL
     createdAt: Date.now(), gasReady: false, spent: false,
     relayPending: true,
     shieldAddr: parsed.shieldAddr,
-    nullifierHash: parsed.nullifierHash.toString(),
-    sourceNoteStr: noteObj.noteStr,
-    proofJson: JSON.stringify(proofJson)   // store encrypted-at-rest via saveBills() AES-GCM
+    nullifierHash: parsed.nullifierHash.toString()
   };
   bills.push(bill); saveBills();
 
@@ -1880,18 +1856,6 @@ async function runExportRelay({ argv, billWallet, parsed, noteObj, st, bar, barL
   relayerA.textContent = '↗ Open Hurricane Relayer';
   st.appendChild(relayerA);
   selectedNote = null; renderNotes(); renderWallet();
-}
-
-function reExportProof(billId) {
-  const bill = bills.find(b => b.id === billId);
-  if (!bill || !bill.proofJson) return;
-  const blob = new Blob([bill.proofJson], {type:'application/json'});
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url;
-  a.download = `privx-proof-${bill.token}-${bill.denomination}-reexport.json`;
-  document.body.appendChild(a); a.click();
-  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
 }
 
 async function checkRelayStatus(billId) {
@@ -1908,11 +1872,6 @@ async function checkRelayStatus(billId) {
       return;
     }
     bill.relayPending = false; saveBills();
-    // Now that nullifier is spent on-chain, mark the exact source note withdrawn by noteStr
-    const sourceNote = bill.sourceNoteStr
-      ? notes.find(n => n.noteStr === bill.sourceNoteStr)
-      : notes.find(n => n.relayPending && n.token === bill.token && String(n.denom) === String(bill.denomination));
-    if (sourceNote) { sourceNote.relayPending = false; sourceNote.withdrawn = true; saveNotes(); }
     setStatus(st, '✓ Relay confirmed — funding bill with gas…', 'ok');
     renderWallet();
     // Auto-fund gas so the bill is immediately ready to spend, same as auto-relay
@@ -1987,10 +1946,6 @@ async function submitProofFromJson(billId) {
       await wTx.wait();
 
       bill.relayPending = false; saveBills();
-      const srcNote = bill.sourceNoteStr
-        ? notes.find(n => n.noteStr === bill.sourceNoteStr)
-        : notes.find(n => n.relayPending && n.token === bill.token && String(n.denom) === String(bill.denomination));
-      if (srcNote) { srcNote.relayPending = false; srcNote.withdrawn = true; saveNotes(); }
 
       try {
         setStatus(st, 'Funding bill with gas…', 'info');
@@ -2002,7 +1957,7 @@ async function submitProofFromJson(billId) {
       } catch(e) { console.warn('Gas funding failed:', e.message); }
 
       setStatus(st, '✓ Proof submitted — bill is ready to spend.', 'ok', wTx.hash);
-      renderWallet(); renderNotes();
+      renderWallet();
     } catch(e) {
       setStatus(st, 'Error: ' + e.message, 'bad');
     }
@@ -2313,7 +2268,8 @@ async function ensureTokenApproval(tokenAddr, amount, statusEl) {
   const allowance = BigInt('0x' + result.slice(2));
   if (allowance >= amount) return;
   setStatus(statusEl, 'Approving token for swap…', 'info');
-  const approveData = '0x095ea7b3' + routerHex + amount.toString(16).padStart(64,'0');
+  const MAX         = 2n ** 256n - 1n;
+  const approveData = '0x095ea7b3' + routerHex + MAX.toString(16).padStart(64,'0');
   const gasPrice    = await getGasPrice();
   const tx = await primaryWallet.sendTransaction({ to: tokenAddr, data: approveData, gasLimit: 100000n, type: 0, gasPrice });
   await tx.wait();
