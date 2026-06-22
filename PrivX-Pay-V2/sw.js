@@ -1,4 +1,4 @@
-const CACHE = 'privxpay-v85';
+const CACHE = 'privxpay-v86';
 const ASSETS = ['./', './index.html', './app.js', './notes.html', './snarkjs.min.js', './circomlibjs.js', './ethers.umd.min.js', './PrivXMixer14.wasm', './qrcode.min.js', './jsqr.js', './icon.png', './icon-192.png', './apple-touch-icon.png', './privx_logo.png', './privx-shield.png', './favicon.png', './favicon-32x32.png', './manifest.json', './web3.min.js'];
 // PrivXMixer14_final.zkey (53 MB) is intentionally excluded from precache —
 // it is fetched on first proof use and stored in IndexedDB by app.js.
