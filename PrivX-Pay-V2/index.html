@@ -4,15 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#8A2BE2">
-<link rel="icon" href="./favicon-32x32.png" type="image/png">
-<link rel="shortcut icon" href="./favicon.png">
+<link rel="icon" href="./privx-shield.png" type="image/png">
+<link rel="shortcut icon" href="./privx-shield.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="PrivX Pay">
 <title>PrivX Pay</title>
 <link rel="manifest" href="./manifest.json">
-<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="apple-touch-icon" href="./privx-shield.png">
+<meta property="og:image" content="./privx-shield.png">
+<meta name="twitter:image" content="./privx-shield.png">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -360,7 +362,7 @@ input::placeholder{color:var(--dim)}
     <h2>ZK Proof — Keep Screen On</h2>
     <div class="pw-time" id="pw-time">~2–5 min</div>
     <p>Your phone must stay unlocked and <strong>PrivX Pay must stay open</strong> while the proof generates.</p>
-    <p style="color:var(--dim);font-size:12px">Switching apps or locking your screen will cancel it. The 53 MB proving key is bundled with this app — on first proof it loads locally, so stay on WiFi if your connection is slow.</p>
+    <p style="color:var(--dim);font-size:12px">Switching apps or locking your screen will cancel it. The 53 MB proving key is downloaded once from IPFS on first use and then cached in the app — stay on WiFi for that first download.</p>
     <button class="btn btn-primary" style="margin-top:16px" onclick="confirmProofWarn()">I'm Ready — Start Proof</button>
     <button onclick="document.getElementById('proof-warn').classList.remove('show')" style="display:block;width:100%;margin-top:10px;font-size:13px;color:var(--dim);background:none;border:none;cursor:pointer">Cancel</button>
   </div>
@@ -934,7 +936,7 @@ input::placeholder{color:var(--dim)}
       </div>
       <div class="guide-note">
         <b>WiFi recommended</b>
-        The 53 MB proving key is bundled with this app — it loads locally on first proof. The ZK computation itself is CPU-intensive and takes 2–5 minutes on mobile. Do this at home, not while standing at a register.
+        The 53 MB proving key is downloaded once from IPFS on first use and cached in the app. The ZK computation itself is CPU-intensive and takes 2–5 minutes on mobile. Do this at home, not while standing at a register.
       </div>
       <div class="guide-note">
         <b>Multiple denominations</b>
@@ -1153,7 +1155,7 @@ input::placeholder{color:var(--dim)}
     </div>
     <div class="accord-body">
       <div class="faq-q">Proof generation is taking forever / failed</div>
-      <div class="faq-a">The 53 MB proving key is bundled with this app and loads locally — no external download needed. On older phones the ZK computation itself can take 10+ minutes. Keep the screen on. If the proof fails, try again — the key is cached in the app after first use.</div>
+      <div class="faq-a">The 53 MB proving key is downloaded once from IPFS on first use, then cached in the app — no repeat download needed. On older phones the ZK computation itself can take 10+ minutes. Keep the screen on. If the proof fails, try again — the cached key loads instantly on retry.</div>
 
       <div class="faq-q">I can't make exact change</div>
       <div class="faq-a">Restock more bills in smaller denominations ($1, $5, $10). The pay algorithm requires an exact match. Plan your denomination mix based on how you expect to spend.</div>
@@ -1196,14 +1198,14 @@ input::placeholder{color:var(--dim)}
         <tr><td>$50</td><td>0x7cfe4718be7991fCA3979Fb0008Bd26e51D01980</td></tr>
         <tr><td>$100</td><td>0xDA6e061F10deE54DDcF8B3d054F2fdDC5848Ee79</td></tr>
       </table>
-      <div class="sec-label">pSunDAI <span style="color:var(--dim);font-weight:400">(0x0b5701…)</span></div>
+      <div class="sec-label">pSunDAI (V9) <span style="color:var(--dim);font-weight:400">(0x1b13cF…)</span></div>
       <table class="contracts-table">
-        <tr><td>$1</td><td>0xC78b470dB2E56CA273fa1aE6dE46aDFdeFa32aB1</td></tr>
-        <tr><td>$5</td><td>0x8D5A907c8d8bd422C7E054C762e6ed1928cc0546</td></tr>
-        <tr><td>$10</td><td>0x81AF3986228fd7fcE300bbD5791f3Eb3A674a6d0</td></tr>
-        <tr><td>$20</td><td>0x6436B944F68bb71eC396D232d6b8d828Bd6ead72</td></tr>
-        <tr><td>$50</td><td>0xFC59e5316f6Efd5002Aeb8C756EeADBBDc44B2CD</td></tr>
-        <tr><td>$100</td><td>0x7202a555d06159eD13adeF437c40B13d65387f8B</td></tr>
+        <tr><td>$1</td><td>0x9266D54FCFD0c7A596a502A2Ac19D601e87A4423</td></tr>
+        <tr><td>$5</td><td>0xbb267dCbF33F3145585E3A740dcB11F03e6410De</td></tr>
+        <tr><td>$10</td><td>0x6Fa9360B4ad86705ca2b8cCe203eF4E9a4760AA6</td></tr>
+        <tr><td>$20</td><td>0x52aE69a87D581044d74d353dD30733Fe28Fa1dD2</td></tr>
+        <tr><td>$50</td><td>0x71CF5F7B7C43CEe8715325ac237c376528f05248</td></tr>
+        <tr><td>$100</td><td>0xD98C66991956122b93cEA662CdA639299873e582</td></tr>
       </table>
       <div class="sec-label">USDC <span style="color:var(--dim);font-weight:400">(0x15D38573…)</span></div>
       <table class="contracts-table">

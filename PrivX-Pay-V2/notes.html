@@ -328,6 +328,17 @@ function init() {
   const warnEl = document.getElementById('warn-box');
   const btnRow = document.getElementById('print-btn-row');
 
+  // Clear private key from URL immediately — prevent it sitting in browser history
+  if (hash) history.replaceState(null, '', window.location.pathname);
+
+  // Warn + auto-close if user navigates away or screenshots
+  window.addEventListener('blur', () => {
+    document.body.style.filter = 'blur(12px)';
+  });
+  window.addEventListener('focus', () => {
+    document.body.style.filter = '';
+  });
+
   if (!hash || !hash.startsWith('privxpay:')) {
     errEl.textContent = 'No note data found. Open this page from a bill card in PrivX Pay — tap the bill and press Print Note.';
     errEl.style.display = '';
