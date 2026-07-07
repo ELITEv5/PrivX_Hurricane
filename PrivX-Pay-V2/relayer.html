@@ -52,7 +52,6 @@ textarea:focus{border-color:rgba(138,43,226,0.4)}
 .status.success{background:rgba(0,255,100,0.07);border:1px solid rgba(0,255,100,0.2);color:#00e664;display:block}
 .status.error{background:rgba(255,50,50,0.07);border:1px solid rgba(255,50,50,0.2);color:#ff6666;display:block}
 .status.pending{background:rgba(138,43,226,0.07);border:1px solid rgba(138,43,226,0.2);color:#B57AFF;display:block}
-.status.warn{background:rgba(255,180,0,0.07);border:1px solid rgba(255,180,0,0.3);color:#cc9900;display:block;white-space:pre-line}
 .wallet-row{display:flex;gap:0.8rem;align-items:center}
 .wallet-addr{font-family:monospace;font-size:0.75rem;color:#555;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .warn-box{background:rgba(255,180,0,0.05);border:1px solid rgba(255,180,0,0.15);border-radius:8px;padding:0.8rem 1rem;font-size:0.75rem;color:#997700;line-height:1.6;font-family:monospace}
@@ -105,7 +104,6 @@ textarea:focus{border-color:rgba(138,43,226,0.4)}
   <!-- Step 2: Review -->
   <div class="card" id="reviewCard" style="display:none">
     <div class="card-title"><span class="step-badge">2</span> Review before submitting</div>
-    <div id="unknown-shield-warn" style="display:none;background:rgba(255,180,0,0.07);border:1px solid rgba(255,180,0,0.35);border-radius:8px;padding:0.8rem 1rem;font-size:0.78rem;color:#cc9900;line-height:1.6;margin-bottom:1rem;font-family:monospace;white-space:pre-line"></div>
     <div class="proof-detail" id="proofDetail"></div>
     <div style="margin-top:1rem">
       <div class="warn-box">⚠ Confirm the recipient address above is correct. Once submitted the nullifier is permanently spent — this proof cannot be used again by anyone.</div>
@@ -143,26 +141,6 @@ const WITHDRAW_ABI = [
 ];
 
 const PULSECHAIN = { chainId:'0x171', chainName:'PulseChain', rpcUrls:['https://rpc.pulsechain.com'], nativeCurrency:{name:'PLS',symbol:'PLS',decimals:18}, blockExplorerUrls:['https://scan.pulsechain.com'] };
-
-// Known PrivX Pay shield contracts — any address not in this set triggers a warning
-const KNOWN_SHIELDS = new Set([
-  // DAI
-  '0xdDdf0fe3A1A85eA5A913347FF8069a04390e4C31','0x1D57f03d48A2E5d9cE97d73F2f7710c313ee8577',
-  '0xFe63926D5535EA3B6e1EA204bdDf93F4E2a4b906','0xE0fA07E91a4A1005C63f9414Fe11B9E84C9C599B',
-  '0x7cfe4718be7991fCA3979Fb0008Bd26e51D01980','0xDA6e061F10deE54DDcF8B3d054F2fdDC5848Ee79',
-  // pSunDAI V9 (current)
-  '0x9266D54FCFD0c7A596a502A2Ac19D601e87A4423','0xbb267dCbF33F3145585E3A740dcB11F03e6410De',
-  '0x6Fa9360B4ad86705ca2b8cCe203eF4E9a4760AA6','0x52aE69a87D581044d74d353dD30733Fe28Fa1dD2',
-  '0x71CF5F7B7C43CEe8715325ac237c376528f05248','0xD98C66991956122b93cEA662CdA639299873e582',
-  // pSunDAI V7 (retired, kept for any historical note lookup)
-  '0xC78b470dB2E56CA273fa1aE6dE46aDFdeFa32aB1','0x8D5A907c8d8bd422C7E054C762e6ed1928cc0546',
-  '0x81AF3986228fd7fcE300bbD5791f3Eb3A674a6d0','0x6436B944F68bb71eC396D232d6b8d828Bd6ead72',
-  '0xFC59e5316f6Efd5002Aeb8C756EeADBBDc44B2CD','0x7202a555d06159eD13adeF437c40B13d65387f8B',
-  // USDC
-  '0x6613d13bf8deB21cA06062904C875b36D053F04e','0x96A869E58B97736615e57742a920667100A801d7',
-  '0xe853A0966C4Add92D8c5935486B7E7fF7194a079','0x658b5d0793b6796D6E3e95671C183b4B2F8CC24A',
-  '0x835c48cF6270f2efF812254b1425400432652fB0','0xc9569CF23D706627d7901ad15d9fBfaA49B0D5E2',
-].map(a => a.toLowerCase()));
 
 let web3, account, parsedProof;
 
@@ -213,7 +191,6 @@ function parseProof() {
     return showStatus('error', `proof must be an array of 24 elements (got ${Array.isArray(data.proof)?data.proof.length:'non-array'}).`);
   if (!Array.isArray(data.pubSignals) || data.pubSignals.length !== 4)
     return showStatus('error', `pubSignals must be an array of 4 elements (got ${Array.isArray(data.pubSignals)?data.pubSignals.length:'non-array'}).`);
-  const unknownShield = !KNOWN_SHIELDS.has((data.shield || '').toLowerCase());
 
   parsedProof = data;
   clearStatus();
@@ -252,15 +229,6 @@ function parseProof() {
   addRow('Proof',       data.proof.length + ' elements ✓');
   addRow('pubSignals',  data.pubSignals.length + ' elements ✓');
   addRow('Generated',   gen);
-
-  // Persistent unknown-shield warning inside review card — not cleared by clearStatus()
-  const warnBanner = document.getElementById('unknown-shield-warn');
-  if (unknownShield) {
-    warnBanner.textContent = `⚠ Unknown shield: ${data.shield} — not a recognised PrivX Pay contract. Your gas will be spent but you cannot lose tokens. Only proceed if you trust the proof source.`;
-    warnBanner.style.display = 'block';
-  } else {
-    warnBanner.style.display = 'none';
-  }
 
   document.getElementById('reviewCard').style.display = 'block';
   document.getElementById('submitCard').style.display = 'block';
