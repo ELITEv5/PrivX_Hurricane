@@ -1,0 +1,33 @@
+{
+  "name": "PrivX Hurricane — ZK Privacy",
+  "short_name": "PrivX Hurricane",
+  "description": "Multi-token PLONK zero-knowledge privacy shield on PulseChain. Shield tokens, generate a Proof of Privacy, earn PRIVX.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#8A2BE2",
+  "background_color": "#000000",
+  "icons": [
+    {
+      "src": "./favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./privx-shield.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "utilities"],
+  "lang": "en"
+}
