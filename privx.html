@@ -1482,7 +1482,7 @@
       try{await window.ethereum.request({method:'wallet_addEthereumChain',params:[{chainId:'0x171',chainName:'PulseChain (Protected)',rpcUrls:[rpc],nativeCurrency:{name:'PLS',symbol:'PLS',decimals:18},blockExplorerUrls:['https://scan.pulsechain.com']}]});web3=new Web3(window.ethereum);switched=true;}
       catch(e){if(!confirm("Could not switch to private RPC. Continue with public RPC?")) return;}
       try{await withdraw();}
-      finally{if(switched){try{await window.ethereum.request({method:'wallet_addEthereumChain',params:[{chainId:'0x171',chainName:'PulseChain',rpcUrls:['https://rpc.pulsechain.com','https://rpc-pulsechain.g4mm4.io','https://pulsechain.publicnode.com'],nativeCurrency:{name:'PLS',symbol:'PLS',decimals:18},blockExplorerUrls:['https://scan.pulsechain.com']}]});web3=new Web3(window.ethereum);}catch(e){}}}
+      finally{if(switched){try{await window.ethereum.request({method:'wallet_addEthereumChain',params:[{chainId:'0x171',chainName:'PulseChain',rpcUrls:['https://rpc.pulsechain.com'],nativeCurrency:{name:'PLS',symbol:'PLS',decimals:18},blockExplorerUrls:['https://scan.pulsechain.com']}]});web3=new Web3(window.ethereum);}catch(e){}}}
     }
 
     // ─── Wallet ───────────────────────────────────────────────────────────────
@@ -1491,7 +1491,7 @@
       try{
         await window.ethereum.request({method:"eth_requestAccounts"});
         try{await window.ethereum.request({method:"wallet_switchEthereumChain",params:[{chainId:"0x171"}]});}
-        catch(e){if(e.code===4902)await window.ethereum.request({method:"wallet_addEthereumChain",params:[{chainId:"0x171",chainName:"PulseChain",rpcUrls:["https://rpc.pulsechain.com","https://rpc-pulsechain.g4mm4.io","https://pulsechain.publicnode.com"],nativeCurrency:{name:"PLS",symbol:"PLS",decimals:18},blockExplorerUrls:["https://scan.pulsechain.com"]}]});}
+        catch(e){if(e.code===4902)await window.ethereum.request({method:"wallet_addEthereumChain",params:[{chainId:"0x171",chainName:"PulseChain",rpcUrls:["https://rpc.pulsechain.com"],nativeCurrency:{name:"PLS",symbol:"PLS",decimals:18},blockExplorerUrls:["https://scan.pulsechain.com"]}]});}
         web3=new Web3(window.ethereum);
         web3.eth.transactionPollingTimeout = 600;
         const accounts=await web3.eth.getAccounts(); userAccount=accounts[0];
